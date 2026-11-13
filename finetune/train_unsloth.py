@@ -6,17 +6,18 @@
 #     "trl>=1.17.1,<1.18",
 #     "peft>=0.21.3,<0.22",
 #     "transformers>=5.22.2,<5.23",
-#     "accelerate>=1.15.0,<1.16",
+#     "accelerate==1.15.0+qmd.2",
 #     "huggingface_hub>=2.4.0,<3",
 #     "datasets>=5.2.0,<5.3",
 #     "trackio>=0.45.1,<0.46",
 #     "pyyaml>=6.0.3,<7",
 #     "gguf",
-#     "bitsandbytes>=0.50.2; sys_platform == \"linux\"",
+#     "bitsandbytes>=0.50.2,<0.51; sys_platform == 'linux'",
 # ]
+# [tool]
 # [tool.uv]
 # constraint-dependencies = [
-#     "accelerate>=1.15.0",
+#     "accelerate==1.15.0+qmd.2",
 #     "aiohttp>=3.14.4",
 #     "anyio>=4.14.2",
 #     "authlib>=1.9.1",
@@ -37,9 +38,12 @@
 #     "setuptools>=84.1.0",
 #     "starlette>=1.3.1",
 #     "torch>=2.13.0",
-#     "transformers>=5.10.0",
+#     "transformers>=5.17.0",
 #     "urllib3>=2.8.0",
 # ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """Qwen3.5 SFT with the original train_unsloth.py command-line interface.
 
@@ -66,6 +70,51 @@ MODEL_MAP = {
 }
 
 
+def export_gguf_artifacts(model, tokenizer, output_dir: str, push_hub: str | None = None):
+    """Keep/publish only complete artifacts from this export, never stale files."""
+    import tempfile
+    from train import export_gguf
+
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    model_name = output_path.name
+    # The shared exporter raises on failed subprocesses. Fresh staging and
+    # explicit artifact checks also prevent publishing an earlier run's files
+    # or replacing them with incomplete output from this run.
+    with tempfile.TemporaryDirectory(prefix=".gguf-export-", dir=output_path) as staging:
+        export_gguf(model, tokenizer, staging, model_name)
+        files = [Path(staging) / "gguf" / f"{model_name}-{quant}.gguf"
+                 for quant in ("q4_k_m", "q6_k", "q8_0")]
+        for path in files:
+            if not path.is_file() or path.stat().st_size <= 4:
+                raise RuntimeError(f"GGUF export failed: missing or empty artifact {path.name}")
+            with path.open("rb") as stream:
+                if stream.read(4) != b"GGUF":
+                    raise RuntimeError(f"GGUF export failed: invalid GGUF artifact {path.name}")
+        destination = output_path / "gguf"
+        destination.mkdir(exist_ok=True)
+        artifacts = []
+        for path in files:
+            target = destination / path.name
+            path.replace(target)
+            artifacts.append(target)
+
+    if push_hub:
+        from huggingface_hub import HfApi
+        api = HfApi()
+        for path in artifacts:
+            print(f"Uploading GGUF: {path.name} to {push_hub}")
+            try:
+                api.upload_file(
+                    path_or_fileobj=str(path), path_in_repo=path.name,
+                    repo_id=push_hub, repo_type="model",
+                    commit_message=f"Upload {path.name}",
+                )
+            except Exception as exc:
+                raise RuntimeError(f"GGUF upload failed for {path.name} to {push_hub}") from exc
+    return artifacts
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", required=True, choices=list(MODEL_MAP), help="Model size to train")
@@ -77,7 +126,7 @@ def main():
     parser.add_argument("--lora-rank", type=int, default=16)
     parser.add_argument("--data", default="data/train/train.jsonl")
     parser.add_argument("--output", help="Output directory (default: outputs/qwen3.5-{size})")
-    parser.add_argument("--push-hub", help="Optional Hugging Face repo for the trained adapter")
+    parser.add_argument("--push-hub", help="Optional Hugging Face repo for the trained adapter/tokenizer and exported GGUFs")
     parser.add_argument("--backend", choices=["transformers", "unsloth"], default="transformers",
                         help="Native audited stack (default); Unsloth is currently blocked by its datasets<5 cap")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
@@ -99,11 +148,14 @@ def main():
     from datasets import load_dataset
     from peft import LoraConfig
     from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers.utils import is_bitsandbytes_available
     from trl import SFTConfig, SFTTrainer
 
     use_cpu = args.device == "cpu" or (args.device == "auto" and not torch.cuda.is_available())
     if args.device == "cuda" and not torch.cuda.is_available():
         parser.error("--device cuda requires an available CUDA device")
+    if not use_cpu and not is_bitsandbytes_available():
+        parser.error("CUDA adamw_8bit requires bitsandbytes. Install the project Linux dependencies (or the standalone runner dependencies) before loading a model; use --device cpu only for intentional CPU runs.")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -153,9 +205,8 @@ def main():
         trainer.model.push_to_hub(args.push_hub)
         tokenizer.push_to_hub(args.push_hub)
     if not args.no_gguf:
-        from train import export_gguf
         merged = trainer.model.merge_and_unload()
-        export_gguf(merged, tokenizer, output_dir, Path(output_dir).name)
+        export_gguf_artifacts(merged, tokenizer, output_dir, args.push_hub)
     if not args.no_eval:
         import subprocess
         subprocess.run([sys.executable, str(Path(__file__).with_name("eval.py")), output_dir], check=True)

@@ -1,0 +1,172 @@
+{
+  "uv": "0.11.18",
+  "scope": "Actual controlled public-package installation and resolution probes; no model or product-runner execution",
+  "records": {
+    "runtime_fragment_controls": [
+      {
+        "case": "direct-bad0-locked0",
+        "lock_exit": null,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "direct-bad0-locked1",
+        "lock_exit": 0,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "direct-bad1-locked0",
+        "lock_exit": null,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "direct-bad1-locked1",
+        "lock_exit": 0,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "constraint-bad0-locked0",
+        "lock_exit": null,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "constraint-bad0-locked1",
+        "lock_exit": 0,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "constraint-bad1-locked0",
+        "lock_exit": null,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      },
+      {
+        "case": "constraint-bad1-locked1",
+        "lock_exit": 0,
+        "run_exit": 0,
+        "stdout": "REAL_PACKAGING_VERSION=26.3\n",
+        "hash_error": false,
+        "bad_digest_rejected": false
+      }
+    ],
+    "stored_lock_hash_negative": {
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "  \u00d7 Failed to download `packaging @\n  \u2502 https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl`\n  \u2570\u2500\u25b6 Hash mismatch for `packaging @\n      https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl`\n\n      Expected:\n        sha256:0000000000000000000000000000000000000000000000000000000000000000\n\n      Computed:\n        sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\n",
+      "hash_mismatch": true
+    },
+    "pip_fragment_negative": [
+      {
+        "mode": "default",
+        "exit_code": 1,
+        "stderr": "Using CPython 3.12.13 interpreter at: .venv/bin/python3\nResolved 1 package in 96ms\nDownloading accelerate (1.5MiB)\n Downloaded accelerate\n  \u00d7 Failed to download `accelerate @\n  \u2502 https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=0000000000000000000000000000000000000000000000000000000000000000`\n  \u2570\u2500\u25b6 Hash mismatch for `accelerate @\n      https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=0000000000000000000000000000000000000000000000000000000000000000`\n\n      Expected:\n        sha256:0000000000000000000000000000000000000000000000000000000000000000\n\n      Computed:\n        sha256:abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6\n"
+      },
+      {
+        "mode": "verify",
+        "exit_code": 1,
+        "stderr": "Using CPython 3.12.13 interpreter at: .venv/bin/python3\nResolved 1 package in 0.95ms\n  \u00d7 Failed to download `accelerate @\n  \u2502 https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=0000000000000000000000000000000000000000000000000000000000000000`\n  \u2570\u2500\u25b6 Hash mismatch for `accelerate @\n      https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=0000000000000000000000000000000000000000000000000000000000000000`\n\n      Expected:\n        sha256:0000000000000000000000000000000000000000000000000000000000000000\n\n      Computed:\n        sha256:abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6\n"
+      }
+    ],
+    "metadata_only_hashed_constraints": {
+      "direct": {
+        "exit_code": 0,
+        "stderr": "Downloading accelerate (1.5MiB)\n Downloaded accelerate\nResolved 49 packages in 472ms\n",
+        "package_count": 49,
+        "has_torch": true,
+        "accelerate_instances": [
+          {
+            "name": "accelerate",
+            "version": "1.15.0+qmd.2",
+            "source": {
+              "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
+            },
+            "wheels": [
+              {
+                "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl",
+                "hash": "sha256:abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6"
+              }
+            ]
+          }
+        ]
+      },
+      "transitive": {
+        "exit_code": 0,
+        "stderr": "Downloading accelerate (1.5MiB)\n Downloaded accelerate\nResolved 64 packages in 609ms\n",
+        "package_count": 64,
+        "has_torch": true,
+        "accelerate_instances": [
+          {
+            "name": "accelerate",
+            "version": "1.15.0+qmd.2",
+            "source": {
+              "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
+            },
+            "wheels": [
+              {
+                "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl",
+                "hash": "sha256:abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6"
+              }
+            ]
+          }
+        ]
+      },
+      "lightweight": {
+        "exit_code": 0,
+        "stderr": "Resolved 5 packages in 174ms\n",
+        "package_count": 5,
+        "has_torch": false,
+        "accelerate_instances": []
+      },
+      "wrong-hash": {
+        "exit_code": 0,
+        "stderr": "Downloading accelerate (1.5MiB)\n Downloaded accelerate\nResolved 49 packages in 126ms\n",
+        "package_count": 49,
+        "has_torch": true,
+        "accelerate_instances": [
+          {
+            "name": "accelerate",
+            "version": "1.15.0+qmd.2",
+            "source": {
+              "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
+            },
+            "wheels": [
+              {
+                "url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl",
+                "hash": "sha256:abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "sources_fragment_parse_failure": "error: Failed to parse entry: `accelerate`\n  Caused by: Fragments are not allowed in URLs: `https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6`\n"
+  },
+  "input_sha256": {
+    "runtime_fragment_controls": "6503808848b1338c7ef84725e4b22c7702c4eee21855df197a4ee4d5a248966e",
+    "stored_lock_hash_negative": "2a11f0e6a527e8a1b9d168afdcc83aadf497778f3abb49b282a065308e2207c8",
+    "pip_fragment_negative": "3f6a5d41a1e414c7be1ffa5ccb418ea2458d24f451188707dbd67a5b44c07f88",
+    "direct": "1029f2a2901a912435bf4796ceb044021ceb763f05c0cd8db61d23ee5b4d49c4",
+    "transitive": "fafddc3894b79ad6322467e1376dd9c675c152da70ef825279d0a4a08819dd8f",
+    "lightweight": "660e172d833eaba880fd47054b2cb76209380863e11c79d776a7dc4e8df890e9",
+    "wrong-hash": "a21f2740d4b602a14e6d6315d7d1d2a4f7c408111fe1726297223b02022f1a35"
+  }
+}

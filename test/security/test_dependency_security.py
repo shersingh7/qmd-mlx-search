@@ -1,6 +1,7 @@
 """Regression contracts for the complete dependency/advisory graph checker."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -130,6 +131,56 @@ class DependencySecurityTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 security.write_report(link, {'passed': False})
             self.assertEqual(target.read_bytes(), original)
+
+    def test_configured_script_locks_are_collected_without_platform_filtering_or_fifo_open(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'finetune/dataset').mkdir(parents=True)
+            (root / 'scripts').mkdir()
+            (root / 'docs/security/dependency-remediation').mkdir(parents=True)
+            (root / 'package.json').write_text(json.dumps({'dependencies': {'example': '2.0.0'}}))
+            (root / 'pnpm-lock.yaml').write_text("lockfileVersion: '9.0'\npackages:\n  example@2.0.0: {}\n")
+            (root / 'bun.lock').write_text('{"lockfileVersion":1,"packages":{"example":["example@2.0.0"]}}')
+            (root / 'finetune/uv.lock').write_text('version = 1\n[[package]]\nname = "accelerate"\nversion = "0.0.0+qmd.synthetic1"\n')
+            (root / 'scripts/mlx_server_constraints.txt').write_text('requests==2.34.2\n')
+            (root / 'scripts/security_audit_requirements.txt').write_text('json5==0.17.3\n')
+            runners = ['finetune/train.py', 'finetune/dataset/data.py']
+            wheel = 'finetune/vendor/accelerate/accelerate-0.0.0+qmd.synthetic1-py3-none-any.whl'
+            synthetic = {'advisory': 'GHSA-4j2p-28q2-5m79', 'version': '0.0.0+qmd.synthetic1',
+                         'wheel_path': wheel, 'commit': 'd' * 40, 'sha256': 'a' * 64,
+                         'immutable_url': 'https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/'
+                         + 'd' * 40 + '/' + wheel.replace('+', '%2B') + '#sha256=' + 'a' * 64,
+                         'runner_paths': runners}
+            policy_path = root / security._binding.POLICY_PATH
+            policy_path.write_text(json.dumps({'schema_version': 1, 'accelerate': synthetic}))
+            training = root / (runners[0] + '.lock')
+            training.write_text('version = 1\n[[package]]\nname = "accelerate"\nversion = "0.0.0+qmd.synthetic1"\n'
+                                '[[package]]\nname = "Pillow"\nversion = "12.3.0"\n'
+                                '[[package]]\nname = "pillow"\nversion = "13.0.0"\n')
+            data = root / (runners[1] + '.lock')
+            data.write_text('version = 1\n[[package]]\nname = "pydantic"\nversion = "2.0.0"\n')
+            baseline = [alert(package='Pillow', ecosystem='pip', vulnerable='<13.0.0')]
+            rows = security.collect(root, baseline)
+            self.assertEqual({row['source'] for row in rows if row['ecosystem'] == 'pip' and row['source'].endswith('.lock')},
+                             {'finetune/uv.lock', *(runner + '.lock' for runner in runners)})
+            self.assertEqual({row['version'] for row in rows if row['name'] == 'pillow'}, {'12.3.0', '13.0.0'})
+            self.assertEqual(len([row for row in rows if row['name'] == 'accelerate']), 2)
+            self.assertFalse(security.assess(baseline, rows)['passed'])
+            data.unlink()
+            with self.assertRaises(ValueError):
+                security.collect(root, baseline)
+            os.mkfifo(data)
+            original_open = os.open
+            def no_fifo_open(filename, *args, **kwargs):
+                self.assertNotEqual(filename, data.name, 'Reject known FIFO before open')
+                return original_open(filename, *args, **kwargs)
+            with patch.object(security._binding.os, 'open', side_effect=no_fifo_open), self.assertRaises(ValueError):
+                security.collect(root, baseline)
+            # Removing the optional policy restores the pre-policy snapshot
+            # contract: no standalone files are read or demanded.
+            policy_path.unlink()
+            baseline_rows = security.collect(root, baseline)
+            self.assertEqual({row['source'] for row in baseline_rows if row['source'].endswith('.lock')}, {'finetune/uv.lock', 'bun.lock'})
 
     def test_osv_error_or_incomplete_response_is_not_clean(self):
         package = [{'ecosystem': 'npm', 'name': 'example', 'version': '2.0.0', 'source': 'fixture'}]

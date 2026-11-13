@@ -76,8 +76,18 @@ in case a later dependency reintroduces them.
   performed for previews.
 - CUDA-only bitsandbytes remains declared for Linux GPU runners, with a
   platform marker so Apple Silicon metadata resolution/previews remain usable.
+  The native Qwen3.5 CLI checks availability before tokenizer/model downloads
+  or loading and refuses a missing 8-bit optimizer dependency; it never silently
+  substitutes a different CUDA optimizer.
 - Local evaluators retain CUDA BF16 loading where available and have an
   explicit float32 CPU fallback for portable tests.
+  Both evaluators honor the exact supplied Hub ID or local full/merged-model
+  directory. Local or remote `adapter_config.json` selects its declared base
+  plus the requested adapter, preferring the adapter's own tokenizer when
+  present. Only a confirmed missing Hub metadata file permits full-model/base-
+  tokenizer routing; authentication, network and offline-cache errors propagate
+  rather than falling back to an unrelated Qwen model. Full models retain
+  their configured embedding tying.
 
 ### Qwen3.5 / legacy `train_unsloth.py`
 
@@ -95,6 +105,13 @@ the 8-bit optimizer. Unsloth-specific acceleration and performance are **not
 qualified** by this remediation. Do not install the old capped stack or use
 `--no-deps` to force it into the environment.
 
+With GGUF enabled, `--push-hub REPO` publishes the adapter/tokenizer and the
+newly exported q4_k_m, q6_k and q8_0 GGUFs through `HfApi.upload_file`. Conversion
+runs in a fresh staging directory and checks all expected nonempty GGUF files
+before moving them to `OUTPUT/gguf` and uploading. Failed/incomplete conversion
+cannot reuse stale GGUFs from an earlier run; export and upload failures are
+explicit errors. `--no-gguf` retains adapter/tokenizer-only publication.
+
 ### ONNX conversion
 
 `optimum-onnx` 0.1.0 requires Transformers<4.58, incompatible with the security
@@ -108,7 +125,10 @@ metadata produced by onnxconverter-common. Q4 uses the current
 The pinned PyTorch release still supports the explicitly selected TorchScript
 ONNX exporter; it emits deprecation/tracing warnings. Tiny-model tests verify
 empty-cache prefill, nonempty-cache decode and batch/sequence variation against
-PyTorch, plus CPU inference for all three quantization modes. Full-size exports
+PyTorch, including unequal-length left-padded batches and successive single-
+token/chunked decode with real propagated caches. Causal masks use physical
+cache/query offsets independently of per-sequence rotary position IDs. Tests
+also check CPU inference for all three quantization modes. Full-size exports
 and browser/WebGPU execution remain unqualified.
 
 ## Reproducing bounded verification

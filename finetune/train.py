@@ -5,18 +5,19 @@
 #     "trl>=1.17.1,<1.18",
 #     "peft>=0.21.3,<0.22",
 #     "transformers>=5.22.2,<5.23",
-#     "accelerate>=1.15.0,<1.16",
+#     "accelerate==1.15.0+qmd.2",
 #     "huggingface_hub>=2.4.0,<3",
 #     "trackio>=0.45.1,<0.46",
 #     "nvidia-ml-py",
 #     "datasets>=5.2.0,<5.3",
-#     "bitsandbytes>=0.50.2; sys_platform == \"linux\"",
+#     "bitsandbytes>=0.50.2,<0.51; sys_platform == 'linux'",
 #     "pyyaml>=6.0.3,<7",
 #     "gguf",
 # ]
+# [tool]
 # [tool.uv]
 # constraint-dependencies = [
-#     "accelerate>=1.15.0",
+#     "accelerate==1.15.0+qmd.2",
 #     "aiohttp>=3.14.4",
 #     "anyio>=4.14.2",
 #     "authlib>=1.9.1",
@@ -37,9 +38,12 @@
 #     "setuptools>=84.1.0",
 #     "starlette>=1.3.1",
 #     "torch>=2.13.0",
-#     "transformers>=5.10.0",
+#     "transformers>=5.17.0",
 #     "urllib3>=2.8.0",
 # ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Unified training script for QMD query expansion models.
@@ -70,6 +74,11 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
     import shutil
     import tempfile
 
+    def run_checked(command, stage, **kwargs):
+        result = subprocess.run(command, **kwargs)
+        if result.returncode != 0:
+            raise RuntimeError(f"GGUF export failed: {stage} exited with status {result.returncode}")
+
     output_path = Path(output_dir)
     gguf_dir = output_path / "gguf"
     gguf_dir.mkdir(exist_ok=True)
@@ -85,7 +94,7 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
         llama_cpp = Path("/tmp/llama.cpp")
         if not llama_cpp.exists():
             print("Cloning llama.cpp...")
-            subprocess.run(
+            run_checked(
                 [
                     "git",
                     "clone",
@@ -94,9 +103,10 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
                     "https://github.com/ggerganov/llama.cpp.git",
                     str(llama_cpp),
                 ],
+                "llama.cpp clone",
                 capture_output=True,
             )
-            subprocess.run(
+            run_checked(
                 [
                     sys.executable,
                     "-m",
@@ -106,6 +116,7 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
                     "-r",
                     str(llama_cpp / "requirements.txt"),
                 ],
+                "converter requirements installation",
                 capture_output=True,
             )
 
@@ -115,7 +126,7 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
             print("Building llama-quantize...")
             build_dir = llama_cpp / "build"
             build_dir.mkdir(exist_ok=True)
-            subprocess.run(
+            run_checked(
                 [
                     "cmake",
                     "-B",
@@ -124,9 +135,10 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
                     str(llama_cpp),
                     "-DGGML_CUDA=OFF",
                 ],
+                "llama-quantize CMake configuration",
                 capture_output=True,
             )
-            subprocess.run(
+            run_checked(
                 [
                     "cmake",
                     "--build",
@@ -136,6 +148,7 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
                     "-j",
                     "4",
                 ],
+                "llama-quantize build",
                 capture_output=True,
             )
 
@@ -145,7 +158,7 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
         log_out = Path("/tmp/qmd-gguf-convert.log")
         log_err = Path("/tmp/qmd-gguf-convert.err")
         with log_out.open("w") as out_f, log_err.open("w") as err_f:
-            result = subprocess.run(
+            run_checked(
                 [
                     sys.executable,
                     str(llama_cpp / "convert_hf_to_gguf.py"),
@@ -155,22 +168,19 @@ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
                     "--outtype",
                     "f16",
                 ],
+                f"HF-to-GGUF conversion (stdout: {log_out}; stderr: {log_err})",
                 stdout=out_f,
                 stderr=err_f,
                 text=True,
             )
-        if result.returncode != 0:
-            print("GGUF conversion failed.")
-            print(f"stdout: {log_out}")
-            print(f"stderr: {log_err}")
-            return
 
         # Quantize to 4, 6, 8 bit
         for quant_type in ["Q4_K_M", "Q6_K", "Q8_0"]:
             out_file = gguf_dir / f"{model_name}-{quant_type.lower()}.gguf"
             print(f"Quantizing {quant_type}: {out_file}")
-            subprocess.run(
+            run_checked(
                 [str(quantize_bin), str(fp16_file), str(out_file), quant_type],
+                f"{quant_type} quantization",
                 capture_output=True,
             )
             if out_file.exists():

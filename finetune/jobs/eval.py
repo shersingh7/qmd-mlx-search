@@ -5,11 +5,12 @@
 #     "peft>=0.21.3,<0.22",
 #     "torch>=2.13.0,<3",
 #     "huggingface_hub>=2.4.0,<3",
-#     "accelerate>=1.15.0,<1.16",
+#     "accelerate==1.15.0+qmd.2",
 # ]
+# [tool]
 # [tool.uv]
 # constraint-dependencies = [
-#     "accelerate>=1.15.0",
+#     "accelerate==1.15.0+qmd.2",
 #     "aiohttp>=3.14.4",
 #     "anyio>=4.14.2",
 #     "authlib>=1.9.1",
@@ -30,9 +31,12 @@
 #     "setuptools>=84.1.0",
 #     "starlette>=1.3.1",
 #     "torch>=2.13.0",
-#     "transformers>=5.10.0",
+#     "transformers>=5.17.0",
 #     "urllib3>=2.8.0",
 # ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Evaluate QMD query expansion models on HuggingFace Jobs.

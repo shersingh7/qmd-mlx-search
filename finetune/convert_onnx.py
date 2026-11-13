@@ -5,7 +5,7 @@
 #     "transformers>=5.22.2,<5.23",
 #     "peft>=0.21.3,<0.22",
 #     "torch>=2.13.0,<3",
-#     "accelerate>=1.15.0,<1.16",
+#     "accelerate==1.15.0+qmd.2",
 #     "huggingface_hub>=2.4.0,<3",
 #     "sentencepiece>=0.2.1",
 #     "protobuf>=3.20.0",
@@ -15,9 +15,10 @@
 #     "onnx-ir>=1.1.0",
 #     "onnxscript>=0.7.2",
 # ]
+# [tool]
 # [tool.uv]
 # constraint-dependencies = [
-#     "accelerate>=1.15.0",
+#     "accelerate==1.15.0+qmd.2",
 #     "aiohttp>=3.14.4",
 #     "anyio>=4.14.2",
 #     "authlib>=1.9.1",
@@ -38,9 +39,12 @@
 #     "setuptools>=84.1.0",
 #     "starlette>=1.3.1",
 #     "torch>=2.13.0",
-#     "transformers>=5.10.0",
+#     "transformers>=5.17.0",
 #     "urllib3>=2.8.0",
 # ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Convert QMD query expansion model to ONNX format for Transformers.js.
@@ -137,7 +141,11 @@ def export_onnx(model, tokenizer, output_dir: str):
             # Python/vmap mask dispatcher and keeps batch/sequence/past axes
             # dynamic, including an empty cache on the first generation call.
             key_positions = torch.arange(attention_mask.shape[-1], device=input_ids.device)
-            allowed = (key_positions <= position_ids.unsqueeze(-1)) & attention_mask[:, None, :].bool()
+            # Rotary position_ids count real tokens and can differ by batch
+            # row under left padding. Causality instead uses physical slots:
+            # the queries follow the cached keys, including padding slots.
+            query_positions = torch.arange(input_ids.shape[-1], device=input_ids.device) + past[0].shape[-2]
+            allowed = (key_positions <= query_positions.unsqueeze(-1)) & attention_mask[:, None, :].bool()
             dtype = self.wrapped.dtype
             mask = torch.where(allowed[:, None, :, :], 0.0, torch.finfo(dtype).min).to(dtype)
             result = self.wrapped(

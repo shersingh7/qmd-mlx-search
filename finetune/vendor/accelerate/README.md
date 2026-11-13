@@ -24,7 +24,8 @@ merged PR is claimed.
 - `LICENSE`: original Apache-2.0 license, also preserved byte-for-byte at the
   original license member's new versioned dist-info location inside the wheel.
 - `evidence/`: actual installed-wheel JUnit results and machine-readable runtime
-  and integrity evidence. These are local execution results, not cloud results.
+  and integrity evidence. `qmd2-native-ci/` contains separately attributed native
+  GitHub Actions receipts; the other named local/review receipts remain local runs.
 
 The builder refuses an input that does not match the pinned upstream SHA256. It
 applies strict patch context, adds the module and a patch notice, updates the
@@ -102,8 +103,11 @@ this patch never infers permission from an arbitrary snapshot-looking path.
   `/proc/self/fd`. It requires usable procfs FD links. The first native qmd.1 CI
   run exposed a test-monitor defect: lstat treated kernel FD aliases as ordinary
   symlinks. The monitor now checks the held inode using fstat, with a regression
-  proving forbidden inode aliases are still rejected. **qmd.2 still requires a
-  fresh passing native Linux run before Linux deployment.**
+  proving forbidden inode aliases are still rejected. Native run
+  [43469021580](https://github.com/shersingh7/qmd-mlx-search/actions/runs/43469021580)
+  passed at the exact published artifact commit: **1203 passed / 55 skipped** on
+  Linux and **1210 passed / 48 skipped** on macOS. These are CPU/filesystem
+  qualification results, not GPU/distributed execution or deployment approval.
 - **macOS, executed:** there is no `O_PATH` equivalent providing the same device
   safety. A private mode-0700 temporary directory receives a descriptor-relative
   **hardlink** to the candidate. The pinned staging entry is checked before any
@@ -159,6 +163,14 @@ installed path and artifact/source hashes.
   until all staging cleanup succeeds. It also closes descriptors if a file
   wrapper or directory context fails during setup. Nine focused regressions
   failed on qmd.1 before repair; the complete qmd.2 suite now passes locally.
+- The independent qmd.2 repair review passed all **1149 maintained cases** and
+  **24 additional positive lifetime contracts**. The parent replayed the same
+  byte-identical positive probe in a separate isolated directory: **24 passed**.
+  Retained evidence is under `evidence/qmd2-independent/` and
+  `evidence/qmd2-parent-lifetime-replay.xml`. The initial 23-pass/1-fail probe
+  receipt remains a failed fixture run; its FD-reuse assumption was corrected,
+  not relabeled as a product pass. This closes the stated lifetime findings,
+  not every conceivable security property.
 - Cases cover invalid schemas, special files, path/foreign-root forms,
   prefix-siblings, external symlinks, valid/nested/flat-index checkpoints,
   approved and forged caches, final-load bypass attempts, aliases, FD cleanup,
@@ -200,17 +212,31 @@ file with `-k baseline`. Never run baseline probes by weakening the patched
 loader or by pointing at private files. The recorded baseline used
 `/Users/shersingh/.hermes/cache/scratch/qmd-accelerate-baseline/site-packages`.
 
-## Required integration/publication gate — NOT completed here
+## Artifact acceptance and resolver integration
 
-This stage creates the controlled artifact, patch, builder and tests only. It
-**does not change manifests, locks or PEP 723 job headers**, does not publish a
-commit, and does not claim isolated/cloud runners are fixed.
+The reviewed qmd.2 bytes are published at immutable commit
+`f452290f116934a4f126fe8e513c565e97a8c94f`. Independent source/lifetime review and
+both native filesystem runs qualify this artifact for dependency binding within
+the documented boundaries. No registry release, service activation, training or
+cloud Job was performed.
 
-The parent must independently review this patch, validate Linux, commit/push the
-reviewed artifact on the authorized feature branch, and only then use that
-**actual immutable commit's raw artifact URL plus this wheel's SHA256** in every
-independently resolved PEP 723 runner. Do not invent a commit URL. Pin the exact
-local version and a local wheel source in the finetune uv project, regenerate
-its lock, and exercise fresh installed environments and actual launch paths.
-A registry `accelerate>=1.15.0` selection alone remains vulnerable and must not be
-used as proof of remediation. Keep the upstream-advisory limitation visible.
+Binding is a separate gate tracked in
+`docs/plans/dependency-security-remediation.md`. The project must select the
+exact local wheel and locked hash; all independent runners must select its
+immutable URL and carry reviewed adjacent script lockfiles. The complete
+source/lock inventory must pass the dependency guard before merge.
+
+**uv 0.11.18 integration pitfall, reproduced with real executions:** URL
+fragments are rejected in `tool.uv.sources`. Putting `#sha256=` in a direct
+requirement or constraint instead parses but does **not** enforce that digest
+in `uv lock` or `uv run`; wrong-fragment controls still executed. Conversely,
+`uv run --locked` rejected an incorrect stored wheel hash in a script lockfile.
+Use a fragment-free immutable installer URL plus a verified, checked-in
+`*.py.lock` and `--locked`, not decorative hash text. `uv pip install` has
+different behavior and did reject the wrong URL-fragment digest.
+
+HF Jobs must receive the adjacent lock as well as the script; the inspected
+Hub 2.4 submission helper does not upload adjacent locks automatically. Job
+submission remains opt-in and unexecuted in this review. A registry
+`accelerate>=1.15.0` selection alone remains vulnerable; neither a version label
+nor a structurally valid manifest is proof of the actual launch-path binding.

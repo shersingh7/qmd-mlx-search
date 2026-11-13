@@ -9,7 +9,7 @@ dependencies = [
   "trl>=1.17.1,<1.18",
   "peft>=0.21.3,<0.22",
   "transformers>=5.22.2,<5.23",
-  "accelerate>=1.15.0,<1.16",
+  "accelerate==1.15.0+qmd.2",
   "huggingface_hub>=2.4.0,<3",
   "trackio>=0.45.1,<0.46",
   "datasets>=5.2.0,<5.3",
@@ -18,6 +18,7 @@ dependencies = [
   "sentencepiece>=0.2.1",
   "nvidia-ml-py",
   "pydantic>=2.12.3,<3",
+  "bitsandbytes>=0.50.2,<0.51; sys_platform == 'linux'",
 ]
 
 [dependency-groups]
@@ -27,10 +28,11 @@ onnx = ["onnx>=1.23.2", "onnxruntime>=1.32.0", "onnx-ir>=1.1.0", "onnxscript>=0.
 [tool.uv]
 # Constraints apply when a package is present; they do not add unused packages.
 # Keep PEP 723 runners in sync with tools/sync_script_dependencies.py.
-# The two null-first-patched advisories require the separate security review;
-# selecting a later version is not, by itself, evidence of a security fix.
+# The controlled Accelerate artifact is source-reviewed and hash-bound by
+# docs/security/dependency-remediation/patched-dependencies.json. A version
+# label or a later registry release alone is not evidence of a security fix.
 constraint-dependencies = [
-  "accelerate>=1.15.0",
+  "accelerate==1.15.0+qmd.2",
   "aiohttp>=3.14.4",
   "anyio>=4.14.2",
   "authlib>=1.9.1",
@@ -51,9 +53,12 @@ constraint-dependencies = [
   "setuptools>=84.1.0",
   "starlette>=1.3.1",
   "torch>=2.13.0",
-  "transformers>=5.10.0",
+  "transformers>=5.17.0",
   "urllib3>=2.8.0",
 ]
+
+[tool.uv.sources]
+accelerate = { path = "vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

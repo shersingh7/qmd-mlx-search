@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import importlib.util
 import json
 from pathlib import Path
 import re
 import sys
 import time
-import tomllib
 
 import json5
 from packaging.specifiers import SpecifierSet
@@ -21,6 +21,18 @@ from packaging.version import Version as PipVersion
 import requests
 from semantic_version import NpmSpec, Version as NpmVersion
 import yaml
+
+
+# Load our adjacent verifier, not an ambient similarly named package. This also
+# supports read-only spec imports in tests without changing global sys.path.
+_binding_spec = importlib.util.spec_from_file_location(
+    '_qmd_verified_patch_binding', Path(__file__).with_name('verify_patched_dependencies.py')
+)
+if _binding_spec is None or _binding_spec.loader is None:
+    raise ImportError('The required source-binding verifier is unavailable')
+_binding = importlib.util.module_from_spec(_binding_spec)
+_binding_spec.loader.exec_module(_binding)
+verify_accelerate_binding = _binding.verify_accelerate_binding
 
 
 class UniqueYamlLoader(yaml.SafeLoader):
@@ -142,12 +154,13 @@ def collect(root: Path, alerts) -> list[dict]:
                 continue  # Actual resolved versions are still scanned in both locks.
             add('npm', name, version, 'package.json', section + ':' + name)
 
-    uv = tomllib.loads((root / 'finetune/uv.lock').read_text())
-    if uv.get('version') != 1 or not isinstance(uv.get('package'), list) or not uv['package']:
-        raise ValueError('Missing/unsupported uv package graph')
-    # Deliberately do not evaluate platform/Python markers: scan every resolution.
-    for index, record in enumerate(uv['package']):
-        add('pip', record['name'], record['version'], 'finetune/uv.lock', str(index))
+    # Scan all policy-owned standalone graphs too, including every platform
+    # fork and data-only graph. The reader refuses links/special files before
+    # opening and bounds reads; no .read_text() may touch a new lock first.
+    for source, graph in _binding.read_dependency_locks(root).items():
+        # Deliberately do not evaluate platform/Python markers.
+        for index, record in enumerate(graph['package']):
+            add('pip', record['name'], record['version'], source, str(index))
 
     for source in ('scripts/mlx_server_constraints.txt', 'scripts/security_audit_requirements.txt'):
         for line in (root / source).read_text().splitlines():
@@ -340,7 +353,9 @@ def main(argv=None):
         source = args.alerts or args.repo / 'docs/security/dependency-remediation/alerts-current.json'
         alerts = json.loads(source.read_text(), object_pairs_hook=unique_mapping)
         records = collect(args.repo, alerts)
-        report.update(assess(alerts, records))
+        proofs, source_binding = verify_accelerate_binding(args.repo, records)
+        report.update(assess(alerts, records, verified_patches=proofs))
+        report['source_binding'] = source_binding
         report['graph_instances'] = len(records)
         if args.online:
             report['osv'] = scan_osv(records)

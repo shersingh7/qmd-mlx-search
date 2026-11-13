@@ -4,11 +4,12 @@
 #     "transformers>=5.22.2,<5.23",
 #     "peft>=0.21.3,<0.22",
 #     "torch>=2.13.0,<3",
-#     "accelerate>=1.15.0,<1.16",
+#     "accelerate==1.15.0+qmd.2",
 # ]
+# [tool]
 # [tool.uv]
 # constraint-dependencies = [
-#     "accelerate>=1.15.0",
+#     "accelerate==1.15.0+qmd.2",
 #     "aiohttp>=3.14.4",
 #     "anyio>=4.14.2",
 #     "authlib>=1.9.1",
@@ -29,9 +30,12 @@
 #     "setuptools>=84.1.0",
 #     "starlette>=1.3.1",
 #     "torch>=2.13.0",
-#     "transformers>=5.10.0",
+#     "transformers>=5.17.0",
 #     "urllib3>=2.8.0",
 # ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 QMD Retrieval-Based Evaluation with Precision & Recall
@@ -282,30 +286,62 @@ def calculate_metrics(
 # Model Loading and Generation
 # =============================================================================
 
+def _model_sources(model_path: str) -> tuple[str, dict | None, str]:
+    """Keep routing aligned with eval.py without requiring sibling CLI files."""
+    from huggingface_hub import hf_hub_download
+    from huggingface_hub.errors import RemoteEntryNotFoundError
+
+    local = Path(model_path)
+    if local.is_dir():
+        adapter_file = local / "adapter_config.json"
+        adapter_file = adapter_file if adapter_file.is_file() else None
+        has_tokenizer = (local / "tokenizer_config.json").is_file()
+    else:
+        # Only a definite missing *file* means this is not an adapter. A bad
+        # repo ID, private/gated repo, offline cache miss or network failure
+        # must remain visible, not silently evaluate an unrelated base model.
+        try:
+            adapter_file = Path(hf_hub_download(model_path, "adapter_config.json", repo_type="model"))
+        except RemoteEntryNotFoundError:
+            adapter_file = None
+        has_tokenizer = False
+        if adapter_file is not None:
+            try:
+                hf_hub_download(model_path, "tokenizer_config.json", repo_type="model")
+                has_tokenizer = True
+            except RemoteEntryNotFoundError:
+                pass
+
+    if adapter_file is None:
+        return model_path, None, model_path
+    with adapter_file.open(encoding="utf-8") as stream:
+        adapter = json.load(stream)
+    if not isinstance(adapter, dict):
+        raise ValueError(f"Adapter {model_path!r} has invalid adapter_config.json metadata")
+    base_model = adapter.get("base_model_name_or_path")
+    if not isinstance(base_model, str) or not base_model.strip():
+        raise ValueError(f"Adapter {model_path!r} has no valid base_model_name_or_path")
+    # Adapter tokenizers can include added tokens/chat-template changes. Use
+    # the base tokenizer only when metadata explicitly shows it is absent.
+    return base_model, adapter, model_path if has_tokenizer else base_model
+
+
 def load_model(model_path: str):
-    """Load model (adapter or merged)."""
+    """Load the exact local/Hub full model, or its declared PEFT base + adapter."""
     import torch
     from peft import PeftModel
     from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
-    model_path = Path(model_path)
-    adapter_config = model_path / "adapter_config.json"
-
-    # Get base model from adapter config or default
-    base_model = "Qwen/Qwen3-1.7B"
-    if adapter_config.exists():
-        with open(adapter_config) as f:
-            cfg = json.load(f)
-            base_model = cfg.get("base_model_name_or_path", base_model)
-
+    base_model, adapter, tokenizer_source = _model_sources(model_path)
     print(f"Loading base: {base_model}", file=sys.stderr)
-    tokenizer = AutoTokenizer.from_pretrained(base_model)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
 
+    # Preserve the base's declared tying while loading its checkpoint. PEFT
+    # restores any independently saved adapter embeddings/output head itself.
     config = AutoConfig.from_pretrained(base_model)
-    config.tie_word_embeddings = False
     use_cuda = torch.cuda.is_available()
     model = AutoModelForCausalLM.from_pretrained(
         base_model, dtype=torch.bfloat16 if use_cuda else torch.float32,
@@ -317,10 +353,10 @@ def load_model(model_path: str):
         model.generation_config.top_p = None
         model.generation_config.top_k = None
 
-    # Load adapter if present
-    if adapter_config.exists():
+    # Load an explicitly identified adapter, whether local or on the Hub.
+    if adapter is not None:
         print(f"Loading adapter: {model_path}", file=sys.stderr)
-        model = PeftModel.from_pretrained(model, str(model_path))
+        model = PeftModel.from_pretrained(model, model_path)
 
     model.eval()
     return model, tokenizer

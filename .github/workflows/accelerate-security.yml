@@ -50,14 +50,33 @@ jobs:
       - name: Install the macOS Torch artifact
         if: runner.os == 'macOS'
         run: uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" torch==2.15.0
-      - name: Install the controlled wheel and locked test dependencies
+      - name: Install the controlled wheel and locked fine-tuning test dependencies
+        # Literal commands + repository manifests only; no event payload is executed.
         run: |
-          uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" 'finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl' transformers==5.22.2 peft==0.21.3 trl==1.17.1 pytest==9.2.0
+          python - <<'PY'
+          import os, re, subprocess, tomllib
+          from pathlib import Path
+          project = tomllib.loads(Path('finetune/pyproject.toml').read_text())
+          requirements = list(project['project']['dependencies'])
+          for group in ('dev', 'onnx'):
+              requirements.extend(project['dependency-groups'][group])
+          # Retain the preinstalled CPU Torch instead of making every CUDA-only
+          # transitive node in the universal lock an explicit install request.
+          requirements = [value for value in requirements
+                          if re.split(r'[\[<>=!~;\s]', value, maxsplit=1)[0].lower()
+                          not in {'torch', 'accelerate'}]
+          subprocess.run([
+              'uv', 'pip', 'install', '--python', os.environ['VENV_PYTHON'],
+              '-c', str(Path(os.environ['RUNNER_TEMP']) / 'checkpoint-constraints.txt'),
+              'finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl',
+              *requirements,
+          ], check=True)
+          PY
           uv pip check --python "$VENV_PYTHON"
           "$VENV_PYTHON" -c 'import accelerate,torch; assert accelerate.__version__ == "1.15.0+qmd.2"; assert torch.__version__ in {"2.15.0", "2.15.0+cpu"}; assert torch.version.cuda is None; print("CPU-only installed wheel:", accelerate.__version__, torch.__version__)'
-      - name: Test real installed checkpoint APIs, races, cleanup and wheel integrity
+      - name: Test the installed checkpoint and complete fine-tuning API contracts
         run: |
-          "$VENV_PYTHON" -m pytest -q -p no:cacheprovider finetune/tests/test_accelerate_checkpoint_security.py finetune/tests/test_accelerate_review_contracts.py --junitxml="$RUNNER_TEMP/accelerate-checkpoint.xml"
+          "$VENV_PYTHON" -m pytest -q -p no:cacheprovider finetune/tests --junitxml="$RUNNER_TEMP/accelerate-checkpoint.xml"
       - name: Retain native platform evidence
         if: always()
         uses: actions/upload-artifact@v4
