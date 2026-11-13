@@ -1,0 +1,14 @@
+{
+  "label": "query-identity-green",
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-gap.mts"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 0.508218667,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-green.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-green-ofh4yylh"
+}

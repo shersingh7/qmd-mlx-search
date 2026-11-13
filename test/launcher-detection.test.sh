@@ -1,97 +1,82 @@
 #!/usr/bin/env bash
-# Tests for bin/qmd runtime detection logic.
-# Simulates lockfile combinations in a temp directory and verifies which
-# runtime the launcher would choose.
-#
-# Usage: bash test/launcher-detection.test.sh
+# Execute the real bin/qmd with recording runtimes. Never duplicate its branch logic.
 set -euo pipefail
-
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/qmd-launcher-test.XXXXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+mkdir -p "$WORK/runtimes" "$WORK/package with spaces/bin" "$WORK/package with spaces/dist/cli" "$WORK/links"
+cp "$ROOT/bin/qmd" "$WORK/package with spaces/bin/qmd"
+printf '// fixture entrypoint\n' > "$WORK/package with spaces/dist/cli/qmd.js"
+# Shell stubs record each argument separately, including empty values and newlines.
+for runtime in node bun; do
+  printf '#!/bin/sh\nprintf "%%s\\n" "%s"\nfor arg do printf "<%%s>\\n" "$arg"; done\nexit "${QMD_TEST_EXIT:-0}"\n' "$runtime" > "$WORK/runtimes/$runtime"
+  chmod +x "$WORK/runtimes/$runtime"
+done
+PATH="$WORK/runtimes:$PATH"
+export PATH
+PACKAGE="$WORK/package with spaces"
 PASS=0
-FAIL=0
-TMPDIR_BASE=$(mktemp -d)
-
-cleanup() { rm -rf "$TMPDIR_BASE"; }
-trap cleanup EXIT
-
-ok()   { printf "  %-60s OK\n" "$1"; PASS=$((PASS + 1)); }
-fail() { printf "  %-60s FAIL\n" "$1 (got: $2, expected: $3)"; FAIL=$((FAIL + 1)); }
-
-# Extract the detection logic from bin/qmd into a testable function.
-# Instead of exec-ing a runtime, we echo which one would be chosen.
-detect_runtime() {
-  local DIR="$1"
-  if [ -f "$DIR/package-lock.json" ]; then
-    echo "node"
-  elif [ -f "$DIR/bun.lock" ] || [ -f "$DIR/bun.lockb" ]; then
-    echo "bun"
-  else
-    echo "node"
-  fi
-}
-
-# Verify detect_runtime matches the actual bin/qmd logic
 assert_runtime() {
-  local label="$1" dir="$2" expected="$3"
-  local got
-  got=$(detect_runtime "$dir")
-  if [[ "$got" == "$expected" ]]; then
-    ok "$label"
-  else
-    fail "$label" "$got" "$expected"
+  local label="$1" expected="$2" output
+  output="$(env -u QMD_RUNTIME BUN_INSTALL=/unrelated/bun "$PACKAGE/bin/qmd" 'space value' '' '--dash' 'wild*card' $'line\nbreak')"
+  local want
+  want="$(printf '%s\n<%s>\n<space value>\n<>\n<--dash>\n<wild*card>\n<line\nbreak>' "$expected" "$PACKAGE/dist/cli/qmd.js")"
+  if [[ "$output" != "$want" ]]; then
+    printf 'FAIL: %s runtime/argv\nexpected:\n%s\nactual:\n%s\n' "$label" "$want" "$output" >&2
+    exit 1
   fi
+  printf 'OK: %s runtime and argv\n' "$label"
+  PASS=$((PASS + 1))
 }
-
-echo "=== bin/qmd runtime detection tests ==="
-
-# --- Test cases ---
-
-# 1. No lockfiles → default to node
-d="$TMPDIR_BASE/no-lockfiles"
-mkdir -p "$d"
-assert_runtime "no lockfiles → node" "$d" "node"
-
-# 2. Only bun.lock → bun
-d="$TMPDIR_BASE/bun-lock-only"
-mkdir -p "$d"
-touch "$d/bun.lock"
-assert_runtime "bun.lock only → bun" "$d" "bun"
-
-# 3. Only bun.lockb → bun
-d="$TMPDIR_BASE/bun-lockb-only"
-mkdir -p "$d"
-touch "$d/bun.lockb"
-assert_runtime "bun.lockb only → bun" "$d" "bun"
-
-# 4. Only package-lock.json → node
-d="$TMPDIR_BASE/npm-only"
-mkdir -p "$d"
-touch "$d/package-lock.json"
-assert_runtime "package-lock.json only → node" "$d" "node"
-
-# 5. Both package-lock.json AND bun.lock → node (npm takes priority)
-# This is the key fix for #381: source checkouts have bun.lock committed,
-# and contributors who run npm install also create package-lock.json.
-d="$TMPDIR_BASE/both-lockfiles"
-mkdir -p "$d"
-touch "$d/package-lock.json"
-touch "$d/bun.lock"
-assert_runtime "package-lock.json + bun.lock → node (npm priority)" "$d" "node"
-
-# 6. Both package-lock.json AND bun.lockb → node (npm takes priority)
-d="$TMPDIR_BASE/both-lockfiles-b"
-mkdir -p "$d"
-touch "$d/package-lock.json"
-touch "$d/bun.lockb"
-assert_runtime "package-lock.json + bun.lockb → node (npm priority)" "$d" "node"
-
-# 7. All three lockfiles → node (npm takes priority)
-d="$TMPDIR_BASE/all-lockfiles"
-mkdir -p "$d"
-touch "$d/package-lock.json"
-touch "$d/bun.lock"
-touch "$d/bun.lockb"
-assert_runtime "all three lockfiles → node (npm priority)" "$d" "node"
-
-echo ""
-echo "=== Results: $PASS passed, $FAIL failed ==="
-[[ $FAIL -eq 0 ]]
+assert_runtime 'no lockfiles (BUN_INSTALL ignored)' node
+touch "$PACKAGE/bun.lock"
+assert_runtime 'bun.lock' bun
+rm "$PACKAGE/bun.lock"
+touch "$PACKAGE/bun.lockb"
+assert_runtime 'bun.lockb' bun
+touch "$PACKAGE/package-lock.json"
+assert_runtime 'npm lock outranks Bun lock' node
+rm "$PACKAGE/package-lock.json" "$PACKAGE/bun.lockb"
+mkdir "$PACKAGE/node_modules"
+touch "$PACKAGE/bun.lock" "$PACKAGE/node_modules/.package-lock.json"
+assert_runtime 'actual npm metadata outranks source lock' node
+rm "$PACKAGE/node_modules/.package-lock.json"
+touch "$PACKAGE/node_modules/.modules.yaml"
+assert_runtime 'actual pnpm metadata outranks source lock' node
+rm "$PACKAGE/node_modules/.modules.yaml"
+ln -s '../package with spaces/bin/qmd' "$WORK/links/qmd"
+ln -s "$WORK/links/qmd" "$WORK/links/qmd-absolute"
+output="$(QMD_RUNTIME=node "$WORK/links/qmd-absolute" 'symlink argv')"
+[[ "$output" == "$(printf 'node\n<%s>\n<symlink argv>' "$PACKAGE/dist/cli/qmd.js")" ]]
+printf 'OK: relative/absolute symlinks and runtime override preserve argv\n'
+PASS=$((PASS + 1))
+# Published packages have no repository lock: inspect the real enclosing install.
+INSTALLED_ROOT="$WORK/install-root"
+mkdir -p "$INSTALLED_ROOT/node_modules/@tobilu"
+cp -R "$PACKAGE" "$INSTALLED_ROOT/node_modules/@tobilu/qmd"
+rm "$INSTALLED_ROOT/node_modules/@tobilu/qmd/bun.lock"
+ORIGINAL_PACKAGE="$PACKAGE"
+PACKAGE="$INSTALLED_ROOT/node_modules/@tobilu/qmd"
+touch "$INSTALLED_ROOT/bun.lock"
+assert_runtime 'published Bun install root' bun
+touch "$INSTALLED_ROOT/node_modules/.package-lock.json"
+assert_runtime 'published npm install metadata' node
+PACKAGE="$ORIGINAL_PACKAGE"
+set +e
+QMD_TEST_EXIT=37 QMD_RUNTIME=node "$PACKAGE/bin/qmd" >/dev/null
+status=$?
+set -e
+[[ "$status" -eq 37 ]]
+printf 'OK: real launcher preserves child exit status 37\n'
+PASS=$((PASS + 1))
+if QMD_RUNTIME=invalid "$PACKAGE/bin/qmd" >/dev/null 2>&1; then
+  printf 'FAIL: invalid runtime accepted\n' >&2; exit 1
+fi
+rm "$PACKAGE/dist/cli/qmd.js"
+if "$PACKAGE/bin/qmd" >"$WORK/missing.log" 2>&1; then
+  printf 'FAIL: missing build accepted\n' >&2; exit 1
+fi
+[[ "$(<"$WORK/missing.log")" == *'build missing'* ]]
+printf 'OK: invalid runtime and missing build refuse\n'
+PASS=$((PASS + 1))
+printf '%s launcher checks passed\n' "$PASS"

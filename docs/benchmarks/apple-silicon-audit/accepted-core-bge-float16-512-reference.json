@@ -1,0 +1,24 @@
+{
+  "reference": "Hugging Face AutoModel, same local weights, CPU float32",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--BAAI--bge-small-en-v1.5/snapshots/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "candidate_vectors": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/accepted-core-bge-float16-512.npz",
+  "pooling": "cls",
+  "token_counts": [
+    12,
+    67,
+    242,
+    35
+  ],
+  "finite": true,
+  "normalized": true,
+  "cosines": [
+    0.9999992847442627,
+    0.9999995231628418,
+    0.9999996423721313,
+    0.9999995827674866
+  ],
+  "min_cosine": 0.9999992847442627,
+  "max_abs": 0.0005019605159759521,
+  "passed": true,
+  "scope": "Authored four-text numerical fixture only; not corpus retrieval quality"
+}

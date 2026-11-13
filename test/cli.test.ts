@@ -5,13 +5,14 @@
  * These tests spawn actual qmd processes to verify end-to-end functionality.
  */
 
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
 import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
 import { existsSync, lstatSync, readFileSync, symlinkSync, writeFileSync, unlinkSync } from "fs";
 import { tmpdir } from "os";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
+import { sourceCliCommand } from "./helpers/source-cli.js";
 import { setTimeout as sleep } from "timers/promises";
 import { buildEditorUri, termLink } from "../src/cli/qmd.ts";
 
@@ -25,15 +26,7 @@ let testCounter = 0; // Unique counter for each test run
 // Get the directory where this test file lives
 const thisDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(thisDir, "..");
-const qmdScript = join(projectRoot, "src", "cli", "qmd.ts");
-// Resolve tsx binary from project's node_modules (not cwd-dependent)
-const tsxBin = (() => {
-  const candidate = join(projectRoot, "node_modules", ".bin", "tsx");
-  if (existsSync(candidate)) {
-    return candidate;
-  }
-  return join(process.cwd(), "node_modules", ".bin", "tsx");
-})();
+
 
 // Helper to run qmd command with test database
 async function runQmd(
@@ -43,7 +36,7 @@ async function runQmd(
   const workingDir = options.cwd || fixturesDir;
   const dbPath = options.dbPath || testDbPath;
   const configDir = options.configDir || testConfigDir;
-  const proc = spawn(tsxBin, [qmdScript, ...args], {
+  const proc = spawn(...sourceCliCommand(args), {
     cwd: workingDir,
     env: {
       ...process.env,
@@ -547,8 +540,8 @@ describe("CLI Update Command", () => {
   });
 
   test("updates all collections", async () => {
-    const { stdout, exitCode } = await runQmd(["update"], { dbPath: localDbPath });
-    expect(exitCode).toBe(0);
+    const { stdout, stderr, exitCode } = await runQmd(["update"], { dbPath: localDbPath });
+    expect(exitCode, stderr).toBe(0);
     expect(stdout).toContain("Updating");
   });
 
@@ -1341,28 +1334,75 @@ describe("mcp http daemon", () => {
   let daemonDbPath: string;
   let daemonConfigDir: string;
 
-  // Track spawned PIDs for cleanup
-  const spawnedPids: number[] = [];
+  type DaemonRecord = { version: 1; pid: number; port: number; instanceToken: string };
+  const spawnedRecords: DaemonRecord[] = [];
+  const foregroundProcesses: import("child_process").ChildProcess[] = [];
 
   /** Get path to PID file inside the test cache dir */
   function pidPath(): string {
     return join(daemonCacheDir, "qmd", "mcp.pid");
   }
 
+  function readDaemonPid(): number {
+    const record = JSON.parse(readFileSync(pidPath(), "utf8")) as DaemonRecord;
+    expect(record.version).toBe(1);
+    expect(Number.isSafeInteger(record.pid) && record.pid > 1).toBe(true);
+    expect(record.instanceToken).toMatch(/^[0-9a-f-]{36}$/i);
+    if (!spawnedRecords.some(owned => owned.pid === record.pid && owned.instanceToken === record.instanceToken)) spawnedRecords.push(record);
+    return record.pid;
+  }
+
+  function pidAlive(pid: number): boolean {
+    try { process.kill(pid, 0); return true; }
+    catch (error) { if ((error as NodeJS.ErrnoException).code === "ESRCH") return false; throw error; }
+  }
+
+  async function stopOwnedFixture(record: DaemonRecord): Promise<void> {
+    if (!pidAlive(record.pid)) return;
+    const response = await fetch(`http://localhost:${record.port}/health`, { signal: AbortSignal.timeout(2000) });
+    const health = await response.json();
+    // Never signal a bare/stale PID from a test record without listener identity.
+    expect(health.pid).toBe(record.pid);
+    expect(health.instanceToken).toBe(record.instanceToken);
+    process.kill(record.pid, "SIGTERM");
+    const deadline = Date.now() + 5000;
+    while (pidAlive(record.pid) && Date.now() < deadline) await sleep(25);
+    expect(pidAlive(record.pid)).toBe(false);
+  }
+
+  async function cleanupOwnedFixtures(): Promise<void> {
+    for (const proc of foregroundProcesses) {
+      if (proc.exitCode !== null || proc.signalCode !== null) continue;
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("Owned foreground fixture did not exit")), 5000);
+        proc.once("close", () => { clearTimeout(timer); resolve(); });
+        proc.kill("SIGTERM");
+      });
+    }
+    for (const record of spawnedRecords) await stopOwnedFixture(record);
+    foregroundProcesses.length = 0;
+    spawnedRecords.length = 0;
+    // Only the disposable test's record is removed, after owned processes exit.
+    if (existsSync(pidPath())) unlinkSync(pidPath());
+  }
+
   /** Run qmd with test-isolated env (cache, db, config) */
   async function runDaemonQmd(
     args: string[],
   ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    return runQmd(args, {
+    const result = await runQmd(args, {
       dbPath: daemonDbPath,
       configDir: daemonConfigDir,
       env: { XDG_CACHE_HOME: daemonCacheDir },
     });
+    // Record successful startup before an assertion can interrupt test cleanup.
+    if (args.includes("--daemon") && result.exitCode === 0) readDaemonPid();
+    return result;
   }
 
   /** Spawn a foreground HTTP server (non-blocking) and return the process */
   function spawnHttpServer(port: number): import("child_process").ChildProcess {
-    const proc = spawn(tsxBin, [qmdScript, "mcp", "--http", "--port", String(port)], {
+    const proc = spawn(...sourceCliCommand(["mcp", "--http", "--port", String(port)]), {
       cwd: fixturesDir,
       env: {
         ...process.env,
@@ -1371,7 +1411,7 @@ describe("mcp http daemon", () => {
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
-    if (proc.pid) spawnedPids.push(proc.pid);
+    foregroundProcesses.push(proc);
     return proc;
   }
 
@@ -1404,21 +1444,9 @@ describe("mcp http daemon", () => {
     await writeFile(join(daemonConfigDir, "index.yml"), "collections: {}\n");
   });
 
+  afterEach(async () => { await cleanupOwnedFixtures(); });
   afterAll(async () => {
-    // Kill any leftover spawned processes
-    for (const pid of spawnedPids) {
-      try { process.kill(pid, "SIGTERM"); } catch { /* already dead */ }
-    }
-    // Also clean up via PID file if present
-    try {
-      const pf = pidPath();
-      if (existsSync(pf)) {
-        const pid = parseInt(readFileSync(pf, "utf-8").trim());
-        try { process.kill(pid, "SIGTERM"); } catch {}
-        unlinkSync(pf);
-      }
-    } catch {}
-
+    await cleanupOwnedFixtures();
     await rm(daemonTestDir, { recursive: true, force: true });
   });
 
@@ -1459,16 +1487,14 @@ describe("mcp http daemon", () => {
     // PID file should exist
     expect(existsSync(pidPath())).toBe(true);
 
-    const pid = parseInt(readFileSync(pidPath(), "utf-8").trim());
-    spawnedPids.push(pid);
+    const pid = readDaemonPid();
 
     // Server should be reachable
     const ready = await waitForServer(port);
     expect(ready).toBe(true);
 
     // Clean up
-    process.kill(pid, "SIGTERM");
-    await sleep(500);
+    await stopOwnedFixture(spawnedRecords.find(record => record.pid === pid)!);
     try { unlinkSync(pidPath()); } catch {}
   });
 
@@ -1480,8 +1506,7 @@ describe("mcp http daemon", () => {
     ]);
     expect(startCode).toBe(0);
 
-    const pid = parseInt(readFileSync(pidPath(), "utf-8").trim());
-    spawnedPids.push(pid);
+    const pid = readDaemonPid();
 
     await waitForServer(port);
 
@@ -1500,7 +1525,7 @@ describe("mcp http daemon", () => {
 
   test("stop handles dead PID gracefully (cleans stale file)", async () => {
     // Write a PID file pointing to a dead process
-    writeFileSync(pidPath(), "999999999");
+    writeFileSync(pidPath(), JSON.stringify({ version: 1, pid: 999999999, port: randomPort(), instanceToken: "00000000-0000-4000-8000-000000000001" }));
 
     const { stdout, exitCode } = await runDaemonQmd(["mcp", "stop"]);
     expect(exitCode).toBe(0);
@@ -1508,6 +1533,18 @@ describe("mcp http daemon", () => {
 
     // PID file should be cleaned up
     expect(existsSync(pidPath())).toBe(false);
+  });
+
+  test("legacy PID-only records are refused without signalling or rewriting", async () => {
+    writeFileSync(pidPath(), "999999999");
+    const stopped = await runDaemonQmd(["mcp", "stop"]);
+    expect(stopped.exitCode).toBe(1);
+    expect(stopped.stderr).toMatch(/Unverified or legacy/);
+    expect(readFileSync(pidPath(), "utf8")).toBe("999999999");
+    const started = await runDaemonQmd(["mcp", "--http", "--daemon", "--port", String(randomPort())]);
+    expect(started.exitCode).toBe(1);
+    expect(started.stderr).toMatch(/Unverified or legacy/);
+    expect(readFileSync(pidPath(), "utf8")).toBe("999999999");
   });
 
   test("--daemon rejects if already running", async () => {
@@ -1518,8 +1555,7 @@ describe("mcp http daemon", () => {
     ]);
     expect(firstCode).toBe(0);
 
-    const pid = parseInt(readFileSync(pidPath(), "utf-8").trim());
-    spawnedPids.push(pid);
+    const pid = readDaemonPid();
 
     await waitForServer(port);
 
@@ -1531,14 +1567,13 @@ describe("mcp http daemon", () => {
     expect(stderr).toContain("Already running");
 
     // Clean up first daemon
-    process.kill(pid, "SIGTERM");
-    await sleep(500);
+    await stopOwnedFixture(spawnedRecords.find(record => record.pid === pid)!);
     try { unlinkSync(pidPath()); } catch {}
   });
 
   test("--daemon cleans stale PID file and starts fresh", async () => {
     // Write a stale PID file
-    writeFileSync(pidPath(), "999999999");
+    writeFileSync(pidPath(), JSON.stringify({ version: 1, pid: 999999999, port: randomPort(), instanceToken: "00000000-0000-4000-8000-000000000001" }));
 
     const port = randomPort();
     const { exitCode, stdout } = await runDaemonQmd([
@@ -1547,15 +1582,13 @@ describe("mcp http daemon", () => {
     expect(exitCode).toBe(0);
     expect(stdout).toContain(`http://localhost:${port}/mcp`);
 
-    const pid = parseInt(readFileSync(pidPath(), "utf-8").trim());
-    spawnedPids.push(pid);
+    const pid = readDaemonPid();
     expect(pid).not.toBe(999999999);
 
     // Clean up
     const ready = await waitForServer(port);
     expect(ready).toBe(true);
-    process.kill(pid, "SIGTERM");
-    await sleep(500);
+    await stopOwnedFixture(spawnedRecords.find(record => record.pid === pid)!);
     try { unlinkSync(pidPath()); } catch {}
   });
 });

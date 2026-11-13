@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
+import { AsyncLocalStorage } from "node:async_hooks";
 import YAML from "yaml";
 
 // ============================================================================
@@ -46,7 +47,7 @@ export interface ModelsConfig {
   mlxUrl?: string;
   /** @deprecated No-op: the daemon serves pre-quantized weights. Kept for config compat. */
   mlxDtype?: 'float32' | 'float16' | 'bfloat16';
-  /** When true (default), auto-fall-back to GGUF if MLX server is unreachable */
+  /** @deprecated Accepted for config compatibility; embeddings never switch vector spaces. SDK default: false. */
   mlxFallback?: boolean;
   /** MLX concurrent request limit (default: 2) */
   mlxConcurrency?: number;
@@ -77,30 +78,40 @@ export interface NamedCollection extends Collection {
 // Current index name (default: "index")
 let currentIndexName: string = "index";
 
-// SDK mode: optional in-memory config or custom config path
-let configSource: { type: 'file'; path?: string } | { type: 'inline'; config: CollectionConfig } = { type: 'file' };
+/** An explicit configuration target. Inline configs are mutable, in-memory state. */
+export interface ConfigSource {
+  configPath?: string;
+  config?: CollectionConfig;
+}
+
+// Keep the CLI's process-wide source for compatibility. SDK operations use an
+// async-local source instead, so interleaved stores never replace CLI/peer state.
+let configSource: ConfigSource = {};
+const scopedConfigSource = new AsyncLocalStorage<ConfigSource>();
+
+function getConfigSource(): ConfigSource {
+  return scopedConfigSource.getStore() ?? configSource;
+}
 
 /**
- * Set the config source for SDK mode.
+ * Run collection helpers against one source without changing the CLI default.
+ * The scope follows async work and restores its parent after return or throw.
+ * Reuse the source object to retain saveConfig() replacements of inline state.
+ */
+export function withConfigSource<T>(source: ConfigSource, action: () => T): T {
+  return scopedConfigSource.run(source, action);
+}
+
+/**
+ * Set the process-wide config source for CLI/legacy callers.
  * - File path: load/save from a specific YAML file
  * - Inline config: use an in-memory CollectionConfig (saveConfig updates in place, no file I/O)
  * - undefined: reset to default file-based config
  */
-export function setConfigSource(source?: { configPath?: string; config?: CollectionConfig }): void {
-  if (!source) {
-    configSource = { type: 'file' };
-    return;
-  }
-  if (source.config) {
-    // Ensure collections object exists
-    if (!source.config.collections) {
-      source.config.collections = {};
-    }
-    configSource = { type: 'inline', config: source.config };
-  } else if (source.configPath) {
-    configSource = { type: 'file', path: source.configPath };
-  } else {
-    configSource = { type: 'file' };
+export function setConfigSource(source?: ConfigSource): void {
+  configSource = source ? { ...source } : {};
+  if (configSource.config && !configSource.config.collections) {
+    configSource.config.collections = {};
   }
 }
 
@@ -158,13 +169,15 @@ function ensureConfigDir(): void {
  * Returns empty config if file doesn't exist
  */
 export function loadConfig(): CollectionConfig {
+  const source = getConfigSource();
   // SDK inline config mode
-  if (configSource.type === 'inline') {
-    return configSource.config;
+  if (source.config) {
+    source.config.collections ??= {};
+    return source.config;
   }
 
   // File-based config (SDK custom path or default)
-  const configPath = configSource.path || getConfigFilePath();
+  const configPath = source.configPath || getConfigFilePath();
   if (!existsSync(configPath)) {
     return { collections: {} };
   }
@@ -190,13 +203,14 @@ export function loadConfig(): CollectionConfig {
  * - File-based: writes to YAML file (default ~/.config/qmd/index.yml)
  */
 export function saveConfig(config: CollectionConfig): void {
+  const source = getConfigSource();
   // SDK inline config mode: update in place, no file I/O
-  if (configSource.type === 'inline') {
-    configSource.config = config;
+  if (source.config) {
+    source.config = config;
     return;
   }
 
-  const configPath = configSource.path || getConfigFilePath();
+  const configPath = source.configPath || getConfigFilePath();
   const configDir = dirname(configPath);
   if (!existsSync(configDir)) {
     mkdirSync(configDir, { recursive: true });
@@ -291,14 +305,16 @@ export function updateCollectionSettings(
 export function addCollection(
   name: string,
   path: string,
-  pattern: string = "**/*.md"
+  pattern: string = "**/*.md",
+  ignore?: string[]
 ): void {
   const config = loadConfig();
 
   config.collections[name] = {
+    ...config.collections[name], // Preserve context, update and default-query settings
     path,
     pattern,
-    context: config.collections[name]?.context, // Preserve existing context
+    ...(ignore !== undefined ? { ignore } : {}),
   };
 
   saveConfig(config);
@@ -402,7 +418,7 @@ export function removeContext(
   const config = loadConfig();
   const collection = config.collections[collectionName];
 
-  if (!collection?.context?.[pathPrefix]) {
+  if (!collection?.context || !(pathPrefix in collection.context)) {
     return false;
   }
 
@@ -499,16 +515,18 @@ export function findContextForPath(
  * Get the config file path (useful for error messages)
  */
 export function getConfigPath(): string {
-  if (configSource.type === 'inline') return '<inline>';
-  return configSource.path || getConfigFilePath();
+  const source = getConfigSource();
+  if (source.config) return '<inline>';
+  return source.configPath || getConfigFilePath();
 }
 
 /**
  * Check if config file exists
  */
 export function configExists(): boolean {
-  if (configSource.type === 'inline') return true;
-  const path = configSource.path || getConfigFilePath();
+  const source = getConfigSource();
+  if (source.config) return true;
+  const path = source.configPath || getConfigFilePath();
   return existsSync(path);
 }
 

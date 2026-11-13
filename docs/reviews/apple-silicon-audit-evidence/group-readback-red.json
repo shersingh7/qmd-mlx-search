@@ -1,0 +1,18 @@
+{
+  "label": "group-readback-red",
+  "command": [
+    "/Users/shersingh/github/qmd-mlx-search/.venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python/test_watchdog_cli_cleanup.py",
+    "test/python/test_process_ownership_quality.py",
+    "-q",
+    "-k",
+    "group_readback_failure or empty_no_match_readback"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 1,
+  "elapsed_seconds": 1.3559797919999999,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw"
+}

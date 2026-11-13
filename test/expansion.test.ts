@@ -2,14 +2,14 @@
  * expansion.test.ts — Unit tests for MLX Query Expansion Protocol and Fail-Closed Semantics
  */
 
-import { describe, test, expect, beforeAll, afterAll } from "vitest";
+import { describe, test, expect, beforeAll, afterAll, afterEach, vi } from "vitest";
 import http from "node:http";
 import {
   buildMlxExpansionPrompt,
   parseExpansionOutput,
   type ParsedExpansion,
 } from "../src/expansion/protocol.js";
-import { LlamaCpp } from "../src/llm.js";
+import { LlamaCpp, withLLMSessionForLlm, SessionReleasedError } from "../src/llm.js";
 
 describe("Expansion Protocol: Prompt Builder", () => {
   test("builds clean delimited prompt for raw search query", () => {
@@ -154,6 +154,123 @@ vec: distributed database indexing techniques
     expect(res.lex.length).toBe(1);
     expect(res.vec.length).toBe(1);
     expect(res.queryables.length).toBe(2);
+  });
+});
+
+describe("HTTP lifecycle and actual identity integration (fixture only)", () => {
+  let server: http.Server;
+  let url: string;
+  let stageRevision = 'fixture-rev-a';
+  let stallGeneration = false;
+  let onGenerate: (() => void) | undefined;
+  const pendingResponses = new Set<http.ServerResponse>();
+  const requests: any[] = [];
+  const embeddingDescriptor = {
+    version: 1, backend: 'mlx', model: 'fixture-embed', pooling: 'mean',
+    nativeDimensions: 2, outputDimensions: 2, maxTokens: 128, normalized: true,
+  };
+
+  beforeAll(async () => {
+    server = http.createServer(async (req, res) => {
+      const path = req.url;
+      const send = (body: unknown) => { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify(body)); };
+      if (path === '/descriptor') {
+        send({ ...embeddingDescriptor,
+          rerank: { model: 'fixture-ranker', revision: stageRevision },
+          generate: { model: 'fixture-generator', revision: stageRevision },
+        });
+        return;
+      }
+      if (path === '/embed') {
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        const payload = JSON.parse(body);
+        requests.push(payload);
+        const dims = payload.dims ?? 2;
+        send({ model: 'fixture-embed', dims, descriptor: { ...embeddingDescriptor, outputDimensions: dims },
+          embeddings: payload.texts.map(() => Array.from({ length: dims }, (_, index) => index === 0 ? 1 : 0)),
+        });
+        return;
+      }
+      if (path === '/rerank') { send({ model: 'fixture-ranker', scores: [0.7] }); return; }
+      if (path === '/generate') {
+        if (stallGeneration) {
+          pendingResponses.add(res);
+          res.on('close', () => pendingResponses.delete(res));
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.write('{"text":');
+          onGenerate?.();
+        } else send({ text: 'vec: fixture query', model: 'fixture-generator' });
+        return;
+      }
+      res.writeHead(404); res.end();
+    });
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+    url = `http://127.0.0.1:${(server.address() as any).port}`;
+  });
+
+  afterEach(() => {
+    stallGeneration = false;
+    onGenerate = undefined;
+    stageRevision = 'fixture-rev-a';
+    for (const response of pendingResponses) response.destroy();
+    pendingResponses.clear();
+    vi.restoreAllMocks();
+  });
+
+  afterAll(async () => {
+    server.closeAllConnections();
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  });
+
+  test('projected dimensions reach the real client without changing native negotiation', async () => {
+    const llm = new LlamaCpp({ embedBackend: 'mlx', mlxUrl: url, mlxBinary: false, embedDims: 1 });
+    try {
+      expect(await llm.getDescriptor()).toMatchObject({ nativeDimensions: 2, outputDimensions: 1 });
+      expect(await llm.embed('fixture')).toEqual({ embedding: [1], model: 'fixture-embed' });
+      expect(requests.at(-1)).toMatchObject({ dims: 1 });
+    } finally { await llm.dispose(); }
+  });
+
+  test('fresh stage revisions and serving labels agree through the actual HTTP transport', async () => {
+    const llm = new LlamaCpp({ strictMlx: true, mlxUrl: url });
+    try {
+      const predicted = await llm.getCacheIdentity('expand');
+      expect(predicted).toMatch(/^mlx:fixture-generator#/);
+      expect((await llm.expandQueryWithIdentity('fixture query')).model).toBe(predicted);
+      expect((await llm.rerank('fixture', [{ file: 'a', text: 'fixture' }])).model).toBe(await llm.getCacheIdentity('rerank'));
+      stageRevision = 'fixture-rev-b';
+      const changed = await llm.getCacheIdentity('expand');
+      expect(changed).not.toBe(predicted);
+      expect((await llm.expandQueryWithIdentity('fixture query')).model).toBe(changed);
+    } finally { await llm.dispose(); }
+  });
+
+  test('a scoped abort reaches a stalled real HTTP response body', async () => {
+    const llm = new LlamaCpp({ strictMlx: true, mlxUrl: url });
+    const abort = new AbortController();
+    const started = new Promise<void>(resolve => { onGenerate = resolve; });
+    stallGeneration = true;
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const pending = withLLMSessionForLlm(llm, session => session.expandQuery('fixture query'), { signal: abort.signal });
+    const rejected = expect(pending).rejects.toBeInstanceOf(SessionReleasedError);
+    await started;
+    abort.abort(new Error('fixture abort'));
+    await rejected;
+    const generateRequest = fetchSpy.mock.calls.find(([input]) => String(input).endsWith('/generate'));
+    expect(generateRequest?.[1]?.signal?.aborted).toBe(true);
+    await llm.dispose();
+  });
+
+  test('the configured deadline also bounds a stalled generation body', async () => {
+    const llm = new LlamaCpp({ strictMlx: true, mlxUrl: url, mlxTimeoutMs: 100 });
+    stallGeneration = true;
+    try {
+      await expect(llm.expandQuery('fixture query')).rejects.toMatchObject({
+        name: 'TimeoutError',
+        message: expect.stringMatching(/deadline exceeded|timed out/i),
+      });
+    } finally { await llm.dispose(); }
   });
 });
 

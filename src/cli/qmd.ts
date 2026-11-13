@@ -2,10 +2,12 @@ import { openDatabase } from "../db.js";
 import type { Database } from "../db.js";
 import fastGlob from "fast-glob";
 import { execSync, spawn as nodeSpawn } from "child_process";
+import { randomUUID } from "node:crypto";
+import { request as httpRequest } from "node:http";
 import { fileURLToPath } from "url";
 import { dirname, join as pathJoin, relative as relativePath } from "path";
 import { parseArgs } from "util";
-import { readFileSync, realpathSync, statSync, existsSync, unlinkSync, writeFileSync, openSync, closeSync, mkdirSync, lstatSync, rmSync, symlinkSync, readlinkSync } from "fs";
+import { readFileSync, realpathSync, statSync, existsSync, unlinkSync, writeFileSync, openSync, closeSync, mkdirSync, lstatSync, rmSync, symlinkSync, readlinkSync, constants, fstatSync, fsyncSync, linkSync, renameSync, rmdirSync } from "fs";
 import { createInterface } from "readline/promises";
 import {
   getPwd,
@@ -358,20 +360,15 @@ async function showStatus(): Promise<void> {
   console.log(`Index: ${dbPath}`);
   console.log(`Size:  ${formatBytes(indexSize)}`);
 
-  // MCP daemon status (check PID file liveness)
-  const mcpCacheDir = process.env.XDG_CACHE_HOME
-    ? resolve(process.env.XDG_CACHE_HOME, "qmd")
-    : resolve(homedir(), ".cache", "qmd");
-  const mcpPidPath = resolve(mcpCacheDir, "mcp.pid");
-  if (existsSync(mcpPidPath)) {
-    const mcpPid = parseInt(readFileSync(mcpPidPath, "utf-8").trim());
-    try {
-      process.kill(mcpPid, 0);
-      console.log(`MCP:   ${c.green}running${c.reset} (PID ${mcpPid})`);
-    } catch {
-      unlinkSync(mcpPidPath);
-      // Stale PID file cleaned up silently
+  // Status is read-only and uses the same identity contract as start/stop.
+  try {
+    const saved = readMcpDaemonRecord(resolve(mcpCacheDirectory(), "mcp.pid"));
+    if (saved) {
+      const verified = await mcpIdentityMatches(saved.record);
+      console.log(`MCP:   ${verified ? c.green + "running" : c.yellow + "unverified"}${c.reset} (PID ${saved.record.pid})`);
     }
+  } catch {
+    console.log(`MCP:   ${c.yellow}unverified daemon record${c.reset} (manual inspection required)`);
   }
   console.log("");
 
@@ -2865,6 +2862,267 @@ async function showVersion(): Promise<void> {
   console.log(`qmd ${versionStr}`);
 }
 
+// A PID alone is not ownership: it may have been reused or copied from another
+// service. Keep the listener identity and never migrate legacy numeric records
+// automatically. The lock serializes our own start/stop operations, not peers
+// that deliberately modify the cache behind our back.
+type McpDaemonRecord = { version: 1; pid: number; port: number; instanceToken: string };
+type McpDaemonSnapshot = { record: McpDaemonRecord; raw: string; dev: number; ino: number };
+
+function mcpCacheDirectory(): string {
+  return process.env.XDG_CACHE_HOME
+    ? resolve(process.env.XDG_CACHE_HOME, "qmd")
+    : resolve(homedir(), ".cache", "qmd");
+}
+
+function readMcpDaemonRecord(pidPath: string): McpDaemonSnapshot | undefined {
+  let fd: number | undefined;
+  try {
+    fd = openSync(pidPath, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+    const metadata = fstatSync(fd);
+    if (!metadata.isFile() || metadata.size > 4096 || metadata.nlink !== 1
+      || (process.getuid && metadata.uid !== process.getuid())) throw new Error("unsafe record file");
+    const raw = readFileSync(fd, "utf8");
+    const record = JSON.parse(raw) as McpDaemonRecord;
+    if (!record || record.version !== 1 || !Number.isSafeInteger(record.pid) || record.pid <= 1
+      || !Number.isInteger(record.port) || record.port < 1 || record.port > 65535
+      || typeof record.instanceToken !== "string"
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(record.instanceToken)) {
+      throw new Error("legacy or invalid record");
+    }
+    return { record, raw, dev: metadata.dev, ino: metadata.ino };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw new Error(`Unverified or legacy MCP PID record at ${pidPath}; refusing to signal or overwrite it. Verify its owner and remove the record manually before starting a new daemon.`);
+  } finally {
+    if (fd !== undefined) closeSync(fd);
+  }
+}
+
+function assertMcpDaemonRecord(pidPath: string, expected: McpDaemonSnapshot): void {
+  const current = readMcpDaemonRecord(pidPath);
+  if (!current || current.dev !== expected.dev || current.ino !== expected.ino || current.raw !== expected.raw) {
+    throw new Error("MCP daemon record changed during operation; refusing to signal or remove it.");
+  }
+}
+
+function mcpProcessAlive(pid: number): boolean {
+  try { process.kill(pid, 0); return true; }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ESRCH") return false;
+    throw error;
+  }
+}
+
+function mcpTimeout(name: string, defaultMs: number): number {
+  const raw = process.env[name];
+  if (raw === undefined) return defaultMs;
+  if (!/^[0-9]+$/.test(raw) || Number(raw) < 1 || Number(raw) > 120000) {
+    throw new Error(`${name} must be an integer in 1..120000 milliseconds.`);
+  }
+  return Number(raw);
+}
+
+// Direct IP sockets ignore proxies, redirects and DNS. Check both loopback
+// families because the foreground listener binds localhost. A total timer and
+// byte limit cover even a peer slowly dripping a health response.
+async function mcpIdentityMatches(record: McpDaemonRecord, timeoutMs = 350): Promise<boolean> {
+  const results = await Promise.all(["127.0.0.1", "::1"].map(hostname => new Promise<boolean>(resolveResult => {
+    let finished = false;
+    const finish = (matched: boolean) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      req.destroy();
+      resolveResult(matched);
+    };
+    const req = httpRequest({ hostname, port: record.port, path: "/health", method: "GET", agent: false,
+      headers: { Host: `localhost:${record.port}`, Connection: "close" }, maxHeaderSize: 8192,
+    }, res => {
+      if (res.statusCode !== 200) { finish(false); return; }
+      const chunks: Buffer[] = [];
+      let size = 0;
+      res.on("data", (chunk: Buffer) => {
+        size += chunk.length;
+        if (size > 16384) finish(false);
+        else chunks.push(chunk);
+      });
+      res.once("error", () => finish(false));
+      res.once("aborted", () => finish(false));
+      res.once("end", () => {
+        try {
+          const data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+          finish(data?.status === "ok" && data.pid === record.pid && data.instanceToken === record.instanceToken);
+        } catch { finish(false); }
+      });
+    });
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    req.once("error", () => finish(false));
+    req.end();
+  })));
+  return results.some(Boolean);
+}
+
+async function withMcpDaemonLock<T>(cacheDir: string, operation: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  mkdirSync(cacheDir, { recursive: true });
+  const lockPath = resolve(cacheDir, "mcp.pid.lock");
+  try { mkdirSync(lockPath, { mode: 0o700 }); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new Error(`Another MCP daemon start/stop is in progress (${lockPath}). If its owner crashed, verify that no operation is running before removing this lock manually.`);
+    }
+    throw error;
+  }
+  const lock = lstatSync(lockPath);
+  const controller = new AbortController();
+  const saved = (["SIGINT", "SIGTERM"] as const).map(signal => ({ signal, listeners: process.rawListeners(signal) }));
+  const onInterrupt = () => { process.exitCode = 130; controller.abort(new Error("MCP daemon operation interrupted by SIGINT")); };
+  const onTerminate = () => { process.exitCode = 143; controller.abort(new Error("MCP daemon operation interrupted by SIGTERM")); };
+  process.removeAllListeners("SIGINT");
+  process.removeAllListeners("SIGTERM");
+  process.on("SIGINT", onInterrupt);
+  process.on("SIGTERM", onTerminate);
+  try { return await operation(controller.signal); }
+  finally {
+    process.off("SIGINT", onInterrupt);
+    process.off("SIGTERM", onTerminate);
+    for (const { signal, listeners } of saved) for (const listener of listeners) process.on(signal, listener as () => void);
+    try {
+      const current = lstatSync(lockPath);
+      if (current.dev === lock.dev && current.ino === lock.ino) rmdirSync(lockPath);
+      else console.error(`MCP operation lock changed; inspect ${lockPath} manually.`);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") console.error(`Could not remove MCP operation lock: ${String(error)}`);
+    }
+  }
+}
+
+function publishMcpDaemonRecord(pidPath: string, record: McpDaemonRecord): void {
+  const temporary = `${pidPath}.${record.instanceToken}.tmp`;
+  const fd = openSync(temporary, "wx", 0o600);
+  try {
+    writeFileSync(fd, JSON.stringify(record) + "\n");
+    fsyncSync(fd);
+    // Unlike rename, link atomically publishes without replacing a record
+    // somebody else inserted while the child was starting.
+    linkSync(temporary, pidPath);
+  } finally {
+    closeSync(fd);
+    unlinkSync(temporary);
+  }
+}
+
+const mcpDelay = (ms: number) => new Promise<void>(resolveDelay => setTimeout(resolveDelay, ms));
+
+async function stopMcpDaemon(cacheDir: string): Promise<void> {
+  await withMcpDaemonLock(cacheDir, async signal => {
+    const pidPath = resolve(cacheDir, "mcp.pid");
+    const snapshot = readMcpDaemonRecord(pidPath);
+    if (!snapshot) { console.log("Not running (no PID file)."); return; }
+    const { record } = snapshot;
+    const timeoutMs = mcpTimeout("QMD_MCP_STOP_TIMEOUT_MS", 5000);
+    if (!mcpProcessAlive(record.pid)) {
+      assertMcpDaemonRecord(pidPath, snapshot);
+      unlinkSync(pidPath);
+      console.log("Cleaned up stale owned daemon record (server was not running).");
+      return;
+    }
+    if (!await mcpIdentityMatches(record)) {
+      throw new Error(`MCP listener identity is unverified for PID ${record.pid} on port ${record.port}; refusing to signal it or remove its record.`);
+    }
+    signal.throwIfAborted();
+    assertMcpDaemonRecord(pidPath, snapshot);
+    // No signal is sent on the basis of the PID file alone. This verifies the
+    // PID/token at the listener immediately before signaling that exact PID.
+    process.kill(record.pid, "SIGTERM");
+    const deadline = performance.now() + timeoutMs;
+    while (mcpProcessAlive(record.pid)) {
+      signal.throwIfAborted();
+      if (performance.now() >= deadline) throw new Error("MCP daemon did not exit before the stop deadline; its record was retained.");
+      await mcpDelay(Math.min(50, Math.max(1, deadline - performance.now())));
+    }
+    assertMcpDaemonRecord(pidPath, snapshot);
+    unlinkSync(pidPath);
+    console.log(`Stopped QMD MCP server (PID ${record.pid}).`);
+  });
+}
+
+async function startMcpDaemon(cacheDir: string, port: number, indexName?: string): Promise<void> {
+  const started = await withMcpDaemonLock(cacheDir, async signal => {
+    const timeoutMs = mcpTimeout("QMD_MCP_START_TIMEOUT_MS", 10000);
+    const pidPath = resolve(cacheDir, "mcp.pid");
+    const existing = readMcpDaemonRecord(pidPath);
+    if (existing) {
+      if (mcpProcessAlive(existing.record.pid)) {
+        if (await mcpIdentityMatches(existing.record)) throw new Error(`Already running (PID ${existing.record.pid}). Run 'qmd mcp stop' first.`);
+        throw new Error("Existing MCP listener identity is unverified; refusing to replace its record or signal its PID.");
+      }
+      assertMcpDaemonRecord(pidPath, existing);
+      unlinkSync(pidPath);
+    }
+    signal.throwIfAborted();
+    const instanceToken = randomUUID();
+    const logPath = resolve(cacheDir, "mcp.log");
+    const temporaryLog = `${logPath}.${instanceToken}.tmp`;
+    const logFd = openSync(temporaryLog, "wx", 0o600);
+    let child: ReturnType<typeof nodeSpawn> | undefined;
+    let exited = false;
+    let spawnError: Error | undefined;
+    try {
+      // Replace the directory entry, never truncate through a symlink/hardlink.
+      renameSync(temporaryLog, logPath);
+      const selfPath = fileURLToPath(import.meta.url);
+      const args = [selfPath, "mcp", "--http", "--port", String(port), ...(indexName ? ["--index", indexName] : [])];
+      if (selfPath.endsWith(".ts")) args.unshift("--import", pathJoin(dirname(selfPath), "..", "..", "node_modules", "tsx", "dist", "esm", "index.mjs"));
+      child = nodeSpawn(process.execPath, args, {
+        stdio: ["ignore", logFd, logFd], detached: true,
+        env: { ...process.env, QMD_MCP_INSTANCE_TOKEN: instanceToken },
+      });
+      child.once("error", error => { spawnError = error; exited = true; });
+      child.once("exit", () => { exited = true; });
+    } finally {
+      closeSync(logFd);
+      if (existsSync(temporaryLog)) unlinkSync(temporaryLog);
+    }
+    try {
+      if (!child?.pid) throw new Error("MCP daemon child could not be spawned.");
+      const record: McpDaemonRecord = { version: 1, pid: child.pid, port, instanceToken };
+      const deadline = performance.now() + timeoutMs;
+      while (performance.now() < deadline) {
+        signal.throwIfAborted();
+        if (exited) throw new Error(`MCP daemon child exited before readiness (${spawnError?.message ?? child.exitCode ?? child.signalCode}).`);
+        if (await mcpIdentityMatches(record, Math.min(350, Math.max(1, deadline - performance.now())))) {
+          signal.throwIfAborted();
+          if (performance.now() >= deadline) throw new Error("MCP daemon startup deadline exceeded during health verification.");
+          if (exited || !mcpProcessAlive(record.pid)) throw new Error("MCP daemon exited during readiness verification.");
+          publishMcpDaemonRecord(pidPath, record);
+          child.unref();
+          return { record, logPath };
+        }
+        await mcpDelay(Math.min(50, Math.max(1, deadline - performance.now())));
+      }
+      throw new Error("MCP daemon startup deadline exceeded without matching PID/token health.");
+    } catch (error) {
+      // Only the child created by this call is eligible for rollback. Never
+      // kill a port owner, a process group, or a PID obtained from a record.
+      if (child && !exited) {
+        child.kill("SIGTERM");
+        let deadline = performance.now() + 2000;
+        while (!exited && performance.now() < deadline) await mcpDelay(25);
+        if (!exited) {
+          child.kill("SIGKILL");
+          deadline = performance.now() + 2000;
+          while (!exited && performance.now() < deadline) await mcpDelay(25);
+        }
+        if (!exited) throw new Error(`${String(error)}; spawned child cleanup deadline exceeded (PID ${child.pid}). Logs: ${logPath}`);
+      }
+      throw new Error(`${error instanceof Error ? error.message : String(error)} Logs: ${logPath}`);
+    }
+  });
+  console.log(`Started on http://localhost:${started.record.port}/mcp (PID ${started.record.pid})`);
+  console.log(`Logs: ${started.logPath}`);
+}
+
 // Main CLI - only run if this is the main module
 const __filename = fileURLToPath(import.meta.url);
 const argv1 = process.argv[1];
@@ -3245,66 +3503,41 @@ if (isMain) {
 
     case "mcp": {
       const sub = cli.args[0]; // stop | status | undefined
-
-      // Cache dir for PID/log files — same dir as the index
-      const cacheDir = process.env.XDG_CACHE_HOME
-        ? resolve(process.env.XDG_CACHE_HOME, "qmd")
-        : resolve(homedir(), ".cache", "qmd");
-      const pidPath = resolve(cacheDir, "mcp.pid");
+      const cacheDir = mcpCacheDirectory();
 
       // Subcommands take priority over flags
-      if (sub === "stop") {
-        if (!existsSync(pidPath)) {
-          console.log("Not running (no PID file).");
-          process.exit(0);
-        }
-        const pid = parseInt(readFileSync(pidPath, "utf-8").trim());
+      if (sub === "stop" || sub === "status") {
         try {
-          process.kill(pid, 0); // alive?
-          process.kill(pid, "SIGTERM");
-          unlinkSync(pidPath);
-          console.log(`Stopped QMD MCP server (PID ${pid}).`);
-        } catch {
-          unlinkSync(pidPath);
-          console.log("Cleaned up stale PID file (server was not running).");
+          if (sub === "stop") await stopMcpDaemon(cacheDir);
+          else {
+            const saved = readMcpDaemonRecord(resolve(cacheDir, "mcp.pid"));
+            if (!saved) throw new Error("Not running (no PID file).");
+            if (!await mcpIdentityMatches(saved.record)) throw new Error("MCP listener identity is unverified; its record was retained.");
+            console.log(`QMD MCP server running on http://localhost:${saved.record.port}/mcp (PID ${saved.record.pid}).`);
+          }
+        } catch (error) {
+          console.error(error instanceof Error ? error.message : String(error));
+          process.exit(process.exitCode || 1);
         }
-        process.exit(0);
+        process.exit(process.exitCode || 0);
       }
 
       if (cli.values.http) {
-        const port = Number(cli.values.port) || 8181;
+        const portValue = String(cli.values.port ?? "8181");
+        const port = Number(portValue);
+        if (!/^[0-9]+$/.test(portValue) || !Number.isInteger(port) || port < 1 || port > 65535) {
+          console.error("MCP --port must be an integer in 1..65535.");
+          process.exit(1);
+        }
 
         if (cli.values.daemon) {
-          // Guard: check if already running
-          if (existsSync(pidPath)) {
-            const existingPid = parseInt(readFileSync(pidPath, "utf-8").trim());
-            try {
-              process.kill(existingPid, 0); // alive?
-              console.error(`Already running (PID ${existingPid}). Run 'qmd mcp stop' first.`);
-              process.exit(1);
-            } catch {
-              // Stale PID file — continue
-            }
+          try {
+            await startMcpDaemon(cacheDir, port, cli.values.index as string | undefined);
+          } catch (error) {
+            console.error(error instanceof Error ? error.message : String(error));
+            process.exit(process.exitCode || 1);
           }
-
-          mkdirSync(cacheDir, { recursive: true });
-          const logPath = resolve(cacheDir, "mcp.log");
-          const logFd = openSync(logPath, "w"); // truncate — fresh log per daemon run
-          const selfPath = fileURLToPath(import.meta.url);
-          const spawnArgs = selfPath.endsWith(".ts")
-            ? ["--import", pathJoin(dirname(selfPath), "..", "..", "node_modules", "tsx", "dist", "esm", "index.mjs"), selfPath, "mcp", "--http", "--port", String(port)]
-            : [selfPath, "mcp", "--http", "--port", String(port)];
-          const child = nodeSpawn(process.execPath, spawnArgs, {
-            stdio: ["ignore", logFd, logFd],
-            detached: true,
-          });
-          child.unref();
-          closeSync(logFd); // parent's copy; child inherited the fd
-
-          writeFileSync(pidPath, String(child.pid));
-          console.log(`Started on http://localhost:${port}/mcp (PID ${child.pid})`);
-          console.log(`Logs: ${logPath}`);
-          process.exit(0);
+          process.exit(process.exitCode || 0);
         }
 
         // Foreground HTTP mode — remove top-level cursor handlers so the

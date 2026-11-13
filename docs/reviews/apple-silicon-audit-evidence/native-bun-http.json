@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "runtime": "bun 1.3.8",
+  "checks": [
+    "installed SDK/SQLite indexing and lexical retrieval",
+    "native Bun HTTP fails closed with explicit Node.js remedy (not HTTP feature acceptance)"
+  ],
+  "httpSupported": false
+}

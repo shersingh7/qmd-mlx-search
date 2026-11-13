@@ -1,0 +1,167 @@
+{"command": [".venv/bin/python", "-m", "pytest", "test/python", "-q", "-m", "not real_model", "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-results.xml"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h"}
+........................................................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+...................................................................s.... [ 60%]
+..s..................................................................... [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 76%]
+........................................................................ [ 81%]
+........................................................................ [ 86%]
+...............................F........................................ [ 91%]
+........................................................................ [ 96%]
+...................................................                      [100%]
+=================================== FAILURES ===================================
+____ test_phase5_full_node_recovery_restore_and_http_on_public_cpu_fixture _____
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x1183cc2c0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x1183ccfe0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x1183c4170>)
+tmp_path = PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h/tmp/pytest-of-shersingh/pytest-0/test_phase5_full_node_recovery0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11840f6b0>
+
+    def test_phase5_full_node_recovery_restore_and_http_on_public_cpu_fixture(phase5_composition, tmp_path, monkeypatch):
+        """Real canonical Node runner/SQLite/recovery/MCP; authored Python stage and one-hot HTTP fixture.
+    
+        These known-fixture vectors intentionally encode the public judgments. They
+        prove orchestration, NOT held-out retrieval quality, model speed or GPU safety.
+        """
+        from scripts.qmd_mlx.supervisor import run_subordinate_process
+    
+        root = tmp_path / ("long managed source qualification " + "x" * 70)
+        root.mkdir()
+        for name in ("home", "tmp", "cache", "config", "hermes", "fixture-model", "unrelated-cwd"):
+            (root / name).mkdir()
+        env = {key: value for key, value in os.environ.items() if key in {"PATH", "LANG", "LC_ALL"}}
+        env.update({"HOME": str(root / "home"), "TMPDIR": str(root / "tmp"), "TMP": str(root / "tmp"),
+                    "TEMP": str(root / "tmp"), "XDG_CACHE_HOME": str(root / "cache"),
+                    "XDG_CONFIG_HOME": str(root / "config"), "HERMES_HOME": str(root / "hermes"),
+                    "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1",
+                    "TSX_DISABLE_CACHE": "1"})
+        public_fixtures = Path(phase5.repo_root, "test/fixtures/public_eval_dataset.ts")
+        command = phase5.node_typescript_command(str(public_fixtures), deadline=time.monotonic() + 10, env=env)
+        fixtures = subprocess.run([*command[:3], "--input-type=module", "-e",
+            f"import {{PUBLIC_CORPUS_DOCS, PUBLIC_HELD_OUT_QUERIES}} from {json.dumps(public_fixtures.as_uri())};"
+            "process.stdout.write(JSON.stringify({docs:PUBLIC_CORPUS_DOCS,queries:PUBLIC_HELD_OUT_QUERIES}));"],
+            cwd=root / "unrelated-cwd", env=env, capture_output=True, text=True, timeout=10, check=True)
+        dataset = json.loads(fixtures.stdout)
+        docs, queries = dataset["docs"], dataset["queries"]
+        dimensions = len(docs)
+        doc_indices = {doc["id"]: index for index, doc in enumerate(docs)}
+        model = str(root / "fixture-model")
+        descriptor = {"version": 1, "backend": "mlx", "model": model, "pooling": "mean",
+                      "nativeDimensions": dimensions, "outputDimensions": dimensions,
+                      "maxTokens": 2048, "normalized": True}
+        requests, fixture_errors = [], []
+    
+        def embedding(text):
+            index = next((doc_indices[query["relevantDocIds"][0]] for query in queries if query["query"] in text), None)
+            if index is None:
+                index = next((i for i, doc in enumerate(docs) if doc["content"] in text), None)
+            if index is None:
+                raise ValueError(f"Unknown synthetic fixture input: {text[:120]!r}")
+            return [float(i == index) for i in range(dimensions)]
+    
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, format, *args):
+                pass
+    
+            def send_body(self, payload, *, status=200, binary=False):
+                body = payload if binary else json.dumps(payload).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/octet-stream" if binary else "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                if binary:
+                    self.send_header("X-QMD-Embedding-Descriptor", quote(json.dumps(descriptor), safe=""))
+                self.end_headers()
+                self.wfile.write(body)
+    
+            def do_GET(self):
+                requests.append(self.path)
+                if self.path == "/health":
+                    self.send_body({"status": "ok", "ready": True, "model": model, "dims": dimensions, "descriptor": descriptor})
+                elif self.path == "/descriptor":
+                    self.send_body(descriptor)
+                else:
+                    self.send_body({"error": "unexpected fixture route"}, status=404)
+    
+            def do_POST(self):
+                requests.append(self.path)
+                try:
+                    data = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                    texts = data["texts"]
+                    if self.path == "/tokenize":
+                        self.send_body({"counts": [max(1, (len(text) + 3) // 4) for text in texts]})
+                    elif self.path in ("/embed", "/embed-bin"):
+                        vectors = [embedding(text) for text in texts]
+                        if self.path == "/embed-bin":
+                            flat = [value for row in vectors for value in row]
+                            self.send_body(struct.pack("<ii", len(vectors), dimensions)
+                                           + struct.pack(f"<{len(flat)}f", *flat), binary=True)
+                        else:
+                            self.send_body({"embeddings": vectors, "model": model, "dims": dimensions, "descriptor": descriptor})
+                    else:
+                        raise ValueError(f"Unexpected fixture route {self.path}")
+                except Exception as error:
+                    fixture_errors.append(str(error))
+                    self.send_body({"error": str(error)}, status=500)
+    
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.02}, daemon=True)
+        thread.start()
+        port = server.server_port
+        assert port != 8787
+        phase5_composition.context.base_url = f"http://127.0.0.1:{port}"
+        phase5_composition.context.deadline = time.monotonic() + 60
+        phase5_composition.supervisor.config.mlx_port = port
+        phase5_composition.supervisor.config.mlx_model = model
+        phase5_composition.supervisor.config.timeout_s = 60
+        monkeypatch.setenv("TMPDIR", str(root / "tmp"))
+        monkeypatch.chdir(root / "unrelated-cwd")
+        results = []
+    
+        def execute(**kwargs):
+            phase5_composition.captured.update(kwargs)
+            phase5_composition.captured["scratch_root"] = str(Path(kwargs["env"]["HOME"]).parent)
+            assert kwargs["cmd"][:3] == command[:3]
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            result = run_subordinate_process(**kwargs)
+            results.append(result)
+            return result
+    
+        monkeypatch.setattr(phase5, "run_subordinate_process", execute)
+        try:
+            report = phase5_composition.run()
+>           assert report["status"] == "passed", {"errors": report["errors"], "logs": [r.captured_logs for r in results]}
+E           AssertionError: {'errors': ['TypeScript Phase 5 runner failed with exit code 1:
+E             [Phase 5] 1. Validating shadow target isolation safeg...s:1210:76)
+E                 at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+E             
+E             Node.js v22.22.3
+E             ']}
+E           assert 'failed' == 'passed'
+E             
+E             - passed
+E             + failed
+
+/Users/shersingh/github/qmd-mlx-search/test/python/test_qualification_http_status.py:409: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+=========================== short test summary info ============================
+FAILED test/python/test_qualification_http_status.py::test_phase5_full_node_recovery_restore_and_http_on_public_cpu_fixture - AssertionError: {'errors': ['TypeScript Phase 5 runner failed with exit code 1:
+  [Phase 5] 1. Validating shadow target isolation safeg...s:1210:76)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+  
+  Node.js v22.22.3
+  ']}
+assert 'failed' == 'passed'
+  
+  - passed
+  + failed
+1 failed, 1416 passed, 2 skipped, 13 deselected in 134.23s (0:02:14)

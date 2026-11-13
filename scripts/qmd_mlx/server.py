@@ -8,17 +8,22 @@ import http.server
 import json
 import math
 import os
+import select
+import socket
 import socketserver
 import sys
 import threading
 import time
 import uuid
+from contextlib import contextmanager
 from typing import Any, Optional
+from urllib.parse import quote
 import numpy as np
 
 from .executor import GPUExecutor
 from .model_manager import ModelResidencyManager, ModelState
 from .protocol import (
+    BoundedDeadlineReader,
     DeadlineExceededError,
     InvalidInputError,
     MLXServerError,
@@ -30,13 +35,92 @@ from .protocol import (
     UnsupportedModelError,
     WorkerUnavailableError,
     decode_binary_embeddings,
+    decode_json_request,
     encode_binary_embeddings,
+    parse_http_body_headers,
     parse_timeout,
     validate_embed_request,
     validate_generate_request,
     validate_rerank_request,
 )
-from .runtime import MLXEmbeddingRuntime
+from .runtime import EmbeddingResult, MLXEmbeddingRuntime
+
+
+class _SocketAdmissionMixin:
+    """Own accepted sockets and release exactly the permits they acquired."""
+
+    def _init_socket_admission(self, max_threads: int):
+        self.thread_limiter = threading.BoundedSemaphore(max_threads)
+        self._active_sockets: set[socket.socket] = set()
+        self._admitted_sockets: set[socket.socket] = set()
+        self._sockets_lock = threading.Lock()
+
+    def get_request(self):
+        sock, address = super().get_request()
+        with self._sockets_lock:
+            if not self._stop_event.is_set():
+                self._active_sockets.add(sock)
+                return sock, address
+        sock.close()
+        raise OSError("Server is stopping")
+
+    def _close_all_active_sockets(self):
+        with self._sockets_lock:
+            sockets = list(self._active_sockets)
+            admitted = self._admitted_sockets.copy()
+            self._active_sockets.clear()
+        for sock in sockets:
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            # shutdown wakes an admitted handler's read. Its finally owns close:
+            # closing the fd here can strand a concurrent timed recv/poll on
+            # Darwin (and allow fd reuse before that poll has returned).
+            if sock not in admitted:
+                try:
+                    sock.close()
+                except OSError:
+                    pass
+
+    def process_request(self, request, client_address):
+        if self._stop_event.is_set():
+            self.shutdown_request(request)
+            return
+        if not self.thread_limiter.acquire(blocking=False):
+            body = json.dumps({"error": "Server overloaded with concurrent connections", "type": "overloaded"}).encode()
+            try:
+                # Rejection runs on the accept loop; never let a non-reading peer block it.
+                request.settimeout(0.2)
+                request.sendall(
+                    b"HTTP/1.1 429 Too Many Requests\r\n"
+                    b"Content-Type: application/json\r\n"
+                    + f"Content-Length: {len(body)}\r\n".encode()
+                    + b"Connection: close\r\n\r\n" + body
+                )
+            except OSError:
+                pass
+            finally:
+                self.shutdown_request(request)
+            return
+        with self._sockets_lock:
+            self._admitted_sockets.add(request)
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self.shutdown_request(request)
+            raise
+
+    def close_request(self, request):
+        with self._sockets_lock:
+            self._active_sockets.discard(request)
+            admitted = request in self._admitted_sockets
+            self._admitted_sockets.discard(request)
+        try:
+            super().close_request(request)
+        finally:
+            if admitted:
+                self.thread_limiter.release()
 
 
 class ServerState:
@@ -198,7 +282,7 @@ def get_health_payload(srv: ThreadedMLXServer) -> dict[str, Any]:
     }
 
 
-class ThreadedMLXServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class ThreadedMLXServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
     request_queue_size = 128
@@ -221,8 +305,11 @@ class ThreadedMLXServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         self.start_time_epoch: float = time.time()
         self.max_body_bytes: int = 10 * 1024 * 1024  # 10 MB limit
         self.max_concurrent_inference = max_concurrent_inference
-        self.thread_limiter = threading.BoundedSemaphore(max_threads)
+        self._init_socket_admission(max_threads)
         self.inference_limiter = threading.BoundedSemaphore(max_concurrent_inference)
+        self.header_timeout_s = 15.0
+        self.body_timeout_s = 15.0
+        self.max_header_bytes = 16384
         self.executor: Optional[GPUExecutor] = None
         self.model_manager: Optional[ModelResidencyManager] = None
         self.runtime: Optional[MLXEmbeddingRuntime] = None
@@ -238,27 +325,6 @@ class ThreadedMLXServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         self._lifecycle_lock = threading.Lock()
         self._stop_lock = self._lifecycle_lock
         self._before_serve_hook: Optional[Any] = None
-        self._active_sockets: set[socket.socket] = set()
-        self._sockets_lock = threading.Lock()
-
-    def get_request(self):
-        sock, addr = super().get_request()
-        with self._sockets_lock:
-            self._active_sockets.add(sock)
-        return sock, addr
-
-    def _close_all_active_sockets(self):
-        with self._sockets_lock:
-            for sock in list(self._active_sockets):
-                try:
-                    sock.shutdown(socket.SHUT_RDWR)
-                except Exception:
-                    pass
-                try:
-                    sock.close()
-                except Exception:
-                    pass
-            self._active_sockets.clear()
 
     def stop(self, timeout: float = 10.0):
         """
@@ -356,110 +422,10 @@ class ThreadedMLXServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         except Exception:
             pass
 
-    def process_request(self, request, client_address):
-        if not self.thread_limiter.acquire(blocking=False):
-            try:
-                request.sendall(
-                    b"HTTP/1.1 429 Too Many Requests\r\n"
-                    b"Content-Type: application/json\r\n"
-                    b"Connection: close\r\n\r\n"
-                    b"{\"error\": \"Server overloaded with concurrent connections\", \"type\": \"overloaded\"}"
-                )
-                request.close()
-            except Exception:
-                pass
-            return
-        super().process_request(request, client_address)
-
-    def close_request(self, request):
-        with self._sockets_lock:
-            self._active_sockets.discard(request)
-        try:
-            super().close_request(request)
-        finally:
-            try:
-                self.thread_limiter.release()
-            except ValueError:
-                pass
+_BoundedDeadlineRfile = BoundedDeadlineReader
 
 
-class _BoundedDeadlineRfile:
-    """
-    Stream wrapper for control listener that enforces an absolute monotonic wall-clock deadline
-    and maximum byte budget across all reads for a single HTTP request/header.
-    """
-    def __init__(self, raw_socket: socket.socket, deadline: float, max_bytes: int = 16384):
-        self._sock = raw_socket
-        self._deadline = deadline
-        self._max_bytes = max_bytes
-        self._bytes_read = 0
-        self._buf = bytearray()
-
-    def _check_deadline(self):
-        rem = self._deadline - time.monotonic()
-        if rem <= 0:
-            raise socket.timeout("Control request absolute deadline exceeded")
-        self._sock.settimeout(max(0.001, rem))
-
-    def read(self, size: int = -1) -> bytes:
-        if size == 0:
-            return b""
-        if size > 0:
-            if self._buf:
-                chunk = bytes(self._buf[:size])
-                self._buf = self._buf[size:]
-                return chunk
-            self._check_deadline()
-            to_read = min(size, 4096)
-            data = self._sock.recv(to_read)
-            self._bytes_read += len(data)
-            if self._bytes_read > self._max_bytes:
-                raise ValueError("Control request exceeded maximum byte budget")
-            return data
-        chunks = [bytes(self._buf)] if self._buf else []
-        self._buf.clear()
-        while True:
-            self._check_deadline()
-            chunk = self._sock.recv(4096)
-            if not chunk:
-                break
-            self._bytes_read += len(chunk)
-            if self._bytes_read > self._max_bytes:
-                raise ValueError("Control request exceeded maximum byte budget")
-            chunks.append(chunk)
-        return b"".join(chunks)
-
-    def readline(self, limit: int = -1) -> bytes:
-        while True:
-            nl = self._buf.find(b"\n")
-            if nl != -1:
-                line = bytes(self._buf[: nl + 1])
-                self._buf = self._buf[nl + 1 :]
-                if 0 < limit < len(line):
-                    excess = line[limit:]
-                    self._buf = bytearray(excess) + self._buf
-                    line = line[:limit]
-                return line
-            if 0 < limit <= len(self._buf):
-                line = bytes(self._buf[:limit])
-                self._buf = self._buf[limit:]
-                return line
-            self._check_deadline()
-            chunk = self._sock.recv(4096)
-            if not chunk:
-                line = bytes(self._buf)
-                self._buf.clear()
-                return line
-            self._bytes_read += len(chunk)
-            if self._bytes_read > self._max_bytes:
-                raise ValueError("Control request exceeded maximum byte budget")
-            self._buf.extend(chunk)
-
-    def close(self):
-        pass
-
-
-class MLXControlServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class MLXControlServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http.server.HTTPServer):
     """
     Dedicated loopback HTTP control listener providing isolated control-plane capacity.
     Operates on a separate port from the inference listener so health checks and diagnostics
@@ -483,36 +449,16 @@ class MLXControlServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         self.bind_host: str = server_address[0]
         self.request_timeout_s = request_timeout_s
         self.max_header_bytes = max_header_bytes
-        self.thread_limiter = threading.BoundedSemaphore(max_threads)
+        self._init_socket_admission(max_threads)
         self._serving_event = threading.Event()
         self._stop_event = threading.Event()
         self._stopped_event = threading.Event()
         self._stop_lock = threading.Lock()
-        self._active_sockets: set[socket.socket] = set()
-        self._sockets_lock = threading.Lock()
-
-    def get_request(self):
-        sock, addr = super().get_request()
-        with self._sockets_lock:
-            self._active_sockets.add(sock)
-        return sock, addr
-
-    def _close_all_active_sockets(self):
-        with self._sockets_lock:
-            for sock in list(self._active_sockets):
-                try:
-                    sock.shutdown(socket.SHUT_RDWR)
-                except Exception:
-                    pass
-                try:
-                    sock.close()
-                except Exception:
-                    pass
-            self._active_sockets.clear()
 
     def stop(self):
         with self._stop_lock:
             self._stop_event.set()
+            self._close_all_active_sockets()
             self._stopped_event.set()
 
     def shutdown(self):
@@ -538,33 +484,6 @@ class MLXControlServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         finally:
             self._serving_event.clear()
 
-    def process_request(self, request, client_address):
-        if not self.thread_limiter.acquire(blocking=False):
-            try:
-                request.sendall(
-                    b"HTTP/1.1 429 Too Many Requests\r\n"
-                    b"Content-Type: application/json\r\n"
-                    b"Connection: close\r\n\r\n"
-                    b"{\"error\": \"Control server overloaded\", \"type\": \"overloaded\"}"
-                )
-                request.close()
-            except Exception:
-                pass
-            return
-        super().process_request(request, client_address)
-
-    def close_request(self, request):
-        with self._sockets_lock:
-            self._active_sockets.discard(request)
-        try:
-            super().close_request(request)
-        finally:
-            try:
-                self.thread_limiter.release()
-            except ValueError:
-                pass
-
-
 class MLXControlRequestHandler(http.server.BaseHTTPRequestHandler):
     """
     Request handler for the dedicated loopback control listener.
@@ -578,13 +497,9 @@ class MLXControlRequestHandler(http.server.BaseHTTPRequestHandler):
     def setup(self):
         super().setup()
         self.close_connection = True
-        try:
-            timeout_s = getattr(self.control_server, "request_timeout_s", 5.0)
-            max_bytes = getattr(self.control_server, "max_header_bytes", 16384)
-            deadline = time.monotonic() + timeout_s
-            self.rfile = _BoundedDeadlineRfile(self.connection, deadline, max_bytes=max_bytes)  # type: ignore
-        except Exception:
-            pass
+        self.rfile.close()
+        deadline = time.monotonic() + self.control_server.request_timeout_s
+        self.rfile = _BoundedDeadlineRfile(self.connection, deadline, self.control_server.max_header_bytes)  # type: ignore
 
     @property
     def control_server(self) -> MLXControlServer:
@@ -598,7 +513,7 @@ class MLXControlRequestHandler(http.server.BaseHTTPRequestHandler):
         pass
 
     def _send_json(self, data: dict, status: int = 200, close_connection: bool = True):
-        body = json.dumps(data).encode("utf-8")
+        body = json.dumps(data, allow_nan=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -732,10 +647,19 @@ class MLXControlRequestHandler(http.server.BaseHTTPRequestHandler):
         )
 
     def handle_one_request(self):
+        self.request_version = "HTTP/1.1"
+        self.requestline = ""
+        self.command = ""
         try:
             super().handle_one_request()
+        except MLXServerError as exc:
+            self.close_connection = True
+            try:
+                self._send_json({"error": str(exc), "type": exc.error_type}, exc.status_code)
+            except OSError:
+                pass
         except (ConnectionError, OSError):
-            pass
+            self.close_connection = True
 
 
 class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -748,10 +672,9 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def setup(self):
         super().setup()
-        try:
-            self.connection.settimeout(15.0)
-        except Exception:
-            pass
+        self.rfile.close()
+        self.rfile = _BoundedDeadlineRfile(self.connection, time.monotonic() + self.mlx_server.header_timeout_s, self.mlx_server.max_header_bytes)  # type: ignore
+        self._request_cancel_event = None
 
     @property
     def mlx_server(self) -> ThreadedMLXServer:
@@ -761,7 +684,7 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         pass
 
     def _send_json(self, data: dict, status: int = 200, close_connection: bool = False):
-        body = json.dumps(data).encode("utf-8")
+        body = json.dumps(data, allow_nan=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -773,10 +696,13 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _send_binary(self, data: bytes, status: int = 200, close_connection: bool = False):
+    def _send_binary(self, data: bytes, status: int = 200, close_connection: bool = False, descriptor: Optional[dict] = None):
+        descriptor_header = quote(json.dumps(descriptor, allow_nan=False), safe="") if descriptor is not None else None
         self.send_response(status)
         self.send_header("Content-Type", "application/octet-stream")
         self.send_header("Content-Length", str(len(data)))
+        if descriptor_header is not None:
+            self.send_header("X-QMD-Embedding-Descriptor", descriptor_header)
         if close_connection or self.close_connection:
             self.send_header("Connection", "close")
             self.close_connection = True
@@ -809,6 +735,71 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                 return False
 
         return True
+
+    @contextmanager
+    def _request_cancellation(self, deadline: float):
+        """Observe unambiguous peer aborts without consuming pipelined input.
+
+        TCP FIN only closes the peer's write direction: it is indistinguishable
+        from a valid HTTP client using shutdown(SHUT_WR) while awaiting a reply.
+        Do not cancel on FIN alone. RST/socket errors, server stop and the
+        absolute request deadline cancel cooperatively; GPU ownership stays with
+        the executor until any already-running forward actually returns.
+        """
+        event = threading.Event()
+        done = threading.Event()
+        self._request_cancel_event = event
+
+        def watch():
+            write_half_closed = False
+            while not done.is_set():
+                remaining = deadline - time.monotonic()
+                if self.mlx_server._stop_event.is_set() or remaining <= 0:
+                    event.set()
+                    return
+                if event.is_set():
+                    return
+                interval = min(0.05, remaining)
+                try:
+                    if self.connection.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR):
+                        event.set()
+                        return
+                    if write_half_closed:
+                        done.wait(interval)
+                        continue
+                    # Poll readiness without a blocking select: done.wait below
+                    # wakes immediately on completion, so successful keepalive
+                    # requests do not pay a polling-interval join penalty.
+                    readable, _, exceptional = select.select([self.connection], [], [self.connection], 0)
+                    if done.is_set():
+                        return
+                    if exceptional:
+                        event.set()
+                        return
+                    if readable:
+                        data = self.connection.recv(1, socket.MSG_PEEK | getattr(socket, "MSG_DONTWAIT", 0))
+                        if not data:
+                            write_half_closed = True
+                    # FIN and pipelined bytes stay readable: avoid a busy loop.
+                    done.wait(interval)
+                except BlockingIOError:
+                    continue
+                except (OSError, ValueError):
+                    event.set()
+                    return
+
+        monitor = threading.Thread(target=watch, daemon=True, name=f"MLX-Disconnect-{uuid.uuid4().hex[:8]}")
+        try:
+            monitor.start()
+            yield event
+        except (ConnectionError, OSError):
+            event.set()
+            raise
+        finally:
+            done.set()
+            if monitor.ident is not None:
+                monitor.join(timeout=0.25)
+            self._request_cancel_event = None
 
     def _handle_exception(self, exc: Exception):
         """Maps typed exceptions to appropriate HTTP error status codes."""
@@ -949,173 +940,169 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def _handle_post_inference(self, path: str):
         srv = self.mlx_server
-
-        # Check content length
+        deadline = None
         try:
-            cl = int(self.headers.get("Content-Length", 0))
-        except ValueError:
-            self._send_json({"error": "Invalid Content-Length header"}, 400, close_connection=True)
-            return
+            length = parse_http_body_headers(self.headers, srv.max_body_bytes)
+            default_timeout = 300.0 if path in ("/embed", "/embed-bin") else 120.0
+            timeout_header = self.headers.get("X-Request-Timeout")
+            header_timeout = parse_timeout(header_val=timeout_header, default_timeout=default_timeout)
+            # A known header budget applies BEFORE any upload read. A timeout
+            # supplied only inside JSON is applied retroactively to the same
+            # request start once decoded; it never restarts after upload.
+            upload_deadline = min(
+                self._request_started_at + header_timeout,
+                time.monotonic() + srv.body_timeout_s,
+            )
+            self.rfile.set_limits(upload_deadline, length)
+            body = self.rfile.read(length)
+            if len(body) != length:
+                raise ProtocolError("Incomplete request body read")
+            payload = decode_json_request(body)
+            request_timeout = parse_timeout(payload, timeout_header, default_timeout=default_timeout)
+            deadline = self._request_started_at + request_timeout
+            if time.monotonic() >= deadline:
+                raise DeadlineExceededError("Request deadline exceeded during upload")
+            with self._request_cancellation(deadline) as cancel_event:
+                self._dispatch_inference(path, payload, request_timeout, deadline, cancel_event)
+        except MLXServerError as exc:
+            # Validation/read failures must close rather than reinterpret an
+            # unread body as the next keepalive request.
+            self.close_connection = True
+            if isinstance(exc, RequestCancelledError) and deadline is not None and time.monotonic() >= deadline:
+                exc = DeadlineExceededError("Request deadline exceeded")
+            self._handle_exception(exc)
+        except TimeoutError as exc:
+            self.close_connection = True
+            self._handle_exception(exc)
+        except OSError:
+            self.close_connection = True
+        except Exception as exc:
+            self.close_connection = True
+            self._handle_exception(exc)
 
-        if cl <= 0:
-            self._send_json({"error": "Request body cannot be empty"}, 400, close_connection=True)
-            return
-        if cl > srv.max_body_bytes:
-            self._send_json({"error": f"Request body exceeds {srv.max_body_bytes} bytes"}, 413, close_connection=True)
-            return
+    def _check_request_active(self, deadline: float, cancel_event: threading.Event):
+        if time.monotonic() >= deadline:
+            raise DeadlineExceededError("Request deadline exceeded")
+        if cancel_event.is_set():
+            raise RequestCancelledError("Request cancelled")
 
-        # Content-Type check
-        ct = self.headers.get("Content-Type", "")
-        ct_main = ct.split(";")[0].strip().lower()
-        if ct_main != "application/json":
-            self._send_json({"error": f"Invalid Content-Type: expected application/json, got '{ct}'"}, 415, close_connection=True)
-            return
-
-        # Read body
-        try:
-            body_bytes = self.rfile.read(cl)
-            if len(body_bytes) != cl:
-                self._send_json({"error": "Incomplete request body read"}, 400, close_connection=True)
-                return
-            payload = json.loads(body_bytes)
-        except json.JSONDecodeError:
-            self._send_json({"error": "Invalid JSON in request body"}, 400, close_connection=True)
-            return
-        except Exception as e:
-            self._send_json({"error": f"Failed to read request body: {e}"}, 400, close_connection=True)
-            return
-
-        timeout_header = self.headers.get("X-Request-Timeout")
-
-        # Handle tokenize endpoint
+    def _dispatch_inference(self, path: str, payload: dict, request_timeout: float, deadline: float, cancel_event: threading.Event):
+        srv = self.mlx_server
+        self._check_request_active(deadline, cancel_event)
         if path == "/tokenize":
             if srv.runtime is None:
                 self._send_json({"error": "Embedding / tokenize adapter not configured on this server"}, 501)
                 return
-            try:
-                if not isinstance(payload, dict):
-                    raise InvalidInputError("Payload must be a JSON object")
-                texts = payload.get("texts", [])
-                if not isinstance(texts, list):
-                    raise InvalidInputError("'texts' must be a list of strings")
-                if len(texts) > 512:
-                    raise InvalidInputError(f"'texts' exceeds per-request limit of 512 (got {len(texts)})")
-                for i, t in enumerate(texts):
-                    if not isinstance(t, str):
-                        raise InvalidInputError(f"texts[{i}] is not a string")
-                    if len(t) > 256 * 1024:
-                        raise InvalidInputError(f"texts[{i}] exceeds 256KB")
-                req_timeout = parse_timeout(payload, timeout_header, default_timeout=120.0)
-                deadline = time.monotonic() + req_timeout
-                cancel_event = threading.Event()
-                tokens = srv.runtime.tokenize(texts, deadline=deadline, cancel_event=cancel_event)
-                counts = [len(t) for t in tokens]
-                self._send_json({"tokens": tokens, "counts": counts}, 200)
-            except Exception as exc:
-                self._handle_exception(exc)
+            texts = payload.get("texts", [])
+            if not isinstance(texts, list):
+                raise InvalidInputError("'texts' must be a list of strings")
+            if len(texts) > 512:
+                raise InvalidInputError(f"'texts' exceeds per-request limit of 512 (got {len(texts)})")
+            for i, text in enumerate(texts):
+                if not isinstance(text, str):
+                    raise InvalidInputError(f"texts[{i}] is not a string")
+                if len(text) > 256 * 1024:
+                    raise InvalidInputError(f"texts[{i}] exceeds 256KB")
+            tokens = srv.runtime.tokenize(texts, deadline=deadline, cancel_event=cancel_event)
+            self._check_request_active(deadline, cancel_event)
+            self._send_json({"tokens": tokens, "counts": [len(t) for t in tokens]}, 200)
             return
-
-        # Rerank endpoint
         if path == "/rerank":
             if srv.rerank_adapter is None:
                 self._send_json({"error": "Rerank adapter not configured on this server"}, 501)
                 return
-            try:
-                query, documents = validate_rerank_request(payload)
-                req_timeout = parse_timeout(payload, timeout_header, default_timeout=120.0)
-                deadline = time.monotonic() + req_timeout
-                cancel_event = threading.Event()
-                scores = srv.rerank_adapter.score_pairs(
-                    query,
-                    documents,
-                    timeout_s=req_timeout,
-                    cancel_event=cancel_event,
-                    deadline=deadline,
-                )
-                self._send_json({
-                    "scores": scores,
-                    "model": srv.rerank_adapter.model_name,
-                    "count": len(scores),
-                }, 200)
-            except Exception as exc:
-                self._handle_exception(exc)
+            query, documents = validate_rerank_request(payload)
+            scores = srv.rerank_adapter.score_pairs(
+                query, documents, timeout_s=request_timeout,
+                cancel_event=cancel_event, deadline=deadline,
+            )
+            self._check_request_active(deadline, cancel_event)
+            result = {"scores": scores, "model": srv.rerank_adapter.model_name, "count": len(scores)}
+            if hasattr(srv.rerank_adapter, "get_descriptor"):
+                descriptor = srv.rerank_adapter.get_descriptor()
+                if isinstance(descriptor, dict):
+                    result["descriptor"] = descriptor
+                    if isinstance(descriptor.get("revision"), str):
+                        result["revision"] = descriptor["revision"]
+            self._check_request_active(deadline, cancel_event)
+            self._send_json(result, 200)
             return
-
-        # Generate endpoint
         if path == "/generate":
             if srv.generate_adapter is None:
                 self._send_json({"error": "Generate adapter not configured on this server"}, 501)
                 return
-            try:
-                prompt, max_tokens, temperature = validate_generate_request(payload)
-                req_timeout = parse_timeout(payload, timeout_header, default_timeout=120.0)
-                deadline = time.monotonic() + req_timeout
-                cancel_event = threading.Event()
-                text = srv.generate_adapter.submit_generate(
-                    prompt,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    timeout=req_timeout,
-                    cancel_event=cancel_event,
-                    deadline=deadline,
-                )
-                self._send_json({
-                    "text": text,
-                    "model": srv.generate_adapter.model_name,
-                }, 200)
-            except Exception as exc:
-                self._handle_exception(exc)
+            prompt, max_tokens, temperature = validate_generate_request(payload)
+            text = srv.generate_adapter.submit_generate(
+                prompt, max_tokens=max_tokens, temperature=temperature,
+                timeout=request_timeout, cancel_event=cancel_event, deadline=deadline,
+            )
+            self._check_request_active(deadline, cancel_event)
+            result = {"text": text, "model": srv.generate_adapter.model_name}
+            if hasattr(srv.generate_adapter, "get_descriptor"):
+                descriptor = srv.generate_adapter.get_descriptor()
+                if isinstance(descriptor, dict):
+                    result["descriptor"] = descriptor
+                    if isinstance(descriptor.get("revision"), str):
+                        result["revision"] = descriptor["revision"]
+            self._check_request_active(deadline, cancel_event)
+            self._send_json(result, 200)
             return
-
-        # Embed endpoint (/embed and /embed-bin)
         if srv.runtime is None:
             self._send_json({"error": "Embedding adapter not configured on this server"}, 501)
             return
-
-        try:
-            texts, requested_dims, is_query = validate_embed_request(payload)
-            # Use validated request timeout with 300.0s default — NEVER override to 60s
-            req_timeout = parse_timeout(payload, timeout_header, default_timeout=300.0)
-            deadline = time.monotonic() + req_timeout
-            cancel_event = threading.Event()
-
-            embeddings_arr = srv.runtime.submit_embed(
-                texts=texts,
-                requested_dims=requested_dims,
-                is_query=is_query,
-                timeout=req_timeout,
-                cancel_event=cancel_event,
-                deadline=deadline,
-            )
-
-            if path == "/embed-bin":
-                count, dims = embeddings_arr.shape
-                bin_data = encode_binary_embeddings(embeddings_arr, count, dims)
-                self._send_binary(bin_data, 200)
-            else:
-                if not np.all(np.isfinite(embeddings_arr)):
-                    raise ProtocolError("Embeddings contain NaN or Infinite values")
-                self._send_json({
-                    "embeddings": embeddings_arr.tolist(),
-                    "model": srv.runtime.model_name,
-                    "dims": embeddings_arr.shape[1],
-                }, 200)
-        except Exception as exc:
-            self._handle_exception(exc)
+        texts, requested_dims, is_query = validate_embed_request(payload)
+        operation = srv.runtime.submit_embed_result(
+            texts=texts, requested_dims=requested_dims, is_query=is_query,
+            timeout=request_timeout, cancel_event=cancel_event, deadline=deadline,
+        )
+        self._check_request_active(deadline, cancel_event)
+        if not isinstance(operation, EmbeddingResult):
+            raise ProtocolError("Embedding runtime did not return an operation-bound result")
+        embeddings = operation.embeddings
+        if not isinstance(embeddings, np.ndarray) or embeddings.ndim != 2 or embeddings.shape[0] != len(texts) or embeddings.shape[1] <= 0:
+            raise ProtocolError("Embedding result shape does not match request")
+        descriptor = operation.descriptor
+        if (not isinstance(descriptor, dict)
+                or type(descriptor.get("outputDimensions")) is not int
+                or descriptor["outputDimensions"] != embeddings.shape[1]):
+            raise ProtocolError("Embedding descriptor does not match output dimensions")
+        if path == "/embed-bin":
+            count, dims = embeddings.shape
+            self._send_binary(encode_binary_embeddings(embeddings, count, dims), 200, descriptor=descriptor)
+        else:
+            if not np.all(np.isfinite(embeddings)):
+                raise ProtocolError("Embeddings contain NaN or Infinite values")
+            self._send_json({
+                "embeddings": embeddings.tolist(), "model": descriptor["model"],
+                "dims": embeddings.shape[1], "descriptor": descriptor,
+            }, 200)
 
     def handle_one_request(self):
+        self._request_started_at = time.monotonic()
+        self.request_version = "HTTP/1.1"
+        self.requestline = ""
+        self.command = ""
+        self.rfile.set_limits(self._request_started_at + self.mlx_server.header_timeout_s, self.mlx_server.max_header_bytes)
         try:
             super().handle_one_request()
-        except (ConnectionError, OSError):
-            pass
+        except MLXServerError as exc:
+            self.close_connection = True
+            try:
+                self._handle_exception(exc)
+            except OSError:
+                pass
+        except OSError:
+            self.close_connection = True
+            if self._request_cancel_event is not None:
+                self._request_cancel_event.set()
 
 
 def start_server(
-    model_name: Optional[str] = "mlx-community/nomic-embed-text-v1.5",
+    model_name: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2",
     port: int = 8787,
     bind_host: str = "127.0.0.1",
     control_port: Optional[int] = None,
-    quantization: str = "bf16",
+    quantization: Optional[str] = None,
     dtype_str: str = "float32",
     max_length: int = 2048,
     preload: bool = True,
@@ -1129,6 +1116,7 @@ def start_server(
     control_request_timeout_s: float = 5.0,
     control_max_header_bytes: int = 16384,
     _before_serve_hook: Optional[Any] = None,
+    max_bulk_microbatch_tokens: int = 512,
 ) -> tuple[ThreadedMLXServer, threading.Thread]:
     """
     Initializes unified executor, residency manager, adapters, and starts both:
@@ -1137,6 +1125,8 @@ def start_server(
     Serves HTTP /health immediately in STARTING/LOADING state on both listeners
     so health probes do not hang or fail during cold model init.
     """
+    if isinstance(max_bulk_microbatch_tokens, bool) or not isinstance(max_bulk_microbatch_tokens, int) or max_bulk_microbatch_tokens <= 0:
+        raise InvalidInputError("max_bulk_microbatch_tokens must be a positive integer")
     server = ThreadedMLXServer(
         (bind_host, port),
         MLXHTTPRequestHandler,
@@ -1152,14 +1142,18 @@ def start_server(
     else:
         effective_control_port = control_port
 
-    control_server = MLXControlServer(
-        ("127.0.0.1", effective_control_port),
-        MLXControlRequestHandler,
-        mlx_server=server,
-        max_threads=control_max_threads,
-        request_timeout_s=control_request_timeout_s,
-        max_header_bytes=control_max_header_bytes,
-    )
+    try:
+        control_server = MLXControlServer(
+            ("127.0.0.1", effective_control_port),
+            MLXControlRequestHandler,
+            mlx_server=server,
+            max_threads=control_max_threads,
+            request_timeout_s=control_request_timeout_s,
+            max_header_bytes=control_max_header_bytes,
+        )
+    except BaseException:
+        server.server_close()
+        raise
     server.control_server = control_server
     server.control_port = control_server.server_address[1]
 
@@ -1168,8 +1162,14 @@ def start_server(
     t_ctrl = threading.Thread(target=control_server.serve_forever, daemon=True, name="MLX-Control-Serve")
     server.t_http = t_http
     server.t_ctrl = t_ctrl
-    t_http.start()
-    t_ctrl.start()
+    try:
+        t_http.start()
+        t_ctrl.start()
+    except BaseException:
+        server.server_close()
+        if t_http.ident is not None:
+            t_http.join(timeout=1.0)
+        raise
 
     def _init_and_coordinate():
         try:
@@ -1199,6 +1199,7 @@ def start_server(
                     dtype_str=dtype_str,
                     max_length=max_length,
                     max_batch_tokens=max_batch_tokens,
+                    max_bulk_microbatch_tokens=max_bulk_microbatch_tokens,
                     executor=executor,
                     model_manager=model_manager,
                     lazy_load=not preload,
@@ -1286,5 +1287,11 @@ def start_server(
         server.stop()
 
     t = threading.Thread(target=_init_and_coordinate, daemon=True, name="MLX-Init-Coordinator")
-    t.start()
+    try:
+        t.start()
+    except BaseException:
+        server.server_close()
+        t_http.join(timeout=1.0)
+        t_ctrl.join(timeout=1.0)
+        raise
     return server, t

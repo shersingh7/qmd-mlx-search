@@ -13,43 +13,92 @@ export type EmbeddingBackendType = "mlx" | "gguf";
 export type PoolingStrategy = "mean" | "cls" | "last_token" | "none";
 
 export interface EmbeddingDescriptor {
-  version: 1;
-  backend: EmbeddingBackendType;
-  model: string;
-  revision?: string;
-  tokenizer?: string;
-  pooling: PoolingStrategy;
-  queryPrefix?: string;
-  docPrefix?: string;
-  nativeDimensions: number;
-  outputDimensions: number;
-  maxTokens: number;
-  normalized: boolean;
-  dtype?: string;
-  quantization?: string;
+  readonly version: 1;
+  readonly backend: EmbeddingBackendType;
+  readonly model: string;
+  readonly revision?: string;
+  readonly tokenizer?: string;
+  readonly pooling: PoolingStrategy;
+  readonly queryPrefix?: string;
+  readonly docPrefix?: string;
+  readonly nativeDimensions: number;
+  readonly outputDimensions: number;
+  readonly maxTokens: number;
+  readonly normalized: boolean;
+  readonly dtype?: string;
+  readonly quantization?: string;
+  /** Optional daemon capabilities; not part of the embedding space identity. */
+  readonly rerank?: Readonly<{ model?: string }>;
+  readonly generate?: Readonly<{ model?: string }>;
+}
+
+export const MAX_EMBEDDING_DIMENSIONS = 65_536;
+
+/** Validate untrusted descriptors and return a detached, immutable snapshot. */
+export function validateEmbeddingDescriptor(data: unknown): EmbeddingDescriptor {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Invalid embedding descriptor: expected an object");
+  }
+  const obj = data as Record<string, unknown>;
+  const invalid = (field: string): never => { throw new Error(`Invalid embedding descriptor: ${field}`); };
+  if (obj.version !== 1) invalid("version must be 1");
+  if (obj.backend !== "mlx" && obj.backend !== "gguf") invalid("unsupported backend");
+  if (typeof obj.model !== "string" || !obj.model.trim() || obj.model.length > 8192) invalid("model must be a nonempty string");
+  if (!["mean", "cls", "last_token", "none"].includes(obj.pooling as string)) invalid("unsupported pooling");
+  for (const field of ["nativeDimensions", "outputDimensions", "maxTokens"] as const) {
+    const value = obj[field];
+    const ceiling = field === "maxTokens" ? 16_777_216 : MAX_EMBEDDING_DIMENSIONS;
+    if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0 || value > ceiling) {
+      invalid(`${field} must be a positive bounded integer`);
+    }
+  }
+  if ((obj.outputDimensions as number) > (obj.nativeDimensions as number)) invalid("outputDimensions exceeds nativeDimensions");
+  if (typeof obj.normalized !== "boolean") invalid("normalized must be a boolean");
+  const snapshot: Record<string, unknown> = {
+    version: obj.version, backend: obj.backend, model: obj.model, pooling: obj.pooling,
+    nativeDimensions: obj.nativeDimensions, outputDimensions: obj.outputDimensions,
+    maxTokens: obj.maxTokens, normalized: obj.normalized,
+  };
+  for (const field of ["revision", "tokenizer", "queryPrefix", "docPrefix", "dtype", "quantization"] as const) {
+    if (obj[field] === undefined) continue;
+    if (typeof obj[field] !== "string" || obj[field].length > 16_384) invalid(`${field} must be a bounded string`);
+    snapshot[field] = obj[field];
+  }
+  for (const field of ["rerank", "generate"] as const) {
+    if (obj[field] === undefined) continue;
+    const capability = obj[field];
+    if (!capability || typeof capability !== "object" || Array.isArray(capability)) invalid(`${field} must be an object`);
+    const model = (capability as Record<string, unknown>).model;
+    if (model !== undefined && (typeof model !== "string" || !model.trim() || model.length > 8192)) invalid(`${field}.model must be a nonempty string`);
+    snapshot[field] = Object.freeze(model === undefined ? {} : { model });
+  }
+  return Object.freeze(snapshot) as unknown as EmbeddingDescriptor;
 }
 
 /**
  * Computes a deterministic SHA-256 fingerprint of the embedding space geometry.
- * Any difference in model, revision, pooling, prefixes, dimensions, or normalization
- * produces a completely different space ID.
+ * Includes truncation (maxTokens), not only vector geometry. Adding this field
+ * intentionally changes every pre-existing ID; old indexes require --rebuild.
  */
 export function computeEmbeddingSpaceId(descriptor: EmbeddingDescriptor): string {
+  validateEmbeddingDescriptor(descriptor);
   // Normalize fields that define vector space geometry
   const canonical = {
     v: descriptor.version,
     b: descriptor.backend,
-    m: descriptor.model.trim(),
-    t: descriptor.tokenizer?.trim() || "",
-    r: descriptor.revision?.trim() || "",
+    m: descriptor.model,
+    t: descriptor.tokenizer ?? "",
+    r: descriptor.revision ?? "",
     p: descriptor.pooling,
-    qp: descriptor.queryPrefix || "",
-    dp: descriptor.docPrefix || "",
+    // Missing prefixes use family defaults; explicit empty prefixes disable them.
+    qp: descriptor.queryPrefix ?? null,
+    dp: descriptor.docPrefix ?? null,
     nd: descriptor.nativeDimensions,
     od: descriptor.outputDimensions,
+    mt: descriptor.maxTokens,
     n: descriptor.normalized,
-    dt: descriptor.dtype?.trim() || "",
-    q: descriptor.quantization?.trim() || "",
+    dt: descriptor.dtype ?? "",
+    q: descriptor.quantization ?? "",
   };
 
   const json = JSON.stringify(canonical, Object.keys(canonical).sort());
@@ -121,8 +170,11 @@ export function formatQueryForDescriptor(query: string, descriptor: Partial<Embe
   if (isNomicEmbeddingModel(model)) {
     return `search_query: ${query}`;
   }
-  // Default embeddinggemma format
-  return `task: search result | query: ${query}`;
+  if (/embeddinggemma/i.test(model)) {
+    return `task: search result | query: ${query}`;
+  }
+  // Unknown encoders must not inherit another family's instruction template.
+  return query;
 }
 
 /**
@@ -139,6 +191,8 @@ export function formatDocForDescriptor(text: string, title?: string, descriptor?
   if (isNomicEmbeddingModel(model)) {
     return title ? `search_document: ${title}\n${text}` : `search_document: ${text}`;
   }
-  // Default embeddinggemma format
-  return `title: ${title || "none"} | text: ${text}`;
+  if (/embeddinggemma/i.test(model)) {
+    return `title: ${title || "none"} | text: ${text}`;
+  }
+  return title ? `${title}\n${text}` : text;
 }

@@ -100,6 +100,7 @@ beforeAll(async () => {
             embeddings,
             model: mockDescriptor.model,
             dims,
+            descriptor: { ...mockDescriptor, outputDimensions: dims },
           })
         );
         return;
@@ -115,16 +116,26 @@ beforeAll(async () => {
           Array.from({ length: dims }, (__, d) => (idx + 1) * 0.01 + d * 0.001)
         );
         const bin = encodeBinaryEmbeddings(embeddings, dims);
-        res.writeHead(200, { "Content-Type": "application/octet-stream" });
+        res.writeHead(200, {
+          "Content-Type": "application/octet-stream",
+          "X-QMD-Embedding-Descriptor": encodeURIComponent(JSON.stringify({ ...mockDescriptor, outputDimensions: dims })),
+        });
         res.end(bin);
         return;
       }
 
-      if (url.pathname === "/slow") {
-        setTimeout(() => {
+      if (url.pathname === "/slow/embed") {
+        const timer = setTimeout(() => {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: true }));
         }, 5000);
+        res.once("close", () => clearTimeout(timer));
+        return;
+      }
+
+      if (url.pathname === "/slow-body/embed") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write('{"embeddings":[');
         return;
       }
 
@@ -143,6 +154,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (server) {
+    server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
@@ -303,7 +315,16 @@ describe("MLX Client Functions", () => {
     const res = await embedWithMlx("slow", { url: `${serverUrl}/slow`, timeoutMs: 150 });
     const duration = Date.now() - start;
     expect(res).toBeNull();
+    expect(duration).toBeGreaterThanOrEqual(100); // proves this did not just get an immediate 404
     expect(duration).toBeLessThan(1000); // timed out rapidly, did not wait 5s
+  });
+
+  test("deadline includes a real stalled response body", async () => {
+    const start = Date.now();
+    const res = await embedWithMlx("slow", { url: `${serverUrl}/slow-body`, timeoutMs: 100 });
+    expect(res).toBeNull();
+    expect(Date.now() - start).toBeGreaterThanOrEqual(60);
+    expect(Date.now() - start).toBeLessThan(1000);
   });
 });
 

@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "runtime": "node v22.22.3",
+  "checks": [
+    "installed SDK/SQLite indexing and lexical retrieval",
+    "installed REST retrieval and foreign-origin rejection",
+    "installed MCP initialize and document retrieval",
+    "native fetch consumes SSE without complete-body buffering",
+    "partial upload bounded; 408 or fail-closed connection termination"
+  ],
+  "httpSupported": true,
+  "partialUploadMs": 85.179125
+}

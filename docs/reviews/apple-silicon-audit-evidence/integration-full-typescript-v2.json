@@ -1,0 +1,17 @@
+{
+  "label": "integration-full-typescript-v2",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--maxWorkers=2",
+    "--reporter=json",
+    "--outputFile=/Users/shersingh/.hermes/cache/scratch/qmd-audit/integration-full-typescript-v2-results.json",
+    "test/"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 1,
+  "elapsed_seconds": 71.564763417,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/integration-full-typescript-v2.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/integration-full-typescript-v2-64wpumgc"
+}

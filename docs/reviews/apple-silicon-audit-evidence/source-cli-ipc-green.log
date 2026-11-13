@@ -1,0 +1,106 @@
+{"command": ["node", "node_modules/vitest/vitest.mjs", "run", "test/audit-cli-ipc.test.ts", "test/cli.test.ts", "test/embed-outcome.test.ts", "--maxWorkers=2"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw"}
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/Users/shersingh/github/qmd-mlx-search[39m
+
+ [32m✓[39m test/audit-cli-ipc.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 479[2mms[22m[39m
+   [33m[2m✓[22m[39m parallel source CLIs work with long managed TMPDIR and unrelated cwd [33m 479[2mms[22m[39m
+[90mstderr[2m | test/embed-outcome.test.ts[2m > [22m[2mTask 2: Truthful Bulk Outcomes and Atomic Counters[2m > [22m[2mhigh error rate abort marks unattempted items as skipped, not failed
+[22m[39m⚠ Chunk hash1:0 returned empty embedding
+
+ [32m✓[39m test/embed-outcome.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1163[2mms[22m[39m
+   [33m[2m✓[22m[39m Task 2: Truthful Bulk Outcomes and Atomic Counters[2m > [22mCLI subprocess exits nonzero and prints truthful failure summary on partial/failed runs [33m 1123[2mms[22m[39m
+ [32m✓[39m test/cli.test.ts [2m([22m[2m92 tests[22m[2m)[22m[33m 59606[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Help[2m > [22mshows help with --help flag [33m 430[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Help[2m > [22mshows help with no arguments [33m 362[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Embed[2m > [22mrejects invalid --max-docs-per-batch [33m 343[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Embed[2m > [22mrejects invalid --max-batch-mb [33m 373[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22mshows embedded skill with --skill alias [33m 333[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22mshows skill help with -h [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22minstalls the skill into the current project [33m 325[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22minstalls globally and creates the Claude symlink with --yes [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22mskips Claude qmd symlink when .claude/skills already points to .agents/skills [33m 318[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Skill Commands[2m > [22mrefuses to overwrite an existing install without --force [33m 651[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Add Command[2m > [22madds files from current directory [33m 341[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Add Command[2m > [22madds files with custom glob pattern [33m 346[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Add Command[2m > [22mcan recreate collection with remove and add [33m 1020[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Status Command[2m > [22mshows index status [33m 747[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22msearches for documents with BM25 [33m 673[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22msearches with limit option [33m 681[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22msearches with all results option [33m 721[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns no results message for non-matching query [33m 798[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns empty JSON array for non-matching query with --json [33m 697[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns CSV header only for non-matching query with --csv [33m 677[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns empty XML container for non-matching query with --xml [33m 672[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns empty output for non-matching query with --md [33m 748[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns empty output for non-matching query with --files [33m 683[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns min-score threshold message for default CLI output [33m 675[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mreturns format-safe empty output when --min-score filters all results [33m 2026[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search Command[2m > [22mrequires query argument [33m 669[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Get Command[2m > [22mretrieves document content by path [33m 700[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Get Command[2m > [22mretrieves document from subdirectory [33m 980[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Get Command[2m > [22mhandles non-existent file [33m 750[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Multi-Get Command[2m > [22mretrieves multiple documents by pattern [33m 745[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Multi-Get Command[2m > [22mretrieves documents by comma-separated paths [33m 724[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Update Command[2m > [22mupdates all collections [33m 730[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Update Command[2m > [22mdeactivates stale docs when collection has zero matching files [33m 1916[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Add-Context Command[2m > [22madds context to a path [33m 338[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Add-Context Command[2m > [22mrequires path and text arguments [33m 339[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Cleanup Command[2m > [22mcleans up orphaned entries [33m 681[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Error Handling[2m > [22mhandles unknown command [33m 330[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Error Handling[2m > [22muses INDEX_PATH environment variable [33m 355[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Output Formats[2m > [22msearch with --json flag outputs JSON [33m 698[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Output Formats[2m > [22msearch with --files flag outputs file paths [33m 686[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Output Formats[2m > [22msearch output includes snippets by default [33m 695[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Search with Collection Filter[2m > [22mfilters search by collection name [33m 1047[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22madd global context with / [33m 691[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22mlist contexts [33m 1035[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22madd context to virtual path [33m 690[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22mremove global context [33m 1093[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22mremove virtual path context [33m 1042[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Context Management[2m > [22mfails to remove non-existent context [33m 724[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI ls Command[2m > [22mlists all collections [33m 714[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI ls Command[2m > [22mlists files in a collection [33m 690[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI ls Command[2m > [22mlists files with path prefix [33m 706[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI ls Command[2m > [22mlists files with virtual path [33m 687[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI ls Command[2m > [22mhandles non-existent collection [33m 699[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mlists collections [33m 698[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mremoves a collection [33m 1364[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles removing non-existent collection [33m 686[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles missing remove argument [33m 673[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles unknown subcommand [33m 694[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mrenames a collection [33m 1388[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles renaming non-existent collection [33m 692[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles renaming to existing collection name [33m 1390[2mms[22m[39m
+   [33m[2m✓[22m[39m CLI Collection Commands[2m > [22mhandles missing rename arguments [33m 1029[2mms[22m[39m
+   [33m[2m✓[22m[39m collection ignore patterns[2m > [22mignore patterns exclude matching files from indexing [33m 354[2mms[22m[39m
+   [33m[2m✓[22m[39m collection ignore patterns[2m > [22mignored files are not searchable [33m 349[2mms[22m[39m
+   [33m[2m✓[22m[39m collection ignore patterns[2m > [22mnon-ignored files are searchable [33m 354[2mms[22m[39m
+   [33m[2m✓[22m[39m collection ignore patterns[2m > [22mstatus shows ignore patterns [33m 346[2mms[22m[39m
+   [33m[2m✓[22m[39m collection ignore patterns[2m > [22mcollection without ignore indexes all files [33m 349[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch --json includes qmd:// path, docid, and context [33m 340[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch --files includes qmd:// path, docid, and context [33m 350[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch --csv includes qmd:// path, docid, and context [33m 341[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch --md includes docid and context [33m 334[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch --xml includes qmd:// path, docid, and context [33m 347[2mms[22m[39m
+   [33m[2m✓[22m[39m search output formats[2m > [22msearch default CLI format includes plain qmd:// path, docid, and context in non-TTY mode [33m 349[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with qmd://collection/path format [33m 341[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with collection/path format (no scheme) [33m 334[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with //collection/path format [33m 344[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with qmd:////collection/path format (extra slashes) [33m 339[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with path:line format [33m 346[2mms[22m[39m
+   [33m[2m✓[22m[39m get command path normalization[2m > [22mget with qmd://path:line format [33m 345[2mms[22m[39m
+   [33m[2m✓[22m[39m status and collection list hide filesystem paths[2m > [22mstatus does not show full filesystem paths [33m 395[2mms[22m[39m
+   [33m[2m✓[22m[39m status and collection list hide filesystem paths[2m > [22mcollection list does not show full filesystem paths [33m 343[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22mforeground HTTP server starts and responds to health check [33m 650[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22m--daemon writes PID file and starts server [33m 817[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22mstop kills daemon and removes PID file [33m 1682[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22mstop handles dead PID gracefully (cleans stale file) [33m 388[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22mlegacy PID-only records are refused without signalling or rewriting [33m 678[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22m--daemon rejects if already running [33m 1147[2mms[22m[39m
+   [33m[2m✓[22m[39m mcp http daemon[2m > [22m--daemon cleans stale PID file and starts fresh [33m 805[2mms[22m[39m
+[?25h
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m98 passed[39m[22m[90m (98)[39m
+[2m   Start at [22m 21:19:11
+[2m   Duration [22m 60.20s[2m (transform 232ms, setup 0ms, collect 711ms, tests 61.25s, environment 0ms, prepare 97ms)[22m
+

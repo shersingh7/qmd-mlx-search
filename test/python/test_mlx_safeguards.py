@@ -19,11 +19,13 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
 from scripts.qmd_mlx.adapters.tokenization import TokenizedBatch
+from scripts.qmd_mlx.adapters.embedding import BaseEmbeddingAdapter
+from types import SimpleNamespace
 from scripts.qmd_mlx.executor import GPUExecutor
 from scripts.qmd_mlx.model_manager import ModelResidencyManager
 from scripts.qmd_mlx.protocol import (
@@ -32,7 +34,7 @@ from scripts.qmd_mlx.protocol import (
     RequestCancelledError,
     WorkerUnavailableError,
 )
-from scripts.qmd_mlx.runtime import MLXEmbeddingRuntime
+from scripts.qmd_mlx.runtime import EmbeddingResult, MLXEmbeddingRuntime
 from scripts.qmd_mlx.server import (
     MLXHTTPRequestHandler,
     ServerState,
@@ -41,6 +43,28 @@ from scripts.qmd_mlx.server import (
 
 
 import requests
+
+
+class SafeguardEmbeddingAdapter(BaseEmbeddingAdapter):
+    """CPU fixture implementing the same verified publication as production."""
+
+    synthetic = True
+
+    def __init__(self, model_name, dims):
+        super().__init__(model_name, max_length=512)
+        self.fixture_dims = dims
+        self.estimated_memory_mb = 1.0
+
+    def load(self):
+        with self._init_lock:
+            if self.is_loaded():
+                return
+            tokenizer = SimpleNamespace(pad_token_id=0, encode=lambda text, **kw: [101, 102])
+            self._publish_loaded(
+                object(), tokenizer, tokenizer, {"hidden_size": self.fixture_dims},
+                "fixture-safeguards", "float32", "none", 0,
+            )
+            self.model_memory_mb = 1.0
 
 
 def get_ephemeral_port() -> int:
@@ -110,14 +134,17 @@ def test_control_path_responsive_during_inference_saturation():
         "backend": "mlx",
         "model": "test-embed-model",
         "nativeDimensions": 384,
+        "outputDimensions": 384,
     }
 
     # Simulate slow inference forwards (0.6s) for active requests
     def slow_submit_embed(texts, **kwargs):
         time.sleep(0.6)
-        return np.ones((len(texts), 384), dtype=np.float32)
+        return EmbeddingResult(
+            np.ones((len(texts), 384), dtype=np.float32), json.dumps(mock_runtime.get_descriptor.return_value),
+        )
 
-    mock_runtime.submit_embed.side_effect = slow_submit_embed
+    mock_runtime.submit_embed_result.side_effect = slow_submit_embed
     server.runtime = mock_runtime
     server.state = ServerState.READY
 
@@ -193,69 +220,22 @@ def test_stalled_gpu_kernel_deadline_timeout_and_lease_recovery():
     executor = GPUExecutor(max_queue_size=8)
     model_manager = ModelResidencyManager(executor)
 
-    class MockStalledAdapter:
-        model_name = "mock-stalled-model"
-        native_dims = 128
-        pooling_strategy = "mean"
-        model_params_b = 0.5
-        quantization = "bf16"
-        dtype_str = "float32"
-        max_length = 512
-
+    class MockStalledAdapter(SafeguardEmbeddingAdapter):
         def __init__(self):
-            self._loaded = True
+            super().__init__("mock-stalled-model", 128)
             self.stall_flag = True
 
-        def is_loaded(self):
-            return self._loaded
-
-        def get_descriptor(self, requested_dims=None):
-            return {
-                "backend": "mlx",
-                "model": self.model_name,
-                "nativeDimensions": self.native_dims,
-                "outputDimensions": requested_dims or self.native_dims,
-            }
-
-        def tokenize_texts(self, texts):
-            return TokenizedBatch(
-                token_ids=[[101, 102] for _ in texts],
-                lengths=[2 for _ in texts],
-                original_indices=list(range(len(texts))),
-                pad_token_id=0,
-                texts=texts,
-            )
-
-        def forward_batch(self, batch, requested_dims=None):
+        def forward_batch(self, tokenized_batch, requested_dims=None):
             if self.stall_flag:
                 # Simulate stalled GPU kernel operation
                 time.sleep(1.0)
-            return np.ones((len(batch), self.native_dims), dtype=np.float32)
-
-        def unload(self):
-            self._loaded = False
+            return np.ones((len(tokenized_batch), self.native_dims), dtype=np.float32)
 
     adapter = MockStalledAdapter()
-    runtime = MLXEmbeddingRuntime.__new__(MLXEmbeddingRuntime)
-    runtime.model_name = "mock-stalled-model"
-    runtime.adapter = adapter
-    runtime.executor = executor
-    runtime._owns_executor = False
-    runtime.model_manager = model_manager
-    runtime.max_concurrent_admissions = 4
-    runtime.max_in_flight_admission_bytes = 10 * 1024 * 1024
-    runtime._admission_lock = threading.Condition()
-    runtime._current_admitted_requests = 0
-    runtime._current_admitted_bytes = 0
-    runtime._shutting_down = False
-    runtime.start_time = time.time()
-    runtime.total_requests = 0
-    runtime.total_latency_ms = 0.0
-    runtime.compiled_shapes = set()
-    model_manager.register_adapter("embed", adapter)
-
-    from scripts.qmd_mlx.batching import BatchPlanner
-    runtime.batch_planner = BatchPlanner(max_batch_tokens=1000)
+    with patch("scripts.qmd_mlx.runtime.resolve_embedding_adapter", return_value=adapter):
+        runtime = MLXEmbeddingRuntime(
+            adapter.model_name, executor=executor, model_manager=model_manager, max_batch_tokens=1000,
+        )
 
     try:
         # Request 1: Stalled with short timeout budget (0.15s) -> must raise DeadlineExceededError
@@ -288,58 +268,19 @@ def test_request_cancellation_releases_admission_lease():
     executor = GPUExecutor(max_queue_size=8)
     model_manager = ModelResidencyManager(executor)
 
-    class MockCancellableAdapter:
-        model_name = "mock-cancellable"
-        native_dims = 64
-        pooling_strategy = "mean"
-        model_params_b = 0.1
-        quantization = "bf16"
-        dtype_str = "float32"
-        max_length = 512
+    class MockCancellableAdapter(SafeguardEmbeddingAdapter):
+        def __init__(self):
+            super().__init__("mock-cancellable", 64)
 
-        def is_loaded(self):
-            return True
-
-        def get_descriptor(self, requested_dims=None):
-            return {"backend": "mlx", "model": self.model_name}
-
-        def tokenize_texts(self, texts):
-            return TokenizedBatch(
-                token_ids=[[1, 2] for _ in texts],
-                lengths=[2 for _ in texts],
-                original_indices=list(range(len(texts))),
-                pad_token_id=0,
-                texts=texts,
-            )
-
-        def forward_batch(self, batch, requested_dims=None):
+        def forward_batch(self, tokenized_batch, requested_dims=None):
             time.sleep(0.5)
-            return np.ones((len(batch), self.native_dims), dtype=np.float32)
-
-        def unload(self):
-            pass
+            return np.ones((len(tokenized_batch), self.native_dims), dtype=np.float32)
 
     adapter = MockCancellableAdapter()
-    runtime = MLXEmbeddingRuntime.__new__(MLXEmbeddingRuntime)
-    runtime.model_name = "mock-cancellable"
-    runtime.adapter = adapter
-    runtime.executor = executor
-    runtime._owns_executor = False
-    runtime.model_manager = model_manager
-    runtime.max_concurrent_admissions = 2
-    runtime.max_in_flight_admission_bytes = 10 * 1024 * 1024
-    runtime._admission_lock = threading.Condition()
-    runtime._current_admitted_requests = 0
-    runtime._current_admitted_bytes = 0
-    runtime._shutting_down = False
-    runtime.start_time = time.time()
-    runtime.total_requests = 0
-    runtime.total_latency_ms = 0.0
-    runtime.compiled_shapes = set()
-    model_manager.register_adapter("embed", adapter)
-
-    from scripts.qmd_mlx.batching import BatchPlanner
-    runtime.batch_planner = BatchPlanner(max_batch_tokens=1000)
+    with patch("scripts.qmd_mlx.runtime.resolve_embedding_adapter", return_value=adapter):
+        runtime = MLXEmbeddingRuntime(
+            adapter.model_name, executor=executor, model_manager=model_manager, max_batch_tokens=1000,
+        )
 
     try:
         cancel_evt = threading.Event()
@@ -482,12 +423,7 @@ def test_cold_model_init_serves_health_immediately():
 
     def slow_resolve(*args, **kwargs):
         time.sleep(0.3)
-        mock_inst = MagicMock()
-        mock_inst.is_loaded.return_value = True
-        mock_inst.native_dims = 256
-        mock_inst.model_params_b = 0.5
-        mock_inst.model_memory_mb = 100.0
-        return mock_inst
+        return SafeguardEmbeddingAdapter("synthetic/slow-cold-model", 256)
 
     with patch("scripts.qmd_mlx.runtime.resolve_embedding_adapter", side_effect=slow_resolve):
         server, thread = start_server(

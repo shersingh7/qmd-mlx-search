@@ -1,0 +1,192 @@
+{
+  "scope": "Bounded real Metal synthetic encoder fixtures; not a large-model/corpus/soak qualification",
+  "profiles": 5,
+  "runtime_runs": 8,
+  "independent_reference_checks": 5,
+  "profiles_data": [
+    {
+      "profile": "rc-core-minilm-float32-512",
+      "model": "minilm",
+      "dtype": "float32",
+      "bulk_tokens": 512,
+      "runs": 2,
+      "bulk_p50_ms": [
+        85.81020848941989,
+        85.59085399610922
+      ],
+      "query_p50_ms": [
+        3.613687484175898,
+        3.1395834957947955
+      ],
+      "active_mib": 86.65285110473633,
+      "peak_mib": 177.58971786499023,
+      "reference_min_cosine": 0.9999998807907104,
+      "cleanup_zero": true,
+      "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+      "benchmark_sha256": "8ec241c1e1d07635009ca434a5a9808b1a487bd0bcd936c75b23acaaf32a217c",
+      "fixture_tokens": [
+        12,
+        67,
+        242,
+        35
+      ],
+      "limits": {
+        "metal_memory_bytes": 2147483648,
+        "metal_cache_bytes": 536870912
+      },
+      "versions": {
+        "mlx": "0.32.4",
+        "mlx-lm": "0.32.2",
+        "numpy": "2.5.4",
+        "transformers": "5.22.2"
+      }
+    },
+    {
+      "profile": "rc-core-minilm-float16-512",
+      "model": "minilm",
+      "dtype": "float16",
+      "bulk_tokens": 512,
+      "runs": 2,
+      "bulk_p50_ms": [
+        77.02704150869977,
+        77.8460415021982
+      ],
+      "query_p50_ms": [
+        3.729771007783711,
+        3.335854518809356
+      ],
+      "active_mib": 43.32642936706543,
+      "peak_mib": 129.97925567626953,
+      "reference_min_cosine": 0.9999990463256836,
+      "cleanup_zero": true,
+      "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+      "benchmark_sha256": "8ec241c1e1d07635009ca434a5a9808b1a487bd0bcd936c75b23acaaf32a217c",
+      "fixture_tokens": [
+        12,
+        67,
+        242,
+        35
+      ],
+      "limits": {
+        "metal_memory_bytes": 2147483648,
+        "metal_cache_bytes": 536870912
+      },
+      "versions": {
+        "mlx": "0.32.4",
+        "mlx-lm": "0.32.2",
+        "numpy": "2.5.4",
+        "transformers": "5.22.2"
+      }
+    },
+    {
+      "profile": "rc-core-minilm-float16-4096",
+      "model": "minilm",
+      "dtype": "float16",
+      "bulk_tokens": 4096,
+      "runs": 2,
+      "bulk_p50_ms": [
+        61.59541699162219,
+        61.92429149814416
+      ],
+      "query_p50_ms": [
+        2.4194584984797984,
+        2.2571040026377887
+      ],
+      "active_mib": 43.32642936706543,
+      "peak_mib": 379.67124366760254,
+      "reference_min_cosine": 0.9999990463256836,
+      "cleanup_zero": true,
+      "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+      "benchmark_sha256": "8ec241c1e1d07635009ca434a5a9808b1a487bd0bcd936c75b23acaaf32a217c",
+      "fixture_tokens": [
+        12,
+        67,
+        242,
+        35
+      ],
+      "limits": {
+        "metal_memory_bytes": 2147483648,
+        "metal_cache_bytes": 536870912
+      },
+      "versions": {
+        "mlx": "0.32.4",
+        "mlx-lm": "0.32.2",
+        "numpy": "2.5.4",
+        "transformers": "5.22.2"
+      }
+    },
+    {
+      "profile": "rc-core-minilm-bfloat16-512",
+      "model": "minilm",
+      "dtype": "bfloat16",
+      "bulk_tokens": 512,
+      "runs": 1,
+      "bulk_p50_ms": [
+        86.5118954970967
+      ],
+      "query_p50_ms": [
+        2.570270502474159
+      ],
+      "active_mib": 43.32642936706543,
+      "peak_mib": 129.97925567626953,
+      "reference_min_cosine": 0.9999473094940186,
+      "cleanup_zero": true,
+      "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+      "benchmark_sha256": "8ec241c1e1d07635009ca434a5a9808b1a487bd0bcd936c75b23acaaf32a217c",
+      "fixture_tokens": [
+        12,
+        67,
+        242,
+        35
+      ],
+      "limits": {
+        "metal_memory_bytes": 2147483648,
+        "metal_cache_bytes": 536870912
+      },
+      "versions": {
+        "mlx": "0.32.4",
+        "mlx-lm": "0.32.2",
+        "numpy": "2.5.4",
+        "transformers": "5.22.2"
+      }
+    },
+    {
+      "profile": "rc-core-bge-float16-512",
+      "model": "bge",
+      "dtype": "float16",
+      "bulk_tokens": 512,
+      "runs": 1,
+      "bulk_p50_ms": [
+        131.88012498721946
+      ],
+      "query_p50_ms": [
+        4.690145491622388
+      ],
+      "active_mib": 63.63355827331543,
+      "peak_mib": 190.90064239501953,
+      "reference_min_cosine": 0.9999992847442627,
+      "cleanup_zero": true,
+      "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+      "benchmark_sha256": "8ec241c1e1d07635009ca434a5a9808b1a487bd0bcd936c75b23acaaf32a217c",
+      "fixture_tokens": [
+        12,
+        67,
+        242,
+        35
+      ],
+      "limits": {
+        "metal_memory_bytes": 2147483648,
+        "metal_cache_bytes": 536870912
+      },
+      "versions": {
+        "mlx": "0.32.4",
+        "mlx-lm": "0.32.2",
+        "numpy": "2.5.4",
+        "transformers": "5.22.2"
+      }
+    }
+  ],
+  "fp16_active_allocation_reduction_pct": 49.999995597724464,
+  "fast_profile_bulk_throughput_ratio": 1.3876414102752659,
+  "fast_profile_latency_reduction_pct": 27.935272571490177
+}

@@ -1,0 +1,17 @@
+{
+  "label": "source-cli-ipc-green",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "test/audit-cli-ipc.test.ts",
+    "test/cli.test.ts",
+    "test/embed-outcome.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 60.478674375,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-green-k9kz87pw"
+}

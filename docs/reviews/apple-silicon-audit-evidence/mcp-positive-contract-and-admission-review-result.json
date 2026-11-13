@@ -1,0 +1,76 @@
+{
+  "before": {
+    "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts": "883d6e8200bf715b7f21f4be9fa809f77f0be3a6a5c0272187b305c99c97b961",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-request-ownership.test.ts": "c2c67466f5ada283d8600f385da834a3209b1f164a4ea78fca9898b4dc3427d3",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/quality-mcp-heldout-cancel.mjs": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997"
+  },
+  "positiveContract": [
+    {
+      "id": 0,
+      "duplicateStatus": 409,
+      "operationsBeforeCancellation": 1,
+      "originalSignalAborted": true,
+      "originalOperationSettled": true,
+      "downstreamSocketClosed": true,
+      "originalSocketClosedWithoutClientTimeout": true,
+      "reusedStatus": 200
+    },
+    {
+      "id": "",
+      "duplicateStatus": 409,
+      "operationsBeforeCancellation": 1,
+      "originalSignalAborted": true,
+      "originalOperationSettled": true,
+      "downstreamSocketClosed": true,
+      "originalSocketClosedWithoutClientTimeout": true,
+      "reusedStatus": 200
+    },
+    {
+      "id": 1,
+      "duplicateStatus": 409,
+      "operationsBeforeCancellation": 1,
+      "originalSignalAborted": true,
+      "originalOperationSettled": true,
+      "downstreamSocketClosed": true,
+      "originalSocketClosedWithoutClientTimeout": true,
+      "reusedStatus": 200
+    },
+    {
+      "id": "1",
+      "duplicateStatus": 409,
+      "operationsBeforeCancellation": 1,
+      "originalSignalAborted": true,
+      "originalOperationSettled": true,
+      "downstreamSocketClosed": true,
+      "originalSocketClosedWithoutClientTimeout": true,
+      "reusedStatus": 200
+    }
+  ],
+  "defects": [
+    {
+      "contract": "pending HTTP upload admission is bounded before body buffering",
+      "maxActiveRequests": 1,
+      "maxSessions": 1,
+      "admittedBlockedOperations": 1,
+      "simultaneousAdditionalUnfinishedUploadsRetained": 16,
+      "bytesReadAcrossUnfinishedUploads": 524288,
+      "overflowResponsesBeforeBodyDeadline": 0,
+      "finding": "Every partial MCP upload reached collectBody and retained bytes; neither session nor active-ID admission bounds pending uploads."
+    },
+    {
+      "contract": "global overflow rejected before allocation or mutation of existing sessions",
+      "maxSessions": 2,
+      "maxActiveRequests": 1,
+      "rejectedInitializeStatus": 503,
+      "unrelatedPreviouslyValidIdleSessionStatusAfterRejectedInitialize": 404,
+      "finding": "reserveSession evicts the unrelated idle session before ownership.reserve rejects global overflow."
+    }
+  ],
+  "after": {
+    "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts": "883d6e8200bf715b7f21f4be9fa809f77f0be3a6a5c0272187b305c99c97b961",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-request-ownership.test.ts": "c2c67466f5ada283d8600f385da834a3209b1f164a4ea78fca9898b4dc3427d3",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/quality-mcp-heldout-cancel.mjs": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997"
+  },
+  "sourceAndOriginalRedUnchanged": true,
+  "overall": "FAIL"
+}
