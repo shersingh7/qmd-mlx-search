@@ -43,6 +43,11 @@
         # One exact Node derivation supplies the runtime AND native addon headers.
         # The HTTP transport requires Node >=22; Bun is only the locked fetcher.
         nodejs = pkgs.nodejs_22;
+        # nixpkgs' wrapper hardcodes its own Node and npm_config_nodedir. Override
+        # both: a CLI --nodedir alone still compiled the addon against Node 24.
+        nodeGyp = (pkgs.node-gyp.override { inherit nodejs; }).overrideAttrs (_old: {
+          makeWrapperArgs = [ "--set npm_config_nodedir ${pkgs.lib.getDev nodejs}" ];
+        });
 
         source = pkgs.lib.cleanSourceWith {
           src = ./.;
@@ -124,7 +129,7 @@
           nativeBuildInputs = [
             nodejs
             pkgs.makeWrapper
-            pkgs.node-gyp
+            nodeGyp
             pkgs.python3
           ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
             pkgs.darwin.cctools

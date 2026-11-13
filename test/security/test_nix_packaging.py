@@ -64,6 +64,11 @@ class NixPackagingContracts(unittest.TestCase):
 
     def test_compiler_headers_and_wrapper_share_one_node(self):
         self.assertIn("nodejs = pkgs.nodejs_22", self.flake)
+        # nixpkgs node-gyp hardcodes both its interpreter and npm_config_nodedir.
+        # Merely putting Node 22 on PATH / passing --nodedir cannot override it.
+        self.assertIn("nodeGyp = (pkgs.node-gyp.override { inherit nodejs; }).overrideAttrs", self.flake)
+        self.assertIn("--set npm_config_nodedir ${pkgs.lib.getDev nodejs}", self.flake)
+        self.assertRegex(self.flake, r"nativeBuildInputs = \[[^]]*\bnodeGyp\b")
         self.assertIn("--nodedir=${pkgs.lib.getDev nodejs}", self.flake)
         self.assertIn("node-gyp rebuild --release", self.flake)
         self.assertIn("${nodejs}/bin/node scripts/build.mjs", self.flake)
