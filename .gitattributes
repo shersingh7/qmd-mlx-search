@@ -1,3 +1,7 @@
 
 # Use bd merge for beads JSONL files
 .beads/issues.jsonl merge=beads
+
+# Unified-diff blank context lines require a literal space. Preserve the exact
+# hash-pinned vendor patch; this exception does not apply to source/code files.
+finetune/vendor/accelerate/source.patch whitespace=-blank-at-eol

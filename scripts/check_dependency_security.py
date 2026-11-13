@@ -161,7 +161,7 @@ def collect(root: Path, alerts) -> list[dict]:
     return records
 
 
-def assess(alerts, records) -> dict:
+def assess(alerts, records, *, verified_patches=frozenset()) -> dict:
     validate_alerts(alerts)
     if not records:
         raise ValueError('An empty dependency graph cannot certify remediation')
@@ -172,28 +172,118 @@ def assess(alerts, records) -> dict:
         ecosystem = package['ecosystem']
         name = canonical(ecosystem, package['name'])
         instances = [r for r in records if r['ecosystem'] == ecosystem and canonical(ecosystem, r['name']) == name]
-        bad = [r for r in instances if affected(ecosystem, r['version'], vulnerability['vulnerable_version_range'])]
-        rows.append({'number': alert['number'], 'ghsa': alert['security_advisory']['ghsa_id'],
+        ghsa = alert['security_advisory']['ghsa_id']
+        effective_range = vulnerability['vulnerable_version_range']
+        source_review = None
+        # Source/wheel inspection found gaps in two advisory bounds. A clean
+        # registry range response must not override these retained findings.
+        if ghsa == 'GHSA-x9r9-c232-4q39':
+            if (ecosystem, name) != ('pip', 'transformers'):
+                raise ValueError('Source-reviewed advisory/package mismatch')
+            effective_range = '>=4.49.0, <5.17.0'
+            source_review = 'Transformers 5.17.0 is the verified safe floor; the recorded 5.8.1 upper bound is insufficient.'
+        bad = [r for r in instances if affected(ecosystem, r['version'], effective_range)]
+        status = 'vulnerable' if bad else 'outside_affected_range' if instances else 'not_in_graph'
+        if ghsa == 'GHSA-4j2p-28q2-5m79':
+            if (ecosystem, name) != ('pip', 'accelerate'):
+                raise ValueError('Source-reviewed advisory/package mismatch')
+            source_review = 'Official Accelerate 1.15.0 remains vulnerable; a separately verified source-bound patch is mandatory.'
+            bad = [r for r in instances if (r['version'], r['source'], r.get('locator')) not in verified_patches]
+            status = ('unverified_source_mitigation' if bad else
+                      'verified_patched_artifact' if instances else 'not_in_graph')
+        rows.append({'number': alert['number'], 'ghsa': ghsa,
                      'package_original': package['name'], 'ecosystem': ecosystem,
                      'severity': vulnerability['severity'], 'vulnerable_range': vulnerability['vulnerable_version_range'],
+                     'effective_range': effective_range, 'source_review': source_review,
                      'first_patched_version': (vulnerability.get('first_patched_version') or {}).get('identifier'),
-                     'instances': instances, 'vulnerable_instances': bad,
-                     'status': 'vulnerable' if bad else 'outside_affected_range' if instances else 'not_in_graph'})
+                     'instances': instances, 'vulnerable_instances': bad, 'status': status})
     return {'passed': not any(r['vulnerable_instances'] for r in rows), 'alerts_checked': len(rows),
             'affected_alerts': sum(bool(r['vulnerable_instances']) for r in rows), 'alerts': rows}
 
 
-def request_osv(queries):
+OSV_URL = 'https://api.osv.dev/v1/querybatch'
+NPM_AUDIT_URL = 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk'
+MAX_AUDIT_RESPONSE_BYTES = 8 * 1024 * 1024
+
+
+def invalid_json_constant(value):
+    raise ValueError(f'Non-JSON numeric constant: {value}')
+
+
+def request_audit_json(url, payload):
+    """Bound and strictly decode the actual response; never trust CLI exit 0."""
     for attempt in range(3):
         try:
-            response = requests.post('https://api.osv.dev/v1/querybatch', json={'queries': queries}, timeout=(10, 60))
-            response.raise_for_status()
-            return response.json()
+            with requests.post(url, json=payload, timeout=(10, 60), stream=True,
+                               allow_redirects=False) as response:
+                if response.status_code != 200:
+                    raise requests.HTTPError(f'Audit HTTP status {response.status_code}')
+                media_type = response.headers.get('Content-Type', '').split(';', 1)[0].strip().lower()
+                # npm's bulk endpoint can omit Content-Type; the body/schema
+                # remain mandatory. An explicitly non-JSON media type is rejected.
+                if media_type and media_type != 'application/json' and not (
+                    media_type.startswith('application/') and media_type.endswith('+json')
+                ):
+                    raise ValueError('Audit response is not declared JSON')
+                body = bytearray()
+                for chunk in response.iter_content(65536):
+                    if len(body) + len(chunk) > MAX_AUDIT_RESPONSE_BYTES:
+                        raise ValueError('Audit response exceeds the bounded response budget')
+                    body.extend(chunk)
+                # Empty bodies, duplicate keys and NaN/Infinity must not become {}.
+                return json.loads(body, object_pairs_hook=unique_mapping,
+                                  parse_constant=invalid_json_constant)
         except (requests.RequestException, ValueError):
             if attempt == 2:
                 raise
             time.sleep(2 ** attempt)
     raise RuntimeError('Unreachable')
+
+
+def request_osv(queries):
+    return request_audit_json(OSV_URL, {'queries': queries})
+
+
+def request_npm(packages):
+    return request_audit_json(NPM_AUDIT_URL, packages)
+
+
+def scan_npm(records):
+    """Scan every locked npm version against the documented bulk advisory API."""
+    packages = {}
+    for record in records:
+        if record['ecosystem'] == 'npm':
+            NpmVersion(record['version'])
+            packages.setdefault(canonical('npm', record['name']), set()).add(record['version'])
+    if not packages:
+        raise ValueError('Cannot audit an empty npm graph')
+    query = {name: sorted(versions) for name, versions in sorted(packages.items())}
+    payload = request_npm(query)
+    if not isinstance(payload, dict) or 'error' in payload or set(payload) - set(query):
+        raise ValueError('Unavailable/invalid npm bulk advisory response')
+    findings = []
+    # The live bulk API binds names through the map key and may omit the
+    # redundant advisory.name, despite the CLI documentation listing it.
+    required = {'url', 'id', 'severity', 'vulnerable_versions', 'title'}
+    for name, advisories in payload.items():
+        if not isinstance(advisories, list):
+            raise ValueError('Malformed npm advisory list')
+        for advisory in advisories:
+            if (not isinstance(advisory, dict) or not required <= set(advisory)
+                    or 'error' in advisory or ('name' in advisory and advisory['name'] != name)
+                    or type(advisory['id']) is not int or advisory['id'] <= 0
+                    or any(not isinstance(advisory[key], str) or not advisory[key]
+                           for key in ('url', 'title', 'severity', 'vulnerable_versions'))
+                    or advisory['severity'] not in {'info', 'low', 'moderate', 'medium', 'high', 'critical'}):
+                raise ValueError('Malformed npm bulk advisory')
+            versions = [version for version in query[name]
+                        if affected('npm', version, advisory['vulnerable_versions'])]
+            if versions:
+                findings.append({'package': name, 'versions': versions,
+                                 'id': advisory['id'], 'severity': advisory['severity'],
+                                 'range': advisory['vulnerable_versions'], 'url': advisory['url']})
+    return {'passed': not findings, 'unique_packages': len(query),
+            'unique_versions': sum(map(len, query.values())), 'affected': findings}
 
 
 def scan_osv(records):
@@ -206,13 +296,24 @@ def scan_osv(records):
     for start in range(0, len(queries), 100):
         batch = queries[start:start + 100]
         payload = request_osv(batch)
-        if not isinstance(payload, dict) or payload.get('error') or not isinstance(payload.get('results'), list) or len(payload['results']) != len(batch):
+        if (not isinstance(payload, dict) or set(payload) != {'results'}
+                or not isinstance(payload['results'], list) or len(payload['results']) != len(batch)):
             raise ValueError('Incomplete/unavailable OSV batch response')
         for query, result in zip(batch, payload['results'], strict=True):
-            if not isinstance(result, dict) or result.get('error') or result.get('next_page_token'):
+            # {} is OSV's documented clean result. Arbitrary objects/errors are not.
+            if not isinstance(result, dict) or set(result) - {'vulns', 'next_page_token'}:
+                raise ValueError('Invalid OSV result schema')
+            if 'next_page_token' in result and (
+                not isinstance(result['next_page_token'], str) or result['next_page_token']
+            ):
                 raise ValueError('Unavailable/paginated OSV result cannot certify a clean scan')
             vulns = result.get('vulns', [])
-            if not isinstance(vulns, list) or any(not isinstance(v, dict) or not isinstance(v.get('id'), str) for v in vulns):
+            if (not isinstance(vulns, list) or any(
+                not isinstance(v, dict) or set(v) - {'id', 'modified'}
+                or not isinstance(v.get('id'), str) or not v['id'].strip()
+                or ('modified' in v and (not isinstance(v['modified'], str) or not v['modified']))
+                for v in vulns
+            )):
                 raise ValueError('Malformed OSV vulnerabilities')
             if vulns:
                 findings.append({'query': query, 'advisories': [v['id'] for v in vulns]})
@@ -232,10 +333,11 @@ def main(argv=None):
     parser.add_argument('--alerts', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--online', action='store_true', help='Also scan every unique resolved package/version through OSV')
+    parser.add_argument('--npm-online', action='store_true', help='Also validate a fresh npm bulk advisory response for all locked npm versions')
     args = parser.parse_args(argv)
     report = {'passed': False, 'created_at': datetime.now(timezone.utc).isoformat()}
     try:
-        source = args.alerts or args.repo / 'docs/security/dependency-remediation/alerts-before.json'
+        source = args.alerts or args.repo / 'docs/security/dependency-remediation/alerts-current.json'
         alerts = json.loads(source.read_text(), object_pairs_hook=unique_mapping)
         records = collect(args.repo, alerts)
         report.update(assess(alerts, records))
@@ -243,6 +345,9 @@ def main(argv=None):
         if args.online:
             report['osv'] = scan_osv(records)
             report['passed'] = report['passed'] and report['osv']['passed']
+        if args.npm_online:
+            report['npm'] = scan_npm(records)
+            report['passed'] = report['passed'] and report['npm']['passed']
     except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError, requests.RequestException) as error:
         report.update(passed=False, error=f'{type(error).__name__}: {error}')
     if args.output:

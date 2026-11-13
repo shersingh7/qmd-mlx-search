@@ -1,0 +1,18 @@
+{
+  "captured_at": "2026-11-13T16:16:31.549092+00:00",
+  "open_rest_count": 262,
+  "open_graphql_count": 262,
+  "severity": {
+    "medium": 122,
+    "high": 93,
+    "low": 30,
+    "critical": 17
+  },
+  "original_baseline_count": 260,
+  "new_ids": [
+    292,
+    293
+  ],
+  "push_banner_observed_count": 263,
+  "count_note": "REST full pagination and GraphQL agree; the preceding push banner reported a different count. No unenumerated advisory is invented or silently ignored."
+}

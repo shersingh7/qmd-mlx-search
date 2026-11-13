@@ -41,6 +41,26 @@ class DependencySecurityTests(unittest.TestCase):
         self.assertEqual(result['alerts'][0]['number'], 1)
         self.assertIsNone(result['alerts'][0]['first_patched_version'])
 
+    def test_source_review_rejects_advisory_bound_blind_spots(self):
+        transformer = alert(package='transformers', ecosystem='pip', vulnerable='>=4.49.0, <=5.8.1')
+        transformer['security_advisory']['ghsa_id'] = 'GHSA-x9r9-c232-4q39'
+        row = {'ecosystem': 'pip', 'name': 'transformers', 'version': '5.16.0', 'source': 'fixture'}
+        self.assertFalse(security.assess([transformer], [row])['passed'])
+        row['version'] = '5.17.0'
+        self.assertTrue(security.assess([transformer], [row])['passed'])
+        accelerate = alert(package='accelerate', ecosystem='pip', vulnerable='<=1.14.0')
+        accelerate['security_advisory']['ghsa_id'] = 'GHSA-4j2p-28q2-5m79'
+        for version in ('1.14.0', '1.15.0', '1.15.0+qmd.1'):
+            with self.subTest(version=version):
+                row = {'ecosystem': 'pip', 'name': 'accelerate', 'version': version,
+                       'source': 'finetune/uv.lock', 'locator': '0'}
+                result = security.assess([accelerate], [row])
+                self.assertFalse(result['passed'], 'A version label alone is not a source mitigation')
+                self.assertEqual(result['alerts'][0]['status'], 'unverified_source_mitigation')
+        proof = {('1.15.0+qmd.1', 'finetune/uv.lock', '0')}
+        self.assertTrue(security.assess([accelerate], [row], verified_patches=proof)['passed'])
+        self.assertFalse(security.assess([accelerate], [row, {**row, 'locator': '1'}], verified_patches=proof)['passed'])
+
     def test_every_version_and_both_lock_graphs_are_checked(self):
         rows = [{'ecosystem': 'npm', 'name': 'example', 'version': version, 'source': source}
                 for source, version in [('pnpm-lock.yaml', '2.0.0'), ('bun.lock', '1.0.0')]]
@@ -114,7 +134,12 @@ class DependencySecurityTests(unittest.TestCase):
     def test_osv_error_or_incomplete_response_is_not_clean(self):
         package = [{'ecosystem': 'npm', 'name': 'example', 'version': '2.0.0', 'source': 'fixture'}]
         for payload in ({'error': 'unavailable'}, {'results': []}, {'results': [{'error': 'bad query'}]},
-                        {'results': [{'next_page_token': 'more'}]}, {'results': [None]}):
+                        {'results': [{'next_page_token': 'more'}]}, {'results': [None]},
+                        {'error': {}, 'results': [{}]}, {'error': None, 'results': [{}]},
+                        {'results': [{'error': {}}]}, {'results': [{'error': None}]},
+                        {'results': [{'unexpected': 'not-an-osv-query-result'}]},
+                        {'results': [{'vulns': None}]}, {'results': [{'next_page_token': False}]},
+                        {'results': [{}], 'unexpected': 'not-an-osv-batch'}):
             with self.subTest(payload=payload), patch.object(security, 'request_osv', return_value=payload), self.assertRaises(ValueError):
                 security.scan_osv(package)
 
@@ -132,6 +157,111 @@ class DependencySecurityTests(unittest.TestCase):
         self.assertIn('2.15.0', [q['version'] for q in captured])
         self.assertFalse(result['passed'])
         self.assertEqual(len(result['affected']), 1)
+
+
+class AuditProviderTests(unittest.TestCase):
+    rows = [{'ecosystem': 'npm', 'name': 'example', 'version': '2.0.0', 'source': 'fixture'}]
+
+    def test_npm_schema_failures_are_not_clean(self):
+        for payload in (None, [], {'error': {}}, {'error': None}, {'unexpected': []},
+                        {'example': {}}, {'example': [None]}, {'example': [{'id': 1}]}):
+            with self.subTest(payload=payload), patch.object(security, 'request_npm', return_value=payload), self.assertRaises(ValueError):
+                security.scan_npm(self.rows)
+
+    def test_npm_deduplicates_both_locks_but_keeps_every_version(self):
+        rows = self.rows + [{'ecosystem': 'npm', 'name': 'example', 'version': '1.0.0', 'source': source}
+                            for source in ('pnpm-lock.yaml', 'bun.lock')]
+        advisory = {'name': 'example', 'id': 1, 'title': 'Synthetic regression fixture',
+                    'url': 'https://example.invalid/advisory', 'severity': 'low',
+                    'vulnerable_versions': '< 2.0.0'}
+        with patch.object(security, 'request_npm', return_value={'example': [advisory]}) as request:
+            result = security.scan_npm(rows)
+        request.assert_called_once_with({'example': ['1.0.0', '2.0.0']})
+        self.assertFalse(result['passed'])
+        self.assertEqual(result['affected'][0]['versions'], ['1.0.0'])
+        self.assertEqual(result['unique_versions'], 2)
+        with patch.object(security, 'request_npm', return_value={}):
+            self.assertTrue(security.scan_npm(self.rows)['passed'])
+        with self.assertRaises(ValueError):
+            security.scan_npm([])
+
+    def test_npm_accepts_map_bound_names_but_not_mismatched_names(self):
+        advisory = {'id': 1, 'title': 'Synthetic fixture matching the live API shape',
+                    'url': 'https://example.invalid/advisory', 'severity': 'high',
+                    'vulnerable_versions': '<3.0.0'}
+        with patch.object(security, 'request_npm', return_value={'example': [advisory]}):
+            self.assertFalse(security.scan_npm(self.rows)['passed'])
+        advisory['name'] = 'not-the-requested-package'
+        with patch.object(security, 'request_npm', return_value={'example': [advisory]}), self.assertRaises(ValueError):
+            security.scan_npm(self.rows)
+
+    def test_real_http_empty_malformed_error_and_duplicate_bodies_fail_closed(self):
+        # Real HTTP responses, not a mocked CLI success code or invented service result.
+        import http.server
+        import socketserver
+        import threading
+
+        class NumericServer(http.server.HTTPServer):
+            def server_bind(self):
+                socketserver.TCPServer.server_bind(self)
+                self.server_name = str(self.server_address[0])
+                self.server_port = self.server_address[1]
+
+        cases = [(200, b'', False), (200, b'not-json', False),
+                 (200, b'{"error":{}}', False), (200, b'{"error":"unavailable"}', False),
+                 (200, b'{"example":[],"example":[]}', False),
+                 (200, b'{"example":NaN}', False), (503, b'{}', False), (200, b'{}', True)]
+        for status, body, valid in cases:
+            captured = []
+            class Handler(http.server.BaseHTTPRequestHandler):
+                def do_POST(self):
+                    self.connection.settimeout(2)
+                    request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                    captured.append((self.path, request))
+                    self.send_response(status)
+                    # The live npm bulk endpoint also omits Content-Type.
+                    self.send_header('Content-Length', str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                def log_message(self, format, *args):
+                    pass
+            with self.subTest(status=status, body=body), NumericServer(('127.0.0.1', 0), Handler) as server:
+                thread = threading.Thread(target=lambda: server.serve_forever(poll_interval=0.01), daemon=True)
+                thread.start()
+                try:
+                    url = f'http://127.0.0.1:{server.server_port}/-/npm/v1/security/advisories/bulk'
+                    with patch.object(security, 'NPM_AUDIT_URL', url), patch.object(security.time, 'sleep'):
+                        if valid:
+                            self.assertTrue(security.scan_npm(self.rows)['passed'])
+                        else:
+                            with self.assertRaises((ValueError, security.requests.RequestException)):
+                                security.scan_npm(self.rows)
+                    self.assertGreaterEqual(len(captured), 1)
+                    self.assertLessEqual(len(captured), 3)
+                    self.assertTrue(all(path == '/-/npm/v1/security/advisories/bulk' and
+                                        payload == {'example': ['2.0.0']} for path, payload in captured))
+                finally:
+                    server.shutdown()
+                    thread.join(timeout=3)
+                    self.assertFalse(thread.is_alive())
+
+    def test_cli_unavailable_providers_write_failed_receipts(self):
+        import contextlib
+        import io
+        for flag, method, response in (
+            ('--online', 'request_osv', {'error': {}, 'results': [{}]}),
+            ('--online', 'request_osv', {'results': [{'unexpected': 'wrong schema'}]}),
+            ('--npm-online', 'request_npm', {'error': {}}),
+        ):
+            with self.subTest(flag=flag, response=response), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                alerts = root / 'synthetic-alerts.json'
+                alerts.write_text(json.dumps([alert()]))
+                output = root / 'receipt.json'
+                with patch.object(security, 'collect', return_value=self.rows), patch.object(security, method, return_value=response), contextlib.redirect_stdout(io.StringIO()):
+                    code = security.main(['--repo', str(root), '--alerts', str(alerts), flag, '--output', str(output)])
+                self.assertEqual(code, 1)
+                self.assertFalse(json.loads(output.read_text())['passed'])
 
 
 if __name__ == '__main__':

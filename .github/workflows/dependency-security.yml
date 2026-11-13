@@ -14,14 +14,19 @@ permissions:
 jobs:
   dependency-safety:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
-      TMPDIR: ${{ runner.temp }}
-      UV_CACHE_DIR: ${{ runner.temp }}/uv-security-cache
       UV_PYTHON_DOWNLOADS: never
       HF_HUB_OFFLINE: '1'
       TRANSFORMERS_OFFLINE: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Configure managed temporary paths
+        # runner is unavailable in job-level env; RUNNER_TEMP is trusted runner state.
+        run: |
+          printf 'TMPDIR=%s\nUV_CACHE_DIR=%s/uv-security-cache\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: '22.22.3'
@@ -44,8 +49,9 @@ jobs:
         run: uv lock --check --no-build --project finetune
       - name: Reject every retained vulnerable dependency instance
         run: python scripts/check_dependency_security.py --output "$RUNNER_TEMP/dependency-baseline.json"
-      - name: Fresh npm registry audit (all severities)
-        run: bun audit --audit-level=low
+      - name: Fresh schema-validated npm registry audit (all severities)
+        # Bun 1.3.8 can exit 0 on empty/error responses; validate the actual API body.
+        run: python scripts/check_dependency_security.py --npm-online --output "$RUNNER_TEMP/dependency-npm.json"
       - name: Fresh OSV scan across all resolved platforms and versions
         run: python scripts/check_dependency_security.py --online --output "$RUNNER_TEMP/dependency-online.json"
       - name: Preserve dependency scan receipts

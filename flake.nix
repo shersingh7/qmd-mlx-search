@@ -68,7 +68,8 @@
           # The old CI 'got' values describe a different graph and only a
           # production tree, NOT this build+production fixed-output layout.
           # These placeholders deliberately fail closed with Nix's real hash.
-          x86_64-linux = pkgs.lib.fakeHash;
+          # Measured by run 43452002860 at 093c9f7 (exact package.json + bun.lock).
+          x86_64-linux = "sha256-lYii6J60m9lQmhDmCjP4lYmEdDxkExke+XIrRN7Vuho=";
           aarch64-darwin = pkgs.lib.fakeHash;
         };
 
@@ -158,7 +159,7 @@
             cp package.json LICENSE CHANGELOG.md $out/lib/qmd/
 
             # Do not consult a consumer's Bun/Node selection for a Node-ABI addon.
-            # Node's bundled SQLite supports sqlite-vec without loader-path hacks.
+            # better-sqlite3's bundled SQLite loads sqlite-vec without loader-path hacks.
             makeWrapper ${nodejs}/bin/node $out/bin/qmd \
               --add-flags "$out/lib/qmd/dist/cli/qmd.js" \
               --prefix PATH : ${pkgs.lib.makeBinPath [ nodejs ]}
