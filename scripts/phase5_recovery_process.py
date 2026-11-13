@@ -10,6 +10,12 @@ setsid can escape observation even before our first sample. They always return
 an explicit uncontained-command failure. The canonical worker instead runs with
 OS-enforced no-fork containment (Seatbelt on Darwin, seccomp on Linux). Threads,
 SQLite and HTTP are supported; subprocesses and daemonization are not.
+
+Bootstrap is not launch permission. Before any fork, the supervisor advertises
+its own session identity and waits for explicit live-parent admission (S).
+Cancellation/EOF wins over queued admission. A runner that never sent S can
+safely kill/reap its exact supervisor handle and prove that no worker existed,
+even when the interpreter never completed bootstrap or sent any protocol.
 """
 from __future__ import annotations
 
@@ -182,15 +188,55 @@ def main():
     session_id = os.getsid(0)
     if session_id != os.getpid() or os.getpgrp() != os.getpid():
         raise RuntimeError("Recovery supervisor must own a fresh anchored session")
+    stop_signal = [False]
+    signal.signal(signal.SIGTERM, lambda *_: stop_signal.__setitem__(0, True))
+    signal.signal(signal.SIGINT, lambda *_: stop_signal.__setitem__(0, True))
+
+    def not_started(reason):
+        send({"type": "not-started", "supervisorPid": os.getpid(),
+              "sessionId": session_id, "reason": reason})
     try:
         executable_stat = os.stat(command[0])
         if not stat.S_ISREG(executable_stat.st_mode) or not os.access(command[0], os.X_OK):
             raise PermissionError("worker executable is not an executable regular file")
     except OSError as error:
         send({"type": "spawn-error", "error": f"Recovery worker spawn failed: {error}"})
-        send({"type": "cleanup", "childReaped": True, "groupTerminated": True,
-              "sessionTerminated": True, "containmentVerified": False, "sigkillUsed": False, "processGroups": []})
+        not_started("spawn-error")
         return
+
+    os.set_blocking(0, False)
+    admission_deadline = time.monotonic() + timeout
+    send({"type": "prepared", "supervisorPid": os.getpid(), "sessionId": session_id})
+    while True:
+        if stop_signal[0] or _control_broken:
+            not_started("parent-interrupted")
+            return
+        remaining = admission_deadline - time.monotonic()
+        if remaining <= 0:
+            not_started("admission-timeout")
+            return
+        readable, _, _ = select.select([0], [], [], min(remaining, 0.010))
+        if not readable:
+            continue
+        data = os.read(0, 4096)
+        if not data:
+            not_started("parent-channel-closed")
+            return
+        if b"T" in data or b"K" in data:
+            not_started("cancelled")
+            return
+        if data != b"S":
+            raise RuntimeError("Invalid recovery launch admission")
+        # Drain cancellation/EOF already queued behind admission before fork.
+        # The parent never sends S once its original execution budget expires.
+        try:
+            pending = os.read(0, 4096)
+        except BlockingIOError:
+            pending = None
+        if pending is not None or stop_signal[0] or _control_broken:
+            not_started("cancelled")
+            return
+        break
 
     launch_read, launch_write = os.pipe()
     worker = os.fork()
@@ -238,9 +284,6 @@ def main():
     worker_term_sent = False
     worker_kill_sent = False
     started = time.monotonic()
-    stop_signal = [False]
-    signal.signal(signal.SIGTERM, lambda *_: stop_signal.__setitem__(0, True))
-    signal.signal(signal.SIGINT, lambda *_: stop_signal.__setitem__(0, True))
 
     def add_error(message):
         if message not in errors:

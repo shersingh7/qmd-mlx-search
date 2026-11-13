@@ -33,7 +33,7 @@ function runNative(args: string[]): { records: Evidence[]; stderr: string } {
     expect(result.signal, diagnostics).toBeNull();
     expect(result.status, diagnostics).toBe(0);
     const records = result.stdout.split("\n").filter(line => line.startsWith("{\"evidence\":")).map(line => JSON.parse(line) as Evidence);
-    const runtime = records.find(record => record.evidence === "native-recovery-runtime" || record.evidence === "recovery-tree-native-runtime");
+    const runtime = records.find(record => ["native-recovery-runtime", "recovery-tree-native-runtime", "recovery-startup-native-runtime"].includes(record.evidence));
     expect(runtime, diagnostics).toBeDefined();
     expect(runtime!.bun).toBe(version.stdout.trim());
     expect(path.isAbsolute(runtime!.executable)).toBe(true);
@@ -42,7 +42,17 @@ function runNative(args: string[]): { records: Evidence[]; stderr: string } {
 }
 
 describe.skipIf(!required && (process.platform === "win32" || missing))("real native-Bun recovery ownership", () => {
-  it("runs all eight unchanged ownership/escape/no-fork cases in the Bun test host", () => {
+  it("proves cold no-start admission and malformed-proof refusal in the Bun test host", () => {
+    const { records, stderr } = runNative(["test", "./test/audit-recovery-startup.test.ts", "--timeout", "30000"]);
+    expect(stderr).toMatch(/11 pass/);
+    expect(stderr).toMatch(/0 fail/);
+    expect(records.filter(record => record.evidence === "recovery-cold-supervisor-before-finally")).toHaveLength(3);
+    expect(records.filter(record => record.evidence === "recovery-cold-supervisor-no-late-work-before-finally")).toHaveLength(3);
+    expect(records.filter(record => record.evidence === "recovery-admission-refusal-before-finally")).toHaveLength(4);
+    expect(records.filter(record => record.evidence === "recovery-malformed-admission-before-finally")).toHaveLength(4);
+  });
+
+  it("runs all eight ownership/escape/no-fork cases in the Bun test host", () => {
     // --timeout changes only the outer runner's default 5s test limit, NOT the
     // helper's 200ms / 5000ms execution deadlines or its 800ms teardown allowance.
     const { records, stderr } = runNative(["test", "./test/audit-recovery-tree.test.ts", "--timeout", "30000"]);

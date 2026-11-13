@@ -263,9 +263,22 @@ describe("W13 fresh OS-process recovery (synthetic HTTP, no models)", () => {
     expect(result.timedOut).toBe(true);
     expect(result.error).toMatch(/timed out/i);
     expect(result.report).toBeUndefined();
-    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, pipesClosed: true, forcedPipeClose: false });
-    expectReaped(result.pid!);
-    console.log(JSON.stringify({ evidence: "W13-timeout", pid: result.pid, signal: result.signal, reaped: true }));
+    expect(result.launch.supervisorPid).toBeTypeOf("number");
+    expect(result.launch.supervisorReaped).toBe(true);
+    expectReaped(result.launch.supervisorPid!);
+    expect(result.cleanup).toMatchObject({ groupTerminated: true, sessionTerminated: true, pipesClosed: true, forcedPipeClose: false });
+    if (result.launch.state === "not-started") {
+      expect(result.launch.admissionGranted).toBe(false);
+      expect(result.pid).toBeUndefined();
+      expect(result.cleanup).toMatchObject({ childReaped: false, processGroups: [] });
+    } else {
+      expect(result.launch.state).toBe("started");
+      expect(result.launch.admissionGranted).toBe(true);
+      expect(result.pid).toBeTypeOf("number");
+      expect(result.cleanup.childReaped).toBe(true);
+      expectReaped(result.pid!);
+    }
+    console.log(JSON.stringify({ evidence: "W13-timeout", pid: result.pid, signal: result.signal, launch: result.launch, reaped: true }));
   });
 
   it("refuses malformed barrier options without opening a database or contacting inference", async () => {
@@ -288,7 +301,10 @@ describe("W13 fresh OS-process recovery (synthetic HTTP, no models)", () => {
     expect(result.error).toMatch(/spawn failed/);
     expect(result.pid).toBeUndefined();
     expect(performance.now() - started).toBeLessThan(1_000);
-    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, pipesClosed: true, forcedPipeClose: false });
+    expect(result.launch).toMatchObject({ state: "not-started", admissionGranted: false, supervisorReaped: true });
+    expect(result.launch.supervisorPid).toBeTypeOf("number");
+    expectReaped(result.launch.supervisorPid!);
+    expect(result.cleanup).toMatchObject({ childReaped: false, groupTerminated: true, pipesClosed: true, forcedPipeClose: false, processGroups: [] });
     expect(requests).toEqual([]);
   });
 

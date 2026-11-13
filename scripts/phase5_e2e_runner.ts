@@ -36,6 +36,13 @@ import { disposeDefaultLlamaCpp } from "../src/llm.js";
 
 export interface RecoveryProcessResult {
   pid?: number;
+  launch: {
+    /** No-start proof requires withheld admission AND an observed supervisor reap. */
+    state: "not-started" | "started" | "unconfirmed";
+    supervisorPid?: number;
+    admissionGranted: boolean;
+    supervisorReaped: boolean;
+  };
   exitCode: number | null;
   signal: NodeJS.Signals | null;
   timedOut: boolean;
@@ -45,6 +52,7 @@ export interface RecoveryProcessResult {
   error?: string;
   cleanup: {
     processGroupId?: number;
+    /** False for a proved not-started launch: no worker ever existed to reap. */
     childReaped: boolean;
     /** All groups in the anchored owned session, not arbitrary escaped sessions. */
     groupTerminated: boolean;
@@ -76,6 +84,8 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_482_647) {
     throw new Error("worker timeoutMs must be a positive integer <= 2147482647");
   }
+  // Bootstrap/admission is part of the caller's budget, not startup grace.
+  const executionDeadline = performance.now() + timeoutMs;
   const stateRoot = path.resolve(options.stateRoot);
   for (const name of ["home", "tmp", "cache", "config", "hermes"]) mkdirSync(path.join(stateRoot, name), { recursive: true });
   const env: NodeJS.ProcessEnv = {};
@@ -112,6 +122,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   if (process.platform === "win32") throw new Error("Recovery session containment requires POSIX");
   return await new Promise(resolve => {
     const receipt: RecoveryProcessResult = { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
+      launch: { state: "unconfirmed", admissionGranted: false, supervisorReaped: false },
       cleanup: { childReaped: false, groupTerminated: false, pipesClosed: false, forcedPipeClose: false,
         sigkillUsed: false, sessionTerminated: false, containmentVerified: false, processGroups: [] } };
     const supervisorScript = fileURLToPath(new URL("./phase5_recovery_process.py", import.meta.url));
@@ -137,7 +148,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         stdin: { write(data: Uint8Array): number; flush(): number | Promise<number>; end(): number | Promise<number> };
         stdout: import("node:stream/web").ReadableStream<Uint8Array>;
         stderr: import("node:stream/web").ReadableStream<Uint8Array>;
-        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void;
+        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void; kill(signal: NodeJS.Signals): void;
       };
       const bun = (globalThis as unknown as { Bun: {
         spawn(command: string[], options: typeof supervisorOptions): NativeProcess;
@@ -163,6 +174,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       const control = Readable.fromWeb(bun.file(native.stdio[3]!).stream());
       const child = Object.assign(new EventEmitter(), {
         pid: native.pid, stdin, stdout, stderr, unref: () => native.unref(),
+        kill: (signal: NodeJS.Signals) => { native.kill(signal); return true; },
       });
       let exited = false;
       let emittedClose = false;
@@ -185,6 +197,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       return { child, control };
     };
     const { child, control } = spawnSupervisor();
+    receipt.launch.supervisorPid = child.pid;
     const logLimit = 64 * 1024;
     const teardownMs = 800;
     let pendingLine = "";
@@ -194,6 +207,10 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     let closed = false;
     let settled = false;
     let cleanupReceived = false;
+    let prepared = false;
+    let notStartedReceived = false;
+    let protocolFailed = false;
+    let supervisorKillRequested = false;
     let workerExited = false;
     let stopStarted: number | undefined;
     let cleanupPoll: ReturnType<typeof setInterval> | undefined;
@@ -202,6 +219,15 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       else if (!receipt.error.includes(message)) receipt.error += `; ${message}`;
     };
     if (options.command) addError("Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified");
+    const killUnadmittedSupervisor = () => {
+      if (receipt.launch.admissionGranted || helperExited || supervisorKillRequested) return;
+      // No S has been sent, so the trusted helper cannot have forked. Use the
+      // runtime's still-owned process handle, NEVER a sampled PID or PGID.
+      try {
+        supervisorKillRequested = child.kill("SIGKILL");
+        receipt.cleanup.sigkillUsed ||= supervisorKillRequested;
+      } catch (error) { addError(`Recovery unadmitted supervisor termination failed: ${String(error)}`); }
+    };
     const requestStop = (signal: NodeJS.Signals) => {
       // Never signal a numerical group from Node after its leader is reaped.
       // This pipe belongs only to the still-anchored Python supervisor.
@@ -209,7 +235,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         child.stdin.write(signal === "SIGKILL" ? "K" : "T");
       }
     };
-    const onParentExit = () => { requestStop("SIGKILL"); child.stdin.end(); };
+    const onParentExit = () => { killUnadmittedSupervisor(); requestStop("SIGKILL"); child.stdin.end(); };
     const onParentTerm = () => { addError("Recovery worker interrupted by parent SIGTERM"); stop("SIGKILL"); };
     const onParentInt = () => { addError("Recovery worker interrupted by parent SIGINT"); stop("SIGKILL"); };
     const finish = () => {
@@ -221,8 +247,18 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       process.removeListener("SIGTERM", onParentTerm);
       process.removeListener("SIGINT", onParentInt);
       child.stdin.end();
-      if (!receipt.cleanup.childReaped || !receipt.cleanup.groupTerminated || !receipt.cleanup.sessionTerminated
-        || !cleanupReceived || !helperExited) addError("Recovery worker cleanup lacks complete owned-session proof");
+      const noStartProved = !receipt.launch.admissionGranted && !protocolFailed && receipt.pid === undefined
+        && receipt.launch.supervisorPid !== undefined && receipt.launch.supervisorReaped && closed
+        && !receipt.cleanup.forcedPipeClose;
+      if (noStartProved) {
+        receipt.launch.state = "not-started";
+        // No worker existed; childReaped intentionally remains false. Only the
+        // empty session is proved, not no-fork containment or successful work.
+        receipt.cleanup.groupTerminated = true;
+        receipt.cleanup.sessionTerminated = true;
+        addError("Recovery worker was not started: launch admission was withheld");
+      } else if (!receipt.cleanup.childReaped || !receipt.cleanup.groupTerminated || !receipt.cleanup.sessionTerminated
+        || !cleanupReceived || !receipt.launch.supervisorReaped) addError("Recovery worker cleanup lacks complete owned-session proof");
       if (!receipt.cleanup.containmentVerified && !options.command && receipt.pid !== undefined) {
         addError("Recovery worker no-fork containment was not verified");
       }
@@ -253,7 +289,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     const checkCleanup = () => {
       if (settled || stopStarted === undefined) return;
       receipt.cleanup.pipesClosed = closed;
-      if (cleanupReceived && helperExited && closed) { finish(); return; }
+      if (helperExited && closed && (cleanupReceived || !receipt.launch.admissionGranted)) { finish(); return; }
       if (performance.now() - stopStarted < teardownMs) return;
       if (!helperExited || !cleanupReceived) addError("Recovery supervisor did not provide bounded cleanup proof");
       if (!closed) {
@@ -272,16 +308,18 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       clearTimeout(timer);
       if (stopStarted === undefined) {
         stopStarted = performance.now();
+        killUnadmittedSupervisor();
         requestStop(signal);
         cleanupPoll = setInterval(checkCleanup, 10);
       } else if (signal === "SIGKILL") requestStop(signal);
       checkCleanup();
     };
-    const timer = setTimeout(() => {
+    const timeout = () => {
       receipt.timedOut = true;
       addError(`Recovery worker timed out after ${timeoutMs}ms (PID ${receipt.pid})`);
       stop();
-    }, timeoutMs);
+    };
+    const timer = setTimeout(timeout, Math.max(0, Math.ceil(executionDeadline - performance.now())));
     process.once("SIGTERM", onParentTerm);
     process.once("SIGINT", onParentInt);
     process.once("exit", onParentExit);
@@ -294,10 +332,31 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         controlLine = controlLine.slice(newline + 1);
         try {
           const message = JSON.parse(line);
-          if (message.type === "ready") {
-            if (receipt.pid !== undefined || !Number.isSafeInteger(message.pid) || message.pid < 1
+          if (message.type === "prepared") {
+            if (prepared || receipt.launch.admissionGranted || receipt.pid !== undefined
+              || message.supervisorPid !== child.pid || message.sessionId !== child.pid) throw new Error("Invalid supervisor admission identity");
+            prepared = true;
+            if (stopStarted !== undefined || helperExited) continue;
+            // A ready event can beat a delayed timer callback after the actual
+            // deadline. Check the clock rather than granting late admission.
+            if (performance.now() >= executionDeadline) { timeout(); continue; }
+            if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Supervisor admission channel is closed");
+            receipt.launch.admissionGranted = true;
+            child.stdin.write("S");
+          } else if (message.type === "not-started") {
+            if (notStartedReceived || receipt.launch.admissionGranted || receipt.pid !== undefined
+              || message.supervisorPid !== child.pid || message.sessionId !== child.pid
+              || !["spawn-error", "cancelled", "parent-channel-closed", "parent-interrupted", "admission-timeout"].includes(message.reason)) {
+              throw new Error("Invalid supervisor no-start identity");
+            }
+            notStartedReceived = true;
+            receipt.timedOut ||= message.reason === "admission-timeout";
+            stop();
+          } else if (message.type === "ready") {
+            if (!receipt.launch.admissionGranted || receipt.pid !== undefined || !Number.isSafeInteger(message.pid) || message.pid < 1
               || message.processGroupId !== message.pid || message.sessionId !== child.pid) throw new Error("Invalid worker ownership identity");
             receipt.pid = message.pid;
+            receipt.launch.state = "started";
             receipt.cleanup.processGroupId = message.processGroupId;
             receipt.cleanup.sessionId = message.sessionId;
           } else if (message.type === "exit") {
@@ -309,7 +368,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
             receipt.signal = message.signal;
             stop();
           } else if (message.type === "cleanup") {
-            if (cleanupReceived || ["childReaped", "groupTerminated", "sessionTerminated", "containmentVerified", "sigkillUsed"]
+            if (cleanupReceived || receipt.pid === undefined || !workerExited || ["childReaped", "groupTerminated", "sessionTerminated", "containmentVerified", "sigkillUsed"]
               .some(key => typeof message[key] !== "boolean") || !Array.isArray(message.processGroups)
               || message.processGroups.some((id: number) => !Number.isSafeInteger(id) || id < 1)
               || (message.errors !== undefined && (!Array.isArray(message.errors) || message.errors.some((error: unknown) => typeof error !== "string")))) {
@@ -327,11 +386,12 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
             stop("SIGKILL");
           } else throw new Error("Unexpected supervisor protocol message");
         } catch (error) {
+          protocolFailed = true;
           addError(`Recovery supervisor protocol failed: ${String(error)}`);
           stop("SIGKILL");
         }
       }
-      if (controlLine.length > logLimit) { addError("Recovery supervisor exceeded bounded protocol line length"); stop("SIGKILL"); }
+      if (controlLine.length > logLimit) { protocolFailed = true; addError("Recovery supervisor exceeded bounded protocol line length"); stop("SIGKILL"); }
     });
     child.stdout.on("data", (chunk: Buffer) => {
       if (settled) return;
@@ -363,14 +423,23 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     });
     child.stderr.on("data", (chunk: Buffer) => { receipt.stderr = (receipt.stderr + chunk.toString()).slice(-logLimit); });
     child.stdin.on("error", error => { if ((error as NodeJS.ErrnoException).code !== "EPIPE") addError(`Recovery supervisor control failed: ${error.message}`); });
-    control.on("error", error => { addError(`Recovery supervisor proof stream failed: ${error.message}`); stop("SIGKILL"); });
+    control.on("end", () => {
+      if (!controlLine.length || settled) return;
+      protocolFailed = true;
+      addError("Recovery supervisor protocol failed: incomplete terminal message");
+      stop("SIGKILL");
+    });
+    control.on("error", error => { protocolFailed = true; addError(`Recovery supervisor proof stream failed: ${error.message}`); stop("SIGKILL"); });
     child.stdout.on("error", error => { addError(`Recovery worker stdout failed: ${error.message}`); stop("SIGKILL"); });
     child.stderr.on("error", error => { addError(`Recovery worker stderr failed: ${error.message}`); stop("SIGKILL"); });
     child.on("error", (error: Error) => { helperExited = true; addError(`Recovery worker spawn failed: ${error.message}`); stop("SIGKILL"); });
     child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
       if (settled) return;
       helperExited = true;
-      if (code !== 0 || signal !== null) addError(`Recovery supervisor failed (exit=${code}, signal=${signal})`);
+      receipt.launch.supervisorReaped = true;
+      if ((code !== 0 || signal !== null) && !(supervisorKillRequested && signal === "SIGKILL")) {
+        addError(`Recovery supervisor failed (exit=${code}, signal=${signal})`);
+      }
       stop();
     });
     child.on("close", () => {

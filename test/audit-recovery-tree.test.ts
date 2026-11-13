@@ -50,22 +50,38 @@ async function fastTimeoutCase() {
     })]);
     clearTimeout(guard);
     const elapsedMs = performance.now() - started;
+    console.log(JSON.stringify({ evidence: "recovery-fast-timeout-before-finally", timeoutMs,
+      elapsedMs: Math.round(elapsedMs), supervisorAbsent: result.launch.supervisorPid !== undefined && !alive(result.launch.supervisorPid),
+      sentinelAlive: alive(sentinel.pid!), guardFired, result }));
     expect(result.timedOut, JSON.stringify(result)).toBe(true);
     expect(result.error).toMatch(/timed out after 200ms/);
     expect(result.report).toBeUndefined();
     expect(elapsedMs).toBeGreaterThanOrEqual(timeoutMs);
     expect(elapsedMs).toBeLessThan(1_500);
     expect(guardFired).toBe(false);
-    expect(result.pid).toBeTypeOf("number");
+    expect(result.launch.supervisorPid).toBeTypeOf("number");
+    expect(result.launch.supervisorReaped).toBe(true);
+    await waitAbsent(result.launch.supervisorPid!);
     // The same ownership/pipe/sentinel observations as the tree cases, before
-    // fixture cleanup, but without requiring a descendant to beat 200ms.
-    await waitAbsent(result.pid!);
+    // fixture cleanup. Cold bootstrap may be refused BEFORE launch admission;
+    // that state has its own positive identity/reap contract, not optional proof.
+    if (result.launch.state === "not-started") {
+      expect(result.launch.admissionGranted).toBe(false);
+      expect(result.pid).toBeUndefined();
+      expect(result.exitCode).toBeNull();
+      expect(result.signal).toBeNull();
+      expect(result.cleanup).toMatchObject({ childReaped: false, processGroups: [] });
+    } else {
+      expect(result.launch.state).toBe("started");
+      expect(result.launch.admissionGranted).toBe(true);
+      expect(result.pid).toBeTypeOf("number");
+      await waitAbsent(result.pid!);
+      expect(result.cleanup.childReaped).toBe(true);
+      expect(result.cleanup.processGroups).toContain(result.pid);
+    }
     expect(alive(sentinel.pid!)).toBe(true);
-    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, sessionTerminated: true,
+    expect(result.cleanup).toMatchObject({ groupTerminated: true, sessionTerminated: true,
       pipesClosed: true, forcedPipeClose: false, containmentVerified: false });
-    console.log(JSON.stringify({ evidence: "recovery-fast-timeout-before-finally", timeoutMs,
-      elapsedMs: Math.round(elapsedMs), pid: result.pid, parentAbsent: !alive(result.pid!),
-      sentinelAlive: alive(sentinel.pid!), guardFired, cleanup: result.cleanup }));
   } finally {
     if (guard) clearTimeout(guard);
     result ??= await helper;
@@ -399,9 +415,22 @@ with open(${JSON.stringify(proofPath)}, 'w') as result:
     JSON.stringify({ command: ["/usr/bin/python3", "-c", code], timeoutMs: 500, contained: true })],
     { detached: true, stdio: ["pipe", "pipe", "pipe", "pipe"] });
   let protocol = "";
+  let pendingProtocol = "";
   let stderr = "";
   let guard: ReturnType<typeof setTimeout> | undefined;
-  (supervisor.stdio[3] as import("node:stream").Readable).on("data", chunk => { protocol += chunk.toString(); });
+  (supervisor.stdio[3] as import("node:stream").Readable).on("data", chunk => {
+    protocol += chunk.toString();
+    pendingProtocol += chunk.toString();
+    let newline: number;
+    while ((newline = pendingProtocol.indexOf("\n")) !== -1) {
+      const message = JSON.parse(pendingProtocol.slice(0, newline));
+      pendingProtocol = pendingProtocol.slice(newline + 1);
+      if (message.type === "prepared") {
+        expect(message).toMatchObject({ supervisorPid: supervisor.pid, sessionId: supervisor.pid });
+        supervisor.stdin!.write("S");
+      }
+    }
+  });
   supervisor.stderr!.on("data", chunk => { stderr += chunk.toString(); });
   try {
     const exit = await Promise.race([new Promise<number | null>(resolve => supervisor.once("close", resolve)),

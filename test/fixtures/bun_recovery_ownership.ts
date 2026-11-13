@@ -116,7 +116,27 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       sentinelPid: sentinel.pid, sentinelAlive: alive(sentinel.pid!), descriptorSentinelOpen: fstatSync(fdSentinel).isFile(), guardFired, result }));
     assert.equal(guardFired, false);
     assert.ok(elapsedMs < (timeoutMs === 200 ? 1_500 : timeoutMs + 500));
-    assert.ok(result.pid !== undefined);
+    assert.ok(result.launch.supervisorPid !== undefined);
+    assert.equal(result.launch.supervisorReaped, true);
+    await waitAbsent(result.launch.supervisorPid!);
+    const noStart = result.launch.state === "not-started";
+    if (noStart) {
+      // Only a short, non-active cold call can withhold admission. Active GC /
+      // descriptor-reuse calls retain every original started-worker assertion.
+      assert.equal(timeoutMs, 200);
+      assert.equal(forceGC, false);
+      assert.equal(result.launch.admissionGranted, false);
+      assert.equal(result.pid, undefined);
+      assert.equal(identity, undefined);
+      assert.deepEqual(result.cleanup.processGroups, []);
+      assert.equal(result.exitCode, null);
+      assert.equal(result.signal, null);
+    } else {
+      assert.equal(result.launch.state, "started");
+      assert.equal(result.launch.admissionGranted, true);
+      assert.ok(result.pid !== undefined);
+      assert.ok(result.cleanup.processGroups.includes(result.pid!));
+    }
     if (identity) {
       assert.equal(result.pid, identity.pid);
       assert.equal(result.cleanup.processGroupId, identity.pgid);
@@ -124,8 +144,7 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       assert.equal(identity.pgid, identity.pid);
       assert.notEqual(identity.sid, identity.pid);
     }
-    assert.ok(result.cleanup.processGroups.includes(result.pid!));
-    assert.equal(result.cleanup.childReaped, true);
+    assert.equal(result.cleanup.childReaped, !noStart);
     assert.equal(result.cleanup.groupTerminated, true);
     assert.equal(result.cleanup.sessionTerminated, true);
     assert.equal(result.cleanup.pipesClosed, true);
@@ -142,7 +161,7 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       if (identity) {
         assert.equal(result.signal, "SIGKILL");
         assert.equal(result.cleanup.sigkillUsed, true);
-      } else assert.ok(result.signal === "SIGTERM" || result.signal === "SIGKILL");
+      } else if (!noStart) assert.ok(result.signal === "SIGTERM" || result.signal === "SIGKILL");
       assert.match(result.error!, new RegExp(`timed out after ${timeoutMs}ms`));
     } else {
       assert.equal(result.exitCode, 0);
@@ -150,7 +169,7 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       assert.equal(result.report?.status, "completed");
       assert.ok(result.stdout.includes(marker));
     }
-    await waitAbsent(result.pid!);
+    if (!noStart) await waitAbsent(result.pid!);
     assert.equal(alive(sentinel.pid!), true);
     if (scenario === "fd-reuse" && index > 1) assert.ok(reusedFDs.length > 0, "Stress must actually reuse recovery descriptor numbers");
   } finally {
