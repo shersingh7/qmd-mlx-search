@@ -32,6 +32,23 @@ These feed into QMD's three search backends:
 - **`vec:`** lines go to vector similarity search (natural language phrases)
 - **`hyde:`** is a hypothetical document passage for embedding-based retrieval ([HyDE](https://arxiv.org/abs/2212.10496) technique)
 
+## Dependency compatibility
+
+Use **Python 3.11+** and the committed `uv.lock` for local runs:
+
+```bash
+uv sync --frozen
+uv run --frozen python train.py sft --config configs/sft.yaml --dry-run
+```
+
+Standalone PEP 723/HF Jobs runners carry the same security constraints. See
+[DEPENDENCIES.md](DEPENDENCIES.md) for the validated release matrix, offline API
+tests, outstanding advisory reviews, and unqualified GPU hardware paths.
+`train_unsloth.py` now explicitly uses the native Transformers/PEFT/TRL backend:
+current Unsloth releases cap datasets below the required security floor. ONNX
+conversion uses the native PyTorch exporter rather than downgrading Transformers
+to satisfy Optimum's old cap.
+
 ## Quick Start
 
 ### Cloud training via HuggingFace Jobs (no GPU needed)

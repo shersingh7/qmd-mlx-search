@@ -1,14 +1,40 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "trl>=0.12.0",
-#     "peft>=0.7.0",
-#     "transformers>=4.45.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "datasets",
-#     "bitsandbytes",
-#     "torch",
+#     "trl>=1.17.1,<1.18",
+#     "peft>=0.21.3,<0.22",
+#     "transformers>=5.22.2,<5.23",
+#     "accelerate>=1.15.0,<1.16",
+#     "huggingface_hub>=2.4.0,<3",
+#     "datasets>=5.2.0,<5.3",
+#     "bitsandbytes>=0.50.2; sys_platform == \"linux\"",
+#     "torch>=2.13.0,<3",
+# ]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate>=1.15.0",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.10.0",
+#     "urllib3>=2.8.0",
 # ]
 # ///
 """
@@ -20,29 +46,9 @@ Experimental recipe run on top of merged SFT weights. Self-contained runner:
 (If using HF Jobs, run this script as the job entrypoint.)
 """
 
+import argparse
 import os
 import sys
-
-import torch
-from datasets import load_dataset
-from huggingface_hub import login
-from peft import LoraConfig, PeftModel, get_peft_model
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from trl import GRPOTrainer, GRPOConfig
-
-# Download eval_common.py if running as a standalone script (e.g. HF Jobs)
-_eval_common_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eval_common.py")
-if not os.path.exists(_eval_common_path):
-    import urllib.request
-    _url = "https://huggingface.co/datasets/tobil/hf-cli-jobs-uv-run-scripts/resolve/main/eval_common.py"
-    _opener = urllib.request.build_opener()
-    _token = os.environ.get("HF_TOKEN", "")
-    if _token:
-        _opener.addheaders = [("Authorization", f"Bearer {_token}")]
-    with open(_eval_common_path, "wb") as _f:
-        _f.write(_opener.open(_url).read())
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from eval_common import QMDRewardFunction, run_eval
 
 # --- Config (inlined from experiments/grpo/grpo.yaml) ---
 BASE_MODEL = "Qwen/Qwen3-1.7B"
@@ -51,7 +57,57 @@ OUTPUT_MODEL = "tobil/qmd-query-expansion-1.7B-grpo"
 DATASET = "tobil/qmd-query-expansion-train"
 
 
+def build_config(**overrides):
+    from trl import GRPOConfig
+
+    kwargs = dict(
+        output_dir="qmd-query-expansion-1.7B-grpo",
+        push_to_hub=True, hub_model_id=OUTPUT_MODEL,
+        num_generations=4, max_completion_length=200, beta=0.04,
+        num_train_epochs=1, per_device_train_batch_size=2,
+        gradient_accumulation_steps=8, learning_rate=5e-7,
+        max_grad_norm=0.5, max_steps=200,
+        logging_steps=10, save_strategy="epoch", bf16=True, report_to="none",
+    )
+    kwargs.update(overrides)
+    return GRPOConfig(**kwargs)
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dry-run", action="store_true", help="Print the plan without authentication, downloads, or training")
+    args = parser.parse_args()
+    if args.dry_run:
+        print({"base_model": BASE_MODEL, "sft_model": SFT_MODEL, "output_model": OUTPUT_MODEL, "dataset": DATASET, "stage": "grpo"})
+        return
+
+    import torch
+    from datasets import load_dataset
+    from huggingface_hub import login
+    from peft import LoraConfig, PeftModel, get_peft_model
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from trl import GRPOTrainer
+    from pathlib import Path
+
+    # Prefer the repository helper. Download only in standalone HF Jobs,
+    # never during module import, --help, or --dry-run.
+    helper_dir = Path(__file__).resolve().parent
+    parents = Path(__file__).resolve().parents
+    if len(parents) > 2 and (parents[2] / "jobs" / "eval_common.py").exists():
+        helper_dir = parents[2] / "jobs"
+    helper = helper_dir / "eval_common.py"
+    if not helper.exists():
+        import urllib.request
+        opener = urllib.request.build_opener()
+        token = os.environ.get("HF_TOKEN", "")
+        if token:
+            opener.addheaders = [("Authorization", f"Bearer {token}")]
+        url = "https://huggingface.co/datasets/tobil/hf-cli-jobs-uv-run-scripts/resolve/main/eval_common.py"
+        with opener.open(url, timeout=30) as response:
+            helper.write_bytes(response.read())
+    sys.path.insert(0, str(helper_dir))
+    from eval_common import QMDRewardFunction, run_eval
+
     hf_token = os.environ.get("HF_TOKEN")
     if hf_token:
         login(token=hf_token)
@@ -78,7 +134,7 @@ def main():
     # Load base model, merge SFT adapter
     print(f"Loading base model {BASE_MODEL}...")
     base_model = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, torch_dtype=torch.bfloat16, device_map="auto",
+        BASE_MODEL, dtype=torch.bfloat16, device_map="auto",
     )
     print(f"Merging SFT adapter {SFT_MODEL}...")
     model = PeftModel.from_pretrained(base_model, SFT_MODEL)
@@ -94,28 +150,7 @@ def main():
     model = get_peft_model(model, grpo_lora)
     model.print_trainable_parameters()
 
-    config = GRPOConfig(
-        output_dir="qmd-query-expansion-1.7B-grpo",
-        push_to_hub=True,
-        hub_model_id=OUTPUT_MODEL,
-
-        num_generations=4,
-        max_completion_length=200,
-        beta=0.04,  # KL regularization — prevents drift from SFT checkpoint
-
-        num_train_epochs=1,
-        per_device_train_batch_size=2,
-        gradient_accumulation_steps=8,
-        learning_rate=5e-7,
-        max_grad_norm=0.5,
-        max_steps=200,
-
-        logging_steps=10,
-        save_strategy="epoch",
-        bf16=True,
-
-        report_to="none",
-    )
+    config = build_config()
 
     print("Initializing GRPO trainer...")
     trainer = GRPOTrainer(

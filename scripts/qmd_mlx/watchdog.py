@@ -3,8 +3,8 @@ watchdog.py — External Resource Watchdog for MLX Production Qualification
 
 Monitors:
 1. Target PID RSS (in MB) vs headroom-derived limits.
-2. System memory pressure (via memory_pressure -Q / vm_stat).
-3. Swap growth (via sysctl vm.swapusage) relative to baseline.
+2. System memory pressure (macOS memory_pressure / vm_stat; Linux MemAvailable).
+3. Swap growth (macOS sysctl vm.swapusage; Linux /proc/meminfo) relative to baseline.
 4. HTTP /health endpoint responsiveness (on dedicated control or inference port) and worker progress telemetry.
 5. Stuck GPU inference detection (monotonic job age vs completed sequence).
 
@@ -436,15 +436,58 @@ class WatchdogCheckResult:
 
 class SystemMemorySampler:
     """
-    Samples macOS system memory statistics, pressure levels, swap usage, and target PID RSS.
-    Fails closed when telemetry commands fail or return unparseable outputs.
+    Samples measured macOS/Linux memory, available headroom, swap, and PID RSS.
+    Missing, malformed, or unsupported telemetry always fails closed.
     """
 
     def __init__(
         self,
         cmd_runner: Optional[Callable[[list[str], float], tuple[int, str, str]]] = None,
+        *,
+        platform_name: Optional[str] = None,
+        proc_meminfo_path: str = "/proc/meminfo",
     ):
         self._cmd_runner = cmd_runner or self._default_cmd_runner
+        self._platform_name = sys.platform if platform_name is None else platform_name
+        self._proc_meminfo_path = proc_meminfo_path
+
+    def _require_memory_platform(self) -> None:
+        if self._platform_name not in ("darwin", "linux"):
+            raise SystemMetricsError(f"Unsupported memory telemetry platform: {self._platform_name}")
+
+    def _linux_memory_kb(self) -> dict[str, int]:
+        """Read a bounded kernel snapshot; never invent missing MemAvailable.
+
+        MemAvailable already estimates reclaimable cache and kernel reserves.
+        Adding MemFree/Buffers/Cached would double-count headroom. Old kernels
+        without MemAvailable are unsupported, not a reason to guess a budget.
+        """
+        required = {"MemTotal", "MemAvailable", "SwapTotal", "SwapFree"}
+        try:
+            with open(self._proc_meminfo_path, "r", encoding="ascii") as stream:
+                text = stream.read(65537)
+            if len(text) > 65536:
+                raise ValueError("snapshot exceeds 65536 bytes")
+            values: dict[str, int] = {}
+            for line in text.splitlines():
+                key = line.partition(":")[0]
+                if key not in required:
+                    continue
+                match = re.fullmatch(r"([A-Za-z]+):\s+([0-9]+)\s+kB\s*", line)
+                if match is None or key in values:
+                    raise ValueError(f"malformed or duplicate {key}")
+                values[key] = int(match.group(2))
+            if values.keys() != required:
+                raise ValueError(f"missing fields: {', '.join(sorted(required - values.keys()))}")
+            if values["MemTotal"] <= 0 or values["MemAvailable"] > values["MemTotal"]:
+                raise ValueError("invalid MemTotal/MemAvailable relationship")
+            if values["SwapFree"] > values["SwapTotal"]:
+                raise ValueError("SwapFree exceeds SwapTotal")
+            if any(not math.isfinite(value / 1024.0) for value in values.values()):
+                raise ValueError("non-finite memory reading")
+            return values
+        except (OSError, UnicodeError, ValueError, OverflowError) as error:
+            raise SystemMetricsError(f"Failed to sample Linux meminfo at {self._proc_meminfo_path}: {error}") from error
 
     @staticmethod
     def _default_cmd_runner(cmd: list[str], timeout_s: float = 2.0) -> tuple[int, str, str]:
@@ -463,7 +506,10 @@ class SystemMemorySampler:
             return -1, "", str(e)
 
     def get_installed_ram_mb(self) -> float:
-        """Returns total installed physical RAM in MB via sysctl hw.memsize. Fails closed on error."""
+        """Return measured physical RAM in MB, never a platform fallback budget."""
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            return self._linux_memory_kb()["MemTotal"] / 1024.0
         rc, out, err = self._cmd_runner(["sysctl", "-n", "hw.memsize"], 2.0)
         if rc == 0 and out.strip().isdigit():
             val = float(int(out.strip()) / (1024 * 1024))
@@ -473,23 +519,29 @@ class SystemMemorySampler:
 
     def get_memory_headroom_mb(self) -> float:
         """
-        Calculates currently available memory headroom in MB on macOS from vm_stat.
+        Calculates currently available memory headroom in MB from OS telemetry.
+        Linux uses measured MemAvailable (not MemFree plus cache).
         Headroom = (Pages free + Pages inactive + Pages speculative) * page_size.
         DOES NOT double-count Pages purgeable (purgeable pages are already counted within inactive/file cache).
         Fails closed on command failure.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            return self._linux_memory_kb()["MemAvailable"] / 1024.0
         rc, out, err = self._cmd_runner(["vm_stat"], 2.0)
         if rc != 0 or not out:
             raise SystemMetricsError(f"Failed to sample vm_stat: rc={rc}, err={err}")
 
-        page_size = 16384  # Default Apple Silicon page size (16KB)
         m_page = re.search(r"page size of (\d+) bytes", out, re.IGNORECASE)
-        if m_page:
-            page_size = int(m_page.group(1))
+        if m_page is None or int(m_page.group(1)) <= 0:
+            raise SystemMetricsError("Missing or invalid vm_stat page size")
+        page_size = int(m_page.group(1))
 
         def _extract_pages(key: str) -> int:
             m = re.search(rf"{key}:\s+(\d+)\.", out)
-            return int(m.group(1)) if m else 0
+            if m is None:
+                raise SystemMetricsError(f"Missing or invalid vm_stat counter: {key}")
+            return int(m.group(1))
 
         pages_free = _extract_pages("Pages free")
         pages_inactive = _extract_pages("Pages inactive")
@@ -504,6 +556,10 @@ class SystemMemorySampler:
         Queries system memory free percentage from `memory_pressure -Q` or falls back to headroom ratio.
         Returns a float percentage in [0.0, 100.0]. Fails closed on error.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            values = self._linux_memory_kb()
+            return round(values["MemAvailable"] / values["MemTotal"] * 100.0, 1)
         rc, out, _ = self._cmd_runner(["memory_pressure", "-Q"], 2.0)
         if rc == 0 and out:
             m = re.search(r"System-wide memory free percentage:\s*(\d+)%", out)
@@ -522,6 +578,10 @@ class SystemMemorySampler:
         Queries current system swap usage in MB via sysctl vm.swapusage.
         Fails closed on error.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            values = self._linux_memory_kb()
+            return (values["SwapTotal"] - values["SwapFree"]) / 1024.0
         rc, out, err = self._cmd_runner(["sysctl", "vm.swapusage"], 2.0)
         if rc == 0 and out:
             m = re.search(r"used\s*=\s*([0-9.]+)([KMG]?)", out)
@@ -558,10 +618,10 @@ class SystemMemorySampler:
         raise SystemMetricsError(f"Failed to query RSS for active PID {pid}: rc={rc}, err={err}, out='{out.strip()}'")
 
     def get_process_cmdline(self, pid: int) -> Optional[str]:
-        """Queries full command-line of target PID via `ps -o command= -p <pid>`."""
+        """Request an untruncated command line on both BSD and GNU ps."""
         if pid <= 1:
             return None
-        rc, out, _ = self._cmd_runner(["ps", "-o", "command=", "-p", str(pid)], 2.0)
+        rc, out, _ = self._cmd_runner(["ps", "-ww", "-o", "command=", "-p", str(pid)], 2.0)
         if rc == 0 and out.strip():
             return out.strip()
         return None

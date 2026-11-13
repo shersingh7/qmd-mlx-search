@@ -16,7 +16,7 @@ import threading
 import time
 import uuid
 from contextlib import contextmanager
-from typing import Any, Optional
+from typing import Any, Optional, cast
 from urllib.parse import quote
 import numpy as np
 
@@ -48,6 +48,13 @@ from .runtime import EmbeddingResult, MLXEmbeddingRuntime
 
 class _SocketAdmissionMixin:
     """Own accepted sockets and release exactly the permits they acquired."""
+
+    def server_bind(self):
+        # HTTPServer.server_bind performs reverse DNS through getfqdn(). A
+        # stalled resolver must not consume a numeric listener's startup budget.
+        tcp_server = cast(socketserver.TCPServer, self)
+        socketserver.TCPServer.server_bind(tcp_server)
+        self.server_name, self.server_port = tcp_server.server_address[:2]
 
     def _init_socket_admission(self, max_threads: int):
         self.thread_limiter = threading.BoundedSemaphore(max_threads)
@@ -294,7 +301,6 @@ class ThreadedMLXServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http
         max_threads: int = 128,
         max_concurrent_inference: int = 32,
     ):
-        super().__init__(server_address, RequestHandlerClass)
         self.state = ServerState.STARTING
         self.state_error: Optional[str] = None
         self.bind_host: str = server_address[0]
@@ -325,6 +331,9 @@ class ThreadedMLXServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http
         self._lifecycle_lock = threading.Lock()
         self._stop_lock = self._lifecycle_lock
         self._before_serve_hook: Optional[Any] = None
+        # TCPServer invokes our virtual server_close if bind/activation fails.
+        # Initialize its cleanup ownership before the first socket can exist.
+        super().__init__(server_address, RequestHandlerClass)
 
     def stop(self, timeout: float = 10.0):
         """
@@ -444,7 +453,6 @@ class MLXControlServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http.
         request_timeout_s: float = 5.0,
         max_header_bytes: int = 16384,
     ):
-        super().__init__(server_address, RequestHandlerClass)
         self.mlx_server = mlx_server
         self.bind_host: str = server_address[0]
         self.request_timeout_s = request_timeout_s
@@ -454,6 +462,8 @@ class MLXControlServer(_SocketAdmissionMixin, socketserver.ThreadingMixIn, http.
         self._stop_event = threading.Event()
         self._stopped_event = threading.Event()
         self._stop_lock = threading.Lock()
+        # Bind failures call server_close, which needs the fields above.
+        super().__init__(server_address, RequestHandlerClass)
 
     def stop(self):
         with self._stop_lock:

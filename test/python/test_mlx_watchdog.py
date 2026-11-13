@@ -168,7 +168,7 @@ def test_headroom_calculation_does_not_double_count_purgeable():
             return 0, mock_vm_stat, ""
         return 0, "", ""
 
-    sampler = SystemMemorySampler(cmd_runner=mock_runner)
+    sampler = SystemMemorySampler(cmd_runner=mock_runner, platform_name="darwin")
     headroom_mb = sampler.get_memory_headroom_mb()
 
     # Expected: (1000 + 2000 + 500) * 16384 bytes = 3500 * 16384 / (1024 * 1024) = 54.6875 MB
@@ -181,7 +181,7 @@ def test_fail_closed_on_telemetry_errors_sampler():
     def broken_runner(cmd, timeout_s=2.0):
         return -1, "", "Command failed"
 
-    sampler = SystemMemorySampler(cmd_runner=broken_runner)
+    sampler = SystemMemorySampler(cmd_runner=broken_runner, platform_name="darwin")
     with pytest.raises(SystemMetricsError):
         sampler.get_installed_ram_mb()
     with pytest.raises(SystemMetricsError):
@@ -207,7 +207,7 @@ def test_fail_closed_on_init_no_fabricated_fallbacks():
             # Telemetry fails
             return -1, "", "sysctl vm.swapusage failed"
 
-        broken_sampler = SystemMemorySampler(cmd_runner=broken_sampler_runner)
+        broken_sampler = SystemMemorySampler(cmd_runner=broken_sampler_runner, platform_name="darwin")
         config = MLXWatchdogConfig(pid=child.pid, instance_token="token-1", dry_run=True)
 
         with pytest.raises(SystemMetricsError):
@@ -325,8 +325,13 @@ def test_owned_child_required_by_default_external_requires_opt_in_and_token():
             owned_child=None,
             allow_external_pid=True,
             instance_token="valid-token-123",
+            expected_cmd_pattern=r"python",
         )
-        assert "python" in cmdline
+        # Framework Python uses an uppercase .../MacOS/Python executable. The
+        # production case-insensitive command gate above must accept it while
+        # returning the original command, not a normalized identity string.
+        assert cmdline == sampler.get_process_cmdline(child.pid)
+        assert "import time; time.sleep(60)" in cmdline
 
         # Case 4: Mismatched owned_child handle -> REJECTED
         sentinel = _spawn_dummy_process()

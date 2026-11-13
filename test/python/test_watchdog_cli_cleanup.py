@@ -34,6 +34,7 @@ import os
 from pathlib import Path
 import signal
 import socket
+import socketserver
 import subprocess
 import sys
 import time
@@ -76,7 +77,9 @@ if mode == "health_timeout":
     server.bind(("127.0.0.1", port))
     server.listen(1)
 elif not mode.startswith("leader_exit"):
-    server = http.server.HTTPServer(("127.0.0.1", port), Handler)
+    # TCPServer runs the real HTTP handler without HTTPServer's unbounded
+    # getfqdn() call during binding. This fixture needs no reverse DNS.
+    server = socketserver.TCPServer(("127.0.0.1", port), Handler)
 (root / "leader.json").write_text(json.dumps({
     "pid": os.getpid(), "pgid": os.getpgrp(),
     "instance_token": os.environ["MLX_INSTANCE_TOKEN"],
@@ -103,7 +106,14 @@ def read_json_when_ready(path, timeout_s=3):
             return json.loads(path.read_text())
         except (FileNotFoundError, json.JSONDecodeError):
             time.sleep(0.01)
-    raise TimeoutError(f"Disposable CLI process did not publish {path.name}")
+    diagnostics = ""
+    log_path = path.with_name("child.log")
+    if log_path.exists():
+        with log_path.open("rb") as log:
+            log.seek(0, os.SEEK_END)
+            log.seek(max(0, log.tell() - 4096))
+            diagnostics = "\nChild stdout/stderr:\n" + log.read(4096).decode("utf-8", errors="replace")
+    raise TimeoutError(f"Disposable CLI process did not publish {path.name}{diagnostics}")
 
 
 def assert_not_executing(pid):
@@ -112,7 +122,11 @@ def assert_not_executing(pid):
         if not TargetProcessValidator.is_pid_alive(pid):
             return
         time.sleep(0.01)
-    pytest.fail(f"Owned fixture PID {pid} still executes after CLI exit")
+    sampler = SystemMemorySampler()
+    pytest.fail(
+        f"Owned fixture PID {pid} still executes after CLI exit; "
+        f"start={sampler.get_process_start_time(pid)!r}, command={sampler.get_process_cmdline(pid)!r}"
+    )
 
 
 def save_process_evidence(tree, child, descendant_pid):
@@ -150,7 +164,10 @@ class SyntheticMemorySampler(SystemMemorySampler):
         # has installed SIG_IGN and the leader has published its ready barrier.
         ready = read_json_when_ready(self.tree.root / "leader.json")
         assert ready["pid"] == pid
-        read_json_when_ready(self.tree.root / "grandchild.json")
+        descendant = read_json_when_ready(self.tree.root / "grandchild.json")
+        if self.tree.descendant_start_time is None:
+            self.tree.descendant_start_time = super().get_process_start_time(descendant["pid"])
+            assert self.tree.descendant_start_time, "Could not pin disposable descendant identity"
         return super().get_process_start_time(pid)
 
     def get_process_rss_mb(self, pid):
@@ -178,7 +195,9 @@ def cli_tree(tmp_path, monkeypatch, mode):
     tree = SimpleNamespace(
         root=tmp_path, mode=mode, cli=cli, children=[], ports=ports,
         command=[sys.executable, str(script), "leader", str(tmp_path), mode],
+        descendant_start_time=None,
     )
+    child_log = (tmp_path / "child.log").open("wb")
     original_popen = subprocess.Popen
     sentinel = original_popen(
         [sys.executable, "-c", "import time; time.sleep(60)"],
@@ -187,6 +206,8 @@ def cli_tree(tmp_path, monkeypatch, mode):
     tree.sentinel = sentinel
 
     def record_real_spawn(command, *args, **kwargs):
+        if command == tree.command:
+            kwargs.update(stdout=child_log, stderr=subprocess.STDOUT)
         child = original_popen(command, *args, **kwargs)
         if command == tree.command:
             tree.children.append(child)
@@ -196,6 +217,8 @@ def cli_tree(tmp_path, monkeypatch, mode):
     original_owned_spawn = cli.spawn_owned_process
 
     def record_owned_spawn(command, **kwargs):
+        if command == tree.command:
+            kwargs.update(stdout=child_log, stderr=subprocess.STDOUT)
         child = original_owned_spawn(command, **kwargs)
         if command == tree.command:
             tree.children.append(child)
@@ -232,7 +255,9 @@ def cli_tree(tmp_path, monkeypatch, mode):
                     descendant = read_json_when_ready(descendant_path)["pid"]
                     sampler = SystemMemorySampler()
                     command = sampler.get_process_cmdline(descendant)
-                    if command and str(script) in command and "grandchild" in command:
+                    start = sampler.get_process_start_time(descendant)
+                    if (start and start == tree.descendant_start_time and command
+                            and str(script) in command and "grandchild" in command):
                         try:
                             os.kill(descendant, signal.SIGKILL)
                         except ProcessLookupError:
@@ -242,6 +267,7 @@ def cli_tree(tmp_path, monkeypatch, mode):
                 if sentinel.poll() is None:
                     sentinel.kill()
                 sentinel.wait(timeout=1)
+                child_log.close()
 
 
 @pytest.mark.parametrize("mode,expected_code,expected_breach", [

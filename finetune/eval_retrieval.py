@@ -1,10 +1,36 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "transformers>=4.45.0",
-#     "peft>=0.7.0",
-#     "torch",
-#     "accelerate",
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "accelerate>=1.15.0,<1.16",
+# ]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate>=1.15.0",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.10.0",
+#     "urllib3>=2.8.0",
 # ]
 # ///
 """
@@ -280,8 +306,10 @@ def load_model(model_path: str):
 
     config = AutoConfig.from_pretrained(base_model)
     config.tie_word_embeddings = False
+    use_cuda = torch.cuda.is_available()
     model = AutoModelForCausalLM.from_pretrained(
-        base_model, dtype=torch.bfloat16, device_map={"": 0}, config=config
+        base_model, dtype=torch.bfloat16 if use_cuda else torch.float32,
+        device_map={"": 0 if use_cuda else "cpu"}, config=config,
     )
     if model.generation_config is not None:
         model.generation_config.do_sample = False

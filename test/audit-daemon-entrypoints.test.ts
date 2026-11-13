@@ -100,7 +100,9 @@ function instrumentChild(f: ReturnType<typeof fixture>, body = "") {
   const receipt = join(f.dir, "spawned-child.json");
   receipts.push(receipt);
   writeFileSync(file, `
-    if (process.env.QMD_MCP_INSTANCE_TOKEN) {
+    import { isMainThread } from 'node:worker_threads';
+    // esbuild/tsx helpers inherit NODE_OPTIONS and the token, but are not the daemon.
+    if (isMainThread && process.argv[1] === ${JSON.stringify(cli)} && process.env.QMD_MCP_INSTANCE_TOKEN) {
       const { writeFileSync } = await import('node:fs');
       writeFileSync(${JSON.stringify(receipt)}, JSON.stringify({pid: process.pid, instanceToken: process.env.QMD_MCP_INSTANCE_TOKEN, argv: process.argv}));
       ${body}
@@ -137,6 +139,25 @@ afterEach(async () => {
 });
 
 describe("quarantined real MCP daemon CLI", () => {
+  test("daemon receipt instrumentation ignores token-bearing helper processes and threads", async () => {
+    const f = fixture();
+    const receipt = instrumentChild(f);
+    const probe = join(f.dir, "unrelated-helper.mjs");
+    writeFileSync(probe, `import { Worker } from 'node:worker_threads';
+      const worker = new Worker('setImmediate(() => process.exit(0))', { eval: true });
+      await new Promise((resolve, reject) => { worker.once('exit', resolve); worker.once('error', reject); });`);
+    const child = spawn(process.execPath, [probe], {
+      cwd: root, env: { ...f.env, QMD_MCP_INSTANCE_TOKEN: randomUUID() }, stdio: "ignore",
+    });
+    children.push(child);
+    const [code] = await once(child, "exit");
+    const incorrectlyRecorded = existsSync(receipt);
+    // This process was already reaped; never let fallback cleanup signal its old PID.
+    rmSync(receipt, { force: true });
+    expect(code).toBe(0);
+    expect(incorrectlyRecorded).toBe(false);
+  });
+
   test("only reports Started after exact PID/token health; records identity and verifies stop", async () => {
     const f = fixture();
     const receipt = instrumentChild(f);

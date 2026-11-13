@@ -141,7 +141,7 @@ afterEach(async () => {
 if (process.versions.bun) {
   test("Bun entrypoint executes all pre-body admission assertions on the supported Node HTTP runtime", async () => {
     const { stdout } = await promisify(execFile)("node", [
-      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1", "--minWorkers=1",
+      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1",
       "--cache=false", "--reporter=json", "test/audit-mcp-admission.test.ts",
     ], { cwd: fileURLToPath(new URL("../", import.meta.url)), env: { ...process.env, CI: "true", QMD_LLAMA_GPU: "false" },
       timeout: 30000, killSignal: "SIGKILL", maxBuffer: 4 * 1024 * 1024 });

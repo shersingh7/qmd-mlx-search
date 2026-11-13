@@ -5,23 +5,65 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-flake:
-    name: Build flake (${{ matrix.os }})
+    name: Build and smoke flake (${{ matrix.system }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-24.04
+            system: x86_64-linux
+          - os: macos-15
+            system: aarch64-darwin
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Build flake
-        run: nix build . --print-build-logs
+      - name: Check Nix packaging contracts
+        env:
+          HOME: ${{ runner.temp }}/qmd-nix-home
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          mkdir -p "$HOME"
+          python3 test/security/test_nix_packaging.py -v
+
+      # A changed dependency graph/layout must produce a real FOD mismatch.
+      # Update flake.nix only from this exact locked build's reported hashes,
+      # then rerun both hosts; do not disable integrity or use --impure.
+      - name: Build flake with native SQLite install checks
+        env:
+          HOME: ${{ runner.temp }}/qmd-nix-home
+          TMPDIR: ${{ runner.temp }}
+        # matrix.system is a checked-in literal, never an event/PR payload.
+        run: nix build .#packages.${{ matrix.system }}.default --print-build-logs
+
+      - name: Verify installed CLI, SDK, WASM, Python assets and HTTP
+        timeout-minutes: 5
+        env:
+          HOME: ${{ runner.temp }}/qmd-nix-home
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          nix run .#check-installed -- "$GITHUB_WORKSPACE/result" \
+            --receipt "$RUNNER_TEMP/nix-installed-${{ matrix.system }}.json"
+
+      - name: Retain installed-surface evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: nix-installed-${{ matrix.system }}
+          path: ${{ runner.temp }}/nix-installed-${{ matrix.system }}.json
+          if-no-files-found: error

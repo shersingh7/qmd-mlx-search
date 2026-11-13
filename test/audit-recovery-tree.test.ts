@@ -56,7 +56,26 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
     let command: string[];
     let port = 8797;
     if (mode === "real-worker") {
-      server = http.createServer((_req, _res) => { workerRequests++; /* Owned, non-model stalled HTTP fixture. */ });
+      const descriptor = { version: 1, backend: "mlx", model: "synthetic-recovery-stall",
+        pooling: "mean", nativeDimensions: 4, outputDimensions: 4, maxTokens: 2048, normalized: true };
+      writeFileSync(path.join(root, "owned-fixture.md"), "# Authored fixture\nRecovery must terminate a stalled embedding request.\n");
+      server = http.createServer(async (req, res) => {
+        // Metadata has its own short public deadline. Succeed through that
+        // prerequisite, then stall actual inference so this test proves work
+        // started before the supervisor's independent execution deadline.
+        res.setHeader("Content-Type", "application/json");
+        if (req.url === "/descriptor") res.end(JSON.stringify(descriptor));
+        else if (req.url === "/health") res.end(JSON.stringify({ status: "ok", ready: true, descriptor }));
+        else if (req.url === "/embed" || req.url === "/embed-bin") {
+          workerRequests++;
+          req.resume(); // Deliberately leave this owned, non-model response open.
+        } else if (req.url === "/tokenize") {
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) chunks.push(Buffer.from(chunk));
+          const { texts } = JSON.parse(Buffer.concat(chunks).toString()) as { texts: string[] };
+          res.end(JSON.stringify({ counts: texts.map(text => Math.ceil(text.length / 4)) }));
+        } else { res.statusCode = 404; res.end(JSON.stringify({ error: "Unexpected fixture route" })); }
+      });
       await new Promise<void>(resolve => server!.listen(0, "127.0.0.1", resolve));
       port = (server.address() as { port: number }).port;
       expect(port).not.toBe(8787);
@@ -67,7 +86,8 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
           fileURLToPath(new URL("../node_modules/tsx/dist/loader.mjs", import.meta.url))]),
         fileURLToPath(new URL("../scripts/phase5_recovery_worker.ts", import.meta.url)),
         "--launch-token", "owned-tree-real-worker", "--db", dbPath, "--docs-dir", root,
-        "--mlx-port", String(port), "--output-json", outputJson, "--execution-timeout-ms", "5000"];
+        "--mlx-model-path", descriptor.model,
+        "--mlx-port", String(port), "--output-json", outputJson, "--execution-timeout-ms", "10000"];
     } else {
       const report = { status: "completed", dbPath, action: "resume", docsCompleted: 1, chunksCommitted: 1,
         totalVectors: 1, checkpointStatus: null, checkpointJobId: "authored-command-fixture",
@@ -79,11 +99,15 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
         `import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs'; ${prelude} ${ending}`];
     }
     const started = performance.now();
-    const timeoutMs = mode === "real-worker" ? 1_000 : 200;
+    // A real TypeScript worker has cold-import/native-addon startup costs that
+    // vary across CI hosts. Give that fixture an explicit execution budget,
+    // while keeping the helper's post-deadline cleanup allowance unchanged.
+    const timeoutMs = mode === "real-worker" ? 5_000 : 200;
+    const elapsedBoundMs = mode === "real-worker" ? timeoutMs + 500 : 1_500;
     helper = executeRecoveryWorker({ dbPath, docsDir: root, mlxPort: port, launchToken: "owned-tree",
       action: mode === "real-worker" ? "index" : "resume", outputJson, stateRoot: path.join(root, "state"), timeoutMs, command });
     const result = await Promise.race([helper, new Promise<never>((_resolve, reject) => {
-      guard = setTimeout(() => { guardFired = true; reject(new Error("Helper exceeded its own timeout + teardown budget")); }, 1_800);
+      guard = setTimeout(() => { guardFired = true; reject(new Error("Helper exceeded its own timeout + teardown budget")); }, elapsedBoundMs + 300);
     })]);
     clearTimeout(guard);
     const elapsedMs = performance.now() - started;
@@ -91,7 +115,7 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
     pids = JSON.parse(readFileSync(pidFile, "utf8"));
     expect(result.pid).toBe(pids!.parent);
     expect(guardFired).toBe(false);
-    expect(elapsedMs).toBeLessThan(1_500);
+    expect(elapsedMs).toBeLessThan(elapsedBoundMs);
     // These observations are made BEFORE any fixture/outer-guard cleanup.
     await waitAbsent(pids!.parent);
     if (mode !== "escaped-pipe") await waitAbsent(pids!.grandchild);

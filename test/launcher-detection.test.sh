@@ -4,6 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/qmd-launcher-test.XXXXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
+# bin/qmd resolves its own installation directory physically. Model the same
+# fixture directory under /var aliases or a caller-supplied symlinked TMPDIR;
+# user argv values below remain literal and must never be normalized.
+WORK="$(cd "$WORK" && pwd -P)"
 mkdir -p "$WORK/runtimes" "$WORK/package with spaces/bin" "$WORK/package with spaces/dist/cli" "$WORK/links"
 cp "$ROOT/bin/qmd" "$WORK/package with spaces/bin/qmd"
 printf '// fixture entrypoint\n' > "$WORK/package with spaces/dist/cli/qmd.js"

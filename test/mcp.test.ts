@@ -931,7 +931,7 @@ import { enableProductionMode } from "../src/store.js";
 if (process.versions.bun) {
   test("MCP HTTP Transport runs all protocol assertions on Node when invoked by Bun", async () => {
     const { stdout } = await promisify(execFile)("node", [
-      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1", "--minWorkers=1",
+      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1",
       "--cache=false", "--testTimeout=4000", "--reporter=json", "test/mcp.test.ts", "-t", "^MCP HTTP Transport",
     ], { cwd: fileURLToPath(new URL("../", import.meta.url)), env: { ...process.env, CI: "true", QMD_LLAMA_GPU: "false" }, timeout: 15000, killSignal: "SIGKILL", maxBuffer: 4 * 1024 * 1024 });
     const report = JSON.parse(stdout);

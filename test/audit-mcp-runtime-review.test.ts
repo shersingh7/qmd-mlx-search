@@ -144,7 +144,7 @@ afterEach(async () => {
 if (process.versions.bun) {
   test("Bun entrypoint verifies cancellation and listener identity on the required Node HTTP runtime", async () => {
     const { stdout } = await promisify(execFile)("node", [
-      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1", "--minWorkers=1",
+      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1",
       "--cache=false", "--testTimeout=4000", "--reporter=json", "test/audit-mcp-runtime-review.test.ts",
     ], { cwd: fileURLToPath(new URL("../", import.meta.url)), env: { ...process.env, CI: "true", QMD_LLAMA_GPU: "false" }, timeout: 15000, killSignal: "SIGKILL", maxBuffer: 4 * 1024 * 1024 });
     const report = JSON.parse(stdout);

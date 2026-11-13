@@ -1,19 +1,45 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "transformers>=4.36.0",
-#     "peft>=0.7.0",
-#     "torch>=2.0.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "sentencepiece>=0.1.99",
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "accelerate>=1.15.0,<1.16",
+#     "huggingface_hub>=2.4.0,<3",
+#     "sentencepiece>=0.2.1",
 #     "protobuf>=3.20.0",
 #     "numpy",
-#     "optimum[onnxruntime]",
-#     "onnx>=1.15.0",
-#     "onnxruntime>=1.17.0",
-#     "onnxconverter-common>=1.14.0",
+#     "onnx>=1.23.2",
+#     "onnxruntime>=1.32.0",
+#     "onnx-ir>=1.1.0",
+#     "onnxscript>=0.7.2",
+# ]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate>=1.15.0",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.10.0",
+#     "urllib3>=2.8.0",
 # ]
 # ///
 """
@@ -86,31 +112,90 @@ def merge_adapters(base_model: str, sft_model: str, grpo_model: str) -> tuple:
 
 
 def export_onnx(model, tokenizer, output_dir: str):
-    """Export merged model to ONNX using Optimum."""
-    from optimum.exporters.onnx import main_export
+    """Export Qwen2/Qwen3 with flattened KV-cache I/O for Transformers.js.
 
-    # Save merged model to temp dir first (Optimum needs HF format on disk)
-    merged_dir = "/tmp/merged_model_onnx"
-    print(f"\nStep 4: Saving merged model to {merged_dir}...")
-    model.save_pretrained(merged_dir, safe_serialization=True)
-    tokenizer.save_pretrained(merged_dir)
+    optimum-onnx 0.1.0 requires transformers<4.58, which cannot satisfy the
+    security floor. Use the supported PyTorch exporter instead of overriding
+    upstream metadata or silently downgrading Transformers.
+    """
+    from transformers.cache_utils import DynamicCache
 
-    print(f"\nStep 5: Exporting to ONNX at {output_dir}...")
-    # no_post_process=True avoids the 2GB protobuf serialization limit
-    # that occurs during tied-weight deduplication on large FP32 models.
-    # The exported model still works correctly — the tied weights just
-    # aren't deduplicated in the graph, which is fine since we quantize next.
-    main_export(
-        model_name_or_path=merged_dir,
-        output=output_dir,
-        task="text-generation-with-past",
-        device="cpu",
-        fp16=False,
-        no_post_process=True,
-    )
+    if model.config.model_type not in {"qwen2", "qwen3"}:
+        raise ValueError("The native ONNX exporter supports Qwen2/Qwen3 models only")
 
-    # Clean up temp merged dir
-    shutil.rmtree(merged_dir, ignore_errors=True)
+    class WithPast(torch.nn.Module):
+        def __init__(self, wrapped):
+            super().__init__()
+            self.wrapped = wrapped
+
+        def forward(self, input_ids, attention_mask, position_ids, *past):
+            cache = DynamicCache(
+                ddp_cache_data=tuple(zip(past[::2], past[1::2])),
+                config=self.wrapped.config,
+            )
+            # Build an explicit additive mask. This avoids tracing the
+            # Python/vmap mask dispatcher and keeps batch/sequence/past axes
+            # dynamic, including an empty cache on the first generation call.
+            key_positions = torch.arange(attention_mask.shape[-1], device=input_ids.device)
+            allowed = (key_positions <= position_ids.unsqueeze(-1)) & attention_mask[:, None, :].bool()
+            dtype = self.wrapped.dtype
+            mask = torch.where(allowed[:, None, :, :], 0.0, torch.finfo(dtype).min).to(dtype)
+            result = self.wrapped(
+                input_ids=input_ids,
+                attention_mask=mask,
+                position_ids=position_ids,
+                past_key_values=cache,
+                use_cache=True,
+                return_dict=True,
+            )
+            present = tuple(t for layer in result.past_key_values.layers for t in (layer.keys, layer.values))
+            return (result.logits, *present)
+
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    model = model.to(device="cpu", dtype=torch.float32).eval()
+    model.set_attn_implementation("eager")
+    config = model.config
+    layers = config.num_hidden_layers
+    heads = config.num_key_value_heads
+    head_dim = getattr(config, "head_dim", None) or config.hidden_size // config.num_attention_heads
+    input_ids = torch.ones((1, 3), dtype=torch.long)
+    attention_mask = torch.ones((1, 5), dtype=torch.long)
+    position_ids = torch.arange(2, 5).unsqueeze(0)
+    past = tuple(torch.zeros((1, heads, 2, head_dim)) for _ in range(layers * 2))
+    input_names = ["input_ids", "attention_mask", "position_ids"]
+    output_names = ["logits"]
+    dynamic_axes = {
+        "input_ids": {0: "batch_size", 1: "sequence_length"},
+        "attention_mask": {0: "batch_size", 1: "total_sequence_length"},
+        "position_ids": {0: "batch_size", 1: "sequence_length"},
+        "logits": {0: "batch_size", 1: "sequence_length"},
+    }
+    for i in range(layers):
+        for kind in ("key", "value"):
+            inp = f"past_key_values.{i}.{kind}"
+            out = f"present.{i}.{kind}"
+            input_names.append(inp)
+            output_names.append(out)
+            dynamic_axes[inp] = {0: "batch_size", 2: "past_sequence_length"}
+            dynamic_axes[out] = {0: "batch_size", 2: "total_sequence_length"}
+
+    print(f"\nExporting ONNX with KV cache to {output}...")
+    with torch.inference_mode():
+        torch.onnx.export(
+            WithPast(model),
+            (input_ids, attention_mask, position_ids, *past),
+            str(output / "model.onnx"),
+            input_names=input_names,
+            output_names=output_names,
+            dynamic_axes=dynamic_axes,
+            opset_version=17,
+            dynamo=False,
+            external_data=True,
+        )
+    model.config.save_pretrained(output)
+    model.generation_config.save_pretrained(output)
+    tokenizer.save_pretrained(output)
 
 
 def _find_onnx_model(onnx_dir: str) -> Path:
@@ -153,7 +238,7 @@ def _quantize_q4(model_path: Path):
         bits=4,
     )
     quant.process()
-    quant.model.save(str(q_path))
+    quant.model.save_model_to_file(str(q_path), use_external_data_format=True)
 
     # Remove original FP32 files, keep only quantized
     if q_path.exists():
@@ -175,6 +260,7 @@ def _quantize_q8(model_path: Path):
         model_input=str(model_path),
         model_output=str(q_path),
         weight_type=QuantType.QUInt8,
+        use_external_data_format=True,
     )
 
     if q_path.exists():
@@ -188,7 +274,7 @@ def _quantize_q8(model_path: Path):
 
 def _convert_fp16(model_path: Path):
     """Convert ONNX model weights to FP16."""
-    from onnxconverter_common import float16
+    from onnxruntime.transformers import float16
     import onnx
 
     print("  Converting to FP16...")
@@ -196,7 +282,11 @@ def _convert_fp16(model_path: Path):
     model_fp16 = float16.convert_float_to_float16(model, keep_io_types=True)
 
     fp16_path = model_path.with_name(model_path.stem + "_fp16" + model_path.suffix)
-    onnx.save(model_fp16, str(fp16_path))
+    onnx.save_model(
+        model_fp16, str(fp16_path), save_as_external_data=True,
+        all_tensors_to_one_file=True, location=fp16_path.name + ".data",
+        size_threshold=1024,
+    )
 
     if fp16_path.exists():
         _report_size(fp16_path)

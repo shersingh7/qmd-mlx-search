@@ -60,6 +60,17 @@ def test_real_bin_launcher_matrix():
     assert "argv" in result.stdout, "the launcher test must execute the real launcher and assert argument forwarding"
 
 
+def test_real_bin_launcher_matrix_with_symlinked_temp_root(tmp_path):
+    env = fixture_environment(tmp_path)
+    alias = tmp_path / "temporary directory alias"
+    alias.symlink_to(Path(env["TMPDIR"]), target_is_directory=True)
+    env["TMPDIR"] = str(alias)
+    result = subprocess.run(["bash", str(ROOT / "test/launcher-detection.test.sh")],
+                            cwd=ROOT, env=env, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.rstrip().endswith("launcher checks passed")
+
+
 def test_install_and_pack_build_source_without_automatic_hook_mutation():
     manifest = json.loads((ROOT / "package.json").read_text())
     assert "prepare" in manifest["scripts"] and "prepack" in manifest["scripts"]

@@ -1,16 +1,42 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "transformers>=4.36.0",
-#     "peft>=0.7.0",
-#     "torch>=2.0.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "sentencepiece>=0.1.99",
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "accelerate>=1.15.0,<1.16",
+#     "huggingface_hub>=2.4.0,<3",
+#     "sentencepiece>=0.2.1",
 #     "protobuf>=3.20.0",
 #     "numpy",
 #     "gguf",
+# ]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate>=1.15.0",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.10.0",
+#     "urllib3>=2.8.0",
 # ]
 # ///
 """

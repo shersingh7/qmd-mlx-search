@@ -1,18 +1,44 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "torch",
-#     "trl>=0.12.0",
-#     "peft>=0.7.0",
-#     "transformers>=4.45.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "trackio",
+#     "torch>=2.13.0,<3",
+#     "trl>=1.17.1,<1.18",
+#     "peft>=0.21.3,<0.22",
+#     "transformers>=5.22.2,<5.23",
+#     "accelerate>=1.15.0,<1.16",
+#     "huggingface_hub>=2.4.0,<3",
+#     "trackio>=0.45.1,<0.46",
 #     "nvidia-ml-py",
-#     "datasets",
-#     "bitsandbytes",
-#     "pyyaml",
+#     "datasets>=5.2.0,<5.3",
+#     "bitsandbytes>=0.50.2; sys_platform == \"linux\"",
+#     "pyyaml>=6.0.3,<7",
 #     "gguf",
+# ]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate>=1.15.0",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.10.0",
+#     "urllib3>=2.8.0",
 # ]
 # ///
 """
@@ -205,8 +231,50 @@ def run_eval(model_path: str) -> float | None:
     return avg
 
 
+def build_sft_config(cfg, **overrides):
+    """Build current TRL arguments while preserving the existing YAML schema."""
+    from trl import SFTConfig
+
+    training = cfg["training"]
+    kwargs = dict(
+        output_dir=cfg["model"]["output"],
+        num_train_epochs=training["epochs"],
+        per_device_train_batch_size=training["batch_size"],
+        gradient_accumulation_steps=training["gradient_accumulation_steps"],
+        # PyYAML treats values such as 2e-4 as strings.
+        learning_rate=float(training["learning_rate"]),
+        max_length=training["max_length"],
+        logging_steps=10,
+        save_strategy="steps",
+        save_steps=training.get("save_steps", 200),
+        save_total_limit=training.get("save_total_limit", 2),
+        eval_strategy="steps",
+        eval_steps=training.get("eval_steps", 200),
+        # Fractional warmup_steps replaces warmup_ratio in Transformers 5.22.
+        warmup_steps=float(training["warmup_ratio"]),
+        lr_scheduler_type=training["lr_scheduler"],
+        ddp_find_unused_parameters=training.get("ddp_find_unused_parameters", False),
+        dataset_text_field=cfg["dataset"].get("text_field", "text"),
+        project=cfg.get("tracking", {}).get("project", "huggingface"),
+        bf16=True,
+        report_to="none",
+    )
+    kwargs.update(overrides)
+    return SFTConfig(**kwargs)
+
+
 def cmd_sft(args):
     """Run supervised fine-tuning."""
+    with open(args.config) as f:
+        cfg = yaml.safe_load(f)
+
+    # Configuration previews must not import GPU extensions, authenticate, or
+    # touch the Hub/model/dataset cache.
+    if args.dry_run:
+        print("SFT Training Configuration:")
+        print(yaml.dump(cfg, default_flow_style=False))
+        return
+
     import torch
     from datasets import load_dataset
     import torch.distributed as dist
@@ -215,17 +283,9 @@ def cmd_sft(args):
     from transformers.utils import logging as hf_logging
 
     hf_logging.set_verbosity_error()
-    from trl import SFTTrainer, SFTConfig
-
-    with open(args.config) as f:
-        cfg = yaml.safe_load(f)
+    from trl import SFTTrainer
 
     os.environ.setdefault("HF_LOG_CUDA_MEMORY", "0")
-
-    if args.dry_run:
-        print("SFT Training Configuration:")
-        print(yaml.dump(cfg, default_flow_style=False))
-        return
 
     dataset_name = cfg["dataset"]["name"]
     print(f"Loading dataset: {dataset_name}...")
@@ -310,28 +370,14 @@ def cmd_sft(args):
         if interval_value and interval_value > 0:
             callbacks.append(TimedSaveCallback(interval_value))
 
-    config = SFTConfig(
+    config = build_sft_config(
+        cfg,
         output_dir=output_dir,
         push_to_hub=push_to_hub,
         hub_model_id=output_name if push_to_hub else None,
         hub_strategy="every_save" if push_to_hub else "end",
-        num_train_epochs=cfg["training"]["epochs"],
-        per_device_train_batch_size=cfg["training"]["batch_size"],
-        gradient_accumulation_steps=cfg["training"]["gradient_accumulation_steps"],
-        learning_rate=cfg["training"]["learning_rate"],
-        max_length=cfg["training"]["max_length"],
-        logging_steps=10,
-        save_strategy="steps",
         save_steps=save_steps,
         save_total_limit=save_total_limit,
-        eval_strategy="steps",
-        eval_steps=cfg["training"].get("eval_steps", 200),
-        warmup_ratio=cfg["training"]["warmup_ratio"],
-        lr_scheduler_type=cfg["training"]["lr_scheduler"],
-        ddp_find_unused_parameters=cfg["training"].get(
-            "ddp_find_unused_parameters", False
-        ),
-        bf16=True,
         report_to=report_to,
         run_name=run_name if report_to == "trackio" else None,
     )
@@ -391,7 +437,7 @@ def cmd_sft(args):
     from peft import PeftModel
 
     base = AutoModelForCausalLM.from_pretrained(
-        base_model, torch_dtype=torch.bfloat16, device_map="auto"
+        base_model, dtype=torch.bfloat16, device_map="auto"
     )
     base.config.tie_word_embeddings = False
     model = PeftModel.from_pretrained(base, output_dir, local_files_only=True)

@@ -67,6 +67,17 @@ def _read_log_tail(path: str, max_bytes: int) -> str:
     return encoded[-max_bytes:].decode("utf-8", errors="ignore")
 
 
+def _startup_failure_message(reason: str, log_path: Optional[str]) -> str:
+    """Keep bounded child stderr visible when a readiness/breach check fails."""
+    if log_path is None:
+        return reason
+    try:
+        logs = _read_log_tail(log_path, 2000)
+    except OSError as error:
+        logs = f"Could not read child logs: {error}"
+    return f"{reason}. Server logs:\n{logs}"
+
+
 class _BoundedLogCapture:
     """Drain a pipe in fixed chunks; only this owner writes the capped disk tail.
 
@@ -835,7 +846,7 @@ class SmokeStageSupervisor:
             while time.monotonic() < startup_deadline:
                 if self.breach_event.is_set():
                     b_res = self.breach_result[0]
-                    raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", capture.path))
 
                 if child.poll() is not None:
                     for _ in range(5):
@@ -844,9 +855,9 @@ class SmokeStageSupervisor:
                         time.sleep(0.05)
                     if self.breach_event.is_set():
                         b_res = self.breach_result[0]
-                        raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                        raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", capture.path))
                     if watchdog.last_check_result and not watchdog.last_check_result.healthy:
-                        raise RuntimeError(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}")
+                        raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}", capture.path))
 
                     log_tail = ""
                     try:
@@ -878,10 +889,10 @@ class SmokeStageSupervisor:
             if not ready:
                 if self.breach_event.is_set():
                     b_res = self.breach_result[0]
-                    raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", capture.path))
                 if watchdog.last_check_result and not watchdog.last_check_result.healthy:
-                    raise RuntimeError(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}")
-                raise TimeoutError(f"Server child failed to report ready on {ctrl_url}/health within startup grace period")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}", capture.path))
+                raise TimeoutError(_startup_failure_message(f"Server child failed to report ready on {ctrl_url}/health within startup grace period", capture.path))
 
             ctx = SmokeStageContext(
                 supervisor=self,
