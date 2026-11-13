@@ -5,7 +5,7 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 -__version__ = "1.15.0"
-+__version__ = "1.15.0+qmd.1"  # QMD controlled checkpoint security patch
++__version__ = "1.15.0+qmd.2"  # QMD controlled checkpoint security patch
  
  from .accelerator import Accelerator
  from .big_modeling import (

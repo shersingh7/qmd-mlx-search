@@ -149,35 +149,41 @@ def _pin_regular(parent_fd, name):
     # device side effects even with O_NONBLOCK. Hardlink first; inspect second.
     # EXDEV/EPERM deliberately fail closed rather than falling back to unsafe
     # open/copy. TMPDIR must be on the checkpoint filesystem and permit links.
-    with tempfile.TemporaryDirectory(prefix="accelerate-checkpoint-") as staging:
-        stage_fd = _open_absolute_directory(os.path.realpath(staging))
-        try:
-            stage_info = os.fstat(stage_fd)
-            if stage_info.st_uid != os.geteuid() or stat.S_IMODE(stage_info.st_mode) != 0o700:
-                _reject("checkpoint staging directory is not private")
+    readable = None
+    try:
+        with tempfile.TemporaryDirectory(prefix="accelerate-checkpoint-") as staging:
+            stage_fd = _open_absolute_directory(os.path.realpath(staging))
             try:
-                os.link(name, "pinned", src_dir_fd=parent_fd, dst_dir_fd=stage_fd, follow_symlinks=False)
-            except OSError as exc:
-                _reject(
-                    "macOS requires private same-filesystem hardlink staging; "
-                    "set TMPDIR to a trusted directory on the checkpoint filesystem "
-                    f"(link failed: {exc.strerror})"
-                )
-            try:
-                info = os.stat("pinned", dir_fd=stage_fd, follow_symlinks=False)
-                _regular(info, name)
-                readable = os.open("pinned", flags, dir_fd=stage_fd)
+                stage_info = os.fstat(stage_fd)
+                if stage_info.st_uid != os.geteuid() or stat.S_IMODE(stage_info.st_mode) != 0o700:
+                    _reject("checkpoint staging directory is not private")
                 try:
+                    os.link(name, "pinned", src_dir_fd=parent_fd, dst_dir_fd=stage_fd, follow_symlinks=False)
+                except OSError as exc:
+                    _reject(
+                        "macOS requires private same-filesystem hardlink staging; "
+                        "set TMPDIR to a trusted directory on the checkpoint filesystem "
+                        f"(link failed: {exc.strerror})"
+                    )
+                try:
+                    info = os.stat("pinned", dir_fd=stage_fd, follow_symlinks=False)
+                    _regular(info, name)
+                    readable = os.open("pinned", flags, dir_fd=stage_fd)
                     if not _same_inode(info, os.fstat(readable)):
                         _reject("private staging changed the checkpoint inode")
-                    return readable
-                except BaseException:
-                    os.close(readable)
-                    raise
+                finally:
+                    os.unlink("pinned", dir_fd=stage_fd)
             finally:
-                os.unlink("pinned", dir_fd=stage_fd)
-        finally:
-            os.close(stage_fd)
+                os.close(stage_fd)
+        # Transfer only after unlink, directory close AND TemporaryDirectory
+        # cleanup succeed. Any preceding failure still belongs to this owner.
+        if readable is None:
+            _reject("staging completed without a readable checkpoint descriptor")
+        result, readable = readable, None
+        return result
+    finally:
+        if readable is not None:
+            os.close(readable)
 
 
 @dataclass(frozen=True)
@@ -202,6 +208,7 @@ class _OpenedFile:
 class _Root:
     def __init__(self, directory):
         _require_platform()
+        self.fd = -1  # Closed sentinel must never mean process-relative dir_fd=None.
         directory = _path(directory)
         selected = os.stat(directory)
         if not stat.S_ISDIR(selected.st_mode):
@@ -224,15 +231,25 @@ class _Root:
             ):
                 self._hub = (hub, relative[0])
         self.fd = _open_absolute_directory(self.path)
-        if not _same_inode(selected, os.fstat(self.fd)):
-            os.close(self.fd)
-            _reject("checkpoint root changed while establishing its directory capability")
+        try:
+            if not _same_inode(selected, os.fstat(self.fd)):
+                _reject("checkpoint root changed while establishing its directory capability")
+        except BaseException:
+            self.close()
+            raise
 
     def close(self):
-        os.close(self.fd)
+        if self.fd >= 0:
+            descriptor, self.fd = self.fd, -1  # Revoke BEFORE the OS may recycle it.
+            os.close(descriptor)
+
+    def _require_open(self):
+        if self.fd < 0:
+            _reject("checkpoint directory capability is closed")
 
     @contextlib.contextmanager
     def locate(self, name):
+        self._require_open()
         _shard_name(name)
         pending = name.split("/")
         links = 0
@@ -299,6 +316,7 @@ class _Root:
             pass
 
     def preflight(self):
+        self._require_open()
         # Defer filesystem checks until this process actually reads a shard.
         # Upstream rank-0 broadcast legitimately needs only the index on other
         # ranks. Schema/path syntax is still validated during discovery there.
@@ -310,10 +328,17 @@ class _Root:
 
     @contextlib.contextmanager
     def open(self, name):
-        with self.locate(name) as (parent, leaf):
-            fd = _pin_regular(parent, leaf)
-        with os.fdopen(fd, "rb") as file:
-            yield _OpenedFile(os.path.join(self.path, name), file)
+        fd = None
+        try:
+            with self.locate(name) as (parent, leaf):
+                fd = _pin_regular(parent, leaf)
+            # Keep one explicit FD owner across directory-context cleanup,
+            # file-wrapper construction, caller errors and wrapper teardown.
+            with os.fdopen(fd, "rb", closefd=False) as file:
+                yield _OpenedFile(os.path.join(self.path, name), file)
+        finally:
+            if fd is not None:
+                os.close(fd)
 
 
 def _unique_object(pairs):

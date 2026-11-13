@@ -20,7 +20,7 @@ import urllib.request
 import zipfile
 
 UPSTREAM_VERSION = "1.15.0"
-VERSION = "1.15.0+qmd.1"
+VERSION = "1.15.0+qmd.2"
 UPSTREAM_NAME = "accelerate-1.15.0-py3-none-any.whl"
 WHEEL_NAME = f"accelerate-{VERSION}-py3-none-any.whl"
 UPSTREAM_SHA256 = "97eacca0b73e45cb867dbf8c5d5d4dc32219544300e0c8992c7334dc2ef33cec"
@@ -30,7 +30,7 @@ UPSTREAM_URL = (
 )
 ROOT = Path(__file__).resolve().parents[1]
 VENDOR = ROOT / "vendor" / "accelerate"
-NOTICE = """QMD controlled local security patch: Accelerate 1.15.0+qmd.1
+NOTICE = """QMD controlled local security patch: Accelerate 1.15.0+qmd.2
 
 This is NOT an official Hugging Face release or an upstream advisory closure.
 Upstream 1.15.0 remains vulnerable to GHSA-4j2p-28q2-5m79 / CVE-2026-69112.

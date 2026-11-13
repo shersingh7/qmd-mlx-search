@@ -11,13 +11,16 @@ from __future__ import annotations
 
 import ast
 import builtins
+import contextlib
 import copy
+import errno
 import hashlib
 import importlib.metadata
 import inspect
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import stat
 import subprocess
@@ -59,7 +62,7 @@ def installed_wheel_contract(request):
     is_baseline = "baseline" in request.node.name
     if BASELINE != is_baseline:
         pytest.skip("separate unmodified-wheel baseline run" if is_baseline else "baseline-only run")
-    expected = "1.15.0" if BASELINE else "1.15.0+qmd.1"
+    expected = "1.15.0" if BASELINE else "1.15.0+qmd.2"
     assert accelerate.__version__ == expected
     assert importlib.metadata.version("accelerate") == expected
     assert "site-packages" in str(Path(accelerate.__file__).resolve())
@@ -130,10 +133,19 @@ def forbid_reads(monkeypatch, forbidden=()):
             pass
     attempts = []
 
+    def target_info(path, dir_fd=None):
+        # Kernel FD aliases are symlinks in lstat, but the held inode is the
+        # object being opened. Inspect it; never broadly exempt /proc paths.
+        value = os.fspath(path)
+        match = re.fullmatch(r"/(?:proc/self/fd|dev/fd)/([0-9]+)", value) if isinstance(value, str) else None
+        if match is not None:
+            return os.fstat(int(match[1]))
+        return real_stat(path, dir_fd=dir_fd, follow_symlinks=False)
+
     def guarded_open(path, flags, mode=0o777, *, dir_fd=None):
         if not (flags & os.O_DIRECTORY) and not (flags & getattr(os, "O_PATH", 0)):
             try:
-                info = real_stat(path, dir_fd=dir_fd, follow_symlinks=False)
+                info = target_info(path, dir_fd)
             except (OSError, TypeError):
                 info = None
             if info is not None and (
@@ -147,7 +159,7 @@ def forbid_reads(monkeypatch, forbidden=()):
     def guarded_builtin(path, *args, **kwargs):
         if not isinstance(path, int):
             try:
-                info = real_stat(path, follow_symlinks=False)
+                info = target_info(path)
             except (OSError, TypeError):
                 info = None
             if info is not None and (info.st_dev, info.st_ino) in forbidden_ids:
@@ -705,7 +717,7 @@ def test_installed_wheel_source_record_and_public_aliases():
     assert ENTRIES[4][1] is ENTRIES[5][1] is retained_dispatch
     assert list(inspect.signature(retained_state_dict).parameters) == ["checkpoint_file", "device_map"]
     with zipfile.ZipFile(VENDOR / "upstream" / "accelerate-1.15.0-py3-none-any.whl") as old, zipfile.ZipFile(wheel) as new:
-        assert old.read("accelerate-1.15.0.dist-info/licenses/LICENSE") == new.read("accelerate-1.15.0+qmd.1.dist-info/licenses/LICENSE")
+        assert old.read("accelerate-1.15.0.dist-info/licenses/LICENSE") == new.read("accelerate-1.15.0+qmd.2.dist-info/licenses/LICENSE")
         changed = set(provenance["patched_upstream_source_members"])
         for name in old.namelist():
             if name.startswith("accelerate/") and name not in changed:
@@ -869,6 +881,158 @@ def test_handles_are_closed_after_success_and_rejection(tmp_path):
         with pytest.raises(security_error()):
             retained_state_dict(rejected)
     assert len(os.listdir(descriptor_directory)) == before
+
+
+def _live_descriptor_set():
+    directory = "/proc/self/fd" if sys.platform == "linux" else "/dev/fd"
+    result = set()
+    for name in os.listdir(directory):
+        try:
+            descriptor = int(name)
+            os.fstat(descriptor)
+            result.add(descriptor)
+        except (ValueError, OSError):
+            pass  # The descriptor used by listdir may already have closed.
+    return result
+
+
+def test_read_monitor_checks_fd_target_identity_without_exempting_fd_aliases(tmp_path, monkeypatch):
+    good, forbidden = tmp_path / "index.json", tmp_path / "owned-forbidden.bin"
+    good.write_text("{}")
+    forbidden.write_bytes(b"owned sentinel")
+    with good.open("rb") as readable, forbidden.open("rb") as denied:
+        attempts = forbid_reads(monkeypatch, [forbidden])
+        prefix = "/proc/self/fd" if sys.platform == "linux" else "/dev/fd"
+        with contextlib.closing(os.fdopen(os.open(f"{prefix}/{readable.fileno()}", os.O_RDONLY), "rb")) as file:
+            assert file.read() == b"{}"
+        with pytest.raises(AssertionError, match="Rejected shard reached a DATA open"):
+            os.open(f"{prefix}/{denied.fileno()}", os.O_RDONLY)
+        assert attempts == [f"{prefix}/{denied.fileno()}"]
+
+
+@pytest.mark.parametrize("operation", ["public-load", "preflight", "validate", "locate", "open"])
+def test_retired_capability_is_revoked_before_recycled_fd_access(tmp_path, monkeypatch, operation):
+    security = importlib.import_module("accelerate.utils.checkpoint_security")
+    first, second = tmp_path / "first", tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    write_weights(first / "pytorch_model.bin")
+    write_weights(second / "pytorch_model.bin")
+    with security.checkpoint_files(first, "pytorch_model.bin", "model.safetensors") as capabilities:
+        capability = capabilities[0]
+        old_fd = capability.root.fd
+    owned = []
+    try:
+        while old_fd not in owned and len(owned) < 32:
+            owned.append(os.open(second, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC))
+        assert old_fd in owned, "Fixture must establish real descriptor recycling without dup2"
+        attempts = forbid_reads(monkeypatch, [second / "pytorch_model.bin"])
+        with pytest.raises(security.CheckpointSecurityError, match="closed|expired|revoked"):
+            if operation == "public-load":
+                retained_state_dict(capability)
+            elif operation == "preflight":
+                capability.root.preflight()
+            elif operation == "validate":
+                capability.root.validate(capability.name)
+            elif operation == "locate":
+                with capability.root.locate(capability.name):
+                    pass
+            else:
+                with capability.root.open(capability.name):
+                    pass
+        assert attempts == []
+        capability.root.close()  # Idempotence must not close the recycled owner.
+        assert stat.S_ISDIR(os.fstat(old_fd).st_mode)
+    finally:
+        for descriptor in owned:
+            with contextlib.suppress(OSError):
+                os.close(descriptor)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="macOS hardlink staging cleanup")
+@pytest.mark.parametrize("stage", ["unlink", "temporary-directory-exit"])
+def test_staging_cleanup_failure_retains_fd_ownership_until_transfer(tmp_path, monkeypatch, stage):
+    security = importlib.import_module("accelerate.utils.checkpoint_security")
+    checkpoint = tmp_path / "weights.bin"
+    write_weights(checkpoint)
+    retained_state_dict(checkpoint)  # Finish import/caching work before the snapshot.
+    before = _live_descriptor_set()
+    original_unlink = os.unlink
+    original_cleanup = security.tempfile.TemporaryDirectory.cleanup
+    injected = []
+    def unlink(path, *args, **kwargs):
+        if stage == "unlink" and path == "pinned" and kwargs.get("dir_fd") is not None and not injected:
+            injected.append(stage)
+            raise OSError(errno.EIO, "owned fixture staging unlink failure")
+        return original_unlink(path, *args, **kwargs)
+    def cleanup(directory):
+        original_cleanup(directory)
+        if stage == "temporary-directory-exit" and not injected:
+            injected.append(stage)
+            raise OSError(errno.EIO, "owned fixture staging exit failure")
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "unlink", unlink)
+        patch.setattr(security.tempfile.TemporaryDirectory, "cleanup", cleanup)
+        with pytest.raises(security.CheckpointSecurityError, match="staging"):
+            retained_state_dict(checkpoint)
+    leaked = _live_descriptor_set() - before
+    try:
+        assert injected == [stage]
+        assert not leaked, f"Staging failure leaked descriptors: {sorted(leaked)}"
+    finally:
+        # A red regression may leak an owned fixture FD. Never close an unrelated descriptor.
+        expected = os.stat(checkpoint)
+        for descriptor in leaked:
+            info = os.fstat(descriptor)
+            if (info.st_dev, info.st_ino) == (expected.st_dev, expected.st_ino):
+                os.close(descriptor)
+
+
+@pytest.mark.parametrize("stage", ["wrapper-construction", "directory-context-exit"])
+def test_open_context_keeps_descriptor_ownership_on_setup_failure(tmp_path, monkeypatch, stage):
+    security = importlib.import_module("accelerate.utils.checkpoint_security")
+    checkpoint = tmp_path / "weights.bin"
+    write_weights(checkpoint)
+    root = security._Root(tmp_path)
+    pinned = []
+    original_pin, original_locate = security._pin_regular, root.locate
+    before = _live_descriptor_set()
+    def pin(*args):
+        descriptor = original_pin(*args)
+        pinned.append(descriptor)
+        return descriptor
+    @contextlib.contextmanager
+    def locate(name):
+        with original_locate(name) as target:
+            yield target
+        if pinned:
+            raise OSError(errno.EIO, "owned fixture directory-context cleanup failure")
+    def fdopen(*args, **kwargs):
+        raise OSError(errno.EIO, "owned fixture file-wrapper construction failure")
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(security, "_pin_regular", pin)
+            if stage == "wrapper-construction":
+                patch.setattr(os, "fdopen", fdopen)
+            else:
+                patch.setattr(root, "locate", locate)
+            with pytest.raises(OSError, match="owned fixture"):
+                with root.open(checkpoint.name):
+                    pytest.fail("Setup failure must precede the caller's load")
+        assert pinned
+        assert _live_descriptor_set() == before
+        for descriptor in pinned:
+            with pytest.raises(OSError):
+                os.fstat(descriptor)
+    finally:
+        # Clean up only these test-owned handles on an intentionally red run.
+        expected = os.stat(checkpoint)
+        for descriptor in pinned:
+            with contextlib.suppress(OSError):
+                info = os.fstat(descriptor)
+                if (info.st_dev, info.st_ino) == (expected.st_dev, expected.st_ino):
+                    os.close(descriptor)
+        root.close()
 
 
 def test_peft_trl_indirect_runtime_and_retained_aliases(tiny_model, tiny_tokenizer, tmp_path, monkeypatch):

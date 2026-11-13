@@ -52,12 +52,12 @@ jobs:
         run: uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" torch==2.15.0
       - name: Install the controlled wheel and locked test dependencies
         run: |
-          uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" 'finetune/vendor/accelerate/accelerate-1.15.0+qmd.1-py3-none-any.whl' transformers==5.22.2 peft==0.21.3 trl==1.17.1 pytest==9.2.0
+          uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" 'finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl' transformers==5.22.2 peft==0.21.3 trl==1.17.1 pytest==9.2.0
           uv pip check --python "$VENV_PYTHON"
-          "$VENV_PYTHON" -c 'import accelerate,torch; assert accelerate.__version__ == "1.15.0+qmd.1"; assert torch.__version__ in {"2.15.0", "2.15.0+cpu"}; assert torch.version.cuda is None; print("CPU-only installed wheel:", accelerate.__version__, torch.__version__)'
+          "$VENV_PYTHON" -c 'import accelerate,torch; assert accelerate.__version__ == "1.15.0+qmd.2"; assert torch.__version__ in {"2.15.0", "2.15.0+cpu"}; assert torch.version.cuda is None; print("CPU-only installed wheel:", accelerate.__version__, torch.__version__)'
       - name: Test real installed checkpoint APIs, races, cleanup and wheel integrity
         run: |
-          "$VENV_PYTHON" -m pytest -q -p no:cacheprovider finetune/tests/test_accelerate_checkpoint_security.py --junitxml="$RUNNER_TEMP/accelerate-checkpoint.xml"
+          "$VENV_PYTHON" -m pytest -q -p no:cacheprovider finetune/tests/test_accelerate_checkpoint_security.py finetune/tests/test_accelerate_review_contracts.py --junitxml="$RUNNER_TEMP/accelerate-checkpoint.xml"
       - name: Retain native platform evidence
         if: always()
         uses: actions/upload-artifact@v4

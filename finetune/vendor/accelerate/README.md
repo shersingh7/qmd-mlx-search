@@ -1,8 +1,8 @@
 # Controlled Accelerate checkpoint security patch
 
-**Artifact:** `accelerate-1.15.0+qmd.1-py3-none-any.whl`
+**Artifact:** `accelerate-1.15.0+qmd.2-py3-none-any.whl`
 
-**SHA256:** `9b778265a3952140fa4b64b97a022b11f288bd56627b64e71c7fd556dabdeadd`
+**SHA256:** `abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6`
 
 This is a controlled local build, **not** an official Hugging Face release or an
 upstream advisory closure. The official Accelerate 1.15.0 wheel still contains
@@ -99,9 +99,11 @@ this patch never infers permission from an arbitrary snapshot-looking path.
 
 - **Linux implementation:** `O_PATH | O_NOFOLLOW` pins a metadata-only handle;
   `fstat` verifies the actual inode before its first data open through
-  `/proc/self/fd`. It requires usable procfs FD links. This branch has **not been
-  executed in this macOS environment**: the installed Docker client could not
-  connect to a daemon. Run this same suite on Linux before Linux deployment.
+  `/proc/self/fd`. It requires usable procfs FD links. The first native qmd.1 CI
+  run exposed a test-monitor defect: lstat treated kernel FD aliases as ordinary
+  symlinks. The monitor now checks the held inode using fstat, with a regression
+  proving forbidden inode aliases are still rejected. **qmd.2 still requires a
+  fresh passing native Linux run before Linux deployment.**
 - **macOS, executed:** there is no `O_PATH` equivalent providing the same device
   safety. A private mode-0700 temporary directory receives a descriptor-relative
   **hardlink** to the candidate. The pinned staging entry is checked before any
@@ -143,10 +145,20 @@ installed path and artifact/source hashes.
   all retained public aliases, directory/direct-index inputs, traversal, absolute
   paths, FIFO and directory shards reach an intercepted loader. All fixtures are
   owned synthetic files; no real private file or blocking FIFO is opened.
-- **Patched installed wheel:** 1139 tests passed, 48 baseline-only cases skipped.
-  The package is actually wheel-installed in the isolated finetune environment;
-  tests compare installed source hashes to the wheel/provenance. There is no
-  repository-local validator import or application guard standing in for it.
+- **Initial qmd.1 installed wheel:** 1139 tests passed, 48 baseline-only cases
+  skipped. Those historical receipts remain unchanged.
+- **Revised qmd.2 installed wheel:** the parent's fresh native macOS run passed
+  **1149 tests**, with 48 baseline-only cases skipped. The package is actually
+  wheel-installed in the isolated finetune environment; tests compare installed
+  source hashes to the wheel/provenance. There is no repository-local validator
+  import or application guard standing in for it.
+- The independent qmd.1 review retained 61 passing held-out cases and identified
+  two low-severity lifetime defects before its provider blocked final delivery.
+  This was not unconditional production approval. qmd.2 revokes retired root
+  capabilities before descriptor recycling and retains readable-FD ownership
+  until all staging cleanup succeeds. It also closes descriptors if a file
+  wrapper or directory context fails during setup. Nine focused regressions
+  failed on qmd.1 before repair; the complete qmd.2 suite now passes locally.
 - Cases cover invalid schemas, special files, path/foreign-root forms,
   prefix-siblings, external symlinks, valid/nested/flat-index checkpoints,
   approved and forged caches, final-load bypass attempts, aliases, FD cleanup,

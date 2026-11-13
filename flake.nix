@@ -64,13 +64,12 @@
         };
 
         nodeModulesHashes = {
-          # Recompute BOTH after the reviewed package.json/bun.lock settle.
-          # The old CI 'got' values describe a different graph and only a
-          # production tree, NOT this build+production fixed-output layout.
-          # These placeholders deliberately fail closed with Nix's real hash.
-          # Measured by run 43452002860 at 093c9f7 (exact package.json + bun.lock).
+          # Recompute both from native CI after package.json/bun.lock or the
+          # build+production dependency layout changes; never disable integrity.
+          # Linux measured by run 43452002860 at 093c9f7.
           x86_64-linux = "sha256-lYii6J60m9lQmhDmCjP4lYmEdDxkExke+XIrRN7Vuho=";
-          aarch64-darwin = pkgs.lib.fakeHash;
+          # Darwin measured by attempt 2 of the same exact-head run.
+          aarch64-darwin = "sha256-bF4vRAwHesw3dFXS7q4sFyRxFmgFpiUdfv/8TTOyBuY=";
         };
 
         nodeModules = pkgs.stdenvNoCC.mkDerivation {

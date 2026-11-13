@@ -4,21 +4,21 @@
   ],
   "advisory": "GHSA-4j2p-28q2-5m79 / CVE-2026-69112; controlled local fix, not upstream closure",
   "artifact": {
-    "filename": "accelerate-1.15.0+qmd.1-py3-none-any.whl",
-    "sha256": "9b778265a3952140fa4b64b97a022b11f288bd56627b64e71c7fd556dabdeadd",
-    "size": 1585179,
-    "version": "1.15.0+qmd.1"
+    "filename": "accelerate-1.15.0+qmd.2-py3-none-any.whl",
+    "sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "size": 1586279,
+    "version": "1.15.0+qmd.2"
   },
   "inputs": {
-    "build_patched_accelerate.py": "8240466aa15cd643aec0248e59dc26a12213a235e94580b08c32fd01c235b04e",
-    "checkpoint_security.py": "2e9f08c1d9b02d545e1f457f562141b928ac9a96c9f298631397647cafba716f",
-    "source.patch": "6717f8fd2bfb62ed7a4daa130724777ba6e27c3180e4a221df7eb5998ba11650"
+    "build_patched_accelerate.py": "a22cbf0e3e880d0ede3dfd6147247bd4b330478466247a6ada138426ef09abdf",
+    "checkpoint_security.py": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
+    "source.patch": "488057287e5b8c7eac6a1ff4ade291a061fbdeed6007b8c34ba503e9f7d150ce"
   },
   "license": {
     "identifier": "Apache-2.0",
     "preserved_verbatim": true,
     "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-    "wheel_path": "accelerate-1.15.0+qmd.1.dist-info/licenses/LICENSE"
+    "wheel_path": "accelerate-1.15.0+qmd.2.dist-info/licenses/LICENSE"
   },
   "patched_upstream_source_members": [
     "accelerate/__init__.py",
@@ -32,14 +32,14 @@
     "version": "1.15.0"
   },
   "wheel_members": {
-    "accelerate-1.15.0+qmd.1.dist-info/METADATA": "a1644db86dd2157d767fd33b90ca741102535c373e578cb3a9cd1a8c6793b905",
-    "accelerate-1.15.0+qmd.1.dist-info/QMD_PATCH_NOTICE.txt": "a2806757825a238b4ea39f850a729d6ae35f019f2bd3a16b775bd3c5e5a869de",
-    "accelerate-1.15.0+qmd.1.dist-info/RECORD": "14664815beeb8f4ad6fbd5495218cd5d926faae2d175c96bb2ed14daed62d38f",
-    "accelerate-1.15.0+qmd.1.dist-info/WHEEL": "95353a07a7887d8a224094d935cf9fc9a47a0692fa7a14f3537c466319f69fc9",
-    "accelerate-1.15.0+qmd.1.dist-info/entry_points.txt": "569cbc81419f67ed559ccdb6dbd7dbf02a4934b05d307ff0b49f4f43b6ffdad4",
-    "accelerate-1.15.0+qmd.1.dist-info/licenses/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-    "accelerate-1.15.0+qmd.1.dist-info/top_level.txt": "7ac55f7714e276c8d0f74cec37facfa632c52788a3465c789a72eb1b4f6196de",
-    "accelerate/__init__.py": "2e9d5d6578a546717c436f876114398e4b4df1c3ab0de95f811ee71deb0ca0d9",
+    "accelerate-1.15.0+qmd.2.dist-info/METADATA": "c3f88a51ccd5d71f9c099d3f49adb3dcdfdeebcb4f0b734c89cba30e1aad2161",
+    "accelerate-1.15.0+qmd.2.dist-info/QMD_PATCH_NOTICE.txt": "760dfd91a3873f5a0f599037b62ca3c90f1c68e3fa8ca99f604c9873f63c970e",
+    "accelerate-1.15.0+qmd.2.dist-info/RECORD": "7190cc07ef5bf71d7effdd0bf58349975a5bc0a6db91c36ab43317e3f48744b3",
+    "accelerate-1.15.0+qmd.2.dist-info/WHEEL": "95353a07a7887d8a224094d935cf9fc9a47a0692fa7a14f3537c466319f69fc9",
+    "accelerate-1.15.0+qmd.2.dist-info/entry_points.txt": "569cbc81419f67ed559ccdb6dbd7dbf02a4934b05d307ff0b49f4f43b6ffdad4",
+    "accelerate-1.15.0+qmd.2.dist-info/licenses/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "accelerate-1.15.0+qmd.2.dist-info/top_level.txt": "7ac55f7714e276c8d0f74cec37facfa632c52788a3465c789a72eb1b4f6196de",
+    "accelerate/__init__.py": "2e65354fca30b8f439935938242a9cefee832dfe9f6805493c1f27a6102a90fe",
     "accelerate/accelerator.py": "b16097a6b8fc372e580eeb35bd94f1e88c6d9dc80ab340f3d05c1daf3e64e14e",
     "accelerate/big_modeling.py": "aa5ff729d8177c29e757ab2fb8a4e9a2b2edd50b3a931d5d159e270066eab426",
     "accelerate/checkpointing.py": "f97a28ebbb7ce44e47ae8ff547ff9f30870c886d92a744485526d8aa9c2feb3f",
@@ -104,7 +104,7 @@
     "accelerate/utils/__init__.py": "ec177be14186f02a623d0033f442948e6de51aeb7f37fca24fc2918fbef3f5d3",
     "accelerate/utils/ao.py": "f718438b68f03209add1d065f798db7c766fd4e81da2bbbaa35664b542fd856d",
     "accelerate/utils/bnb.py": "6e8847abe62acb5395f9e9cb1caafd0fbd0f6da731b97c8754622cdcc70aac02",
-    "accelerate/utils/checkpoint_security.py": "2e9f08c1d9b02d545e1f457f562141b928ac9a96c9f298631397647cafba716f",
+    "accelerate/utils/checkpoint_security.py": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
     "accelerate/utils/constants.py": "d8b51b2b93c583f4ccfd8a9a7b431fbbe0102ac7e0509b20ec55251914709ab0",
     "accelerate/utils/dataclasses.py": "9a9f3d6e7092c6232df3195806ae62ed8a26551be59e01a5af8ef6d55eba5587",
     "accelerate/utils/deepspeed.py": "82dfa3c0ea4eb51b3a378b2886e48ed88df1d6a2e83bab986239cfacaa7a664e",
