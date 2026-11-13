@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+// Run the identical ownership assertions in Node/Vitest and native `bun test`.
+const testRuntime = (process.versions as Record<string, string>).bun ? "bun:test" : "vitest";
+const { describe, expect, it }: typeof import("vitest") = await import(testRuntime);
+if ((process.versions as Record<string, string>).bun) console.log(JSON.stringify({
+  evidence: "recovery-tree-native-runtime", bun: (process.versions as Record<string, string>).bun, executable: process.execPath,
+}));
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import http from "node:http";
@@ -24,34 +29,106 @@ async function stopSentinel(child: ChildProcess): Promise<void> {
   await waitAbsent(child.pid!);
 }
 
+// This deadline intentionally makes NO claim that a cold command has started.
+// Tree readiness is a separate fixture contract below, not production grace.
+async function fastTimeoutCase() {
+  const root = mkdtempSync(path.join(tmpdir(), "qmd-recovery-fast-timeout-"));
+  const sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { detached: true, stdio: "ignore" });
+  let helper: Promise<RecoveryProcessResult> | undefined;
+  let result: RecoveryProcessResult | undefined;
+  let guard: ReturnType<typeof setTimeout> | undefined;
+  let guardFired = false;
+  const finallyKilled: number[] = [];
+  try {
+    const timeoutMs = 200;
+    const started = performance.now();
+    helper = executeRecoveryWorker({ dbPath: path.join(root, "shadow-unused.sqlite"), docsDir: root,
+      action: "resume", outputJson: path.join(root, "absent-report.json"), stateRoot: path.join(root, "state"),
+      timeoutMs, command: ["/usr/bin/python3", "-S", "-c", "import time; time.sleep(60)"] });
+    result = await Promise.race([helper, new Promise<never>((_resolve, reject) => {
+      guard = setTimeout(() => { guardFired = true; reject(new Error("200ms helper exceeded bounded teardown")); }, 1_800);
+    })]);
+    clearTimeout(guard);
+    const elapsedMs = performance.now() - started;
+    expect(result.timedOut, JSON.stringify(result)).toBe(true);
+    expect(result.error).toMatch(/timed out after 200ms/);
+    expect(result.report).toBeUndefined();
+    expect(elapsedMs).toBeGreaterThanOrEqual(timeoutMs);
+    expect(elapsedMs).toBeLessThan(1_500);
+    expect(guardFired).toBe(false);
+    expect(result.pid).toBeTypeOf("number");
+    // The same ownership/pipe/sentinel observations as the tree cases, before
+    // fixture cleanup, but without requiring a descendant to beat 200ms.
+    await waitAbsent(result.pid!);
+    expect(alive(sentinel.pid!)).toBe(true);
+    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, sessionTerminated: true,
+      pipesClosed: true, forcedPipeClose: false, containmentVerified: false });
+    console.log(JSON.stringify({ evidence: "recovery-fast-timeout-before-finally", timeoutMs,
+      elapsedMs: Math.round(elapsedMs), pid: result.pid, parentAbsent: !alive(result.pid!),
+      sentinelAlive: alive(sentinel.pid!), guardFired, cleanup: result.cleanup }));
+  } finally {
+    if (guard) clearTimeout(guard);
+    result ??= await helper;
+    if (result?.pid !== undefined) {
+      if (alive(result.pid)) { finallyKilled.push(result.pid); process.kill(result.pid, "SIGKILL"); }
+      await waitAbsent(result.pid);
+    }
+    await stopSentinel(sentinel);
+    rmSync(root, { recursive: true, force: true });
+    expect(existsSync(root)).toBe(false);
+    console.log(JSON.stringify({ evidence: "recovery-fast-timeout-finally", guardFired, finallyKilled,
+      scratchRemoved: !existsSync(root) }));
+    expect(finallyKilled).toEqual([]);
+  }
+}
+
 // A real helper invocation with a real TERM-ignoring descendant. The independent
 // guard is failure-only; pre-finally assertions cannot pass by using its cleanup.
 async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escaped-pipe") {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-recovery-tree-"));
   const pidFile = path.join(root, "owned-pids.json");
+  const releaseFile = path.join(root, "fixture-released");
   const outputJson = path.join(root, "worker-report.json");
   const dbPath = path.join(root, "shadow-unused.sqlite");
   const sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { detached: true, stdio: "ignore" });
   let server: http.Server | undefined;
   let helper: Promise<RecoveryProcessResult> | undefined;
   let guard: ReturnType<typeof setTimeout> | undefined;
-  let pids: { parent: number; grandchild: number } | undefined;
+  let pids: { parent: number; grandchild: number; ready: boolean } | undefined;
+  let settledResult: RecoveryProcessResult | undefined;
+  let fixtureStartupMs: number | undefined;
+  let releasedAt: number | undefined;
   let guardFired = false;
   let finallyKilled: number[] = [];
   let workerRequests = 0;
   try {
-    // IPC readiness proves the grandchild's TERM handler exists before the
-    // leader exits or the helper's execution deadline starts teardown.
+    // Deliberately exceed the old 200ms setup assumption on every host. The
+    // real entrypoint already has its own cold-import work to exercise.
+    const fixtureStartupDelayMs = mode === "real-worker" ? 0 : 300;
+    // IPC proves the grandchild's TERM handler exists. The release file then
+    // lets this test observe BOTH live PIDs before allowing the leader to exit
+    // or the real worker to start. Neither handshake resets the helper timer.
     const grandchildCode = "process.on('SIGTERM', () => {}); process.send('ready'); setInterval(() => {}, 1000);";
     const prelude = `
+      process.on('SIGTERM', () => {});
+      await new Promise(resolve => setTimeout(resolve, ${fixtureStartupDelayMs}));
       const grandchild = spawn(process.execPath, ['-e', ${JSON.stringify(grandchildCode)}], {
         detached: ${mode === "escaped-pipe"}, stdio: ['ignore', 1, 2, 'ipc']
       });
-      await new Promise(resolve => grandchild.once('message', resolve));
+      const record = ready => {
+        writeFileSync(${JSON.stringify(pidFile + ".tmp")}, JSON.stringify({ parent: process.pid, grandchild: grandchild.pid, ready }));
+        renameSync(${JSON.stringify(pidFile + ".tmp")}, ${JSON.stringify(pidFile)});
+      };
+      record(false); // Failure-only cleanup can find even a not-yet-ready child.
+      await new Promise((resolve, reject) => {
+        grandchild.once('error', reject);
+        grandchild.once('exit', (code, signal) => reject(new Error('Fixture descendant exited before readiness: ' + code + '/' + signal)));
+        grandchild.once('message', message => message === 'ready' ? resolve() : reject(new Error('Unexpected fixture readiness message')));
+      });
       grandchild.disconnect();
       grandchild.unref();
-      writeFileSync(${JSON.stringify(pidFile)}, JSON.stringify({ parent: process.pid, grandchild: grandchild.pid }));
-      process.on('SIGTERM', () => {});
+      record(true);
+      while (!existsSync(${JSON.stringify(releaseFile)})) await new Promise(resolve => setTimeout(resolve, 5));
     `;
     let command: string[];
     let port = 8797;
@@ -80,7 +157,7 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
       port = (server.address() as { port: number }).port;
       expect(port).not.toBe(8787);
       const preload = path.join(root, "spawn-descendant.mjs");
-      writeFileSync(preload, `import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs'; ${prelude}`);
+      writeFileSync(preload, `import { spawn } from 'node:child_process'; import { existsSync, renameSync, writeFileSync } from 'node:fs'; ${prelude}`);
       command = [process.execPath, "--import", preload,
         ...((process.versions as Record<string, string>).bun ? [] : ["--import",
           fileURLToPath(new URL("../node_modules/tsx/dist/loader.mjs", import.meta.url))]),
@@ -96,26 +173,54 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
         writeFileSync(${JSON.stringify(outputJson)}, JSON.stringify({ ...${JSON.stringify(report)}, pid: process.pid }));
         process.exit(0);`;
       command = [process.execPath, "--input-type=module", "-e",
-        `import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs'; ${prelude} ${ending}`];
+        `import { spawn } from 'node:child_process'; import { existsSync, renameSync, writeFileSync } from 'node:fs'; ${prelude} ${ending}`];
     }
     const started = performance.now();
-    // A real TypeScript worker has cold-import/native-addon startup costs that
-    // vary across CI hosts. Give that fixture an explicit execution budget,
-    // while keeping the helper's post-deadline cleanup allowance unchanged.
-    const timeoutMs = mode === "real-worker" ? 5_000 : 200;
-    const elapsedBoundMs = mode === "real-worker" ? timeoutMs + 500 : 1_500;
+    // Cold supervisor + leader + descendant startup belongs to this explicit
+    // 5s execution budget. Keep the short-deadline test above and independently
+    // bound post-release cleanup for successful/escaped leaders below.
+    const timeoutMs = 5_000;
+    const elapsedBoundMs = timeoutMs + 500;
     helper = executeRecoveryWorker({ dbPath, docsDir: root, mlxPort: port, launchToken: "owned-tree",
-      action: mode === "real-worker" ? "index" : "resume", outputJson, stateRoot: path.join(root, "state"), timeoutMs, command });
-    const result = await Promise.race([helper, new Promise<never>((_resolve, reject) => {
+      action: mode === "real-worker" ? "index" : "resume", outputJson, stateRoot: path.join(root, "state"), timeoutMs, command })
+      .then(result => { settledResult = result; return result; });
+    const readyThenRun = async () => {
+      while (!settledResult) {
+        if (existsSync(pidFile)) {
+          const recorded = JSON.parse(readFileSync(pidFile, "utf8")) as NonNullable<typeof pids>;
+          if (recorded.ready) {
+            pids = recorded;
+            expect(alive(pids.parent)).toBe(true);
+            expect(alive(pids.grandchild)).toBe(true);
+            expect(alive(sentinel.pid!)).toBe(true);
+            fixtureStartupMs = performance.now() - started;
+            releasedAt = performance.now();
+            writeFileSync(releaseFile, "ready\n");
+            return await helper!;
+          }
+        }
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      return settledResult;
+    };
+    const result = await Promise.race([readyThenRun(), new Promise<never>((_resolve, reject) => {
       guard = setTimeout(() => { guardFired = true; reject(new Error("Helper exceeded its own timeout + teardown budget")); }, elapsedBoundMs + 300);
     })]);
     clearTimeout(guard);
     const elapsedMs = performance.now() - started;
-    expect(existsSync(pidFile), result.stderr).toBe(true);
+    const diagnostics = JSON.stringify({ mode, timeoutMs, elapsedMs, fixtureStartupMs, error: result.error,
+      stderr: result.stderr, cleanup: result.cleanup });
+    expect(existsSync(pidFile), diagnostics).toBe(true);
     pids = JSON.parse(readFileSync(pidFile, "utf8"));
+    expect(pids!.ready, diagnostics).toBe(true);
+    expect(fixtureStartupMs, diagnostics).toBeTypeOf("number");
+    expect(fixtureStartupMs!).toBeGreaterThanOrEqual(fixtureStartupDelayMs);
+    expect(fixtureStartupMs!).toBeLessThan(timeoutMs);
+    const postReleaseMs = performance.now() - releasedAt!;
     expect(result.pid).toBe(pids!.parent);
     expect(guardFired).toBe(false);
     expect(elapsedMs).toBeLessThan(elapsedBoundMs);
+    if (mode === "leader-exit" || mode === "escaped-pipe") expect(postReleaseMs).toBeLessThan(1_500);
     // These observations are made BEFORE any fixture/outer-guard cleanup.
     await waitAbsent(pids!.parent);
     if (mode !== "escaped-pipe") await waitAbsent(pids!.grandchild);
@@ -127,6 +232,7 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
     expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, pipesClosed: true });
     if (mode === "timeout" || mode === "real-worker") {
       expect(result.timedOut).toBe(true);
+      expect(elapsedMs).toBeGreaterThanOrEqual(timeoutMs);
       expect(result.error).toMatch(/timed out/);
       expect(result.cleanup).toMatchObject({ sigkillUsed: true, forcedPipeClose: false });
     } else if (mode === "leader-exit") {
@@ -141,10 +247,14 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
       // owned group. Refuse success and bound pipe drain, never signal an
       // arbitrary other group inferred from logs or report data.
       expect(result.error).toMatch(/pipe/i);
+      expect(result.timedOut).toBe(false);
+      expect(result.exitCode).toBe(0);
+      expect(result.signal).toBeNull();
       expect(result.cleanup).toMatchObject({ forcedPipeClose: true });
       expect(alive(pids!.grandchild)).toBe(true);
     }
-    console.log(JSON.stringify({ evidence: "recovery-tree-before-finally", mode, timeoutMs, elapsedMs: Math.round(elapsedMs), workerRequests,
+    console.log(JSON.stringify({ evidence: "recovery-tree-before-finally", mode, timeoutMs, elapsedMs: Math.round(elapsedMs),
+      fixtureStartupDelayMs, fixtureStartupMs: Math.round(fixtureStartupMs!), postReleaseMs: Math.round(postReleaseMs), workerRequests,
       helper: result.pid, grandchild: pids!.grandchild, parentAbsent: !alive(pids!.parent),
       grandchildAbsent: !alive(pids!.grandchild), sentinelAlive: alive(sentinel.pid!), guardFired,
       error: result.error ?? null, cleanup: result.cleanup }));
@@ -155,7 +265,9 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
     for (const pid of pids ? [pids.parent, pids.grandchild] : []) {
       if (alive(pid)) { finallyKilled.push(pid); process.kill(pid, "SIGKILL"); }
     }
-    if (helper) await helper;
+    const finalResult = helper ? await helper : undefined;
+    if (guardFired) console.error(JSON.stringify({ evidence: "recovery-tree-guard", mode, fixtureStartupMs,
+      error: finalResult?.error, stderr: finalResult?.stderr, cleanup: finalResult?.cleanup }));
     for (const pid of pids ? [pids.parent, pids.grandchild] : []) await waitAbsent(pid);
     await stopSentinel(sentinel);
     if (server) {
@@ -323,7 +435,8 @@ with open(${JSON.stringify(proofPath)}, 'w') as result:
 }
 
 describe.skipIf(process.platform === "win32")("recovery helper owns its POSIX worker group", () => {
-  it("bounds a 200ms timeout across TERM-ignoring inherited-pipe descendants", async () => treeCase("timeout"));
+  it("bounds a 200ms execution deadline without assuming cold-command readiness", fastTimeoutCase);
+  it("bounds a 5000ms execution budget across ready TERM-ignoring inherited-pipe descendants", async () => treeCase("timeout"));
   it("cleans the group even after its successful leader exits", async () => treeCase("leader-exit"));
   it("bounds the actual recovery-worker entrypoint with a preloaded inherited-pipe descendant", async () => treeCase("real-worker"));
   it("fails closed with bounded pipe fallback for a deliberately escaped session", async () => treeCase("escaped-pipe"));

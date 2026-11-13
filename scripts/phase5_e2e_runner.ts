@@ -9,6 +9,8 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSyn
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { EventEmitter } from "node:events";
+import { Readable, Writable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { RECOVERY_BARRIER_PREFIX, type RecoveryWorkerOptions, type RecoveryWorkerResult } from "./phase5_recovery_worker.js";
 import {
@@ -113,13 +115,76 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       cleanup: { childReaped: false, groupTerminated: false, pipesClosed: false, forcedPipeClose: false,
         sigkillUsed: false, sessionTerminated: false, containmentVerified: false, processGroups: [] } };
     const supervisorScript = fileURLToPath(new URL("./phase5_recovery_process.py", import.meta.url));
-    // Python retains the exact worker and joining anchors with WNOWAIT. Node's
-    // automatic reap cannot provide safe post-exit PGID ownership on its own.
-    const child = spawn("/usr/bin/python3", ["-S", "-u", supervisorScript, JSON.stringify({
+    const supervisorArgs = ["-S", "-u", supervisorScript, JSON.stringify({
       command: [executable, ...commandArgs], timeoutMs, contained: options.command === undefined,
-    })], { cwd: fileURLToPath(new URL("../", import.meta.url)), env,
-      detached: true, stdio: ["pipe", "pipe", "pipe", "pipe"] });
-    const control = child.stdio[3] as import("node:stream").Readable;
+    })];
+    const supervisorOptions = { cwd: fileURLToPath(new URL("../", import.meta.url)), env,
+      detached: true, stdio: ["pipe", "pipe", "pipe", "pipe"] as ["pipe", "pipe", "pipe", "pipe"] };
+    // Python retains the exact worker and joining anchors with WNOWAIT. Neither
+    // runtime's automatic reap grants post-exit numerical-PGID authority.
+    const spawnSupervisor = () => {
+      if (!(process.versions as Record<string, string>).bun) {
+        const child = spawn("/usr/bin/python3", supervisorArgs, supervisorOptions);
+        return { child, control: child.stdio[3] as Readable };
+      }
+      // Bun 1.3.8's node:child_process extra-stdio Socket can close a reused FD
+      // when an earlier child is collected. Do not give node:net ownership of
+      // this FD. Bun.spawn owns it; Bun.file(fd).stream() borrows it. Retain that
+      // native owner through exit AND all stream drains, independently observed.
+      // Keep this narrow structural API so Node builds need no Bun type package.
+      type NativeProcess = {
+        pid: number; stdio: [null, null, null, ...number[]];
+        stdin: { write(data: Uint8Array): number; flush(): number | Promise<number>; end(): number | Promise<number> };
+        stdout: import("node:stream/web").ReadableStream<Uint8Array>;
+        stderr: import("node:stream/web").ReadableStream<Uint8Array>;
+        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void;
+      };
+      const bun = (globalThis as unknown as { Bun: {
+        spawn(command: string[], options: typeof supervisorOptions): NativeProcess;
+        file(fd: number): { stream(): import("node:stream/web").ReadableStream<Uint8Array> };
+      } }).Bun;
+      const native = bun.spawn(["/usr/bin/python3", ...supervisorArgs], supervisorOptions);
+      let inputEnded = false;
+      const endInput = async () => {
+        if (inputEnded) return;
+        inputEnded = true;
+        await native.stdin.end();
+      };
+      const stdin = new Writable({
+        write(chunk: Buffer, _encoding, callback) {
+          try { native.stdin.write(chunk); Promise.resolve(native.stdin.flush()).then(() => callback(), callback); }
+          catch (error) { callback(error as Error); }
+        },
+        final(callback) { endInput().then(() => callback(), callback); },
+        destroy(error, callback) { endInput().then(() => callback(error), failure => callback(error ?? failure)); },
+      });
+      const stdout = Readable.fromWeb(native.stdout);
+      const stderr = Readable.fromWeb(native.stderr);
+      const control = Readable.fromWeb(bun.file(native.stdio[3]!).stream());
+      const child = Object.assign(new EventEmitter(), {
+        pid: native.pid, stdin, stdout, stderr, unref: () => native.unref(),
+      });
+      let exited = false;
+      let emittedClose = false;
+      const checkClose = () => {
+        if (!exited || emittedClose || ![stdout, stderr, control].every(stream => stream.closed)) return;
+        emittedClose = true;
+        child.emit("close");
+      };
+      for (const stream of [stdout, stderr, control]) stream.once("close", checkClose);
+      void native.exited.then(code => {
+        exited = true;
+        stdin.end();
+        child.emit("exit", native.signalCode === null ? code : null, native.signalCode);
+        checkClose();
+      }, error => {
+        exited = true;
+        child.emit("error", error);
+        checkClose();
+      });
+      return { child, control };
+    };
+    const { child, control } = spawnSupervisor();
     const logLimit = 64 * 1024;
     const teardownMs = 800;
     let pendingLine = "";
@@ -301,8 +366,8 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     control.on("error", error => { addError(`Recovery supervisor proof stream failed: ${error.message}`); stop("SIGKILL"); });
     child.stdout.on("error", error => { addError(`Recovery worker stdout failed: ${error.message}`); stop("SIGKILL"); });
     child.stderr.on("error", error => { addError(`Recovery worker stderr failed: ${error.message}`); stop("SIGKILL"); });
-    child.on("error", error => { helperExited = true; addError(`Recovery worker spawn failed: ${error.message}`); stop("SIGKILL"); });
-    child.on("exit", (code, signal) => {
+    child.on("error", (error: Error) => { helperExited = true; addError(`Recovery worker spawn failed: ${error.message}`); stop("SIGKILL"); });
+    child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
       if (settled) return;
       helperExited = true;
       if (code !== 0 || signal !== null) addError(`Recovery supervisor failed (exit=${code}, signal=${signal})`);

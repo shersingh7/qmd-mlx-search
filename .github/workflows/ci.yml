@@ -51,9 +51,10 @@ jobs:
       - name: Vitest suite through Bun's package-script launcher
         if: matrix.runtime == 'bun'
         # The suite uses Vitest APIs, not Bun's incomplete Vitest test shim.
-        # Native Bun CLI/SDK/SQLite/MCP-stdio and explicit HTTP refusal are
-        # independently checked below; Node's row exercises REST/MCP/SSE.
-        run: python scripts/run-offline.py bun run test --maxWorkers=2 --testTimeout 60000
+        # Native Bun recovery/GC checks must not skip in this advertised runtime.
+        # Set the literal requirement AFTER the offline wrapper strips ambient env.
+        # CLI/SDK/SQLite/MCP-stdio and HTTP refusal are also checked below.
+        run: python scripts/run-offline.py env REQUIRE_BUN=1 bun run test --maxWorkers=2 --testTimeout 60000
         env:
           DYLD_LIBRARY_PATH: /opt/homebrew/opt/sqlite/lib
           LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu
