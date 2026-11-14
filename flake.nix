@@ -71,10 +71,9 @@
         nodeModulesHashes = {
           # Recompute both from native CI after package.json/bun.lock or the
           # build+production dependency layout changes; never disable integrity.
-          # Linux measured by run 43452002860 at 093c9f7.
-          x86_64-linux = "sha256-lYii6J60m9lQmhDmCjP4lYmEdDxkExke+XIrRN7Vuho=";
-          # Darwin measured by attempt 2 of the same exact-head run.
-          aarch64-darwin = "sha256-bF4vRAwHesw3dFXS7q4sFyRxFmgFpiUdfv/8TTOyBuY=";
+          # Both measured by native run 43587714131 at head 9697a6f.
+          x86_64-linux = "sha256-FShClrkZs1dqlIJD3ygyda018rRhYhMJWSPDsAyS+Vc=";
+          aarch64-darwin = "sha256-Hb23tGns07IbiyUyXXdTrVpAA9Qamqagd/iYMOW3qZ4=";
         };
 
         nodeModules = pkgs.stdenvNoCC.mkDerivation {
