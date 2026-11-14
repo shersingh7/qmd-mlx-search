@@ -1,0 +1,460 @@
+{
+  "fullNode": {
+    "schema": "parent-canonical-stdout-reduction-v1",
+    "command": "pnpm run test",
+    "terminalExit": 0,
+    "terminalVerification": {
+      "status": "passed",
+      "kind": "test",
+      "scope": "full"
+    },
+    "rawLogSha256": "b9529817a5a162cdb3fbe523a6b3f09f1c618db09f5733974d1fdf82a8d33f8b",
+    "parsedPassed": 1524,
+    "parsedSkipped": 66,
+    "parsedFailed": 0,
+    "parsedFiles": 54,
+    "individualReporterRowsReconciled": true
+  },
+  "runs": {
+    "whole-root-node-config": {
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--showConfig"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 0.18909895897377282,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf",
+      "retainedSuccessfulExecutionReusedNotRerun": true
+    },
+    "whole-root-node": {
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 3.1369669170235284,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf",
+      "retainedSuccessfulExecutionReusedNotRerun": true
+    },
+    "whole-root-bun-config": {
+      "argv": [
+        "/Users/shersingh/.bun/bin/bun",
+        "--bun",
+        "--preload=/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/compiler-read-guard.cjs",
+        "node_modules/typescript/bin/tsc",
+        "--showConfig"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 0.7422948330058716,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf",
+      "retainedSuccessfulExecutionReusedNotRerun": true
+    },
+    "whole-root-bun": {
+      "argv": [
+        "/Users/shersingh/.bun/bin/bun",
+        "--bun",
+        "--preload=/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/compiler-read-guard.cjs",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 3.2823708330397494,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf",
+      "retainedSuccessfulExecutionReusedNotRerun": true
+    },
+    "runtime-guard-control": {
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "--require",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/runtime-read-guard.cjs",
+        "-e",
+        "const fs=require('node:fs'),assert=require('node:assert/strict');assert.equal(typeof fs.readFileSync(process.env.QMD_COMPOSE_ROOT+'/environment.json','utf8'),'string');assert.throws(()=>fs.readFileSync('/Users/shersingh/.hermes/cache/scratch/qmd-parent-B-negative-u5zwaqui/harness/reproduce-findings.mjs'),e=>e.code==='COMPOSE_RUNTIME_READ_DENIED');console.log('Owned fixture read allowed; unrelated public fixture refused before bytes')"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 0.035116042010486126,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf"
+    },
+    "native-bun-A-qualified": {
+      "argv": [
+        "/Users/shersingh/.bun/bin/bun",
+        "test",
+        "--preload",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/runtime-read-guard.cjs",
+        "--preload",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/runtime-proof.cjs",
+        "./test/audit-recovery-execution-admission.test.ts",
+        "--timeout",
+        "30000",
+        "--test-name-pattern",
+        "publishes a complete child stage|witnesses real E delivery|missing-stage diagnostics|identical primary stage error|rejects caller EOF"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 8.523425915976986,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf"
+    },
+    "native-wrapper-observation-on": {
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "--require",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/probes/runtime-proof.cjs",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--maxWorkers=1",
+        "--no-cache",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/evidence/native-wrapper-observation-on.json",
+        "test/audit-native-bun-recovery.test.ts",
+        "-t",
+        "preserves proof across sequential|survives eight active-call GC|cleans the owned worker on a real parent"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 8.297126541030593,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf"
+    },
+    "package-node": {
+      "argv": [
+        "/bin/bash",
+        "test/smoke-install.sh",
+        "--runtime",
+        "node"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 18.77498658298282,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf"
+    },
+    "package-bun": {
+      "argv": [
+        "/bin/bash",
+        "test/smoke-install.sh",
+        "--runtime",
+        "bun",
+        "--package",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/tmp/qmd-package-smoke-JV7RpP/tobilu-qmd-2.1.0.tgz"
+      ],
+      "cwd": "/Users/shersingh/github/qmd-mlx-search",
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 7.175434874952771,
+      "sourceManifestSha256": "44989e42525b1ba5c0ecaec076f3b5553e2141643a9b400d7ae7736382cd5eaf"
+    }
+  },
+  "packageSmokes": [
+    {
+      "runtime": "node",
+      "tarball": "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/tmp/qmd-package-smoke-JV7RpP/tobilu-qmd-2.1.0.tgz",
+      "tarballSha256": "ce36bcaca2037d7ae1c6e0a63e71260554e6c9e0a837158f24821b4fe69ad3be",
+      "httpSupported": true,
+      "checks": [
+        "source prepare and prepack (unless --package supplied)",
+        "recursive package inventory",
+        "isolated local dependency install",
+        "real launcher help/collection/status",
+        "SQLite and sqlite-vec load",
+        "installed native MCP stdio initialize, tools/list and status",
+        "installed SDK/SQLite indexing and lexical retrieval",
+        "installed REST retrieval and foreign-origin rejection",
+        "installed MCP initialize and document retrieval",
+        "native fetch consumes SSE without complete-body buffering",
+        "partial upload bounded; 408 or fail-closed connection termination"
+      ]
+    },
+    {
+      "runtime": "bun",
+      "tarball": "/Users/shersingh/.hermes/cache/scratch/qmd-A-live-integration-8gg39bno/tmp/qmd-package-smoke-JV7RpP/tobilu-qmd-2.1.0.tgz",
+      "tarballSha256": "ce36bcaca2037d7ae1c6e0a63e71260554e6c9e0a837158f24821b4fe69ad3be",
+      "httpSupported": false,
+      "checks": [
+        "source prepare and prepack (unless --package supplied)",
+        "recursive package inventory",
+        "isolated local dependency install",
+        "real launcher help/collection/status",
+        "SQLite and sqlite-vec load",
+        "installed native MCP stdio initialize, tools/list and status",
+        "installed SDK/SQLite indexing and lexical retrieval",
+        "native Bun HTTP fails closed with explicit Node.js remedy (not HTTP feature acceptance)"
+      ]
+    }
+  ],
+  "canonicalBuild": {
+    "command": "pnpm run build",
+    "terminalExit": 0,
+    "terminalVerification": {
+      "status": "passed",
+      "kind": "build",
+      "scope": "full"
+    },
+    "guardRows": 610,
+    "guardRefusals": 0,
+    "actualHosts": [
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      },
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      }
+    ]
+  },
+  "whole-root-node": {
+    "compilerRoots": 154,
+    "diagnostics": 0,
+    "guardRefusals": 0,
+    "actualHosts": [
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      },
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      }
+    ]
+  },
+  "whole-root-bun": {
+    "compilerRoots": 154,
+    "diagnostics": 0,
+    "guardRefusals": 0,
+    "actualHosts": [
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      },
+      {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "source": "/Users/shersingh/github/qmd-mlx-search"
+      }
+    ]
+  },
+  "nativeBunChangedBehavior": {
+    "pass": 6,
+    "filtered out": 43,
+    "fail": 0
+  },
+  "nativeWrapperObservationOn": {
+    "passed": 4,
+    "failed": 0,
+    "filtered": 3,
+    "realNativeCalls": 13,
+    "descriptorObservations": 13
+  },
+  "status": "A_LOCAL_INTEGRATION_ACCEPTED_ACTUAL_CI_PENDING_B_NOT_APPLIED",
+  "retainedHarnessFailure": {
+    "receipt": "native-bun-A.receipt.json",
+    "classification": "Compiler-only read guard incorrectly used for runtime tests; it refused owned fixture stage reads",
+    "originalCounts": {
+      "passed": 1,
+      "failed": 5,
+      "filtered": 43
+    },
+    "correction": "Separate runtime guard permits the exact call-owned scratch root; compiler guard unchanged; out-of-scope read negative passed",
+    "reusedCompilerExecutions": "Previously completed successful compiler receipts remain source-bound and were not rerun"
+  },
+  "limits": [
+    "Native Bun focused coverage is not the full native Vitest suite",
+    "B diagnostic proposal remains rejected pending its separate repair/review",
+    "Package Bun HTTP refusal is not HTTP feature acceptance",
+    "Existing C1/actual-CI/cold-start/FD-holder qualifications remain"
+  ]
+}

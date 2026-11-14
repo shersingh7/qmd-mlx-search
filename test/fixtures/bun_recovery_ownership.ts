@@ -122,7 +122,12 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
     if (!identity && existsSync(readyPath)) identity = JSON.parse(readFileSync(readyPath, "utf8")) as Identity;
     // Preserve failure evidence BEFORE any assertion/finally cleanup can mask it.
     console.log(JSON.stringify({ evidence: "native-recovery-before-finally", scenario, index, timeoutMs, elapsedMs,
-      gcDuringActive, activeFDs, reusedFDs, identity, parentAbsent: result.pid !== undefined && !alive(result.pid),
+      gcDuringActive, activeFDs, reusedFDs,
+      ...(process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS === "1" ? {
+        descriptorObservation: { scope: "parent-side-fstat-only-not-writer-or-resource-identity",
+          beforeFDs: [...beforeFDs], seenActiveFDs: [...priorFDs], atReturnFDs: pipes() },
+      } : {}),
+      identity, parentAbsent: result.pid !== undefined && !alive(result.pid),
       sentinelPid: sentinel.pid, sentinelAlive: alive(sentinel.pid!), descriptorSentinelOpen: fstatSync(fdSentinel).isFile(), guardFired, result }));
     assert.equal(guardFired, false);
     assert.ok(elapsedMs < (timeoutMs === 200 ? 1_500 : timeoutMs + 500));

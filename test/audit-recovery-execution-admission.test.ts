@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -28,6 +28,17 @@ async function until(predicate: () => boolean, deadline: number, message: string
   while (!predicate() && performance.now() < deadline) await sleep(2);
   expect(predicate(), message).toBe(true);
 }
+async function observeStageFailure(check: () => Promise<void>, snapshot: () => unknown): Promise<void> {
+  try { await check(); }
+  catch (primary) {
+    // Failure-only, before the caller's finally. Observation is not permission
+    // to replace the required-stage failure, even if reading/logging fails.
+    if (process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS === "1") {
+      try { console.log(JSON.stringify(snapshot())); } catch { /* preserve primary */ }
+    }
+    throw primary;
+  }
+}
 async function reap(child: ChildProcess, killed: number[]) {
   if (child.exitCode === null && child.signalCode === null) {
     killed.push(child.pid!);
@@ -37,7 +48,8 @@ async function reap(child: ChildProcess, killed: number[]) {
 
 type Stage = "none" | "supervisor-consumed" | "supervisor-forwarded" | "child-consumed" | "child-validation" | "child-admitted";
 type Fault = "control-read-error" | "proof-write-error" | "cancel-read-hold";
-function instrument(root: string, stage: Stage, pause: "delay" | "stop", proofToStdout: boolean, fault?: Fault, forwardDelayMs = 250): string {
+type FixtureProbe = "stage-open-hold" | "forward-write-hold" | "startup-delay";
+function instrument(root: string, stage: Stage, pause: "delay" | "stop", proofToStdout: boolean, fault?: Fault, forwardDelayMs = 250, probe?: FixtureProbe): string {
   const wrapper = path.join(root, "execution-boundary.py");
   writeFileSync(wrapper, `import json,os,select,signal,sys,time
 source=${JSON.stringify(source)}
@@ -48,12 +60,29 @@ exec(compile(open(source,'rb').read(),source,'exec'),scope)
 original_read,original_write,original_fork,original_waitpid=os.read,os.write,os.fork,os.waitpid
 owner=os.getpid()
 held=False
-def hold(label):
+if ${probe === "stage-open-hold" ? "True" : "False"}:
+    original_open=open
+    def open(file,*args,**kwargs):
+        out=original_open(file,*args,**kwargs)
+        stage_path=${JSON.stringify(path.join(root, "stage.json"))}
+        if file==stage_path or str(file).startswith(stage_path+'.'):
+            with original_open(${JSON.stringify(path.join(root, "probe.json"))},'x') as record:
+                json.dump(dict(probe='stage-open-hold',pid=os.getpid(),stageVisible=os.path.exists(stage_path)),record)
+            # Fault only: hold the ACTUAL generated fixture after its real open.
+            time.sleep(.040)
+        return out
+def publish_stage(label,witness=None):
+    stage_path=${JSON.stringify(path.join(root, "stage.json"))}
+    stage_temp=stage_path+'.'+str(os.getpid())+'.tmp'
+    # Existence is a cancellation handshake: publish only a complete record.
+    with open(stage_temp,'x') as out:
+        json.dump(dict(stage=label,pid=os.getpid(),owner=owner,at=time.monotonic(),witness=witness),out)
+    os.replace(stage_temp,stage_path)
+def hold(label,publish=True):
     global held
     if held or label!=${JSON.stringify(stage)}: return
     held=True
-    with open(${JSON.stringify(path.join(root, "stage.json"))},'w') as out:
-        json.dump(dict(stage=label,pid=os.getpid(),owner=owner,at=time.monotonic()),out)
+    if publish: publish_stage(label)
     ${pause === "stop" ? "os.kill(os.getpid(),signal.SIGSTOP)" : "time.sleep(1.300)"}
 def read(fd,n):
     data=original_read(fd,n)
@@ -71,6 +100,11 @@ def read(fd,n):
                 json.dump(dict(stage='cancel-consumed',pid=os.getpid()),out)
             time.sleep(1.300)
     if data==b'E':
+        if os.getpid()!=owner and ${stage === "supervisor-forwarded" && forwardDelayMs === 0 ? "True" : "False"}:
+            # Real child receipt proves forwarding before its EOF refusal can
+            # signal/interrupt the supervisor's auxiliary post-write observer.
+            # Do not hold this child: this case requires a still-positive lease.
+            publish_stage('supervisor-forwarded','child-received-E')
         hold('supervisor-consumed' if os.getpid()==owner and fd==0 else 'child-consumed')
         # At the post-forward boundary, the child must revalidate a grant that
         # actually aged past its lease, not already execute before parent death.
@@ -86,12 +120,20 @@ def write(fd,data):
         assert readable and original_read(0,1)==b''
         with open(${JSON.stringify(path.join(root, "queued-eof.json"))},'w') as out:
             json.dump(dict(pid=os.getpid(),at=time.monotonic()),out)
-    written=original_write(fd,data)
+    if os.getpid()==owner and fd!=3 and data==b'E' and ${probe === "forward-write-hold" ? "True" : "False"}:
+        with open(${JSON.stringify(path.join(root, "probe.json"))},'x') as out:
+            json.dump(dict(probe='forward-write-hold',pid=os.getpid()),out)
+        written=original_write(fd,data)
+        # Fault only: child refusal can interrupt the owner after the real E
+        # write, BEFORE the auxiliary supervisor-side stage publication.
+        time.sleep(.040)
+    else:
+        written=original_write(fd,data)
     if os.getpid()==owner and fd!=3 and data==b'E':
         with open(${JSON.stringify(path.join(root, "gate-forwarded.json"))},'w') as out:
             json.dump(dict(pid=os.getpid()),out)
         if ${fault === "control-read-error" ? "True" : "False"}: os.close(0)
-        hold('supervisor-forwarded')
+        hold('supervisor-forwarded',publish=${stage === "supervisor-forwarded" && forwardDelayMs === 0 ? "False" : "True"})
         # Preserve the reviewer's real runnable-child slice after forwarding.
         if ${stage === "supervisor-consumed" ? "True" : "False"}: time.sleep(.050)
     return written
@@ -128,15 +170,19 @@ if 'execution_allowed' in scope:
         if result: hold('child-admitted')
         return result
     scope['execution_allowed']=allowed
+if ${probe === "startup-delay" ? "True" : "False"}:
+    with open(${JSON.stringify(path.join(root, "probe.json"))},'x') as out:
+        json.dump(dict(probe='startup-delay',pid=os.getpid()),out)
+    time.sleep(.250) # Fixture-only: exhaust, never restart, the caller budget.
 scope['main']()
 `);
   return wrapper;
 }
 
-async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "eof" | "none", fault?: Fault, forwardDelayMs = 250) {
+async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "eof" | "none", fault?: Fault, forwardDelayMs = 250, probe?: FixtureProbe) {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-raw-"));
   const env = cleanEnv(root);
-  const wrapper = instrument(root, stage, pause, true, fault, forwardDelayMs);
+  const wrapper = instrument(root, stage, pause, true, fault, forwardDelayMs, probe);
   const work = path.join(root, "work");
   const positive = !fault && stage === "none" && grant === "open";
   const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
@@ -165,8 +211,11 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
   child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
   // Child-boundary probes first prove that the actual child reached the held
   // boundary. Otherwise a fast supervisor EOF cleanup could miss that boundary.
+  let stageAtEOF: string | null = null;
   const closeAfterAdmission = stage.startsWith("child-") ? setInterval(() => {
-    if (existsSync(path.join(root, "stage.json"))) child.stdin!.end();
+    if (stageAtEOF === null && existsSync(path.join(root, "stage.json"))) {
+      stageAtEOF = read(path.join(root, "stage.json")); child.stdin!.end();
+    }
   }, 2) : undefined;
   let cancelSent = false;
   const cancelAfterForward = fault === "cancel-read-hold" ? setInterval(() => {
@@ -184,10 +233,10 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
     const validationText = read(path.join(root, "validation.json"));
     const validation = validationText ? JSON.parse(validationText) as { allowed: boolean; remainingMs: number } : null;
     const controlReads = (read(path.join(root, "control-reads.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { preExec: boolean });
-    const observation = { evidence: "recovery-execution-admission-before-finally", stage, pause, grant, fault, forwardDelayMs, elapsedMs, guardFired,
+    const observation = { evidence: "recovery-execution-admission-before-finally", stage, pause, grant, fault, forwardDelayMs, probe, elapsedMs, guardFired,
       supervisorPid: child.pid, supervisorAbsent: !alive(child.pid!), workerPid: worker, workerAbsent: worker !== undefined && !alive(worker),
       sentinelAlive: alive(sentinel.pid!), work: read(work), stageRecord: read(path.join(root, "stage.json")), queuedEof: read(path.join(root, "queued-eof.json")),
-      reaps, validation, controlReads, messages, stderr };
+      reaps, validation, controlReads, messages, stderr, stageAtEOF, probeRecord: read(path.join(root, "probe.json")), fixtureCleanupStarted: false };
     console.log(JSON.stringify(observation));
     expect(guardFired, JSON.stringify(observation)).toBe(false);
     expect(observation.supervisorAbsent).toBe(true); expect(observation.workerAbsent).toBe(true);
@@ -199,7 +248,13 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
     if (fault !== "proof-write-error") expect(messages.at(-1)).toMatchObject({ type: "cleanup", childReaped: true,
       sessionTerminated: true, groupTerminated: true, containmentVerified: false });
     if (stage !== "none") expect(JSON.parse(observation.stageRecord!).stage).toBe(stage);
+    if (probe === "stage-open-hold") {
+      expect(JSON.parse(observation.probeRecord!)).toMatchObject({ probe, stageVisible: false, pid: worker });
+      expect(JSON.parse(stageAtEOF!).stage).toBe(stage);
+    }
+    if (probe === "forward-write-hold") expect(JSON.parse(observation.probeRecord!)).toMatchObject({ probe, pid: child.pid });
     if (stage === "supervisor-forwarded" && forwardDelayMs === 0) {
+      expect(JSON.parse(observation.stageRecord!)).toMatchObject({ witness: "child-received-E", pid: worker, owner: child.pid });
       expect(read(path.join(root, "queued-eof.json"))).not.toBeNull();
       expect(validation, JSON.stringify(observation)).not.toBeNull();
       expect(validation!.allowed).toBe(false); expect(validation!.remainingMs).toBeGreaterThan(0);
@@ -224,10 +279,10 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
   }
 }
 
-async function hostCase(runtime: "node" | "bun", stage: Stage, pause: "delay" | "stop", mode: "valid" | "alive" | "graceful" | "hard") {
+async function hostCase(runtime: "node" | "bun", stage: Stage, pause: "delay" | "stop", mode: "valid" | "alive" | "graceful" | "hard", probe?: FixtureProbe) {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-host-"));
   const env = cleanEnv(root);
-  const wrapper = instrument(root, stage, pause, false);
+  const wrapper = instrument(root, stage, pause, false, undefined, 250, probe);
   const hostScript = path.join(root, "host.ts");
   writeFileSync(hostScript, `import childProcess from 'node:child_process';
 import {syncBuiltinESMExports} from 'node:module';
@@ -273,7 +328,21 @@ writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-st
     const started = performance.now();
     const deadline = started + (mode === "valid" ? 6_000 : 1_800);
     if (mode !== "valid") {
-      await until(() => existsSync(path.join(root, "stage.json")), deadline, `actual ${stage} must be reached: ${stderr}`);
+      await observeStageFailure(
+        () => until(() => existsSync(path.join(root, "stage.json")), deadline, `actual ${stage} must be reached: ${stderr}`),
+        () => {
+          const text = read(path.join(root, "helper.json"));
+          let parsed: { elapsedMs?: number; guardFired?: boolean; result?: RecoveryProcessResult } | null = null;
+          try { parsed = text === null ? null : JSON.parse(text); } catch { /* retain incomplete-file evidence */ }
+          return { evidence: "recovery-missing-stage-before-finally", runtime, mode, stage, pause,
+            host: { pid: host.pid, exitCode: host.exitCode, signalCode: host.signalCode },
+            fixtureElapsedMs: performance.now() - started,
+            stageFilePresent: existsSync(path.join(root, "stage.json")), forks: forks(), workFilePresent: existsSync(path.join(root, "work")),
+            helperFileBytes: text === null ? null : Buffer.byteLength(text), helperJsonComplete: parsed !== null,
+            helper: parsed === null ? null : { elapsedMs: parsed.elapsedMs, guardFired: parsed.guardFired,
+              launch: parsed.result?.launch, cleanup: parsed.result?.cleanup, transportFailure: parsed.result?.transportFailure },
+            stdoutBytes: Buffer.byteLength(stdout), stderrBytes: Buffer.byteLength(stderr), fixtureCleanupStarted: false };
+        });
       if (mode === "hard") host.kill("SIGKILL"); // An actual abrupt death, with NO JS exit hook.
     }
     while (host.exitCode === null && host.signalCode === null && performance.now() < deadline) await sleep(2);
@@ -350,6 +419,70 @@ async function invalidBudgetFrame(frame: string) {
 }
 
 describe.skipIf(process.platform === "win32")("execution authority cannot replay after the caller dies", () => {
+  for (const enabled of [false, true]) {
+    it(`keeps missing-stage diagnostics ${enabled ? "enabled" : "disabled"} before real host cleanup`, async () => {
+      const saved = process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS;
+      process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS = enabled ? "1" : "0";
+      const records: Array<{ evidence: string; [key: string]: unknown }> = [];
+      const originalLog = console.log;
+      const log = vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
+        if (typeof args[0] === "string" && args[0].startsWith('{"evidence":')) records.push(JSON.parse(args[0]));
+        originalLog(...args);
+      });
+      try {
+        // Keep the deliberately missing-stage child on this actual test host;
+        // process.execPath is Bun, not Node, in a native `bun test` invocation.
+        const runtime = (process.versions as Record<string, string>).bun ? "bun" : "node";
+        await expect(hostCase(runtime, "supervisor-consumed", "delay", "alive", "startup-delay"))
+          .rejects.toThrow("actual supervisor-consumed must be reached");
+        const snapshots = records.filter(record => record.evidence === "recovery-missing-stage-before-finally");
+        expect(snapshots).toHaveLength(enabled ? 1 : 0);
+        const cleanupIndex = records.findIndex(record => record.evidence === "recovery-parent-death-finally");
+        expect(cleanupIndex).toBeGreaterThanOrEqual(0);
+        expect(records[cleanupIndex]!.finallyKilled).toEqual([]);
+        if (enabled) {
+          expect(records.indexOf(snapshots[0]!)).toBeLessThan(cleanupIndex);
+          expect(snapshots[0]).toMatchObject({ fixtureCleanupStarted: false, stageFilePresent: false,
+            forks: [], workFilePresent: false, helperJsonComplete: true,
+            helper: { guardFired: false, launch: { admissionGranted: false, supervisorReaped: true, state: "not-started" } } });
+          expect(snapshots[0]).not.toHaveProperty("stdout"); expect(snapshots[0]).not.toHaveProperty("stderr");
+        }
+      } finally {
+        log.mockRestore();
+        if (saved === undefined) delete process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS;
+        else process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS = saved;
+      }
+    });
+  }
+  it("preserves the identical primary stage error if diagnostic observation fails", async () => {
+    const saved = process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS;
+    process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS = "1";
+    const primary = new Error("primary required-stage assertion");
+    let observed = false, cleanupStarted = false;
+    try {
+      try {
+        await expect(observeStageFailure(async () => { throw primary; }, () => {
+          observed = true; expect(cleanupStarted).toBe(false); throw new Error("diagnostic read failed");
+        })).rejects.toBe(primary);
+      }
+      finally { cleanupStarted = true; }
+      expect(observed).toBe(true);
+      let successObserved = false;
+      await observeStageFailure(async () => {}, () => { successObserved = true; });
+      expect(successObserved).toBe(false);
+      const log = vi.spyOn(console, "log").mockImplementation(() => { throw new Error("diagnostic log failed"); });
+      try {
+        await expect(observeStageFailure(async () => { throw primary; }, () => ({ evidence: "diagnostic-log-control" })))
+          .rejects.toBe(primary);
+        expect(log).toHaveBeenCalledOnce();
+      } finally { log.mockRestore(); }
+    } finally {
+      if (saved === undefined) delete process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS;
+      else process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS = saved;
+    }
+  });
+  it("publishes a complete child stage despite a held actual fixture write", () => rawCase("child-validation", "delay", "eof", undefined, 250, "stage-open-hold"));
+  it("witnesses real E delivery despite an interrupted post-forward publication", () => rawCase("supervisor-forwarded", "delay", "eof", undefined, 0, "forward-write-hold"));
   it("actually executes a valid raw grant (separate 5s readiness control)", () => rawCase("none", "delay", "open"));
   it("does not execute on EOF without E", () => rawCase("none", "delay", "none"));
   it("expires consumed E autonomously with a still-open parent and no cancellation byte", () => rawCase("supervisor-consumed", "delay", "open"));
