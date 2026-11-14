@@ -1,0 +1,138 @@
+"""Focused parent checks for the test-only diagnostics proposal; not CI acceptance."""
+from collections import Counter
+from pathlib import Path
+import hashlib
+import json
+import re
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+NODE = '/Users/shersingh/.hermes/node/bin/node'
+ENV = json.loads((ROOT / 'environment.json').read_text())
+BIND = json.loads((ROOT / 'source-bindings.json').read_text())
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def source_identity():
+    for group, folder in (('original', 'original'), ('proposed', 'mirror')):
+        for name, digest in BIND[group].items():
+            assert hashlib.sha256((ROOT / folder / name).read_bytes()).hexdigest() == digest, name
+    assert hashlib.sha256((ROOT / 'harness/run-local.mjs').read_bytes()).hexdigest() == BIND['harness_sha256']
+
+
+def workload(mode, label):
+    source_identity()
+    args = [NODE, str(ROOT / 'harness/run-local.mjs'), mode, label]
+    result = subprocess.run(args, cwd=ROOT, env=ENV, capture_output=True, timeout=105)
+    (ROOT / f'{label}-runner.stdout').write_bytes(result.stdout)
+    (ROOT / f'{label}-runner.stderr').write_bytes(result.stderr)
+    assert result.returncode == 0, (mode, result.stdout.decode(), result.stderr.decode())
+    receipt = read(ROOT / f'evidence/{label}-command.json')
+    assert receipt['exitCode'] == 0 and receipt['outerCleanup'] == 'none'
+    source_identity()
+    return receipt
+
+
+def json_lines(path):
+    # Use Node's maintained ANSI/control-sequence stripper; preserve raw logs.
+    script = 'const fs=require("node:fs"),u=require("node:util");process.stdout.write(u.stripVTControlCharacters(fs.readFileSync(process.argv[1],"utf8")));'
+    result = subprocess.run([NODE, '-e', script, str(path)], env=ENV, capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    records = []
+    for line in result.stdout.splitlines():
+        if '"evidence":' in line:
+            records.append(json.loads(line[line.index('{'):]))
+    return records
+
+
+def test_01_original_fast_case_is_first_observed_runtime_workload():
+    for mode, label in (('fast-on', 'parent-fast-on'), ('fast-off', 'parent-fast-off')):
+        workload(mode, label)
+        tests = read(ROOT / f'evidence/{label}.json')
+        counts = Counter(case['status'] for suite in tests['testResults'] for case in suite['assertionResults'])
+        assert tests['success'] and counts == {'passed': 1, 'skipped': 7}
+        rows = json_lines(ROOT / f'evidence/{label}.stdout.log')
+        before = [row for row in rows if row['evidence'] == 'recovery-fast-timeout-before-finally']
+        after = [row for row in rows if row['evidence'] == 'recovery-fast-timeout-finally']
+        assert len(before) == len(after) == 1
+        before, after = before[0], after[0]
+        assert before['sentinelAlive'] and before['supervisorAbsent'] and not before['guardFired']
+        assert before['result']['launch']['supervisorReaped']
+        assert before['result']['cleanup']['pipesClosed'] and not before['result']['cleanup']['forcedPipeClose']
+        assert not after['finallyKilled'] and not after['guardFired'] and after['scratchRemoved']
+        # The canonical test checks its unrounded elapsed value; this receipt is rounded.
+        assert before['timeoutMs'] == 200
+        if mode == 'fast-on':
+            artifacts = list((ROOT / f'evidence/{label}-artifacts').glob('fast-timeout-node-*.json'))
+            assert len(artifacts) == 1
+            trace = read(artifacts[0])
+            assert trace['status'] == 'observed-node-supervisor'
+            assert trace['ownerPid'] == before['result']['launch']['supervisorPid']
+            assert trace['restoration'] == {'channelUnsubscribed': True, 'listenersRemoved': True}
+            names = {item['event'] for item in trace['events']}
+            assert {'stdout.end', 'stderr.end', 'control.end', 'owner.close'} <= names
+            assert len(trace['events']) <= 32
+            assert trace['finalState']['closeCounter']['got'] == trace['finalState']['closeCounter']['needed'] == 4
+            assert trace['causality'] == 'not-established-by-runtime-events'
+        else:
+            assert not (ROOT / f'evidence/{label}-artifacts').exists()
+        print(json.dumps({'mode': mode, 'counts': dict(counts), 'helperMs': before['elapsedMs'], 'noFixtureKills': True}))
+
+
+def test_02_node_selftests_after_existing_fast_case():
+    assert (ROOT / 'evidence/parent-fast-on.json').exists()
+    workload('selftests', 'parent-selftests')
+    stdout = (ROOT / 'evidence/parent-selftests.stdout.log').read_text()
+    totals = {name: int(re.search(r'^# ' + name + r' (\d+)\s*$', stdout, re.M).group(1)) for name in ('tests', 'pass', 'fail', 'skipped')}
+    assert totals == {'tests': 8, 'pass': 8, 'fail': 0, 'skipped': 0}
+    rows = {row['evidence']: row for row in json_lines(ROOT / 'evidence/parent-selftests.stdout.log')}
+    held = rows['diagnostic-control-known-fixture-FD3-writer']
+    assert held['ends'] == {'stdout': True, 'stderr': True, 'control': False}
+    assert held['closeCounter']['got'] == 3 and held['closeCounter']['needed'] == 4
+    assert held['causality'] == 'not-established-by-runtime-events'
+    delayed = rows['diagnostic-control-delayed-reader']
+    assert delayed['closeDelayMs'] >= 40 and delayed['causality'] == 'not-established-by-runtime-events'
+    forced = rows['diagnostic-control-forced-destroy']
+    assert forced['ends'] == {'stdout': False, 'stderr': False, 'control': False}
+    assert forced['preForcedClosure']['tMs'] is None and not forced['cleanup']['pipesClosed']
+    (ROOT / 'parent-selftest-summary.json').write_text(json.dumps({'totals': totals, 'controls': rows}, indent=2) + '\n')
+
+
+def test_03_preserved_test_body_and_workflow_lint():
+    original = (ROOT / 'original/test/audit-recovery-tree.test.ts').read_text()
+    recovered = (ROOT / 'mirror/test/audit-recovery-tree.test.ts').read_text()
+    removals = [
+        'import { beginRecoveryBootstrapDiagnostics } from "./helpers/recovery-bootstrap-diagnostics.mjs";\n',
+        '  // No extra launch/warmup: observe this existing invocation only when opted in.\n  const bootstrapDiagnostics = beginRecoveryBootstrapDiagnostics();\n',
+        '    bootstrapDiagnostics.attachAfterLaunch();\n',
+    ]
+    for fragment in removals:
+        assert recovered.count(fragment) == 1
+        recovered = recovered.replace(fragment, '')
+    fragment = '    try { result ??= await helper; }\n    finally { bootstrapDiagnostics.finish(result); }'
+    assert recovered.count(fragment) == 1
+    recovered = recovered.replace(fragment, '    result ??= await helper;')
+    assert recovered == original
+    assert hashlib.sha256(Path('/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint').read_bytes()).hexdigest() == '8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388'
+    workload('actionlint-published', 'parent-actionlint')
+    workload('syntax-helper', 'parent-helper-syntax')
+    workload('syntax-controls', 'parent-controls-syntax')
+    workload('helper-typecheck', 'parent-helper-types')
+    (ROOT / 'parent-preservation-summary.json').write_text(json.dumps({'originalTestRecoveredByteForByte': True, 'proposedSourceCount': len(BIND['proposed']), 'strictHelperTypes': 'pass', 'actionlint': 'pass', 'ciAccepted': False}, indent=2) + '\n')
+
+
+def test_04_durable_proposal_remains_review_and_ci_pending():
+    source_identity()
+    ledger = read(Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/integration-gates-wave4.json'))
+    gate = next(row for row in ledger['gates'] if row['id'] == 'recovery-startup')
+    summary = read(Path('/Users/shersingh/github/qmd-mlx-search') / gate['native_ci_observability_proposal_archive'])
+    assert summary['patchSha256'] == BIND['patch_sha256']
+    assert summary['independentReviewDelegation'] == 'deleg_eb890b44'
+    assert summary['ciExecuted'] is False and summary['acceptedForIntegration'] is False
+    assert summary['originalCause'] == 'UNPROVEN'
+    assert summary['parentVerification']['focusedOn'] == {'passed': 1, 'filtered': 7}
+    assert summary['parentVerification']['focusedOff'] == {'passed': 1, 'filtered': 7}
+    assert summary['parentVerification']['selftests'] == {'tests': 8, 'pass': 8, 'fail': 0, 'skipped': 0}

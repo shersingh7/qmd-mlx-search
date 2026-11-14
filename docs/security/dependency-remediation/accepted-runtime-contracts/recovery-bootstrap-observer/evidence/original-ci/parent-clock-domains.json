@@ -1,0 +1,76 @@
+{
+  "scope": "Read-only local clock-domain samples, not pristine CI/bootstrap reproduction",
+  "raw_cross_runtime_clock_compatibility_not_assumed": true,
+  "rows": [
+    {
+      "label": "system-python",
+      "argv": [
+        "/usr/bin/python3",
+        "-I",
+        "-B",
+        "-S",
+        "-c",
+        "import json,sys,time;print(json.dumps({\"executable\":sys.executable,\"version\":sys.version.split()[0],\"monotonic_ns\":time.monotonic_ns(),\"clock_monotonic_ns\":time.clock_gettime_ns(time.CLOCK_MONOTONIC),\"monotonic_info\":str(time.get_clock_info(\"monotonic\"))}))"
+      ],
+      "exit_code": 0,
+      "result": {
+        "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "version": "3.9.6",
+        "monotonic_ns": 35140166,
+        "clock_monotonic_ns": 351795043819000,
+        "monotonic_info": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"
+      }
+    },
+    {
+      "label": "project-python312",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "-c",
+        "import json,sys,time;print(json.dumps({\"executable\":sys.executable,\"version\":sys.version.split()[0],\"monotonic_ns\":time.monotonic_ns(),\"clock_monotonic_ns\":time.clock_gettime_ns(time.CLOCK_MONOTONIC),\"monotonic_info\":str(time.get_clock_info(\"monotonic\"))}))"
+      ],
+      "exit_code": 0,
+      "result": {
+        "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+        "version": "3.12.13",
+        "monotonic_ns": 311540774923750,
+        "clock_monotonic_ns": 351795063806000,
+        "monotonic_info": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"
+      }
+    },
+    {
+      "label": "node",
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "-e",
+        "console.log(JSON.stringify({executable:process.execPath,node:process.versions.node,bun:process.versions.bun??null,hrtimeNs:process.hrtime.bigint().toString(),performanceNowMs:performance.now()}))"
+      ],
+      "exit_code": 0,
+      "result": {
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "node": "22.22.3",
+        "bun": null,
+        "hrtimeNs": "351797814934041",
+        "performanceNowMs": 11.594625
+      }
+    },
+    {
+      "label": "bun",
+      "argv": [
+        "/Users/shersingh/.bun/bin/bun",
+        "-e",
+        "console.log(JSON.stringify({executable:process.execPath,node:process.versions.node,bun:process.versions.bun??null,hrtimeNs:process.hrtime.bigint().toString(),performanceNowMs:performance.now()}))"
+      ],
+      "exit_code": 0,
+      "result": {
+        "executable": "/Users/shersingh/.bun/bin/bun",
+        "node": "24.3.0",
+        "bun": "1.3.8",
+        "hrtimeNs": "5642500",
+        "performanceNowMs": 5.645708
+      }
+    }
+  ]
+}

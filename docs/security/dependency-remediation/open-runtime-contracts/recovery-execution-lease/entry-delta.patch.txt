@@ -1,0 +1,776 @@
+--- a/scripts/phase5_e2e_runner.ts
++++ b/scripts/phase5_e2e_runner.ts
+@@ -394,10 +394,14 @@
+             if (stopStarted !== undefined || helperExited) continue;
+             // A ready event can beat a delayed timer callback after the actual
+             // deadline. Check the clock rather than granting late admission.
+-            if (performance.now() >= executionDeadline) { timeout(); continue; }
++            const remainingMs = Math.floor(executionDeadline - performance.now());
++            if (remainingMs <= 0) { timeout(); continue; }
+             if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Supervisor admission channel is closed");
+             receipt.launch.admissionGranted = true;
+-            child.stdin.write("S");
++            // PREPARED's Python-side anchor precedes this subtraction. Charging
++            // the remaining duration from that earlier anchor is conservative;
++            // never compare independent runtime monotonic clock epochs.
++            child.stdin.write(`S${remainingMs}\n`);
+           } else if (message.type === "not-started") {
+             if (notStartedReceived || receipt.pid !== undefined
+               || message.supervisorPid !== child.pid || message.sessionId !== child.pid
+--- a/scripts/phase5_recovery_process.py
++++ b/scripts/phase5_recovery_process.py
+@@ -11,8 +11,10 @@
+ OS-enforced no-fork containment (Seatbelt on Darwin, seccomp on Linux). Threads,
+ SQLite and HTTP are supported; subprocesses and daemonization are not.
+ 
+-Bootstrap is not launch permission. S allows creation of a gated child, not
+-execution. The live runner must acknowledge READY (E) before user code can run.
++Bootstrap is not launch permission. S carries a conservatively anchored budget
++and allows creation of a gated child, not execution. E acknowledges READY, but
++is not a durable capability: the child checks the inherited lease and the live
++parent channel after containment, at the last trusted execution gate.
+ TERM/INT interrupt startup, including the fork/registration interval. Gated
+ children are authenticated with kernel waitid before taking anchored cleanup.
+ The runtime-owned exact
+@@ -61,7 +63,9 @@
+                 data = data[written:]
+             if message.get("type") == "ready":
+                 _worker_announced = True
+-        except BrokenPipeError:
++        except OSError:
++            # Terminal proof-channel errors cancel; they must not unwind past
++            # a retained worker/group ownership anchor.
+             _control_broken = True
+     finally:
+         signal.pthread_sigmask(signal.SIG_SETMASK, previous_mask)
+@@ -195,6 +199,58 @@
+     return pid
+ 
+ 
++def read_control(limit=4096):
++    """Terminal transport errors are EOF/cancellation, never an owner unwind."""
++    global _control_broken
++    try:
++        return os.read(0, limit)
++    except BlockingIOError:
++        return None
++    except OSError:
++        _control_broken = True
++        return b""
++
++
++def execution_allowed(parent_read, deadline):
++    """Last trusted child gate, after E and potentially slow containment.
++
++    This fd is a CLOEXEC duplicate of the caller channel, not a new reader until
++    the supervisor has consumed E. EOF persists even if the supervisor also
++    observes it; ANY queued byte/error refuses execution. Deadline checks share
++    only the already-initialized Python clock inherited through this fork.
++    Admission is revocable: the independently scheduled supervisor owns deadline
++    and EOF cleanup if the child is delayed after this validation, before exec.
++    """
++    if time.monotonic() >= deadline:
++        return False
++    try:
++        os.read(parent_read, 1)
++    except BlockingIOError:
++        return time.monotonic() < deadline
++    except OSError:
++        pass
++    return False
++
++
++def refuse_execution(session_id):
++    """Wake an interrupted/stopped owner without a live caller or PID guess.
++
++    Successful setpgid joins an EXISTING group in our own session, exactly as
++    joining anchors do. Our membership pins that group through both signals.
++    No signal is authorized if the kernel join fails. No direct numerical
++    parent-PID fallback is safe after reparenting/reuse. This child has executed
++    no workload and exits without unblocking its own pending TERM.
++    """
++    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})
++    try:
++        os.setpgid(0, session_id)
++        os.killpg(session_id, signal.SIGTERM)
++        os.killpg(session_id, signal.SIGCONT)
++    except OSError:
++        pass
++    os._exit(125)
++
++
+ def main():
+     config = json.loads(sys.argv[1])
+     command = config["command"]
+@@ -212,6 +268,9 @@
+     startup_timed_out = False
+     worker_was_reaped = False
+     recovered_exit_code = None
++    # Fail closed if an interruption occurs before PREPARED initializes the
++    # lease. No creation path is allowed to use a fresh timeout later.
++    admission_deadline = 0.0
+ 
+     def interrupted(*_):
+         if os.getpid() != session_id:
+@@ -220,7 +279,12 @@
+             os._exit(125)
+         stop_signal[0] = True
+         if startup_interruptible[0]:
+-            raise StartupCancelled()
++            # Parent cancellation and the child's autonomous refusal can race.
++            # Interrupt only once; a second TERM must not escape the exception
++            # handler/finally that is transferring ownership into cleanup.
++            startup_interruptible[0] = False
++            if sys.exc_info()[0] is None:
++                raise StartupCancelled()
+ 
+     signal.signal(signal.SIGTERM, interrupted)
+     signal.signal(signal.SIGINT, interrupted)
+@@ -244,7 +308,12 @@
+             return
+ 
+         os.set_blocking(0, False)
+-        admission_deadline = time.monotonic() + timeout
++        # PREPARED precedes the caller's remaining-budget calculation. Anchoring
++        # its duration here charges transport conservatively, without comparing
++        # Node/Bun/Python monotonic epochs or restarting a startup timeout.
++        prepared_at = time.monotonic()
++        admission_deadline = prepared_at + timeout
++        admission_frame = b""
+         send({"type": "prepared", "supervisorPid": os.getpid(), "sessionId": session_id})
+         while True:
+             if stop_signal[0] or _control_broken:
+@@ -256,21 +325,29 @@
+             readable, _, _ = select.select([0], [], [], min(remaining, 0.010))
+             if not readable:
+                 continue
+-            data = os.read(0, 4096)
++            data = read_control(16)
++            if data is None:
++                continue
+             if not data:
+                 not_started("parent-channel-closed")
+                 return
+             if b"T" in data or b"K" in data:
+                 not_started("cancelled")
+                 return
+-            if data != b"S":
++            admission_frame += data
++            if len(admission_frame) > 12:
+                 raise RuntimeError("Invalid recovery launch admission")
++            if b"\n" not in admission_frame:
++                continue
++            budget = admission_frame[1:-1]
++            if (not admission_frame.startswith(b"S") or not admission_frame.endswith(b"\n")
++                    or not budget.isdigit() or budget.startswith(b"0")
++                    or not 1 <= int(budget) <= config["timeoutMs"]):
++                raise RuntimeError("Invalid recovery launch admission")
++            admission_deadline = min(admission_deadline, prepared_at + int(budget) / 1000)
+             # This drain rejects already-queued cancellation/EOF. It is NOT the
+             # ownership boundary: cancellation can interrupt later startup too.
+-            try:
+-                pending = os.read(0, 4096)
+-            except BlockingIOError:
+-                pending = None
++            pending = read_control()
+             if pending is not None or stop_signal[0] or _control_broken:
+                 not_started("cancelled")
+                 return
+@@ -290,6 +367,7 @@
+                 os.close(gate_write)
+                 os.close(launch_read)
+                 os.close(3)
++                parent_read = os.dup(0)  # CLOEXEC, same persistent caller EOF.
+                 null = os.open(os.devnull, os.O_RDONLY)
+                 os.dup2(null, 0)
+                 if null > 2:
+@@ -298,16 +376,30 @@
+                 # Creation is not execution. No user code (including an
+                 # injected command) runs until READY is acknowledged by
+                 # the live runner within its original execution deadline.
+-                if os.read(gate_read, 1) != b"E":
+-                    os._exit(125)
++                os.set_blocking(gate_read, False)
++                while True:
++                    remaining = admission_deadline - time.monotonic()
++                    if remaining <= 0:
++                        refuse_execution(session_id)
++                    readable, _, _ = select.select([gate_read], [], [], min(remaining, 0.010))
++                    if not readable:
++                        continue
++                    if os.read(gate_read, 2) != b"E":
++                        refuse_execution(session_id)
++                    break
+                 os.close(gate_read)
+                 if contained:
+                     no_fork()
+                     os.write(launch_write, b"contained\n")
++                if not execution_allowed(parent_read, admission_deadline):
++                    refuse_execution(session_id)
++                os.close(parent_read)
+                 os.execvpe(command[0], command, os.environ)
+             except BaseException as error:
+-                os.write(launch_write, f"Recovery worker spawn failed: {error}\n".encode())
+-                os._exit(127)
++                try:
++                    os.write(launch_write, f"Recovery worker spawn failed: {error}\n".encode())
++                finally:
++                    os._exit(127)
+         # The child and this retained direct-child anchor both establish the
+         # group before any exec. Neither relies on a sampled numerical PGID.
+         assert worker is not None
+@@ -327,7 +419,9 @@
+             readable, _, _ = select.select([0], [], [], min(remaining, 0.010))
+             if not readable:
+                 continue
+-            data = os.read(0, 4096)
++            data = read_control()
++            if data is None:
++                continue
+             if not data or b"T" in data or b"K" in data:
+                 raise StartupCancelled()
+             if data != b"E":
+@@ -336,6 +430,7 @@
+             break
+     except StartupCancelled:
+         stop_signal[0] = True
++        startup_timed_out |= admission_deadline > 0 and time.monotonic() >= admission_deadline
+     except BaseException as error:
+         if worker is None and launch_read is None:
+             raise
+@@ -392,6 +487,8 @@
+     errors = []
+     if startup_error:
+         errors.append(startup_error)
++    if startup_timed_out:
++        errors.append(f"Recovery worker timed out after {config['timeoutMs']}ms (PID {worker})")
+     if not contained:
+         errors.append("Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified")
+     launch_output = b""
+@@ -407,11 +504,23 @@
+     signalled_kill = set()
+     worker_term_sent = False
+     worker_kill_sent = False
+-    started = time.monotonic()
++
+ 
+     def add_error(message):
+         if message not in errors:
+             errors.append(message)
++
++    def observe_owned_exit(pid):
++        try:
++            return wait_child_without_reaping(pid)
++        except RuntimeError as failure:
++            # Darwin can report a non-exit event for a genuinely stopped child
++            # even with WEXITED. That is NOT exit/reap proof. Fail closed and
++            # terminate the still-retained direct child, then observe again;
++            # never unwind around its anchor or modify the canonical observer.
++            add_error(f"Recovery child exit observation failed: {failure}")
++            stop_signal[0] = True
++            return None
+ 
+     def signal_group(group, number):
+         nonlocal sigkill_used
+@@ -438,14 +547,33 @@
+             except BlockingIOError:
+                 pass
+         if not worker_was_reaped:
+-            worker_code = wait_child_without_reaping(worker)
++            worker_code = observe_owned_exit(worker)
+         if worker_code is not None and not exit_sent:
+             send({"type": "exit", "exitCode": max(0, worker_code) if worker_code >= 0 else None,
+                   "signal": signal.Signals(-worker_code).name if worker_code < 0 else None})
+             exit_sent = True
+             stopped = stopped if stopped is not None else now
+-        try:
+-            data = os.read(0, 4096)
++        data = None
++        if launch_eof:
++            # CLOEXEC launch-writer EOF means the child has crossed exec (or
++            # exited). Only now may the supervisor consume teardown commands.
++            data = read_control()
++        else:
++            # Until the last child gate, cancellation bytes belong to that
++            # gate. Consuming K/T here could erase revocation, then stall before
++            # signalling while the child sees an empty, still-live channel.
++            # Poll without consumption: readability/error cancels anchored work,
++            # and the pending byte/EOF remains independently visible to child.
++            try:
++                readable, _, _ = select.select([0], [], [], 0)
++            except (OSError, ValueError) as failure:
++                add_error(f"Recovery pre-execution control channel failed: {failure}")
++                readable = [0]
++            if readable:
++                add_error("Recovery runner control channel closed or cancelled before execution")
++                stopped = stopped if stopped is not None else now
++                requested_kill = True
++        if data is not None:
+             if not data:
+                 add_error("Recovery runner control channel closed before teardown")
+                 stopped = stopped if stopped is not None else now
+@@ -455,13 +583,15 @@
+                 requested_kill = True
+             elif b"T" in data:
+                 stopped = stopped if stopped is not None else now
+-        except BlockingIOError:
+-            pass
++            else:
++                add_error("Invalid recovery control after execution admission")
++                stopped = stopped if stopped is not None else now
++                requested_kill = True
+         if stop_signal[0] or _control_broken:
+             add_error("Recovery supervisor interrupted by parent signal or closed proof channel")
+             stopped = stopped if stopped is not None else now
+             requested_kill = True
+-        if stopped is None and now - started >= timeout:
++        if stopped is None and now >= admission_deadline:
+             timed_out = True
+             add_error(f"Recovery worker timed out after {config['timeoutMs']}ms (PID {worker})")
+             stopped = now
+@@ -516,13 +646,13 @@
+     # Stop all retained joining anchors before reaping any of them. A failed
+     # membership inspection cannot authorize signalling a newly sampled group.
+     for group, anchor_pid in anchors.items():
+-        if group not in signalled_kill and (anchor_pid != worker or wait_child_without_reaping(worker) is None):
++        if group not in signalled_kill and (anchor_pid != worker or observe_owned_exit(worker) is None):
+             signal_group(group, signal.SIGKILL)
+             signalled_kill.add(group)
+     # Exit observation is non-consuming until the last possible group signal.
+     reap_deadline = time.monotonic() + 0.050
+     for pid in set(anchors.values()):
+-        while wait_child_without_reaping(pid) is None and time.monotonic() < reap_deadline:
++        while observe_owned_exit(pid) is None and time.monotonic() < reap_deadline:
+             time.sleep(0.001)
+     try:
+         final_members = session_groups(session_id)
+@@ -536,7 +666,7 @@
+     child_reaped = worker_was_reaped
+     all_reaped = True
+     for pid in set(anchors.values()):
+-        if wait_child_without_reaping(pid) is not None:
++        if observe_owned_exit(pid) is not None:
+             os.waitpid(pid, 0)
+             if pid == worker:
+                 child_reaped = True
+--- a/test/audit-recovery-tree.test.ts
++++ b/test/audit-recovery-tree.test.ts
+@@ -431,7 +431,7 @@
+       pendingProtocol = pendingProtocol.slice(newline + 1);
+       if (message.type === "prepared") {
+         expect(message).toMatchObject({ supervisorPid: supervisor.pid, sessionId: supervisor.pid });
+-        supervisor.stdin!.write("S");
++        supervisor.stdin!.write("S500\n");
+       } else if (message.type === "ready") {
+         supervisor.stdin!.write("E");
+       }
+--- a/test/audit-recovery-startup.test.ts
++++ b/test/audit-recovery-startup.test.ts
+@@ -199,13 +199,13 @@
+       const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1);
+       if (message.type === "prepared") {
+         observedLive = alive(child.pid!);
+-        if (mode === "queued-cancel") child.stdin!.write("SK");
++        if (mode === "queued-cancel") child.stdin!.write("S200\nK");
+         else if (mode === "signal") child.kill("SIGTERM");
+       } else if (message.type === "ready") child.stdin!.write("K"); // Failure-only cancellation.
+     }
+   });
+   child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
+-  if (mode === "closed-parent") child.stdin!.end("S"); // An old grant must not survive EOF.
++  if (mode === "closed-parent") child.stdin!.end("S200\n"); // An old grant must not survive EOF.
+   try {
+     const exit = await Promise.race([new Promise<number | null>(resolve => child.once("close", resolve)),
+       new Promise<never>((_resolve, reject) => { guard = setTimeout(() => {
+@@ -335,7 +335,7 @@
+     pending += chunk.toString(); let newline: number;
+     while ((newline = pending.indexOf("\n")) !== -1) {
+       const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1); messages.push(message);
+-      if (message.type === "prepared") child.stdin!.write("S");
++      if (message.type === "prepared") child.stdin!.write("S200\n");
+       if (message.type === "ready") {
+         workerPid = message.pid;
+         if (mode === "eof") child.stdin!.end();
+--- /dev/null
++++ b/test/audit-recovery-execution-admission.test.ts
+@@ -0,0 +1,380 @@
++import { describe, expect, it } from "vitest";
++import { spawn, type ChildProcess } from "node:child_process";
++import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
++import { tmpdir } from "node:os";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import type { RecoveryProcessResult } from "../scripts/phase5_e2e_runner.js";
++
++const source = fileURLToPath(new URL("../scripts/phase5_recovery_process.py", import.meta.url));
++const runner = new URL("../scripts/phase5_e2e_runner.ts", import.meta.url).href;
++const loader = fileURLToPath(new URL("../scripts/phase5_recovery_process_loader.mjs", import.meta.url));
++const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
++const read = (file: string) => existsSync(file) ? readFileSync(file, "utf8") : null;
++function alive(pid: number): boolean {
++  try { process.kill(pid, 0); return true; }
++  catch (error) { if ((error as NodeJS.ErrnoException).code === "ESRCH") return false; throw error; }
++}
++function cleanEnv(root: string): NodeJS.ProcessEnv {
++  const env: NodeJS.ProcessEnv = { PATH: process.env.PATH, LANG: "en_US.UTF-8", CI: "1", QMD_LLAMA_GPU: "false",
++    HF_HUB_OFFLINE: "1", TRANSFORMERS_OFFLINE: "1", HF_DATASETS_OFFLINE: "1", PYTHONDONTWRITEBYTECODE: "1" };
++  for (const [key, name] of Object.entries({ HOME: "home", HERMES_HOME: "hermes", XDG_CACHE_HOME: "cache",
++    XDG_CONFIG_HOME: "config", TMPDIR: "tmp", TMP: "tmp", TEMP: "tmp" })) {
++    mkdirSync(path.join(root, name), { recursive: true }); env[key] = path.join(root, name);
++  }
++  return env;
++}
++async function until(predicate: () => boolean, deadline: number, message: string) {
++  while (!predicate() && performance.now() < deadline) await sleep(2);
++  expect(predicate(), message).toBe(true);
++}
++async function reap(child: ChildProcess, killed: number[]) {
++  if (child.exitCode === null && child.signalCode === null) {
++    killed.push(child.pid!);
++    const exited = new Promise<void>(resolve => child.once("exit", () => resolve())); child.kill("SIGKILL"); await exited;
++  }
++}
++
++type Stage = "none" | "supervisor-consumed" | "supervisor-forwarded" | "child-consumed" | "child-validation" | "child-admitted";
++type Fault = "control-read-error" | "proof-write-error" | "cancel-read-hold";
++function instrument(root: string, stage: Stage, pause: "delay" | "stop", proofToStdout: boolean, fault?: Fault, forwardDelayMs = 250): string {
++  const wrapper = path.join(root, "execution-boundary.py");
++  writeFileSync(wrapper, `import json,os,select,signal,sys,time
++source=${JSON.stringify(source)}
++${proofToStdout ? "os.dup2(1,3)" : ""}
++sys.path.insert(0,os.path.dirname(source))
++scope=dict(__name__='execution_admission_regression')
++exec(compile(open(source,'rb').read(),source,'exec'),scope)
++original_read,original_write,original_fork,original_waitpid=os.read,os.write,os.fork,os.waitpid
++owner=os.getpid()
++held=False
++def hold(label):
++    global held
++    if held or label!=${JSON.stringify(stage)}: return
++    held=True
++    with open(${JSON.stringify(path.join(root, "stage.json"))},'w') as out:
++        json.dump(dict(stage=label,pid=os.getpid(),owner=owner,at=time.monotonic()),out)
++    ${pause === "stop" ? "os.kill(os.getpid(),signal.SIGSTOP)" : "time.sleep(1.300)"}
++def read(fd,n):
++    data=original_read(fd,n)
++    if os.getpid()==owner and fd==0 and data==b'K' and ${fault === "cancel-read-hold" ? "True" : "False"}:
++        frame=sys._getframe().f_back
++        while frame and not (frame.f_code.co_filename==source and frame.f_code.co_name=='main'):
++            frame=frame.f_back
++        # Consuming K after real launch-pipe EOF (exec OR child exit) is the
++        # legitimate handoff, not pre-admission revocation erasure.
++        pre_exec=frame is not None and frame.f_locals.get('launch_eof') is False
++        with open(${JSON.stringify(path.join(root, "control-reads.jsonl"))},'a') as out:
++            out.write(json.dumps(dict(pid=os.getpid(),preExec=pre_exec))+'\\n')
++        if pre_exec:
++            with open(${JSON.stringify(path.join(root, "stage.json"))},'w') as out:
++                json.dump(dict(stage='cancel-consumed',pid=os.getpid()),out)
++            time.sleep(1.300)
++    if data==b'E':
++        hold('supervisor-consumed' if os.getpid()==owner and fd==0 else 'child-consumed')
++        # At the post-forward boundary, the child must revalidate a grant that
++        # actually aged past its lease, not already execute before parent death.
++        if os.getpid()!=owner and ${stage === "supervisor-forwarded" && forwardDelayMs > 0 ? "True" : "False"}: time.sleep(${forwardDelayMs / 1000})
++        if os.getpid()!=owner and ${fault === "control-read-error" || fault === "cancel-read-hold" ? "True" : "False"}: time.sleep(.050)
++    return data
++def write(fd,data):
++    if os.getpid()==owner and fd!=3 and data==b'E' and ${stage === "supervisor-forwarded" && forwardDelayMs === 0 ? "True" : "False"}:
++        # Isolate live-channel revocation from lease expiry: observe REAL queued
++        # EOF before forwarding, rather than spending 50ms of a 200ms lease on
++        # an artificial child sleep. EOF is persistent, not consumed authority.
++        readable,_,_=select.select([0],[],[],.050)
++        assert readable and original_read(0,1)==b''
++        with open(${JSON.stringify(path.join(root, "queued-eof.json"))},'w') as out:
++            json.dump(dict(pid=os.getpid(),at=time.monotonic()),out)
++    written=original_write(fd,data)
++    if os.getpid()==owner and fd!=3 and data==b'E':
++        with open(${JSON.stringify(path.join(root, "gate-forwarded.json"))},'w') as out:
++            json.dump(dict(pid=os.getpid()),out)
++        if ${fault === "control-read-error" ? "True" : "False"}: os.close(0)
++        hold('supervisor-forwarded')
++        # Preserve the reviewer's real runnable-child slice after forwarding.
++        if ${stage === "supervisor-consumed" ? "True" : "False"}: time.sleep(.050)
++    return written
++def fork():
++    pid=original_fork()
++    if pid:
++        with open(${JSON.stringify(path.join(root, "forks.jsonl"))},'a') as out:
++            out.write(json.dumps(dict(parent=os.getpid(),pid=pid))+'\\n')
++    return pid
++def waitpid(*args):
++    result=original_waitpid(*args)
++    with open(${JSON.stringify(path.join(root, "reaps.jsonl"))},'a') as out:
++        out.write(json.dumps(dict(owner=os.getpid(),pid=result[0],status=result[1]))+'\\n')
++    return result
++os.read,os.write,os.fork,os.waitpid=read,write,fork,waitpid
++if ${fault === "proof-write-error" ? "True" : "False"}:
++    original_send=scope['send']
++    proof_closed=False
++    def send(message):
++        global proof_closed
++        if message['type']=='ready' and not proof_closed:
++            proof_closed=True
++            os.close(3) # A real EBADF on the next production proof write.
++        original_send(message)
++    scope['send']=send
++if 'execution_allowed' in scope:
++    original_allowed=scope['execution_allowed']
++    def allowed(*args):
++        hold('child-validation')
++        remaining=(args[1]-time.monotonic())*1000
++        result=original_allowed(*args)
++        with open(${JSON.stringify(path.join(root, "validation.json"))},'w') as out:
++            json.dump(dict(pid=os.getpid(),allowed=result,remainingMs=remaining),out)
++        if result: hold('child-admitted')
++        return result
++    scope['execution_allowed']=allowed
++scope['main']()
++`);
++  return wrapper;
++}
++
++async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "eof" | "none", fault?: Fault, forwardDelayMs = 250) {
++  const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-raw-"));
++  const env = cleanEnv(root);
++  const wrapper = instrument(root, stage, pause, true, fault, forwardDelayMs);
++  const work = path.join(root, "work");
++  const positive = !fault && stage === "none" && grant === "open";
++  const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
++  const child = spawn("/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({
++    command: ["/bin/sh", "-c", 'printf actual-user-work > "$1"', "owned-shell", work], timeoutMs: positive ? 5_000 : 200, contained: false,
++  })], { env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
++  const messages: any[] = [];
++  let pending = "", stderr = "", worker: number | undefined;
++  let guardFired = false;
++  const killed: number[] = [];
++  const started = performance.now();
++  const closed = new Promise<void>(resolve => child.once("close", () => resolve()));
++  child.stdout!.on("data", chunk => {
++    pending += chunk.toString(); let newline: number;
++    while ((newline = pending.indexOf("\n")) !== -1) {
++      const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1); messages.push(message);
++      if (message.type === "prepared") child.stdin!.write(positive ? "S5000\n" : "S200\n");
++      if (message.type === "ready") {
++        worker = message.pid;
++        if (grant !== "none") child.stdin!.write("E");
++        if (grant !== "open" && !stage.startsWith("child-")) child.stdin!.end();
++      }
++    }
++  });
++  child.stdin!.on("error", () => {});
++  child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
++  // Child-boundary probes first prove that the actual child reached the held
++  // boundary. Otherwise a fast supervisor EOF cleanup could miss that boundary.
++  const closeAfterAdmission = stage.startsWith("child-") ? setInterval(() => {
++    if (existsSync(path.join(root, "stage.json"))) child.stdin!.end();
++  }, 2) : undefined;
++  let cancelSent = false;
++  const cancelAfterForward = fault === "cancel-read-hold" ? setInterval(() => {
++    if (!cancelSent && existsSync(path.join(root, "gate-forwarded.json"))) { cancelSent = true; child.stdin!.write("K"); }
++  }, 2) : undefined;
++  const guard = setTimeout(() => { guardFired = true; child.kill("SIGKILL"); }, positive ? 5_000 : 1_800);
++  try {
++    await closed; clearTimeout(guard);
++    const elapsedMs = performance.now() - started;
++    // No assertion/finally cleanup before the original scheduling window ends.
++    if (stage !== "none") await sleep(Math.max(0, 1_450 - elapsedMs));
++    const forkRecords = (read(path.join(root, "forks.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { pid: number });
++    worker ??= forkRecords[0]?.pid;
++    const reaps = (read(path.join(root, "reaps.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { pid: number });
++    const validationText = read(path.join(root, "validation.json"));
++    const validation = validationText ? JSON.parse(validationText) as { allowed: boolean; remainingMs: number } : null;
++    const controlReads = (read(path.join(root, "control-reads.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { preExec: boolean });
++    const observation = { evidence: "recovery-execution-admission-before-finally", stage, pause, grant, fault, forwardDelayMs, elapsedMs, guardFired,
++      supervisorPid: child.pid, supervisorAbsent: !alive(child.pid!), workerPid: worker, workerAbsent: worker !== undefined && !alive(worker),
++      sentinelAlive: alive(sentinel.pid!), work: read(work), stageRecord: read(path.join(root, "stage.json")), queuedEof: read(path.join(root, "queued-eof.json")),
++      reaps, validation, controlReads, messages, stderr };
++    console.log(JSON.stringify(observation));
++    expect(guardFired, JSON.stringify(observation)).toBe(false);
++    expect(observation.supervisorAbsent).toBe(true); expect(observation.workerAbsent).toBe(true);
++    expect(observation.sentinelAlive).toBe(true);
++    expect(observation.work).toBe(positive ? "actual-user-work" : null);
++    // A broken proof channel cannot provide a cleanup receipt. The fixture
++    // records the REAL waitpid return, never a forged supervisor message.
++    expect(reaps.some(item => item.pid === worker)).toBe(true);
++    if (fault !== "proof-write-error") expect(messages.at(-1)).toMatchObject({ type: "cleanup", childReaped: true,
++      sessionTerminated: true, groupTerminated: true, containmentVerified: false });
++    if (stage !== "none") expect(JSON.parse(observation.stageRecord!).stage).toBe(stage);
++    if (stage === "supervisor-forwarded" && forwardDelayMs === 0) {
++      expect(read(path.join(root, "queued-eof.json"))).not.toBeNull();
++      expect(validation, JSON.stringify(observation)).not.toBeNull();
++      expect(validation!.allowed).toBe(false); expect(validation!.remainingMs).toBeGreaterThan(0);
++    }
++    if (stage === "supervisor-forwarded" && grant === "open") {
++      expect(validation, JSON.stringify(observation)).not.toBeNull();
++      expect(validation!.allowed).toBe(false); expect(validation!.remainingMs).toBeLessThan(0);
++    }
++    if (stage !== "none" && grant === "open") expect(messages.at(-1).timedOut).toBe(true);
++    if (fault === "cancel-read-hold") {
++      expect(cancelSent).toBe(true);
++      expect(observation.stageRecord, "supervisor must not erase pre-admission K").toBeNull();
++      expect(controlReads.every(item => !item.preExec)).toBe(true);
++    }
++  } finally {
++    clearTimeout(guard); if (closeAfterAdmission) clearInterval(closeAfterAdmission); if (cancelAfterForward) clearInterval(cancelAfterForward);
++    child.stdin!.end(); await reap(child, killed);
++    if (worker !== undefined && alive(worker)) { killed.push(worker); process.kill(worker, "SIGKILL"); }
++    const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
++    console.log(JSON.stringify({ evidence: "recovery-execution-admission-finally", stage, pause, grant, fault, forwardDelayMs, finallyKilled: killed }));
++    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
++  }
++}
++
++async function hostCase(runtime: "node" | "bun", stage: Stage, pause: "delay" | "stop", mode: "valid" | "alive" | "graceful" | "hard") {
++  const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-host-"));
++  const env = cleanEnv(root);
++  const wrapper = instrument(root, stage, pause, false);
++  const hostScript = path.join(root, "host.ts");
++  writeFileSync(hostScript, `import childProcess from 'node:child_process';
++import {syncBuiltinESMExports} from 'node:module';
++import {existsSync,writeFileSync} from 'node:fs';
++import {executeRecoveryWorker} from ${JSON.stringify(runner)};
++const source=${JSON.stringify(source)},wrapper=${JSON.stringify(wrapper)},root=${JSON.stringify(root)};
++if ((process.versions as Record<string,string>).bun) {
++  const bun=(globalThis as any).Bun,original=bun.spawn;
++  bun.spawn=function(command:string[],options:unknown) {
++    return original.call(bun,command[3]===source?[...command.slice(0,3),wrapper,...command.slice(4)]:command,options);
++  };
++} else {
++  const original=childProcess.spawn;
++  (childProcess as any).spawn=function(executable:string,args:string[],options:unknown) {
++    return original(executable,args[2]===source?[...args.slice(0,2),wrapper,...args.slice(3)]:args,options as any);
++  }; syncBuiltinESMExports();
++}
++const events=['exit','SIGTERM','SIGINT'];
++const hooksBefore=events.map(event=>process.listenerCount(event));
++writeFileSync(root+'/started.json',JSON.stringify({executable:process.execPath,versions:process.versions}));
++const started=performance.now();
++const helper=executeRecoveryWorker({dbPath:root+'/unused.sqlite',docsDir:root,outputJson:root+'/absent-report.json',stateRoot:root+'/state',
++  timeoutMs:${mode === "valid" ? 5_000 : 200},command:['/bin/sh','-c','printf actual-user-work > "$1"','owned-shell',root+'/work']});
++const exitPoll=${mode === "graceful" ? "setInterval(()=>{if(existsSync(root+'/stage.json'))process.exit(17);},2)" : "undefined"};
++let guardFired=false;
++const guard=setTimeout(()=>{guardFired=true;process.exitCode=99;},${mode === "valid" ? 6_000 : 1_800});
++const result=await helper;
++clearTimeout(guard);if(exitPoll)clearInterval(exitPoll);
++writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-started,hooksBefore,hooksAfter:events.map(event=>process.listenerCount(event)),guardFired,result}));
++`);
++  const executable = runtime === "node" ? process.execPath : process.env.BUN_EXECUTABLE || "bun";
++  const args = runtime === "node" ? ["--import", loader, hostScript] : [hostScript];
++  const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
++  const host = spawn(executable, args, { env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
++  let stdout = "", stderr = "";
++  host.stdout!.on("data", chunk => { stdout += chunk.toString(); }); host.stderr!.on("data", chunk => { stderr += chunk.toString(); });
++  const killed: number[] = [];
++  const forks = () => (read(path.join(root, "forks.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { parent: number; pid: number });
++  let guardFired = false;
++  try {
++    await until(() => existsSync(path.join(root, "started.json")) || host.exitCode !== null, performance.now() + 5_000, "host bootstrap");
++    expect(read(path.join(root, "started.json")), stderr).not.toBeNull();
++    const started = performance.now();
++    const deadline = started + (mode === "valid" ? 6_000 : 1_800);
++    if (mode !== "valid") {
++      await until(() => existsSync(path.join(root, "stage.json")), deadline, `actual ${stage} must be reached: ${stderr}`);
++      if (mode === "hard") host.kill("SIGKILL"); // An actual abrupt death, with NO JS exit hook.
++    }
++    while (host.exitCode === null && host.signalCode === null && performance.now() < deadline) await sleep(2);
++    guardFired = host.exitCode === null && host.signalCode === null;
++    const atHostExit = { elapsedMs: performance.now() - started, exitCode: host.exitCode, signal: host.signalCode,
++      recoveryAlive: forks().filter(item => alive(item.parent) || alive(item.pid)), work: read(path.join(root, "work")) };
++    if (mode !== "valid") await sleep(Math.max(0, 1_500 - (performance.now() - started)));
++    const children = forks();
++    const helperText = read(path.join(root, "helper.json"));
++    const helper = helperText ? JSON.parse(helperText) as { elapsedMs: number; guardFired: boolean; hooksBefore: number[]; hooksAfter: number[]; result: RecoveryProcessResult } : null;
++    const observation = { evidence: "recovery-parent-death-before-finally", runtime, mode, stage, pause, executable,
++      nativeRuntime: JSON.parse(read(path.join(root, "started.json"))!), atHostExit, guardFired, forks: children,
++      supervisorsAbsent: children.length === 1 && children.every(item => !alive(item.parent)),
++      workersAbsent: children.length === 1 && children.every(item => !alive(item.pid)), sentinelAlive: alive(sentinel.pid!),
++      work: read(path.join(root, "work")), stageRecord: read(path.join(root, "stage.json")), helper, stdout, stderr };
++    console.log(JSON.stringify(observation));
++    expect(guardFired, JSON.stringify(observation)).toBe(false);
++    expect(observation.supervisorsAbsent, JSON.stringify(observation)).toBe(true); expect(observation.workersAbsent).toBe(true);
++    expect(observation.sentinelAlive).toBe(true); expect(observation.work).toBe(mode === "valid" ? "actual-user-work" : null);
++    if (mode === "alive" || mode === "valid") {
++      expect(helper, JSON.stringify(observation)).not.toBeNull(); expect(helper!.guardFired).toBe(false);
++      expect(helper!.hooksAfter).toEqual(helper!.hooksBefore);
++      expect(helper!.result.launch).toMatchObject({ state: "started", admissionGranted: true, supervisorReaped: true });
++      expect(helper!.result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, sessionTerminated: true,
++        pipesClosed: true, forcedPipeClose: false, containmentVerified: false });
++      if (mode === "alive") {
++        expect(helper!.result.timedOut).toBe(true); expect(helper!.elapsedMs).toBeGreaterThanOrEqual(200); expect(helper!.elapsedMs).toBeLessThan(1_500);
++      }
++    } else {
++      expect(helper).toBeNull();
++      if (mode === "hard") expect(host.signalCode).toBe("SIGKILL"); else expect(host.exitCode).toBe(17);
++    }
++  } finally {
++    await reap(host, killed);
++    for (const item of forks()) for (const pid of [item.parent, item.pid]) if (alive(pid)) { killed.push(pid); process.kill(pid, "SIGKILL"); }
++    const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
++    console.log(JSON.stringify({ evidence: "recovery-parent-death-finally", runtime, mode, stage, pause, finallyKilled: killed }));
++    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
++  }
++}
++
++async function invalidBudgetFrame(frame: string) {
++  const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-budget-frame-"));
++  const env = cleanEnv(root);
++  const wrapper = instrument(root, "none", "delay", true);
++  const work = path.join(root, "work");
++  const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
++  const child = spawn("/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({ command: ["/bin/sh", "-c",
++    'printf actual-user-work > "$1"', "owned-shell", work], timeoutMs: 200, contained: false })],
++  { env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
++  let protocol = "", stderr = "", sent = false, guardFired = false;
++  const killed: number[] = [];
++  child.stdout!.on("data", chunk => {
++    protocol += chunk.toString();
++    if (!sent && protocol.includes('"prepared"')) { sent = true; child.stdin!.end(frame); }
++  });
++  child.stdin!.on("error", () => {});
++  child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
++  const closed = new Promise<void>(resolve => child.once("close", () => resolve()));
++  const guard = setTimeout(() => { guardFired = true; child.kill("SIGKILL"); }, 1_800);
++  try {
++    await closed; clearTimeout(guard);
++    const observation = { evidence: "recovery-budget-frame-before-finally", frame, protocol, stderr, guardFired,
++      supervisorAbsent: !alive(child.pid!), forked: existsSync(path.join(root, "forks.jsonl")), work: read(work), sentinelAlive: alive(sentinel.pid!) };
++    console.log(JSON.stringify(observation));
++    expect(sent).toBe(true); expect(guardFired).toBe(false); expect(observation.supervisorAbsent).toBe(true);
++    expect(observation.forked).toBe(false); expect(observation.work).toBeNull(); expect(observation.sentinelAlive).toBe(true);
++    expect(protocol).not.toContain('"ready"');
++  } finally {
++    clearTimeout(guard); await reap(child, killed); const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
++    console.log(JSON.stringify({ evidence: "recovery-budget-frame-finally", frame, finallyKilled: killed }));
++    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
++  }
++}
++
++describe.skipIf(process.platform === "win32")("execution authority cannot replay after the caller dies", () => {
++  it("actually executes a valid raw grant (separate 5s readiness control)", () => rawCase("none", "delay", "open"));
++  it("does not execute on EOF without E", () => rawCase("none", "delay", "none"));
++  it("expires consumed E autonomously with a still-open parent and no cancellation byte", () => rawCase("supervisor-consumed", "delay", "open"));
++  it("expires an already-forwarded grant at the child with a still-open parent", () => rawCase("supervisor-forwarded", "delay", "open"));
++  it("rejects caller EOF at the child while its execution lease is still valid", () => rawCase("supervisor-forwarded", "delay", "eof", undefined, 0));
++  for (const fault of ["control-read-error", "proof-write-error"] as const) {
++    it(`retains anchored cleanup after a real terminal ${fault}`, () => rawCase("none", "delay", "open", fault));
++  }
++  it("does not erase queued cancellation before the child's last gate", () => rawCase("none", "delay", "open", "cancel-read-hold"));
++  for (const stage of ["supervisor-consumed", "supervisor-forwarded", "child-consumed", "child-validation", "child-admitted"] as const) {
++    it(`rejects stale permission across a 1300ms ${stage} hold and EOF`, () => rawCase(stage, "delay", "eof"));
++  }
++  for (const stage of ["supervisor-consumed", "child-consumed"] as const) {
++    it(`autonomously cleans a real stopped ${stage} on EOF, without fixture CONT`, () => rawCase(stage, "stop", "eof"));
++  }
++  for (const frame of ["S0\n", "S201\n", "S200\nS200\n", "S200", "S999999999999999999999\n", "S+1\n", "Sbad\nK"] as const) {
++    it(`refuses bounded malformed/duplicate/truncated budget ${JSON.stringify(frame)}`, () => invalidBudgetFrame(frame));
++  }
++  for (const runtime of ["node", "bun"] as const) {
++    it(`actually executes in real ${runtime} (separate 5s readiness control)`, () => hostCase(runtime, "none", "delay", "valid"));
++    for (const stage of ["supervisor-consumed", "supervisor-forwarded", "child-admitted"] as const) {
++      for (const mode of ["alive", "graceful", "hard"] as const) {
++        it(`cleans ${runtime} ${mode} after ${stage} without late work`, () => hostCase(runtime, stage, "delay", mode));
++      }
++    }
++    it(`cleans real ${runtime} SIGKILL with its supervisor SIGSTOPped`, () => hostCase(runtime, "supervisor-consumed", "stop", "hard"));
++  }
++});

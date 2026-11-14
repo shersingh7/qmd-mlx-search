@@ -20,6 +20,9 @@ import {
 } from "node-llama-cpp";
 import { homedir } from "os";
 import { join } from "path";
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { inspect } from "node:util";
 import { cpus } from "os";
 
 // ============================================================================
@@ -87,7 +90,7 @@ function median(arr: number[]): number {
 interface BenchResult {
   parallelism: number;
   contextSize: number;
-  flashAttention: boolean;
+  flashAttention: boolean | "auto";
   times: number[];       // ms per run
   medianMs: number;
   docsPerSec: number;
@@ -96,12 +99,22 @@ interface BenchResult {
   peakRss: number;        // bytes
 }
 
+// A failed release invalidates further measurements in this process.
+class BenchmarkCleanupError extends AggregateError {}
+
+async function disposeOwned(resources: readonly { dispose(): void | Promise<void> }[]): Promise<unknown[]> {
+  const errors: unknown[] = [];
+  for (const resource of resources) {
+    try { await resource.dispose(); } catch (error) { errors.push(error); }
+  }
+  return errors;
+}
+
 async function benchmarkConfig(
   model: LlamaModel,
   llama: Llama,
   docs: string[],
   parallelism: number,
-  flash: boolean,
 ): Promise<BenchResult> {
   // Measure VRAM before
   const vramBefore = llama.gpu ? await llama.getVramState() : null;
@@ -109,77 +122,93 @@ async function benchmarkConfig(
 
   // Create contexts. On CPU, split threads evenly across contexts.
   const cpuThreads = !llama.gpu ? Math.floor(llama.cpuMathCores / parallelism) : 0;
-  const contexts = [];
-  for (let i = 0; i < parallelism; i++) {
-    try {
-      contexts.push(await model.createRankingContext({
-        contextSize: CONTEXT_SIZE,
-        flashAttention: flash,
-        ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
-      }));
-    } catch {
-      if (contexts.length === 0) {
-        // Try without flash
+  const contexts: Awaited<ReturnType<LlamaModel["createRankingContext"]>>[] = [];
+  const operationErrors: unknown[] = [];
+  try {
+    for (let i = 0; i < parallelism; i++) {
+      try {
         contexts.push(await model.createRankingContext({
           contextSize: CONTEXT_SIZE,
+          // Ranking contexts inherit the model's defaultContextFlashAttention;
+          // node-llama-cpp 3.22.3 has no per-ranking-context flash option.
           ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
         }));
+      } catch {
+        if (contexts.length === 0) {
+          // Retry the first context once with the same supported options.
+          contexts.push(await model.createRankingContext({
+            contextSize: CONTEXT_SIZE,
+            ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
+          }));
+        }
+        break;
       }
-      break;
     }
-  }
-  const actualParallelism = contexts.length;
+    const actualParallelism = contexts.length;
+    const firstContext = contexts[0];
+    if (!firstContext) throw new Error("No ranking contexts created");
 
-  // Measure VRAM after context creation
-  const vramAfter = llama.gpu ? await llama.getVramState() : null;
-  const vramUsed = vramBefore && vramAfter ? vramAfter.used - vramBefore.used : 0;
-  const vramPerCtx = actualParallelism > 0 ? vramUsed / actualParallelism : 0;
+    // Measure VRAM after context creation
+    const vramAfter = llama.gpu ? await llama.getVramState() : null;
+    const vramUsed = vramBefore && vramAfter ? vramAfter.used - vramBefore.used : 0;
+    const vramPerCtx = actualParallelism > 0 ? vramUsed / actualParallelism : 0;
 
-  // Warm up
-  await contexts[0]!.rankAll(QUERY, docs.slice(0, 2));
+    // Warm up
+    await firstContext.rankAll(QUERY, docs.slice(0, 2));
 
-  // Benchmark iterations
-  const times: number[] = [];
-  let peakRss = getMemUsage().rss;
+    // Benchmark iterations
+    const times: number[] = [];
+    let peakRss = getMemUsage().rss;
 
-  for (let iter = 0; iter < ITERATIONS; iter++) {
-    const chunkSize = Math.ceil(docs.length / actualParallelism);
+    for (let iter = 0; iter < ITERATIONS; iter++) {
+      const chunkSize = Math.ceil(docs.length / actualParallelism);
 
-    const t0 = performance.now();
-    const allScores = await Promise.all(
-      Array.from({ length: actualParallelism }, (_, i) => {
-        const chunk = docs.slice(i * chunkSize, (i + 1) * chunkSize);
-        return chunk.length > 0 ? contexts[i]!.rankAll(QUERY, chunk) : Promise.resolve([]);
-      })
+      const t0 = performance.now();
+      // Async callbacks also capture synchronous refusals. Do not release any
+      // context until every started ranking has settled, even if a sibling fails.
+      const outcomes = await Promise.allSettled(
+        contexts.map(async (context, i) => {
+          const chunk = docs.slice(i * chunkSize, (i + 1) * chunkSize);
+          return chunk.length > 0 ? context.rankAll(QUERY, chunk) : [];
+        })
+      );
+      const elapsed = performance.now() - t0;
+      times.push(elapsed);
+      const failures = outcomes.filter((entry): entry is PromiseRejectedResult => entry.status === "rejected");
+      if (failures.length === 1) throw failures[0]!.reason;
+      if (failures.length > 1) throw new AggregateError(failures.map(entry => entry.reason), "Ranking operations failed");
+
+      // Verify scores are valid
+      const flat = outcomes.flatMap(entry => entry.status === "fulfilled" ? entry.value : []);
+      if (flat.some(s => s < 0 || s > 1 || isNaN(s))) {
+        throw new Error("Invalid scores detected");
+      }
+
+      const currentRss = getMemUsage().rss;
+      if (currentRss > peakRss) peakRss = currentRss;
+    }
+
+    const med = median(times);
+    return {
+      parallelism: actualParallelism,
+      contextSize: CONTEXT_SIZE,
+      flashAttention: model.defaultContextFlashAttention,
+      times,
+      medianMs: med,
+      docsPerSec: (docs.length / med) * 1000,
+      vramPerContext: vramPerCtx,
+      totalVram: vramUsed,
+      peakRss,
+    };
+  } catch (error) {
+    operationErrors.push(error);
+    throw error;
+  } finally {
+    const cleanupErrors = await disposeOwned(contexts);
+    if (cleanupErrors.length) throw new BenchmarkCleanupError(
+      [...operationErrors, ...cleanupErrors], "Ranking context cleanup failed; benchmark cannot continue",
     );
-    const elapsed = performance.now() - t0;
-    times.push(elapsed);
-
-    // Verify scores are valid
-    const flat = allScores.flat();
-    if (flat.some(s => s < 0 || s > 1 || isNaN(s))) {
-      throw new Error("Invalid scores detected");
-    }
-
-    const currentRss = getMemUsage().rss;
-    if (currentRss > peakRss) peakRss = currentRss;
   }
-
-  // Cleanup
-  for (const ctx of contexts) await ctx.dispose();
-
-  const med = median(times);
-  return {
-    parallelism: actualParallelism,
-    contextSize: CONTEXT_SIZE,
-    flashAttention: flash,
-    times,
-    medianMs: med,
-    docsPerSec: (docs.length / med) * 1000,
-    vramPerContext: vramPerCtx,
-    totalVram: vramUsed,
-    peakRss,
-  };
 }
 
 // ============================================================================
@@ -196,83 +225,94 @@ async function main() {
     build: "autoAttempt",
     logLevel: LlamaLogLevel.error
   });
-  let gpuLabel: string = llama.gpu === false
-    ? "cpu"
-    : llama.gpu;
-
-  // System info
-  const cpuInfo = cpus();
-  const cpuModel = cpuInfo[0]?.model || "unknown";
-  const cpuCount = cpuInfo.length;
-
-  console.log("System");
-  console.log(`  CPU:       ${cpuModel}`);
-  console.log(`  Cores:     ${cpuCount} (${llama.cpuMathCores} math)`);
-  console.log(`  Device:    ${gpuLabel}`);
-
-  if (llama.gpu) {
-    const gpuNames = await llama.getGpuDeviceNames();
-    const counts = new Map<string, number>();
-    for (const name of gpuNames) counts.set(name, (counts.get(name) || 0) + 1);
-    const devStr = Array.from(counts.entries())
-      .map(([name, n]) => n > 1 ? `${n}× ${name}` : name).join(", ");
-    console.log(`  GPU:       ${devStr}`);
-    const vram = await llama.getVramState();
-    console.log(`  VRAM:      ${formatBytes(vram.total)} total, ${formatBytes(vram.free)} free`);
-  }
-
-  console.log(`  RAM:       ${formatBytes(getMemUsage().rss)} RSS at start`);
-
-  // Load model
-  console.log(`\nModel`);
-  console.log(`  URI:       ${RERANK_MODEL}`);
-  const modelPath = await resolveModelFile(RERANK_MODEL, MODEL_CACHE);
-  const vramPreModel = llama.gpu ? await llama.getVramState() : null;
-  const model = await llama.loadModel({ modelPath });
-  const vramPostModel = llama.gpu ? await llama.getVramState() : null;
-  const modelVram = vramPreModel && vramPostModel ? vramPostModel.used - vramPreModel.used : 0;
-  console.log(`  Params:    ${model.trainContextSize} train ctx`);
-  if (modelVram > 0) console.log(`  VRAM:      ${formatBytes(modelVram)} (model weights)`);
-
-  // Generate test docs
-  const docs = generateDocs(DOC_COUNT);
-  console.log(`\nBenchmark`);
-  console.log(`  Documents: ${DOC_COUNT}`);
-  console.log(`  Ctx size:  ${CONTEXT_SIZE}`);
-  console.log(`  Iterations:${ITERATIONS}`);
-  console.log(`  Query:     "${QUERY.slice(0, 50)}..."`);
-
-  // Run benchmarks
   const results: BenchResult[] = [];
+  let model: LlamaModel | undefined;
+  const operationErrors: unknown[] = [];
+  try {
+    const gpuLabel = llama.gpu === false ? "cpu" : llama.gpu;
 
-  for (const p of PARALLEL_CONFIGS) {
-    if (!llama.gpu && p > 1) {
-      // CPU: only test if we have enough cores (at least 4 per context)
-      if (llama.cpuMathCores < p * 4) {
-        console.log(`\n  [${p} ctx] skipped (need ${p * 4} cores, have ${llama.cpuMathCores})`);
-        continue;
-      }
+    // System info
+    const cpuInfo = cpus();
+    const cpuModel = cpuInfo[0]?.model || "unknown";
+    const cpuCount = cpuInfo.length;
+
+    console.log("System");
+    console.log(`  CPU:       ${cpuModel}`);
+    console.log(`  Cores:     ${cpuCount} (${llama.cpuMathCores} math)`);
+    console.log(`  Device:    ${gpuLabel}`);
+
+    if (llama.gpu) {
+      const gpuNames = await llama.getGpuDeviceNames();
+      const counts = new Map<string, number>();
+      for (const name of gpuNames) counts.set(name, (counts.get(name) || 0) + 1);
+      const devStr = Array.from(counts.entries())
+        .map(([name, n]) => n > 1 ? `${n}× ${name}` : name).join(", ");
+      console.log(`  GPU:       ${devStr}`);
+      const vram = await llama.getVramState();
+      console.log(`  VRAM:      ${formatBytes(vram.total)} total, ${formatBytes(vram.free)} free`);
     }
 
-    // Test with flash attention
-    process.stdout.write(`\n  [${p} ctx, flash] running...`);
-    try {
-      const r = await benchmarkConfig(model, llama, docs, p, true);
-      results.push(r);
-      process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
-    } catch (e: any) {
-      process.stdout.write(` failed: ${e.message}\n`);
-      // Try without flash
-      process.stdout.write(`  [${p} ctx, no flash] running...`);
+    console.log(`  RAM:       ${formatBytes(getMemUsage().rss)} RSS at start`);
+
+    // Load model
+    console.log(`\nModel`);
+    console.log(`  URI:       ${RERANK_MODEL}`);
+    const modelPath = await resolveModelFile(RERANK_MODEL, MODEL_CACHE);
+    const vramPreModel = llama.gpu ? await llama.getVramState() : null;
+    model = await llama.loadModel({ modelPath });
+    const vramPostModel = llama.gpu ? await llama.getVramState() : null;
+    const modelVram = vramPreModel && vramPostModel ? vramPostModel.used - vramPreModel.used : 0;
+    console.log(`  Params:    ${model.trainContextSize} train ctx`);
+    if (modelVram > 0) console.log(`  VRAM:      ${formatBytes(modelVram)} (model weights)`);
+
+    // Generate test docs
+    const docs = generateDocs(DOC_COUNT);
+    console.log(`\nBenchmark`);
+    console.log(`  Documents: ${DOC_COUNT}`);
+    console.log(`  Ctx size:  ${CONTEXT_SIZE}`);
+    console.log(`  Iterations:${ITERATIONS}`);
+    console.log(`  Query:     "${QUERY.slice(0, 50)}..."`);
+
+    // Run benchmarks
+    const configErrors: unknown[] = [];
+    for (const p of PARALLEL_CONFIGS) {
+      if (!llama.gpu && p > 1) {
+        // CPU: only test if we have enough cores (at least 4 per context)
+        if (llama.cpuMathCores < p * 4) {
+          console.log(`\n  [${p} ctx] skipped (need ${p * 4} cores, have ${llama.cpuMathCores})`);
+          continue;
+        }
+      }
+
+      // The public ranking API uses the model default; do not label an ignored
+      // per-context option as a flash/no-flash comparison.
+      process.stdout.write(`\n  [${p} ctx, flash=${model.defaultContextFlashAttention}] running...`);
       try {
-        const r = await benchmarkConfig(model, llama, docs, p, false);
+        const r = await benchmarkConfig(model, llama, docs, p);
         results.push(r);
         process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
-      } catch (e2: any) {
-        process.stdout.write(` failed: ${e2.message}\n`);
+      } catch (error) {
+        // Failed cleanup contaminates later configurations: stop, release the
+        // parents, and propagate it instead of publishing a misleading summary.
+        if (error instanceof BenchmarkCleanupError) throw error;
+        configErrors.push(error);
+        process.stdout.write(` failed: ${error instanceof Error ? error.message : String(error)}\n`);
       }
     }
+    if (!results.length) throw new AggregateError(configErrors, "No benchmark configurations succeeded");
+  } catch (error) {
+    operationErrors.push(error);
+    throw error;
+  } finally {
+    // Contexts have settled and had every release attempted by benchmarkConfig.
+    // Always attempt both parent releases, in dependency order.
+    const cleanupErrors = await disposeOwned([...(model ? [model] : []), llama]);
+    if (cleanupErrors.length) throw new BenchmarkCleanupError(
+      [...operationErrors, ...cleanupErrors], "Benchmark resource cleanup failed",
+    );
   }
+
+  // Publish the summary only after parent cleanup succeeds.
 
   // Summary table
   console.log("\n═══════════════════════════════════════════════════════════════");
@@ -290,7 +330,7 @@ async function main() {
     const speedupStr = r === results[0] ? "      " : `(${speedup.toFixed(1)}×)`;
     console.log(
       `  ${String(r.parallelism).padStart(3)}  ` +
-      `${r.flashAttention ? " yes " : "  no "}  ` +
+      `${r.flashAttention === "auto" ? "auto " : r.flashAttention ? " yes " : "  no "}  ` +
       `${r.medianMs.toFixed(0).padStart(5)}ms  ` +
       `${r.docsPerSec.toFixed(1).padStart(6)}  ` +
       `${formatBytes(r.vramPerContext).padStart(8)}  ` +
@@ -309,8 +349,22 @@ async function main() {
   }
 
   console.log("");
-  await model.dispose();
-  await llama.dispose();
 }
 
-main().catch(console.error);
+// Native flags short-circuit filesystem work. Older Node needs both paths
+// resolved, including when --preserve-symlinks-main preserves the module URL.
+if (import.meta.main ?? (() => {
+  if (process.argv[1] === undefined) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    // Missing or unresolvable entry paths must not make imports fail or launch.
+    return false;
+  }
+})()) {
+  main().catch(error => {
+    // Keep nested primary/cleanup failures visible on Node as well as Bun.
+    console.error(inspect(error, { depth: null, colors: false }));
+    process.exitCode = 1;
+  });
+}

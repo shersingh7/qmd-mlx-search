@@ -1,0 +1,6 @@
+{
+  "specVerdict": "SPEC_PASS_SCOPED",
+  "specSha256": "bc78c3a2e0911c20789b2d4d066e17f6bb438c343ffb52c2495f506cfa1c30ea",
+  "actionlintBinarySha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388",
+  "qualityStartedOnlyAfterSpec": true
+}

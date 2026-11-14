@@ -1,0 +1,22 @@
+from pathlib import Path
+import json
+R=Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+a=json.loads((R/'evidence/mirror-package-aliases.json').read_text())
+nm=R/'held/node_modules';nm.mkdir()
+for name,target in a.items():
+ p=nm/name;p.parent.mkdir(parents=True,exist_ok=True);p.symlink_to(target,target_is_directory=True)
+for sub in ['.vite','.cache','.vitest']:
+ (nm/sub).mkdir();(R/'held'/sub).mkdir()
+(R/'held/package.json').write_text('{"type":"module","private":true}\n')
+setup=(R/'probes/test-host-setup.mjs').read_text()
+new="  const text=String(filename);\n  const leaf=text.split(/[\\\\/]/).pop() ?? '';\n  if(/llama|ggml|metal|mlx/i.test(leaf)||/[\\\\/]@?node-llama-cpp[\\\\/]/i.test(text))return deny('model-native-dlopen:'+text)();"
+# Preserve the initial failed guard fixture by reversing only its disclosed edit.
+old="  if(/llama|ggml|metal|mlx/i.test(String(filename)))return deny('model-native-dlopen')();"
+assert new in setup
+(R/'evidence/test-host-setup-initial.mjs').write_text(setup.replace(new,old))
+checks=[]
+for p in sorted((R/'evidence').glob('*-compiler-reads-*.jsonl')):
+ rows=[json.loads(x) for x in p.read_text().splitlines()]
+ checks.append({'log':p.name,'reads':sum('operation' in x for x in rows),'denied':[x for x in rows if x.get('allowed') is False]})
+(R/'evidence/compiler-guard-checkpoint.json').write_text(json.dumps(checks,indent=2)+'\n')
+print(json.dumps(checks,indent=2))

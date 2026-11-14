@@ -1,0 +1,87 @@
+{
+  "totals": {
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "skipped": 0
+  },
+  "controls": {
+    "diagnostic-control-natural-close": {
+      "evidence": "diagnostic-control-natural-close",
+      "ends": {
+        "stdout": true,
+        "stderr": true,
+        "control": true
+      },
+      "closeCounter": {
+        "needed": 4,
+        "got": 4,
+        "scope": "Node-private-read-only-not-kernel-state"
+      }
+    },
+    "diagnostic-control-known-fixture-FD3-writer": {
+      "evidence": "diagnostic-control-known-fixture-FD3-writer",
+      "ends": {
+        "stdout": true,
+        "stderr": true,
+        "control": false
+      },
+      "closeCounter": {
+        "needed": 4,
+        "got": 3,
+        "scope": "Node-private-read-only-not-kernel-state"
+      },
+      "causality": "not-established-by-runtime-events"
+    },
+    "diagnostic-control-delayed-reader": {
+      "evidence": "diagnostic-control-delayed-reader",
+      "closeDelayMs": 40.373000000000005,
+      "ends": {
+        "stdout": true,
+        "stderr": true,
+        "control": true
+      },
+      "causality": "not-established-by-runtime-events"
+    },
+    "diagnostic-control-forced-destroy": {
+      "evidence": "diagnostic-control-forced-destroy",
+      "ends": {
+        "stdout": false,
+        "stderr": false,
+        "control": false
+      },
+      "preForcedClosure": {
+        "source": "existing-result.transportFailure-before-destroy",
+        "tMs": null,
+        "transportFailure": {
+          "prepared": false,
+          "supervisorExited": false,
+          "supervisorCloseObserved": false,
+          "stdout": {
+            "bytes": 0,
+            "ended": false,
+            "closed": false,
+            "destroyed": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "ended": false,
+            "closed": false,
+            "destroyed": false
+          },
+          "proof": {
+            "bytes": 0,
+            "ended": false,
+            "closed": false,
+            "destroyed": false
+          }
+        }
+      },
+      "cleanup": {
+        "pipesClosed": false,
+        "forcedPipeClose": true,
+        "containmentVerified": false
+      }
+    }
+  }
+}

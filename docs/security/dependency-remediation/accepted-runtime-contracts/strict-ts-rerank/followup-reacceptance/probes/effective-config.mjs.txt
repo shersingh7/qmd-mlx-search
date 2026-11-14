@@ -1,0 +1,29 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { resolveConfig } from 'vitest/node';
+import { VitestModuleEvaluator } from '../node_modules/vitest/dist/module-evaluator.js';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+const R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const records=[];
+for(const layout of ['baseline','mirror']){
+ const {vitestConfig:c,viteConfig:v}=await resolveConfig({root:path.join(R,layout),config:path.join(R,layout+'-isolated.config.mjs'),watch:false,run:true});
+ assert.equal(c.maxWorkers,2);assert.equal(c.testTimeout,30000);assert.deepEqual(c.include,['test/**/*.test.ts']);
+ assert.notEqual(c.deps.interopDefault,false);
+ if(layout==='mirror')assert.deepEqual(c.server.deps.inline,process.versions.bun?['zod']:[]);
+ else assert.equal(c.server.deps.inline,undefined);
+ records.push({layout,maxWorkers:c.maxWorkers,testTimeout:c.testTimeout,include:c.include,inline:c.server.deps.inline??null,interopDefault:c.deps.interopDefault??null,serverDeps:c.server.deps,cacheDir:v.cacheDir,setupFiles:c.setupFiles});
+}
+// Real CJS public package through unmodified evaluator, using effective options.
+// Node [] must not disable CJS default interoperability; Bun correction is Zod only.
+const require=createRequire(path.join(R,'mirror/package.json'));
+const id=require.resolve('picomatch');
+const resolved=await new VitestModuleEvaluator(undefined,{}).runExternalModule(id);
+assert.equal(typeof resolved.default,'function');assert.equal(resolved.default('*.md')('note.md'),true);assert.equal(resolved.default('*.md')('note.txt'),false);
+const cli=fs.readFileSync(path.join(R,'mirror/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js'),'utf8');
+assert.ok(cli.includes('if (matchPattern(id, moduleDirectories, defaultInline)) return false;'));
+assert.ok(cli.includes('if (patterns == null) return false;'));
+// Empty inline match list does not replace independent built-in defaultInline.
+console.log(JSON.stringify({execPath:process.execPath,versions:process.versions,records,realCjs:{id,defaultType:typeof resolved.default,positive:true,negative:true},defaultInlineRemainsIndependent:true,vitestResolverSha256:createHash('sha256').update(cli).digest('hex')},null,2));

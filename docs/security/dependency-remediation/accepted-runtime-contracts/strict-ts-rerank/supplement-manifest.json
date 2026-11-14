@@ -1,0 +1,275 @@
+{
+  "patch": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/rerank-lifecycle-supplement.patch",
+  "patchSha256": "531b457942ab2c4d3e17780a69251a9b4b8d23b2287f436f76c05b3981eed4cc",
+  "files": [
+    {
+      "file": "src/bench-rerank.ts",
+      "baselineSha256": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+      "proposedSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d"
+    },
+    {
+      "file": "src/llm.ts",
+      "baselineSha256": "d103fd98fbe43635856711abe3d18496fe140a7539100107ecb9f6aed0d3fa50",
+      "proposedSha256": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d"
+    },
+    {
+      "file": "test/llm.test.ts",
+      "baselineSha256": "3ad4c219f3126c9ca4d031a27d83c7d8a32277a08bd33cf07270358212ecf8da",
+      "proposedSha256": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5"
+    },
+    {
+      "file": "test/bench-rerank-lifecycle.test.ts",
+      "baselineSha256": null,
+      "proposedSha256": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520"
+    }
+  ],
+  "originalTypePatchSha256": "e7b8d38aa36df031a3d28b4ba4044d5a6e16607b7f1ddfe3fa515f7fbe4fa620",
+  "patchCheckExitCode": 0,
+  "patchReconstructsAllFourProposedFilesExactly": true,
+  "patchNumstat": "189\t138\tsrc/bench-rerank.ts\n5\t6\tsrc/llm.ts\n132\t0\ttest/llm.test.ts\n458\t0\ttest/bench-rerank-lifecycle.test.ts\n",
+  "onlyChangedNonGeneratedFiles": [
+    "src/bench-rerank.ts",
+    "src/llm.ts",
+    "test/bench-rerank-lifecycle.test.ts",
+    "test/llm.test.ts"
+  ],
+  "checks": {
+    "node-focused-settled": {
+      "testFiles": 5,
+      "totalTests": 155,
+      "statuses": {
+        "passed": 124,
+        "skipped": 31
+      },
+      "files": {
+        "test/audit-llm-cleanup-review.test.ts": {
+          "passed": 21
+        },
+        "test/audit-llm-deadline-review.test.ts": {
+          "passed": 22
+        },
+        "test/audit-llm-lifecycle.test.ts": {
+          "passed": 27
+        },
+        "test/bench-rerank-lifecycle.test.ts": {
+          "passed": 34
+        },
+        "test/llm.test.ts": {
+          "passed": 20,
+          "skipped": 31
+        }
+      },
+      "actualHost": {
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "node": "22.22.3",
+        "bun": null
+      },
+      "exactExecutableBodiesVerified": true
+    },
+    "bun-focused-settled": {
+      "testFiles": 5,
+      "totalTests": 155,
+      "statuses": {
+        "passed": 124,
+        "skipped": 31
+      },
+      "files": {
+        "test/audit-llm-lifecycle.test.ts": {
+          "passed": 27
+        },
+        "test/audit-llm-cleanup-review.test.ts": {
+          "passed": 21
+        },
+        "test/bench-rerank-lifecycle.test.ts": {
+          "passed": 34
+        },
+        "test/llm.test.ts": {
+          "passed": 20,
+          "skipped": 31
+        },
+        "test/audit-llm-deadline-review.test.ts": {
+          "passed": 22
+        }
+      },
+      "actualHost": {
+        "executable": "/Users/shersingh/.bun/bin/bun",
+        "node": "24.3.0",
+        "bun": "1.3.8"
+      },
+      "exactExecutableBodiesVerified": true
+    },
+    "node-build-settled": {
+      "label": "node-build-settled",
+      "command": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "scripts/build.mjs"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 1.578379958,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    },
+    "node-root-type-settled": {
+      "label": "node-root-type-settled",
+      "command": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 2.794282416,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    },
+    "bun-root-type-settled": {
+      "label": "bun-root-type-settled",
+      "command": [
+        "/Users/shersingh/.bun/bin/bun",
+        "--bun",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 2.825232,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    },
+    "node-exact-settled": {
+      "label": "node-exact-settled",
+      "command": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "--test",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/exact-body-lifecycle.test.mjs"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 0.291601834,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    },
+    "bun-exact-settled": {
+      "label": "bun-exact-settled",
+      "command": [
+        "/Users/shersingh/.bun/bin/bun",
+        "test",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/exact-body-lifecycle.test.mjs"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 0.26010641700000003,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    },
+    "contract-policy-verification": {
+      "label": "contract-policy-verification",
+      "command": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/verify-contracts.mjs"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/mirror",
+      "elapsedSeconds": 0.23573595800000002,
+      "exitCode": 0,
+      "isolatedEnvironment": {
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/home",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/cache",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/tmp",
+        "CI": "1",
+        "REQUIRE_BUN": "1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "QMD_LLAMA_GPU": "false",
+        "PYTHONPATH": ""
+      }
+    }
+  },
+  "baselineRed": {
+    "numTotalTests": 79,
+    "numPassedTests": 23,
+    "numFailedTests": 25,
+    "numPendingTests": 31
+  },
+  "originalParentRedRunnerSha256": "055073c2b89162b97bdae97f66217fc5b3e911acebf37d59761be80381865bbe",
+  "frozenSourceManifestVerifiedEntries": 242,
+  "rootCounts": {
+    "originalRootCount": 146,
+    "proposedRootCount": 147,
+    "removedRoots": [],
+    "addedRoots": [
+      "test/bench-rerank-lifecycle.test.ts"
+    ]
+  },
+  "sharedDependencyCacheSideEffect": {
+    "initialRedUsedTopLevelNodeModulesSymlink": true,
+    "observedSharedCacheFiles": [
+      {
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "mtimeNs": 1794608031759430836,
+        "sha256": "aa0b2e06cb12d8ca1a44b5a04b5ea60d3d2b87d27d1a8c6cc849a0dc77fc2d2c",
+        "stillSameBytesAndMtimeAfterIsolation": true,
+        "cacheMtimeMinusRedStartMs": 2308.430908203125
+      }
+    ],
+    "laterRunsUseOwnedCacheDirectoriesAndDisableVitestCache": true,
+    "sharedCacheNotRevertedBecauseFrozenTreeIsReadOnly": true
+  },
+  "privateNodeBunEsbuildProcessesRemaining": [],
+  "scope": "Derivative mirror only; no live integration/commit/push/install; no metadata/config/docs/skills changes; recovery-owner files untouched",
+  "limits": [
+    "Synthetic JS/native-context fakes only; no native load, GPU/inference/training, native memory leak or performance qualification",
+    "Native operations/disposal promises that never settle remain library failures; no forced disposal timeout, production GC or retry loops added",
+    "Canonical full-suite/CI and independent review remain with parent after all writers settle",
+    "Native import.meta.main tested on Node 22.22.3 and Bun 1.3.8; legacy URL fallback not executed under older Node binaries"
+  ]
+}

@@ -33,7 +33,7 @@ function runNative(args: string[]): { records: Evidence[]; stderr: string } {
     expect(result.signal, diagnostics).toBeNull();
     expect(result.status, diagnostics).toBe(0);
     const records = result.stdout.split("\n").filter(line => line.startsWith("{\"evidence\":")).map(line => JSON.parse(line) as Evidence);
-    const runtime = records.find(record => ["native-recovery-runtime", "recovery-tree-native-runtime", "recovery-startup-native-runtime"].includes(record.evidence));
+    const runtime = records.find(record => ["native-recovery-runtime", "recovery-tree-native-runtime", "recovery-startup-native-runtime", "recovery-transition-native-runtime"].includes(record.evidence));
     expect(runtime, diagnostics).toBeDefined();
     expect(runtime!.bun).toBe(version.stdout.trim());
     expect(path.isAbsolute(runtime!.executable)).toBe(true);
@@ -44,12 +44,23 @@ function runNative(args: string[]): { records: Evidence[]; stderr: string } {
 describe.skipIf(!required && (process.platform === "win32" || missing))("real native-Bun recovery ownership", () => {
   it("proves cold no-start admission and malformed-proof refusal in the Bun test host", () => {
     const { records, stderr } = runNative(["test", "./test/audit-recovery-startup.test.ts", "--timeout", "30000"]);
-    expect(stderr).toMatch(/11 pass/);
+    expect(stderr).toMatch(/18 pass/);
     expect(stderr).toMatch(/0 fail/);
     expect(records.filter(record => record.evidence === "recovery-cold-supervisor-before-finally")).toHaveLength(3);
     expect(records.filter(record => record.evidence === "recovery-cold-supervisor-no-late-work-before-finally")).toHaveLength(3);
     expect(records.filter(record => record.evidence === "recovery-admission-refusal-before-finally")).toHaveLength(4);
     expect(records.filter(record => record.evidence === "recovery-malformed-admission-before-finally")).toHaveLength(4);
+    expect(records.filter(record => record.evidence === "recovery-execution-gate-before-finally")).toHaveLength(7);
+  });
+
+  it("cancels admitted creation/readiness transitions across real delays and SIGSTOP", () => {
+    const { records, stderr } = runNative(["test", "./test/audit-recovery-transition.test.ts", "--timeout", "30000"]);
+    expect(stderr).toMatch(/10 pass/);
+    expect(stderr).toMatch(/0 fail/);
+    const observations = records.filter(record => record.evidence === "recovery-transition-before-finally");
+    expect(observations).toHaveLength(10);
+    expect(observations.every(record => record.supervisorAbsent && record.sentinelAlive && !record.guardFired)).toBe(true);
+    expect(records.filter(record => record.evidence === "recovery-transition-no-late-work-before-finally")).toHaveLength(10);
   });
 
   it("runs all eight ownership/escape/no-fork cases in the Bun test host", () => {
@@ -78,4 +89,14 @@ describe.skipIf(!required && (process.platform === "win32" || missing))("real na
     expect(observations.slice(2).every(record => record.reusedFDs.length > 0)).toBe(true);
     expect(records.find(record => record.evidence === "native-recovery-passed")).toMatchObject({ calls: 9, scenario: "fd-reuse" });
   });
+
+  for (const scenario of ["signal-term", "signal-int"] as const) {
+    it(`cleans the owned worker on a real parent ${scenario}`, () => {
+      const { records } = runNative(["./test/fixtures/bun_recovery_ownership.ts", scenario]);
+      const observations = records.filter(record => record.evidence === "native-recovery-before-finally");
+      expect(observations).toHaveLength(1);
+      expect(observations[0]).toMatchObject({ parentAbsent: true, sentinelAlive: true, guardFired: false });
+      expect(records.find(record => record.evidence === "native-recovery-passed")).toMatchObject({ calls: 1, scenario });
+    });
+  }
 });

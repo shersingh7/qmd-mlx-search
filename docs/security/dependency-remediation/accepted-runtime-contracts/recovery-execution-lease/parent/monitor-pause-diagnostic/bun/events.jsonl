@@ -1,0 +1,18 @@
+{"kind": "source", "pid": 38155, "owner": 38155, "at": 0.086160375, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 38155, "owner": 38155, "at": 0.086438083, "preparedAt": 0.08643175, "deadline": 0.28643175}
+{"kind": "control-read", "pid": 38155, "owner": 38155, "at": 0.087364958, "dataHex": "5339340a", "preExec": false}
+{"kind": "fork-parent", "pid": 38155, "owner": 38155, "at": 0.088392708, "child": 38156, "inheritedDeadline": 0.18043175}
+{"kind": "setpgid", "pid": 38155, "owner": 38155, "at": 0.088921958, "target": 38156, "group": 38156, "currentGroup": 38155, "currentSession": 38155}
+{"kind": "fork-child", "pid": 38156, "owner": 38155, "at": 0.088554}
+{"kind": "control-read", "pid": 38155, "owner": 38155, "at": 0.089164666, "dataHex": "45", "preExec": false}
+{"kind": "e-forwarded", "pid": 38155, "owner": 38155, "at": 0.089258708}
+{"kind": "setpgid", "pid": 38156, "owner": 38155, "at": 0.089294541, "target": 0, "group": 0, "currentGroup": 38156, "currentSession": 38155}
+{"kind": "child-gate-enter", "pid": 38156, "owner": 38155, "at": 0.089422375, "deadline": 0.18043175, "fd": 3, "inheritable": false, "blocking": false}
+{"kind": "pre-exec-readable-held", "pid": 38155, "owner": 38155, "at": 0.099012083}
+{"kind": "child-gate-result", "pid": 38156, "owner": 38155, "at": 0.1027995, "allowed": false, "remainingMs": 77.641959, "deadline": 0.18043175}
+{"kind": "refusal-enter", "pid": 38156, "owner": 38155, "at": 0.102928125, "target": 38155, "currentGroup": 38156, "currentSession": 38155}
+{"kind": "setpgid", "pid": 38156, "owner": 38155, "at": 0.103052708, "target": 0, "group": 38155, "currentGroup": 38155, "currentSession": 38155}
+{"kind": "group-signal", "pid": 38156, "owner": 38155, "at": 0.103123791, "group": 38155, "signal": 15, "pinned": true, "currentSession": 38155, "termBlocked": true}
+{"kind": "group-signal", "pid": 38156, "owner": 38155, "at": 0.103232666, "group": 38155, "signal": 19, "pinned": true, "currentSession": 38155, "termBlocked": true}
+{"kind": "control-read", "pid": 38155, "owner": 38155, "at": 1.565316083, "dataHex": "4b", "preExec": false}
+{"kind": "waitpid", "pid": 38155, "owner": 38155, "at": 1.572042, "reaped": 38156, "status": 32000}

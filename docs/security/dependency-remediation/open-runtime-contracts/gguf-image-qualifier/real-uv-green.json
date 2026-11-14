@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-S",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/qualify_gguf_image.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p",
+  "name": "real-uv-green",
+  "returncode": 0,
+  "seconds": 0.5390899169724435,
+  "stderr": "",
+  "stdout": "{\n  \"locked_python_converter_training_gpu_cloud_qualified\": false,\n  \"native_only\": false,\n  \"outputs\": [\n    \"qmd-c-ok\",\n    \"qmd-cxx-ok\"\n  ],\n  \"platform\": \"Darwin/arm64\",\n  \"probe_sha256\": \"72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc\",\n  \"python\": \"3.12.13\",\n  \"scope\": \"native CPU C/C++ prerequisites only\",\n  \"status\": \"pass\",\n  \"versions\": {\n    \"c++\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"cc\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"git\": \"git version 2.53.0\",\n    \"make\": \"GNU Make 3.81\",\n    \"uv\": \"uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)\"\n  }\n}\n"
+}

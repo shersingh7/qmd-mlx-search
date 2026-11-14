@@ -1,0 +1,51 @@
+"""Re-run the original RED and the minimally transport-adapted candidate."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+ORIGINAL = Path('/Users/shersingh/.hermes/cache/scratch/qmd-transition-independent-ruk8fjg0')
+WORKER = Path('/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo')
+env = json.loads((ROOT / 'environment.json').read_text())
+raw = (ORIGINAL / 'reproduce_stale_e.py').read_bytes()
+assert raw == (WORKER / 'original-reproduce_stale_e.py').read_bytes()
+(ROOT / 'original-reproduce_stale_e.py').write_bytes(raw)
+results = []
+for label, source, adapt in [('old-red', WORKER / 'entry', False), ('candidate-green', ROOT / 'mirror', True)]:
+    base = ROOT / label
+    (base / 'probes').mkdir(parents=True)
+    for relative in ['scripts/phase5_recovery_process.py', 'scripts/qmd_mlx/__init__.py', 'scripts/qmd_mlx/process_anchor.py']:
+        target = base / 'snapshot' / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / relative, target)
+    content = raw.decode()
+    if adapt:
+        assert content.count("child.stdin.write(b'S')") == 1
+        content = content.replace("child.stdin.write(b'S')", "child.stdin.write(b'S200\\n')")
+    (base / 'reproduce_stale_e.py').write_text(content)
+    (base / 'focused-invocation.json').write_text(json.dumps({'env': env}, indent=2) + '\n')
+    with (base / 'execution.log').open('w') as log:
+        executed = subprocess.run(['/usr/bin/python3', '-B', '-S', str(base / 'reproduce_stale_e.py')],
+            cwd=base, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=15)
+    evidence = list((base / 'probes').glob('*/results.json'))
+    assert len(evidence) == 1, evidence
+    records = json.loads(evidence[0].read_text())
+    final = [json.loads((evidence[0].parent / record['name'] / 'finally.json').read_text()) for record in records]
+    assert all(not item['guardFired'] and item['supervisorAbsent'] and item['workersAbsent'] and item['sentinelAlive'] for item in records)
+    assert all(not item['fixtureKills'] for item in final)
+    assert executed.returncode == (0 if adapt else 1), (label, executed.returncode)
+    assert records[0]['work'] == 'actual-user-work' and records[1]['work'] is None
+    assert records[2]['work'] == (None if adapt else 'actual-user-work')
+    results.append({'label': label, 'exitCode': executed.returncode, 'results': str(evidence[0]),
+        'cases': [{key: item[key] for key in ['name', 'elapsedMs', 'guardFired', 'work', 'supervisorAbsent', 'workersAbsent', 'sentinelAlive']} for item in records],
+        'fixtureKills': [item['fixtureKills'] for item in final]})
+    if adapt:
+        (ROOT / 'original-transport-adaptation.patch').write_text(''.join(difflib.unified_diff(raw.decode().splitlines(True), content.splitlines(True),
+            fromfile='original-reproduce_stale_e.py', tofile='candidate-green/reproduce_stale_e.py')))
+summary = {'originalSha256': hashlib.sha256(raw).hexdigest(), 'originalUnchanged': True,
+    'adaptation': 'Exactly one S -> S200\\n frame substitution; all holds, controls, assertions and 200/1800 bounds retained', 'runs': results}
+(ROOT / 'original-replay-summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+print(json.dumps(summary, indent=2))

@@ -1,0 +1,46 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const mirror=path.join(root,'mirror');
+const node='/Users/shersingh/.hermes/node/bin/node';
+const bun='/Users/shersingh/.bun/bin/bun';
+const mode=process.argv[2];
+const label=process.argv[3]??mode;
+const own=path.join(root,'environments',label);
+const env={};
+for(const [key,folder] of Object.entries({HOME:'home',HERMES_HOME:'hermes',HERMES_DIR:'hermes',HERMES_KNOWLEDGE_DIR:'knowledge',KNOWLEDGE_DIR:'knowledge',XDG_CACHE_HOME:'cache',XDG_CONFIG_HOME:'config',XDG_DATA_HOME:'data',HF_HOME:'hf',HF_HUB_CACHE:'hf/hub',TRANSFORMERS_CACHE:'hf/transformers',TMPDIR:'tmp',TMP:'tmp',TEMP:'tmp',BUN_INSTALL_CACHE_DIR:'bun',npm_config_cache:'npm',VITE_CACHE_DIR:'vite',VITEST_CACHE_DIR:'vitest'})) {
+ env[key]=path.join(own,folder);fs.mkdirSync(env[key],{recursive:true});
+}
+Object.assign(env,{PATH:'/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin:/usr/sbin:/sbin',LANG:'en_US.UTF-8',LC_ALL:'en_US.UTF-8',CI:'1',REQUIRE_BUN:'1',QMD_LLAMA_GPU:'false',HF_HUB_OFFLINE:'1',TRANSFORMERS_OFFLINE:'1',HF_DATASETS_OFFLINE:'1',UV_OFFLINE:'1',npm_config_offline:'true',PYTHONDONTWRITEBYTECODE:'1',PYTHONNOUSERSITE:'1',TOKENIZERS_PARALLELISM:'false'});
+const fast=[node,['node_modules/vitest/vitest.mjs','run','test/audit-recovery-tree.test.ts','--maxWorkers=2','--reporter=verbose','--reporter=json',`--outputFile.json=${root}/evidence/${label}.vitest.json`,'--testNamePattern=bounds a 200ms execution deadline without assuming cold-command readiness']];
+const commands={
+ 'fast-on':fast,'fast-off':fast,
+ 'selftests':[node,['--test','--test-concurrency=1','test/helpers/recovery-bootstrap-diagnostics.selftest.mjs']],
+ 'bun-fast-on':[bun,['test','./test/audit-recovery-tree.test.ts','--test-name-pattern','bounds a 200ms execution deadline without assuming cold-command readiness','--timeout','30000']],
+ 'actual-fallback':[node,['--import',path.join(mirror,'scripts/phase5_recovery_process_loader.mjs'),path.join(root,'harness/provided-actual-fallback-control.mjs')]],
+ 'heldouts':[node,['--test','--test-concurrency=1',path.join(root,'harness/heldouts.mjs')]],
+ 'metadata':[node,['test/helpers/recovery-bootstrap-diagnostics.mjs','--metadata',path.join(root,'evidence',label+'-artifacts')]],
+ 'syntax-helper':[node,['--check','test/helpers/recovery-bootstrap-diagnostics.mjs']],
+ 'syntax-selftest':[node,['--check','test/helpers/recovery-bootstrap-diagnostics.selftest.mjs']],
+ 'helper-types':[node,['node_modules/typescript/bin/tsc','--noEmit','--allowJs','--checkJs','--strict','--skipLibCheck','--module','NodeNext','--moduleResolution','NodeNext','--target','ESNext','test/helpers/recovery-bootstrap-diagnostics.mjs']],
+ 'bounded-types':[node,[path.join(root,'harness/bounded-types.mjs')]],
+ 'static':[node,[path.join(root,'harness/static.mjs')]],
+ 'spec-readback':[node,[path.join(root,'harness/spec-readback.mjs')]],
+ 'actionlint':['/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint',['-shellcheck=','.github/workflows/ci.yml']],
+ 'host':[node,['--input-type=module','-e',"import os from 'node:os'; console.log(JSON.stringify({executable:process.execPath,node:process.versions.node,uv:process.versions.uv,platform:process.platform,arch:process.arch,kernel:os.release(),os:os.version(),cpu:os.cpus()[0]?.model}));"]],
+};
+if(!commands[mode])throw new Error('unknown mode');
+if(['fast-on','bun-fast-on','actual-fallback'].includes(mode)){env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS='1';env.QMD_RECOVERY_BOOTSTRAP_DIR=path.join(root,'evidence',label+'-artifacts');}
+const sourceManifest=JSON.parse(fs.readFileSync(path.join(root,'evidence/provided-source-hash-manifest.json'),'utf8'));
+const sourceSha256=Object.fromEntries(Object.entries(sourceManifest.sourceSha256).map(([name,want])=>{const got=createHash('sha256').update(fs.readFileSync(path.join(mirror,name))).digest('hex');if(got!==want)throw new Error('source drift: '+name);return [name,got];}));
+const [executable,argv]=commands[mode];
+const start=performance.now();
+const result=spawnSync(executable,argv,{cwd:mirror,env,encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024});
+for(const stream of ['stdout','stderr'])fs.writeFileSync(path.join(root,'evidence',label+'.'+stream+'.log'),result[stream]??'',{flag:'wx'});
+const receipt={label,mode,executable,argv,cwd:mirror,environment:env,sourceSha256,exitCode:result.status,signal:result.signal,errorCode:result.error?.code??null,elapsedMs:performance.now()-start,outerCleanup:result.error?.code==='ETIMEDOUT'?'owned child terminated by harness timeout':'none'};
+fs.writeFileSync(path.join(root,'evidence',label+'-command.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({label,mode,executable,argv,cwd:mirror,exitCode:result.status,signal:result.signal,errorCode:result.error?.code??null,elapsedMs:receipt.elapsedMs,receipt:path.join(root,'evidence',label+'-command.json')}));
+console.log(result.stdout??'');console.error(result.stderr??'');process.exitCode=result.status??1;

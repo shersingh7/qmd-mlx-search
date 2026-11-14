@@ -5,7 +5,7 @@
  * resources before the process exits, avoiding GGML_ASSERT failures.
  */
 import { afterAll } from "bun:test";
-import { disposeDefaultLlamaCpp } from "./llm";
+import { disposeDefaultLlamaCpp } from "./llm.js";
 
 // Global afterAll runs after all test files complete
 afterAll(async () => {

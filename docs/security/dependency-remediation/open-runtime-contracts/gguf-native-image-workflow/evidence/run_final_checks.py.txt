@@ -1,0 +1,36 @@
+"""Run independent local checks with owned environments; summarize raw receipts."""
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+
+ROOT = Path(__file__).parent.parent
+EVIDENCE = ROOT / 'evidence'
+ENV = dict(os.environ)
+assert 'PYTHONPATH' not in ENV and 'NODE_OPTIONS' not in ENV
+for name in ('HOME', 'HERMES_HOME', 'KNOWLEDGE_DIR', 'TMPDIR', 'HF_HOME', 'XDG_CACHE_HOME', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME'):
+    assert Path(ENV[name]).is_relative_to(ROOT), (name, ENV[name])
+
+def run(item):
+    label, script, phase = item
+    command = [sys.executable, '-I', '-B', '-S', str(EVIDENCE / script), phase]
+    result = subprocess.run(command, env=ENV, cwd=ROOT, capture_output=True, text=True, timeout=180)
+    (EVIDENCE / (label + '.stdout.log')).write_text(result.stdout)
+    (EVIDENCE / (label + '.stderr.log')).write_text(result.stderr)
+    return {'label': label, 'command': command, 'exit_code': result.returncode,
+            'stdout': str(EVIDENCE / (label + '.stdout.log')), 'stderr': str(EVIDENCE / (label + '.stderr.log'))}
+
+with ThreadPoolExecutor(max_workers=2) as executor:
+    results = list(executor.map(run, [('validation-final', 'validate_workflow.py', 'final'),
+                                      ('control-flow-final', 'control_flow_tests.py', 'final-v2')]))
+summary = json.loads((EVIDENCE / 'synthetic-final-v2/summary.json').read_text())
+validation = json.loads((EVIDENCE / 'validation-final.json').read_text())
+output = {'checks': results, 'synthetic_cases': summary['cases'], 'synthetic_passed': summary['passed'],
+          'synthetic_failed': summary['failed'], 'synthetic_skipped': summary['skipped'],
+          'workflow_sha256': summary['workflow_sha256'], 'physical_host': summary['physical_test_host'],
+          'image_execution': False, 'validation_passed': validation['passed']}
+(EVIDENCE / 'final-checks.json').write_text(json.dumps(output, indent=2) + '\n')
+print(json.dumps(output, indent=2))
+raise SystemExit(0 if all(item['exit_code'] == 0 for item in results) else 1)

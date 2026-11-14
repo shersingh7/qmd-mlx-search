@@ -1,0 +1,28 @@
+--- baseline/src/llm.ts
++++ accepted19/src/llm.ts
+@@ -1061,10 +1061,8 @@
+    * Load rerank contexts (lazy). Creates multiple contexts for parallel ranking.
+    * Each context has its own sequence, so they can evaluate independently.
+    *
+-   * Tuning choices:
+-   * - contextSize 1024: reranking chunks are ~800 tokens max, 1024 is plenty
+-   * - flashAttention: ~20% less VRAM per context (568 vs 711 MB)
+-   * - Combined: drops from 11.6 GB (auto, no flash) to 568 MB per context (20×)
++   * Ranking contexts inherit the model's default attention selection. The
++   * installed API has no per-ranking-context flashAttention option.
+    */
+   // Qwen3 reranker template adds ~200 tokens overhead (system prompt, tags, etc.)
+   // Default 2048 was too small for longer documents (e.g. session transcripts,
+@@ -1097,9 +1095,10 @@
+         contextSize: LlamaCpp.RERANK_CONTEXT_SIZE,
+         createSignal: lifecycleFor(this).signal,
+         ...(threads > 0 ? { threads } : {}),
+-      };
++      } satisfies NonNullable<Parameters<LlamaModel["createRankingContext"]>[0]>;
+       const contexts = await this.createContextPool(n, async () => {
+-        try { return await model.createRankingContext({ ...contextOptions, flashAttention: true } as any); }
++        // Retry a transient creation refusal once with the same supported options.
++        try { return await model.createRankingContext(contextOptions); }
+         catch (error) {
+           this.checkOperation();
+           return model.createRankingContext(contextOptions);

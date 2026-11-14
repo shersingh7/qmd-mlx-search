@@ -1,0 +1,110 @@
+from pathlib import Path
+import os, json, hashlib, stat, shutil, difflib
+ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+BASE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5')
+ACCEPT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo')
+LEASE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif')
+DEP = Path('/Users/shersingh/github/qmd-mlx-search/node_modules')
+def sha(data): return hashlib.sha256(data).hexdigest()
+def read(path):
+    assert not path.is_symlink(), str(path)
+    assert stat.S_ISREG(path.stat().st_mode), str(path)
+    return path.read_bytes()
+def save(path, obj):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, indent=2) + '\n')
+for sub in ['home','hermes','knowledge','xdg/config','xdg/cache','xdg/data','xdg/state','hf','tmp','cache/bun','cache/npm','cache/pnpm','cache/node','cache/uv','cache/python','evidence','logs','reference','baseline','mirror','tools/bin']:
+    (ROOT/sub).mkdir(parents=True, exist_ok=True)
+assert os.environ['HOME'] == str(ROOT/'home')
+assert os.environ['TMPDIR'] == str(ROOT/'tmp')
+assert os.environ['QMD_LLAMA_GPU'] == 'false'
+manifest_data = read(BASE/'baseline-manifest.json')
+manifest = json.loads(manifest_data)
+assert manifest['sourceCount'] == len(manifest['sourceSha256']) == 248
+index_data = read(ACCEPT/'report-index.json')
+index = json.loads(index_data)
+index_checks = {name: sha(read(ACCEPT/name)) for name in ['report-index.json','ad-hoc-index.json','source-binding.json']}
+assert '949e00889d5c073c9d61bdb69ee01dfde307dffc6bc8c39f2f8046dd82fba9dd' in index_checks.values(), index_checks
+binding = json.loads(read(ACCEPT/'source-binding.json'))
+for rel in ['REVIEW.md','review-result.json','source-binding.json']:
+    data = read(ACCEPT/rel)
+    assert sha(data) == index['files'][rel], rel
+    (ROOT/'reference'/rel).write_bytes(data)
+allowed = ['scripts/phase5_e2e_runner.ts','src/bench-rerank.ts','src/llm.ts','src/llm/mlx-identity.ts','src/mcp/server.ts','src/test-preload.ts','test/bench-rerank-entrypoint.test.ts','test/bench-rerank-lifecycle.test.ts','test/cli.test.ts','test/eval-bm25.test.ts','test/eval.test.ts','test/fixtures/public_eval_dataset.ts','test/llm.test.ts','test/multi-collection-filter.test.ts','test/phase5-recovery.test.ts','test/rrf-trace.test.ts','test/store.helpers.unit.test.ts','test/zod-import.test.ts','vitest.config.ts']
+assert index['integration_count'] == len(allowed) == 19
+assert set(allowed) == set(index['integration_sha256'])
+assert binding['integration_sha256'] == index['integration_sha256']
+review = json.loads(read(ACCEPT/'review-result.json'))
+assert review['integration_sha256'] == index['integration_sha256']
+assert review['quality'] == 'APPROVE_WITH_MINOR_FINDING'
+for rel, expected in manifest['sourceSha256'].items():
+    assert not Path(rel).is_absolute() and '..' not in Path(rel).parts
+    data = read(BASE/'baseline'/rel)
+    assert sha(data) == expected, rel
+    for tree in ['baseline','mirror']:
+        dest = ROOT/tree/rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+        dest.chmod(stat.S_IMODE((BASE/'baseline'/rel).stat().st_mode))
+changes = []
+for rel in allowed:
+    data = read(ACCEPT/'mirror'/rel)
+    assert sha(data) == index['integration_sha256'][rel], rel
+    dest = ROOT/'reference/accepted19'/rel
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(data)
+    before = (ROOT/'baseline'/rel).read_text() if (ROOT/'baseline'/rel).exists() else ''
+    after = data.decode()
+    if before != after:
+        changes.append({'path': rel,'baseline_sha256': manifest['sourceSha256'].get(rel),'accepted_sha256': sha(data)})
+        out = ROOT/'reference/diffs'/f'{rel.replace("/","__")}.diff'
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True), fromfile='baseline/'+rel, tofile='accepted19/'+rel)))
+lease_receipt = json.loads(read(LEASE/'final-review-receipt.json'))
+for rel in ['SPEC-REVIEW.md','QUALITY-REVIEW.md','final-review-receipt.json','source-binding.json','final-source-binding.json']:
+    data = read(LEASE/rel)
+    (ROOT/'reference'/('lease-'+rel)).write_bytes(data)
+for name, key in [('SPEC-REVIEW.md','spec'),('QUALITY-REVIEW.md','quality')]:
+    assert sha(read(LEASE/name)) == lease_receipt['reportSha256'][key]
+lease_checks = {}
+for rel, expected in lease_receipt['candidateSha256'].items():
+    actual = manifest['sourceSha256'][rel]
+    # The observer has a separately approved later edit to this path.
+    assert actual == expected or rel == 'test/audit-recovery-tree.test.ts', (rel, expected, actual)
+    lease_checks[rel] = {'lease_accepted': expected, 'baseline': actual, 'later_observer': rel == 'test/audit-recovery-tree.test.ts'}
+for tree in ['baseline','mirror']:
+    nm = ROOT/tree/'node_modules'
+    nm.mkdir()
+    assert not nm.is_symlink()
+    for name in ['.vite','.cache','.vitest']:
+        (nm/name).mkdir()
+        (ROOT/tree/name).mkdir()
+    aliases = {}
+    def link_package(entry, relative):
+        target = entry.resolve(strict=True)
+        assert target.is_relative_to(DEP.resolve()), (entry, target)
+        assert (target/'package.json').is_file(), target
+        dest = nm/relative
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.symlink_to(target, target_is_directory=True)
+        aliases[str(relative)] = str(target)
+    for entry in sorted(DEP.iterdir()):
+        if entry.name.startswith('.'):
+            continue
+        if entry.name.startswith('@'):
+            for package in sorted(entry.iterdir()):
+                if (package/'package.json').is_file(): link_package(package, Path(entry.name)/package.name)
+        elif (entry/'package.json').is_file():
+            link_package(entry, Path(entry.name))
+    save(ROOT/'evidence'/f'{tree}-package-aliases.json', aliases)
+# Add exact executable aliases only in our own tools directory.
+for name, target in [('node','/Users/shersingh/.hermes/node/bin/node'),('bun','/Users/shersingh/.bun/bin/bun')]:
+    p = Path(target)
+    assert p.is_file() and os.access(p, os.X_OK), target
+    (ROOT/'tools/bin'/name).symlink_to(p.resolve())
+report = {'root':str(ROOT),'baseline_manifest_sha256':sha(manifest_data),'baseline_source_count':len(manifest['sourceSha256']),'accepted_index_sha256':index_checks,'accepted19_sha256':index['integration_sha256'],'different_paths':changes,'different_count':len(changes),'lease_baseline_checks':lease_checks,'environment':dict(os.environ),'package_alias_count':len(aliases),'cache_layout_ready_before_any_test':True}
+save(ROOT/'evidence/authentication.json',report)
+save(ROOT/'before-manifest.json',manifest)
+(ROOT/'reference/report-index.json').write_bytes(index_data)
+print(json.dumps({k:report[k] for k in ['root','baseline_source_count','accepted_index_sha256','different_count','package_alias_count','cache_layout_ready_before_any_test']},indent=2))
+print('DIFFERENT PATHS',json.dumps([x['path'] for x in changes]))

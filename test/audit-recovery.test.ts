@@ -268,7 +268,8 @@ describe("W13 fresh OS-process recovery (synthetic HTTP, no models)", () => {
     expectReaped(result.launch.supervisorPid!);
     expect(result.cleanup).toMatchObject({ groupTerminated: true, sessionTerminated: true, pipesClosed: true, forcedPipeClose: false });
     if (result.launch.state === "not-started") {
-      expect(result.launch.admissionGranted).toBe(false);
+      if (result.launch.admissionGranted) expect(result.launch.noStartProof).toBe("supervisor-acknowledgement");
+      else expect(result.launch.noStartProof).toBeUndefined();
       expect(result.pid).toBeUndefined();
       expect(result.cleanup).toMatchObject({ childReaped: false, processGroups: [] });
     } else {
@@ -293,18 +294,19 @@ describe("W13 fresh OS-process recovery (synthetic HTTP, no models)", () => {
     expectReaped(result.pid!);
   });
 
-  it("bounds a spawn failure without waiting for a nonexistent exit event", async () => {
+  it("bounds a spawn failure without creating a supervisor or inventing a reap", async () => {
     const started = performance.now();
     const result = await executeRecoveryWorker({ dbPath: path.join(root, "shadow-no-spawn.sqlite"),
       outputJson: path.join(root, "spawn-failure.json"), stateRoot: path.join(root, "spawn-failure-state"),
       timeoutMs: 200, command: [path.join(root, "nonexistent-executable")] });
     expect(result.error).toMatch(/spawn failed/);
     expect(result.pid).toBeUndefined();
+    expect(result.timedOut).toBe(false);
     expect(performance.now() - started).toBeLessThan(1_000);
-    expect(result.launch).toMatchObject({ state: "not-started", admissionGranted: false, supervisorReaped: true });
-    expect(result.launch.supervisorPid).toBeTypeOf("number");
-    expectReaped(result.launch.supervisorPid!);
-    expect(result.cleanup).toMatchObject({ childReaped: false, groupTerminated: true, pipesClosed: true, forcedPipeClose: false, processGroups: [] });
+    expect(result.launch).toEqual({ state: "not-attempted", admissionGranted: false, supervisorReaped: false });
+    expect(result.launch.supervisorPid).toBeUndefined();
+    expect(result.cleanup).toMatchObject({ childReaped: false, groupTerminated: true, sessionTerminated: true,
+      pipesClosed: true, forcedPipeClose: false, processGroups: [] });
     expect(requests).toEqual([]);
   });
 

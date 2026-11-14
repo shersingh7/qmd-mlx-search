@@ -1,0 +1,16 @@
+import net from 'node:net';
+import tls from 'node:tls';
+import http from 'node:http';
+import https from 'node:https';
+import { afterAll, expect } from 'vitest';
+const attempts=[];
+const deny=name=>function(){attempts.push(name);throw new Error('SDK in-memory fixture forbids '+name);};
+net.Socket.prototype.connect=deny('net.Socket.connect');
+net.Server.prototype.listen=deny('net.Server.listen');
+tls.connect=deny('tls.connect');
+http.request=deny('http.request');http.get=deny('http.get');
+https.request=deny('https.request');https.get=deny('https.get');
+globalThis.fetch=deny('fetch');
+process.dlopen=deny('process.dlopen');
+globalThis.__sdkReviewBoundaryAttempts=attempts;
+afterAll(()=>{expect(attempts).toEqual([]);});

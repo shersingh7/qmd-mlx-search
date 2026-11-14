@@ -1,0 +1,342 @@
+{
+  "offline": true,
+  "results": [
+    {
+      "graph": "finetune/uv.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--project",
+        "finetune"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "error: No interpreter found for Python >=3.11 in managed installations or search path\n\nhint: A managed Python download is available for Python >=3.11, but Python downloads are set to 'never'\n",
+      "seconds": 0.41198620898649096,
+      "lockSha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/convert_gguf.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/convert_gguf.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 71 packages in 8ms\n",
+      "seconds": 0.06930854101665318,
+      "lockSha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/convert_onnx.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/convert_onnx.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 72 packages in 1ms\n",
+      "seconds": 0.015569375013001263,
+      "lockSha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/dataset/analyze_data.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/dataset/analyze_data.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 1ms\n",
+      "seconds": 0.011542332998942584,
+      "lockSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/dataset/prepare_data.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/dataset/prepare_data.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 36 packages in 2ms\n",
+      "seconds": 0.013600792037323117,
+      "lockSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/dataset/prepare_data_lfm2.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/dataset/prepare_data_lfm2.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 36 packages in 2ms\n",
+      "seconds": 0.013914750015828758,
+      "lockSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/dataset/score_data.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/dataset/score_data.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 1ms\n",
+      "seconds": 0.012261083000339568,
+      "lockSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/dataset/validate_schema.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/dataset/validate_schema.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 2ms\n",
+      "seconds": 0.013252125005237758,
+      "lockSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/eval.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/eval.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 2ms\n",
+      "seconds": 0.015042458020616323,
+      "lockSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/eval_retrieval.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/eval_retrieval.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 1ms\n",
+      "seconds": 0.01415416703093797,
+      "lockSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/experiments/grpo/grpo.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/experiments/grpo/grpo.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 1ms\n",
+      "seconds": 0.015316707955207676,
+      "lockSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/experiments/lfm2/sft_lfm2.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 2ms\n",
+      "seconds": 0.015725540986750275,
+      "lockSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/jobs/eval.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/jobs/eval.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 1ms\n",
+      "seconds": 0.014116458012722433,
+      "lockSha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/jobs/sft.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/jobs/sft.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 1ms\n",
+      "seconds": 0.015178792004007846,
+      "lockSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/train.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/train.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 92 packages in 2ms\n",
+      "seconds": 0.017544083995744586,
+      "lockSha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "lockUnchanged": true
+    },
+    {
+      "graph": "finetune/train_unsloth.py.lock",
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--no-config",
+        "--cache-dir",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+        "--offline",
+        "lock",
+        "--check",
+        "--no-build",
+        "--script",
+        "finetune/train_unsloth.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "Resolved 91 packages in 2ms\n",
+      "seconds": 0.018044208991341293,
+      "lockSha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "lockUnchanged": true
+    }
+  ],
+  "expected": 16
+}

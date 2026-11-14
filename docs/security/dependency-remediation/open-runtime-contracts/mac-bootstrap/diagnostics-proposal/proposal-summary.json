@@ -1,0 +1,1149 @@
+{
+  "status": "LOCAL_PROPOSAL_VERIFIED; independent review and actual native Mac CI pending",
+  "implementationDelegation": "deleg_46e0a020",
+  "independentReviewDelegation": "deleg_eb890b44",
+  "independentReviewer": "sa-0-a5cf9b8b",
+  "acceptedForIntegration": false,
+  "ciExecuted": false,
+  "originalCause": "UNPROVEN",
+  "patchSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+  "sourceManifestSha256": "d4f94e439de1704994cd2eb94e6b697d55c0625a833f7881832071529f0fed87",
+  "verifiedDeclaredArtifacts": 104,
+  "proposedSourceFiles": 246,
+  "changes": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "originalSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "proposedSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f"
+    },
+    {
+      "path": "test/audit-recovery-tree.test.ts",
+      "originalSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "proposedSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "originalSha256": null,
+      "proposedSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+      "originalSha256": null,
+      "proposedSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e"
+    }
+  ],
+  "parentVerification": {
+    "pytest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "focusedOn": {
+      "passed": 1,
+      "filtered": 7
+    },
+    "focusedOff": {
+      "passed": 1,
+      "filtered": 7
+    },
+    "selftests": {
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "skipped": 0
+    },
+    "sourcePreservation": {
+      "originalTestRecoveredByteForByte": true,
+      "proposedSourceCount": 246,
+      "strictHelperTypes": "pass",
+      "actionlint": "pass",
+      "ciAccepted": false
+    },
+    "originalCause": "UNPROVEN",
+    "ciExecuted": false
+  },
+  "scope": "Test/workflow diagnostics only; no production recovery changes, new dependencies, deadline increases, native Bun owner tracing or causal CI proof",
+  "limitations": [
+    "Existing fast case is observed in place, not guaranteed globally first supervisor under canonical concurrency",
+    "Existing transportFailure is pre-destroy but timestamp is unavailable; Node event/counter observations do not prove kernel holder identity",
+    "Whole-snapshot exploratory tsc followed archived absolute imports into live public source: parse-only, no writes, disqualified; guarded same-source comparison65to65 is not canonical root acceptance",
+    "Artifact existence/metadata alone is insufficient: parent must read exact candidate-head and actual checkout trace, verify observed-node-supervisor and original canonical failure/cleanup assertions"
+  ],
+  "archivedFiles": {
+    "DESIGN.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/DESIGN.md",
+      "sourceSha256": "b0cfa96829e9bb1d202fb47471eb0b39061dd849bc8ac44553361ab0c5b7844f",
+      "archivedSha256": "b0cfa96829e9bb1d202fb47471eb0b39061dd849bc8ac44553361ab0c5b7844f",
+      "encoding": "identity"
+    },
+    "IMPLEMENTATION-REPORT.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/IMPLEMENTATION-REPORT.md",
+      "sourceSha256": "4a4e944674b46665704806bf50c58c1a4d00a1bf287cd7d68740f5014d34a8cf",
+      "archivedSha256": "4a4e944674b46665704806bf50c58c1a4d00a1bf287cd7d68740f5014d34a8cf",
+      "encoding": "identity"
+    },
+    "artifact-hash-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/artifact-hash-manifest.json",
+      "sourceSha256": "a1a8123a3f263b044c7ce17efe28979597b8835ec8cc8c9f6d51221246833370",
+      "archivedSha256": "a1a8123a3f263b044c7ce17efe28979597b8835ec8cc8c9f6d51221246833370",
+      "encoding": "identity"
+    },
+    "diagnostics-proposal.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/diagnostics-proposal.patch",
+      "sourceSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+      "archivedSha256": "266bc17eda87dfca4a77d1a409f67d46337283794e0716f6af5e7bf7553d99a5",
+      "encoding": "gzip"
+    },
+    "evidence/actionlint-final-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-final-command.json",
+      "sourceSha256": "2ef63bfabb5dcc3c3eab402526ad9416a7d1116a526a9d6b32eb0c7a9c6394f3",
+      "archivedSha256": "2ef63bfabb5dcc3c3eab402526ad9416a7d1116a526a9d6b32eb0c7a9c6394f3",
+      "encoding": "identity"
+    },
+    "evidence/actionlint-final.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-final.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/actionlint-final.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-final.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/actionlint-published-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-published-command.json",
+      "sourceSha256": "34b69e5c580bc86e83af80a85761d6872a48aca3ffd35aed169bad68459563fe",
+      "archivedSha256": "34b69e5c580bc86e83af80a85761d6872a48aca3ffd35aed169bad68459563fe",
+      "encoding": "identity"
+    },
+    "evidence/actionlint-published-release-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-published-release-receipt.json",
+      "sourceSha256": "28ff335cf03405aea74fb98dcc91146a2c353ebbd7e2d29505846e106f180d80",
+      "archivedSha256": "28ff335cf03405aea74fb98dcc91146a2c353ebbd7e2d29505846e106f180d80",
+      "encoding": "identity"
+    },
+    "evidence/actionlint-published.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-published.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/actionlint-published.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actionlint-published.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/actual-fallback-after-first-artifacts/fast-timeout-node-15607.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actual-fallback-after-first-artifacts/fast-timeout-node-15607.json",
+      "sourceSha256": "08ad67721d89dcd566b0d05a375fbce0f0965f936531214ed67b948bf679f4ea",
+      "archivedSha256": "08ad67721d89dcd566b0d05a375fbce0f0965f936531214ed67b948bf679f4ea",
+      "encoding": "identity"
+    },
+    "evidence/actual-fallback-after-first-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actual-fallback-after-first-command.json",
+      "sourceSha256": "7d42b95b8aa63ca1a2aebb513d656fe7da70c8067148c4018f79fb308e352a46",
+      "archivedSha256": "7d42b95b8aa63ca1a2aebb513d656fe7da70c8067148c4018f79fb308e352a46",
+      "encoding": "identity"
+    },
+    "evidence/actual-fallback-after-first.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actual-fallback-after-first.stderr.log",
+      "sourceSha256": "536dbb00f456dc4b1c5843ac69d1bc551cbde7b6e19b74f6585932742e3de759",
+      "archivedSha256": "6243563e002742dbe1be19694a4f86fde293ea900f4ba94f1aaff0020bf48527",
+      "encoding": "gzip"
+    },
+    "evidence/actual-fallback-after-first.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/actual-fallback-after-first.stdout.log",
+      "sourceSha256": "7cb5640e68c412560d215f3003140e3dba3b4c0397dac948537176b71338121d",
+      "archivedSha256": "65622dd52bc925f886221e33f57049d9610e07d91e43e231819d72adf3b64b23",
+      "encoding": "gzip"
+    },
+    "evidence/bounded-types.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/bounded-types.json",
+      "sourceSha256": "ff3f781759513873985b183746ed2d778f5201eb42de0d71fafb5fcb7e03dfb9",
+      "archivedSha256": "76cd6ab3a0b58ba28a9f269fb3e91f27c480e76733dd28d3d7e78111727c2594",
+      "encoding": "gzip"
+    },
+    "evidence/direct-verification-artifacts/fast-timeout-node-32834.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/direct-verification-artifacts/fast-timeout-node-32834.json",
+      "sourceSha256": "f00f545031fa0b0162b5d7652f4b01f2a8e0cd2c4a94c33efea21ae2ddc5f2e5",
+      "archivedSha256": "f00f545031fa0b0162b5d7652f4b01f2a8e0cd2c4a94c33efea21ae2ddc5f2e5",
+      "encoding": "identity"
+    },
+    "evidence/direct-verification-vitest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/direct-verification-vitest.json",
+      "sourceSha256": "c35180755bfd0c8318d9cde76829a54351b11cf30c368e151851d69ac17aad1b",
+      "archivedSha256": "c35180755bfd0c8318d9cde76829a54351b11cf30c368e151851d69ac17aad1b",
+      "encoding": "identity"
+    },
+    "evidence/fast-off-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off-command.json",
+      "sourceSha256": "3f209d495c322d59093d5a570898375244c223f5f4f3f6776d16a9fde295e15c",
+      "archivedSha256": "3f209d495c322d59093d5a570898375244c223f5f4f3f6776d16a9fde295e15c",
+      "encoding": "identity"
+    },
+    "evidence/fast-off-hashbound-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off-hashbound-command.json",
+      "sourceSha256": "4e639935ad9a56466097c761261653cabf2081b801ecf2ccb1e150110b30677a",
+      "archivedSha256": "4e639935ad9a56466097c761261653cabf2081b801ecf2ccb1e150110b30677a",
+      "encoding": "identity"
+    },
+    "evidence/fast-off-hashbound.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off-hashbound.json",
+      "sourceSha256": "b522348639025a02f803b7b92785b40b43ea520a26957f49d221850c1706c715",
+      "archivedSha256": "b522348639025a02f803b7b92785b40b43ea520a26957f49d221850c1706c715",
+      "encoding": "identity"
+    },
+    "evidence/fast-off-hashbound.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off-hashbound.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/fast-off-hashbound.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off-hashbound.stdout.log",
+      "sourceSha256": "58bda164487ee3cc091358696ea3fdb851332ad41bbd487609da56f94ea4c848",
+      "archivedSha256": "8c4185a9aeb19a8aa306ea5f1485e248f8b07129ded87d856e49227d1e0f868e",
+      "encoding": "gzip"
+    },
+    "evidence/fast-off.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off.json",
+      "sourceSha256": "74d20d2dd410d92c1cd63615c2977bfea1df9914b0f122d0dc6fad5f9d423fa8",
+      "archivedSha256": "74d20d2dd410d92c1cd63615c2977bfea1df9914b0f122d0dc6fad5f9d423fa8",
+      "encoding": "identity"
+    },
+    "evidence/fast-off.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/fast-off.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-off.stdout.log",
+      "sourceSha256": "78a657362b992fb1b5c08a688ea0cf76cd41396074b7ddd5d14e1961ccf17f1c",
+      "archivedSha256": "852d9518f18d983d26d5179a0d9a6546d714cc22b453f22df89ccde654814107",
+      "encoding": "gzip"
+    },
+    "evidence/fast-on-artifacts/fast-timeout-node-12687.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-artifacts/fast-timeout-node-12687.json",
+      "sourceSha256": "f36b68b764810604a321ea54c2f7871b7900a12ea9f37701f1fa6ff64d8dce22",
+      "archivedSha256": "f36b68b764810604a321ea54c2f7871b7900a12ea9f37701f1fa6ff64d8dce22",
+      "encoding": "identity"
+    },
+    "evidence/fast-on-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-command.json",
+      "sourceSha256": "18dcb3f90737d7969eb5feaa72e5c2b24d387760660b08eacc54be142ba98ed2",
+      "archivedSha256": "18dcb3f90737d7969eb5feaa72e5c2b24d387760660b08eacc54be142ba98ed2",
+      "encoding": "identity"
+    },
+    "evidence/fast-on-hashbound-artifacts/fast-timeout-node-14576.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-hashbound-artifacts/fast-timeout-node-14576.json",
+      "sourceSha256": "665d21aed145f71d942fde666d83c7aa6142b27bd8a0bf05f279795f9a25b372",
+      "archivedSha256": "665d21aed145f71d942fde666d83c7aa6142b27bd8a0bf05f279795f9a25b372",
+      "encoding": "identity"
+    },
+    "evidence/fast-on-hashbound-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-hashbound-command.json",
+      "sourceSha256": "0c9c6f410d15185b4520dc76f9689658fe2d2290389227941e24c9f8739ba755",
+      "archivedSha256": "0c9c6f410d15185b4520dc76f9689658fe2d2290389227941e24c9f8739ba755",
+      "encoding": "identity"
+    },
+    "evidence/fast-on-hashbound.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-hashbound.json",
+      "sourceSha256": "24b2a4bca4b3f46e922e72f148557b112ef5692a3b731df0aae3e9c23173320c",
+      "archivedSha256": "24b2a4bca4b3f46e922e72f148557b112ef5692a3b731df0aae3e9c23173320c",
+      "encoding": "identity"
+    },
+    "evidence/fast-on-hashbound.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-hashbound.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/fast-on-hashbound.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on-hashbound.stdout.log",
+      "sourceSha256": "8288372c46fe96f646a25e5cb50d3814151f6f8dc788226e49f0372c4726f664",
+      "archivedSha256": "cc44b0103e2e4f32676b10fd521a1ef6cb35e015ee23a140c097b1a90cdab392",
+      "encoding": "gzip"
+    },
+    "evidence/fast-on.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on.json",
+      "sourceSha256": "60d244d20022d4989fdb125bd015eccf5cfe6071332c63038842475286e6f009",
+      "archivedSha256": "60d244d20022d4989fdb125bd015eccf5cfe6071332c63038842475286e6f009",
+      "encoding": "identity"
+    },
+    "evidence/fast-on.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/fast-on.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/fast-on.stdout.log",
+      "sourceSha256": "a53adda853540e8db730b50e7ffe5556336f5ab986f23b99552b07152b75ba25",
+      "archivedSha256": "e9758aa077e6173f2ad93d211d6f80bcb72878172e3d34bf713ca47f295fcb0b",
+      "encoding": "gzip"
+    },
+    "evidence/final-readback-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback-command.json",
+      "sourceSha256": "3b97406a6d5b8ce94e4e9cfdc2d1d871db6a4b896c78d399029468e09fba7587",
+      "archivedSha256": "3b97406a6d5b8ce94e4e9cfdc2d1d871db6a4b896c78d399029468e09fba7587",
+      "encoding": "identity"
+    },
+    "evidence/final-readback-fixed-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback-fixed-command.json",
+      "sourceSha256": "9be465224eb277c43209bce4671c2b7db55d840d546ee0bee6d50987cbad2c59",
+      "archivedSha256": "9be465224eb277c43209bce4671c2b7db55d840d546ee0bee6d50987cbad2c59",
+      "encoding": "identity"
+    },
+    "evidence/final-readback-fixed.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback-fixed.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/final-readback-fixed.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback-fixed.stdout.log",
+      "sourceSha256": "7f106f6776b2a7c8cf0b67b4e385ee122881dd181ecb276717f105ea4358341a",
+      "archivedSha256": "8f95d11a963cdff10908dce4d0e681d5638fd749a913bbc90ae6ecacc85f2074",
+      "encoding": "gzip"
+    },
+    "evidence/final-readback.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback.stderr.log",
+      "sourceSha256": "544a4bf3c8504ece484776008c32d4c6b189d3d5b63013b67cd6a09e76de1746",
+      "archivedSha256": "3e94519e4bfa7ea84160a51a7cae8cffc4e97ca6619dc062c732c3b8574fc82f",
+      "encoding": "gzip"
+    },
+    "evidence/final-readback.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/final-readback.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-command.json",
+      "sourceSha256": "0b6215ce93b70461708f727ad1b5e89506120bee7796443e3e9a78c4b5aa54e7",
+      "archivedSha256": "0b6215ce93b70461708f727ad1b5e89506120bee7796443e3e9a78c4b5aa54e7",
+      "encoding": "identity"
+    },
+    "evidence/helper-typecheck-hashbound-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-hashbound-command.json",
+      "sourceSha256": "ac87ef9e1bb2b354f097eaf49279350e3f4f26566007d138d2f4541e8824afac",
+      "archivedSha256": "ac87ef9e1bb2b354f097eaf49279350e3f4f26566007d138d2f4541e8824afac",
+      "encoding": "identity"
+    },
+    "evidence/helper-typecheck-hashbound.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-hashbound.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck-hashbound.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-hashbound.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck-second-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-second-command.json",
+      "sourceSha256": "2484b7b35517c2b8f6d599c010ae51b3714c010799a85775530ff16c851525c9",
+      "archivedSha256": "2484b7b35517c2b8f6d599c010ae51b3714c010799a85775530ff16c851525c9",
+      "encoding": "identity"
+    },
+    "evidence/helper-typecheck-second.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-second.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck-second.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck-second.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/helper-typecheck.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/helper-typecheck.stdout.log",
+      "sourceSha256": "ccf9305b7a940625ab82aed91a0e05ab3fe35cf18f19b4e5666a6d710084acb1",
+      "archivedSha256": "af2d65792577ec4ccf71b60df1c721e9657d5e895b4a208a53da71a001378479",
+      "encoding": "gzip"
+    },
+    "evidence/metadata-hashbound-artifacts/runner-metadata.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-hashbound-artifacts/runner-metadata.json",
+      "sourceSha256": "0bae7fc3583b0dc14b51fc6b83e5868d894b6e30b52c8cdbbe810fff33739b29",
+      "archivedSha256": "0bae7fc3583b0dc14b51fc6b83e5868d894b6e30b52c8cdbbe810fff33739b29",
+      "encoding": "identity"
+    },
+    "evidence/metadata-hashbound-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-hashbound-command.json",
+      "sourceSha256": "00704b5da7b02ada35778051abbdbdc7af68aa7a65f32b6de4f125fd3232860a",
+      "archivedSha256": "00704b5da7b02ada35778051abbdbdc7af68aa7a65f32b6de4f125fd3232860a",
+      "encoding": "identity"
+    },
+    "evidence/metadata-hashbound.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-hashbound.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/metadata-hashbound.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-hashbound.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/metadata-local-artifacts/runner-metadata.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-local-artifacts/runner-metadata.json",
+      "sourceSha256": "a0cb1ba95f68524008d69fa7e3242c0d01e35d6dc5bf5ea483294c0f41b03e49",
+      "archivedSha256": "a0cb1ba95f68524008d69fa7e3242c0d01e35d6dc5bf5ea483294c0f41b03e49",
+      "encoding": "identity"
+    },
+    "evidence/metadata-local-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-local-command.json",
+      "sourceSha256": "1704608f0602ad46b2ad5e92561496f9d135bf5c2aa69f737474d115375db6bf",
+      "archivedSha256": "1704608f0602ad46b2ad5e92561496f9d135bf5c2aa69f737474d115375db6bf",
+      "encoding": "identity"
+    },
+    "evidence/metadata-local.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-local.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/metadata-local.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/metadata-local.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/native-import-control-artifacts/fast-timeout-bun-15102.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/native-import-control-artifacts/fast-timeout-bun-15102.json",
+      "sourceSha256": "28928290dccf6ff352fe4b0173c0049cc548481cbe5a92b50938ca4df69fc83a",
+      "archivedSha256": "28928290dccf6ff352fe4b0173c0049cc548481cbe5a92b50938ca4df69fc83a",
+      "encoding": "identity"
+    },
+    "evidence/native-import-control-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/native-import-control-command.json",
+      "sourceSha256": "defe28106b46bc7eebf2f5260aae435674672aa4229373eb63f2000eed68a70e",
+      "archivedSha256": "defe28106b46bc7eebf2f5260aae435674672aa4229373eb63f2000eed68a70e",
+      "encoding": "identity"
+    },
+    "evidence/native-import-control.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/native-import-control.stderr.log",
+      "sourceSha256": "1e38b776879028bdc53ac6907ec1daa155f3affb82aa8cab3f7eeeea130cff82",
+      "archivedSha256": "410513b8d6f1a4a10bf06d709e0dfac870e4a9c880bf1041c3b81dfebf57df1a",
+      "encoding": "gzip"
+    },
+    "evidence/native-import-control.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/native-import-control.stdout.log",
+      "sourceSha256": "a82bb5ffaa5427b200652503d38ffe97f63db03607c7ff58435a0a9bd5f7bae6",
+      "archivedSha256": "adc00a6b275ba292e2115895f4497ab1e2c7641a4de77e5bb593649f7b031abe",
+      "encoding": "gzip"
+    },
+    "evidence/node-child-process-channel.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/node-child-process-channel.json",
+      "sourceSha256": "38888df294c2af5a70071fa269442821874350e2dc1a6b9a23b4282c5dd3997f",
+      "archivedSha256": "38888df294c2af5a70071fa269442821874350e2dc1a6b9a23b4282c5dd3997f",
+      "encoding": "identity"
+    },
+    "evidence/node-close-counter.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/node-close-counter.json",
+      "sourceSha256": "3e43650eb67b0b0b59cd960c8c5394c5976fa645c42f12d00d6b728b4db76cf5",
+      "archivedSha256": "3e43650eb67b0b0b59cd960c8c5394c5976fa645c42f12d00d6b728b4db76cf5",
+      "encoding": "identity"
+    },
+    "evidence/node-internal-channel.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/node-internal-channel.json",
+      "sourceSha256": "428c527f50cf4727b7bd89f0bf15c4deb584dfb5bc791ac3ae1e95999fcb50a4",
+      "archivedSha256": "428c527f50cf4727b7bd89f0bf15c4deb584dfb5bc791ac3ae1e95999fcb50a4",
+      "encoding": "identity"
+    },
+    "evidence/original-ci-retention.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci-retention.json",
+      "sourceSha256": "a691a5821fff9bf5c259d5404c57177caea56f299f6f8f075155464ad439ee4f",
+      "archivedSha256": "a691a5821fff9bf5c259d5404c57177caea56f299f6f8f075155464ad439ee4f",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/132155679594.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/132155679594.log",
+      "sourceSha256": "d4f086aea21c44175d6418809b413786e86ef1ae0782f3d789ef4540f0fb7293",
+      "archivedSha256": "d73e7c114ca5851bb8b21b81e58032d6d06dfd2ba2acbfe5f8adae302db6b35f",
+      "encoding": "gzip"
+    },
+    "evidence/original-ci/132155679910.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/132155679910.log",
+      "sourceSha256": "b4b1e9e8b431ee6b229352d8e0ca2432f19f37dc770b43cd0b13da0353238b81",
+      "archivedSha256": "f9c01e51cc0758f7529004df49e2762c7b07a7223b00c2b4362fd64800240b23",
+      "encoding": "gzip"
+    },
+    "evidence/original-ci/ci-extracted-receipts.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/ci-extracted-receipts.json",
+      "sourceSha256": "f25924b42560bf8022a63009fd66163ce8b6d347ed52b209dfcc4be4e62aa539",
+      "archivedSha256": "f25924b42560bf8022a63009fd66163ce8b6d347ed52b209dfcc4be4e62aa539",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/collection-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/collection-summary.json",
+      "sourceSha256": "54d934419084ca4191f6c8ef68bd3aad3b7ff05e5629d59897e584fac934c92b",
+      "archivedSha256": "54d934419084ca4191f6c8ef68bd3aad3b7ff05e5629d59897e584fac934c92b",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/diagnosis.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/diagnosis.md",
+      "sourceSha256": "38179cbe24745397011ef77d5c2704b5cbedcbbd481189aaa777da0936572966",
+      "archivedSha256": "38179cbe24745397011ef77d5c2704b5cbedcbbd481189aaa777da0936572966",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/open-gate-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/open-gate-summary.json",
+      "sourceSha256": "44eb5b191b7d261055030cdc5fb33928f1120959fd9c3bb30276f4cc8a3e5816",
+      "archivedSha256": "44eb5b191b7d261055030cdc5fb33928f1120959fd9c3bb30276f4cc8a3e5816",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/parent-clock-domains.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/parent-clock-domains.json",
+      "sourceSha256": "eae359c66299f5264c377988c2cbaca1a25995cbd813c3df2b71be5a64c96f27",
+      "archivedSha256": "eae359c66299f5264c377988c2cbaca1a25995cbd813c3df2b71be5a64c96f27",
+      "encoding": "identity"
+    },
+    "evidence/original-ci/probe-source-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/original-ci/probe-source-manifest.json",
+      "sourceSha256": "eb0f85f772099480ba7806354e79a1f2677b1504879d22b5d829a5b9e2a8eaaa",
+      "archivedSha256": "eb0f85f772099480ba7806354e79a1f2677b1504879d22b5d829a5b9e2a8eaaa",
+      "encoding": "identity"
+    },
+    "evidence/patch-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/patch-command.json",
+      "sourceSha256": "e2f8adb7f105ac60627045650776e8cb1fb31298f749b655120d0bd590ed7dc8",
+      "archivedSha256": "e2f8adb7f105ac60627045650776e8cb1fb31298f749b655120d0bd590ed7dc8",
+      "encoding": "identity"
+    },
+    "evidence/red-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/red-command.json",
+      "sourceSha256": "d94837fe1659ff8ead5adc935baabcd20ea4d0c7cd70a5655789028527593d8d",
+      "archivedSha256": "d94837fe1659ff8ead5adc935baabcd20ea4d0c7cd70a5655789028527593d8d",
+      "encoding": "identity"
+    },
+    "evidence/red.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/red.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/red.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/red.stdout.log",
+      "sourceSha256": "cd73592e83eedda932d23890f81062156cc91206171fdb435dbf3f1edd626a02",
+      "archivedSha256": "358fc1afe0939cfb87a0d4fac6ba95af2013ab57df340ebfba2de313074a923d",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-final-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-final-command.json",
+      "sourceSha256": "5d43545153d03b64e77e41e1216b8d2c2c4d80032cf6bb469a24041620748cdb",
+      "archivedSha256": "5d43545153d03b64e77e41e1216b8d2c2c4d80032cf6bb469a24041620748cdb",
+      "encoding": "identity"
+    },
+    "evidence/selftests-final.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-final.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-final.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-final.stdout.log",
+      "sourceSha256": "088ee48178c1dc551153da5d2cb5cddc3d51ed2d25eeeb32e6bce50f61692e09",
+      "archivedSha256": "592f8de1d39fba8143b7a753a822e239ccb88def9a78ac26694f0a30b34387ec",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-first-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-first-command.json",
+      "sourceSha256": "d23e6f48b289d38c689f9ce3bc1c87453004ac54c75cd0a184fc8cf837714195",
+      "archivedSha256": "d23e6f48b289d38c689f9ce3bc1c87453004ac54c75cd0a184fc8cf837714195",
+      "encoding": "identity"
+    },
+    "evidence/selftests-first.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-first.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-first.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-first.stdout.log",
+      "sourceSha256": "941c14fe1118df26bd1b5c910be56ee4b5f265c46eb412c84caed42c2e6ef7e4",
+      "archivedSha256": "450ee685ceb0e5bd82eb2b512cf62d646c144d89ebb39b6a441043f55ee85846",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-hashbound-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-hashbound-command.json",
+      "sourceSha256": "1e98b277d791e0291cdbe2a52165dec536bd6ece8a76fdbb7e651a6696dae57f",
+      "archivedSha256": "1e98b277d791e0291cdbe2a52165dec536bd6ece8a76fdbb7e651a6696dae57f",
+      "encoding": "identity"
+    },
+    "evidence/selftests-hashbound.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-hashbound.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/selftests-hashbound.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/selftests-hashbound.stdout.log",
+      "sourceSha256": "80b8368ae7ad02d1dcc4d5ef3b1fb428e0cca432f07ef00f472fb147c2e33109",
+      "archivedSha256": "3215791fac8c2827f9c05d65ec7529cb4573ffe58a9b3ee3d67ffa37ee858776",
+      "encoding": "gzip"
+    },
+    "evidence/syntax-controls-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-controls-command.json",
+      "sourceSha256": "36f538686e0d52dd80af5918f2f6ddc44c93fb3ef5232253aecdefda26848f37",
+      "archivedSha256": "36f538686e0d52dd80af5918f2f6ddc44c93fb3ef5232253aecdefda26848f37",
+      "encoding": "identity"
+    },
+    "evidence/syntax-controls.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-controls.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/syntax-controls.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-controls.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/syntax-helper-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-helper-command.json",
+      "sourceSha256": "4575618274618ccc0f4c3d51ff05def18e817f28fcb12468eee22e341e35e914",
+      "archivedSha256": "4575618274618ccc0f4c3d51ff05def18e817f28fcb12468eee22e341e35e914",
+      "encoding": "identity"
+    },
+    "evidence/syntax-helper.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-helper.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/syntax-helper.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/syntax-helper.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/types-after-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-after-command.json",
+      "sourceSha256": "1602310d6f4a82a2d37acf199d4261b3beac737a13255a985f0a4bf7d59cb565",
+      "archivedSha256": "1602310d6f4a82a2d37acf199d4261b3beac737a13255a985f0a4bf7d59cb565",
+      "encoding": "identity"
+    },
+    "evidence/types-after.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-after.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/types-after.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-after.stdout.log",
+      "sourceSha256": "29dc9f78d19cc1c601e0260b9bf22a41a6107e95d20d86beb4433951612905ea",
+      "archivedSha256": "cf86ff0e756dc49ee2e2015792d71da42303a1e75fd2eff50ae4f0e8c7a3faa5",
+      "encoding": "gzip"
+    },
+    "evidence/types-before-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-before-command.json",
+      "sourceSha256": "01779c9b4f578da80e3dc7227d229d20edaec0db8aa09689f37298a67afad4aa",
+      "archivedSha256": "01779c9b4f578da80e3dc7227d229d20edaec0db8aa09689f37298a67afad4aa",
+      "encoding": "identity"
+    },
+    "evidence/types-before.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-before.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/types-before.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/types-before.stdout.log",
+      "sourceSha256": "b3b4b6365a2a4255d2e395789e65ee4e794f5cf4dddb1026e15fa495dc1653cd",
+      "archivedSha256": "5a19f40258c82f11e75ea64e2cb302b1dc075e58af432a4e8fecaa99c83f1a6c",
+      "encoding": "gzip"
+    },
+    "evidence/validation-first-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/validation-first-command.json",
+      "sourceSha256": "ad3ed227770a8762f9c3c4b6478018a2b26e5bbef3d3c680cb5563bc98ebff9a",
+      "archivedSha256": "ad3ed227770a8762f9c3c4b6478018a2b26e5bbef3d3c680cb5563bc98ebff9a",
+      "encoding": "identity"
+    },
+    "evidence/validation-first.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/validation-first.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/validation-first.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/validation-first.stdout.log",
+      "sourceSha256": "e1e5085068c24f4a33c639ec524cc7dd8b50840f1e3fe404c7b306a22aebaa77",
+      "archivedSha256": "6db03a1134f22c1b600907b977476a7711bd6e6211c318b832460600b27e9f8b",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-actionlint-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-actionlint-command.json",
+      "sourceSha256": "eaa01e1e88ee6c0509c0e0a7ecece3c6c3badf0188595f62e11344437d010dac",
+      "archivedSha256": "eaa01e1e88ee6c0509c0e0a7ecece3c6c3badf0188595f62e11344437d010dac",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-actionlint.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-actionlint.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-actionlint.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-actionlint.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-fast-artifacts/fast-timeout-node-31808.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-fast-artifacts/fast-timeout-node-31808.json",
+      "sourceSha256": "12d2645c5c577f037e6c148ca59700537cfc8399c77feaa36b304142247485e0",
+      "archivedSha256": "12d2645c5c577f037e6c148ca59700537cfc8399c77feaa36b304142247485e0",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-fast-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-fast-command.json",
+      "sourceSha256": "e577c3e6db09ee1acd6795cf513baa0482782f804ac129de68b49e5aa1834a4b",
+      "archivedSha256": "e577c3e6db09ee1acd6795cf513baa0482782f804ac129de68b49e5aa1834a4b",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-fast.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-fast.json",
+      "sourceSha256": "1c5cffeafdbd5fb5c1e0c9562b41dea467455204f5749caa3712f67400e89cce",
+      "archivedSha256": "1c5cffeafdbd5fb5c1e0c9562b41dea467455204f5749caa3712f67400e89cce",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-fast.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-fast.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-fast.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-fast.stdout.log",
+      "sourceSha256": "f257a95b1aa50d86bf9eae4e34b8a4ecd357f1cbf189571e8f9a9a5a4d3c6cca",
+      "archivedSha256": "0028cbc5ce080c204413ef916b6c1dc470baa74059f58571e6e71d49cb92bea0",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-readback.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-readback.json",
+      "sourceSha256": "95deb80eafbc3678944888596106eb2795ec4c296607a35aa55dcdd4ea60dfda",
+      "archivedSha256": "95deb80eafbc3678944888596106eb2795ec4c296607a35aa55dcdd4ea60dfda",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-selftests-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-selftests-command.json",
+      "sourceSha256": "47b659a3a8792cb28977a607d4b49c05cbf22e130a2f022b8093c83319924203",
+      "archivedSha256": "47b659a3a8792cb28977a607d4b49c05cbf22e130a2f022b8093c83319924203",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-selftests.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-selftests.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-selftests.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-selftests.stdout.log",
+      "sourceSha256": "beb5c7192185aa9a455a89ec4890d47c7087fb39a9fdb98710b061f6f82327ec",
+      "archivedSha256": "44b8dc4f9f7b9a351b85b653f451b9d2a18acba94793bad30628c53311746aed",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-types-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-types-command.json",
+      "sourceSha256": "c4269acf4f824683af2a94eec405f9ce22f6661f3789b72158d4143a4eb433f8",
+      "archivedSha256": "c4269acf4f824683af2a94eec405f9ce22f6661f3789b72158d4143a4eb433f8",
+      "encoding": "identity"
+    },
+    "evidence/verification-gate-types.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-types.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "evidence/verification-gate-types.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/evidence/verification-gate-types.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "harness/actual-fallback-control.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/actual-fallback-control.mjs",
+      "sourceSha256": "4205369b7e86b35ebb690f77d3c7fb21ab182e644c4f391754607be63f02ceb4",
+      "archivedSha256": "4205369b7e86b35ebb690f77d3c7fb21ab182e644c4f391754607be63f02ceb4",
+      "encoding": "identity"
+    },
+    "harness/finalize.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/finalize.mjs",
+      "sourceSha256": "0fd5239fa8b560d26f0461e5d4a794aad66642e6c69cbd9e03ebdc5dfebe3087",
+      "archivedSha256": "0fd5239fa8b560d26f0461e5d4a794aad66642e6c69cbd9e03ebdc5dfebe3087",
+      "encoding": "identity"
+    },
+    "harness/run-clean.sh.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/run-clean.sh",
+      "sourceSha256": "1a0e432418a93980237e62d81eb61295d4b49c5ca462addde798727ab468541b",
+      "archivedSha256": "1a0e432418a93980237e62d81eb61295d4b49c5ca462addde798727ab468541b",
+      "encoding": "identity"
+    },
+    "harness/run-local.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/run-local.mjs",
+      "sourceSha256": "827e97437c654c12106de10e40970aa06178f5b0cc8c9fb10bf2d29f0d1d8948",
+      "archivedSha256": "827e97437c654c12106de10e40970aa06178f5b0cc8c9fb10bf2d29f0d1d8948",
+      "encoding": "identity"
+    },
+    "harness/validate.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/validate.mjs",
+      "sourceSha256": "c9addd93cfe226da88c70bf764915bde87d62e7d7d9e8717c21a9e898e9e5a4f",
+      "archivedSha256": "c9addd93cfe226da88c70bf764915bde87d62e7d7d9e8717c21a9e898e9e5a4f",
+      "encoding": "identity"
+    },
+    "input.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/input.json",
+      "sourceSha256": "d3471f988985281c864ea81bab57d0603f53af53928b700b9bb30676f74c5de1",
+      "archivedSha256": "d3471f988985281c864ea81bab57d0603f53af53928b700b9bb30676f74c5de1",
+      "encoding": "identity"
+    },
+    "original-source/.github/workflows/ci.yml.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/original/.github/workflows/ci.yml",
+      "sourceSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "archivedSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "encoding": "identity"
+    },
+    "original-source/test/audit-recovery-tree.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/original/test/audit-recovery-tree.test.ts",
+      "sourceSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "archivedSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "encoding": "identity"
+    },
+    "parent/diagnostics-proposal.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/diagnostics-proposal.patch",
+      "sourceSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+      "archivedSha256": "266bc17eda87dfca4a77d1a409f67d46337283794e0716f6af5e7bf7553d99a5",
+      "encoding": "gzip"
+    },
+    "parent/environment.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/environment.json",
+      "sourceSha256": "b327e729d1980c2f009193924dffaedee8f845f1b63f3ddb99cea8ab23705599",
+      "archivedSha256": "b327e729d1980c2f009193924dffaedee8f845f1b63f3ddb99cea8ab23705599",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-actionlint-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-actionlint-command.json",
+      "sourceSha256": "167a978bd234460d1bce265f338fb809ae1649937a4a0d9ae32434f5a44b778d",
+      "archivedSha256": "167a978bd234460d1bce265f338fb809ae1649937a4a0d9ae32434f5a44b778d",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-actionlint.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-actionlint.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-actionlint.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-actionlint.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-controls-syntax-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-controls-syntax-command.json",
+      "sourceSha256": "55b27c9fa6cb210397b552d43194007e150a72894fcafa9ca8aa05cd7ad361be",
+      "archivedSha256": "55b27c9fa6cb210397b552d43194007e150a72894fcafa9ca8aa05cd7ad361be",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-controls-syntax.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-controls-syntax.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-controls-syntax.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-controls-syntax.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-fast-off-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-off-command.json",
+      "sourceSha256": "20201239d8ace2f08ba7a23f2f48762c87c0cd83300dfb3af32dc1a96764b71f",
+      "archivedSha256": "20201239d8ace2f08ba7a23f2f48762c87c0cd83300dfb3af32dc1a96764b71f",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-fast-off.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-off.json",
+      "sourceSha256": "d0cb6340bea80f5cbbf0d0fafcf5da3b840041d0a972b151f5a9cd1bde6a4ecf",
+      "archivedSha256": "d0cb6340bea80f5cbbf0d0fafcf5da3b840041d0a972b151f5a9cd1bde6a4ecf",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-fast-off.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-off.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-fast-off.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-off.stdout.log",
+      "sourceSha256": "0209c8b76c3bd7c43c252197e3d56250c2d7667ffe9d7924182ed32bd71c0db8",
+      "archivedSha256": "74b0881db2c098359fd4f1abe1c6016019185209b4de202772c2a7b4acd39c5a",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-fast-on-artifacts/fast-timeout-node-40359.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-on-artifacts/fast-timeout-node-40359.json",
+      "sourceSha256": "8fc033302bd0cae2a5d3e29be78abd568d2bd1a531a53f23fa081b18b7b8b039",
+      "archivedSha256": "8fc033302bd0cae2a5d3e29be78abd568d2bd1a531a53f23fa081b18b7b8b039",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-fast-on-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-on-command.json",
+      "sourceSha256": "f2c7d460ab28f988379e7b3bec54c3809da935b86d85248255678097d4c2ed32",
+      "archivedSha256": "f2c7d460ab28f988379e7b3bec54c3809da935b86d85248255678097d4c2ed32",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-fast-on.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-on.json",
+      "sourceSha256": "a3263bf0dfb9a83bceb249eceac4d8d30d681fb70d9292b1b789755e244e9f82",
+      "archivedSha256": "a3263bf0dfb9a83bceb249eceac4d8d30d681fb70d9292b1b789755e244e9f82",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-fast-on.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-on.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-fast-on.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-fast-on.stdout.log",
+      "sourceSha256": "e025d44c37ba334b218b6c6ffe3c0bd9f7f14c4ee1a63d90531f2ada6d0fa4fc",
+      "archivedSha256": "9e534265be4e0a2c4a48e7e0ae8a1802e572a503d148456391fa90fbe80af1b9",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-helper-syntax-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-syntax-command.json",
+      "sourceSha256": "2f770cc03d864f41d374514d1589d624ab7dba09c8f85631efc30de92a92e496",
+      "archivedSha256": "2f770cc03d864f41d374514d1589d624ab7dba09c8f85631efc30de92a92e496",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-helper-syntax.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-syntax.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-helper-syntax.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-syntax.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-helper-types-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-types-command.json",
+      "sourceSha256": "d70286e02f6e3cd49d680bfda3466545ffd773796a1c4f1ee82669fd3ab47307",
+      "archivedSha256": "d70286e02f6e3cd49d680bfda3466545ffd773796a1c4f1ee82669fd3ab47307",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-helper-types.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-types.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-helper-types.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-helper-types.stdout.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-selftests-command.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-selftests-command.json",
+      "sourceSha256": "e90fefe39b318b637138405026b006109b4a87011ac279a3031c1645db009a52",
+      "archivedSha256": "e90fefe39b318b637138405026b006109b4a87011ac279a3031c1645db009a52",
+      "encoding": "identity"
+    },
+    "parent/evidence/parent-selftests.stderr.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-selftests.stderr.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "parent/evidence/parent-selftests.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/evidence/parent-selftests.stdout.log",
+      "sourceSha256": "ed19a71db8933ae0832b9951b1d80224f8203cba7ef40241e1a2dcd3c3e51c6e",
+      "archivedSha256": "941d0887156c7677ced9a9ffd9e52741a9129e320f36f3cfc171b6271be5bdeb",
+      "encoding": "gzip"
+    },
+    "parent/harness/run-local.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/harness/run-local.mjs",
+      "sourceSha256": "827e97437c654c12106de10e40970aa06178f5b0cc8c9fb10bf2d29f0d1d8948",
+      "archivedSha256": "827e97437c654c12106de10e40970aa06178f5b0cc8c9fb10bf2d29f0d1d8948",
+      "encoding": "identity"
+    },
+    "parent/parent-actionlint-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-actionlint-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-actionlint-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-actionlint-runner.stdout",
+      "sourceSha256": "e3eec8406c0f3435caeb488472289e69852d4da98fc03d337df7ea2907e4517b",
+      "archivedSha256": "be61bc847710e8f544415bcf9307ee33f98fb84ea6ac77de5ac69390423d4b55",
+      "encoding": "gzip"
+    },
+    "parent/parent-controls-syntax-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-controls-syntax-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-controls-syntax-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-controls-syntax-runner.stdout",
+      "sourceSha256": "81595b1c6e90d820a5050e663ec881e55e9b58ca1077a33c0ff43e581640fc5a",
+      "archivedSha256": "11a454db75a2abef894fe1c373c7464b0b978609636078c177e960bc01164d89",
+      "encoding": "gzip"
+    },
+    "parent/parent-fast-off-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-fast-off-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-fast-off-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-fast-off-runner.stdout",
+      "sourceSha256": "3d5341728013aae22e3b9eac51deb87cbd13fd676a75bd5fa867cedb5975f4fd",
+      "archivedSha256": "bc75e1a016ed8b184408bf101df80b2bf05557805d1fe3375af29e0f4f5c295a",
+      "encoding": "gzip"
+    },
+    "parent/parent-fast-on-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-fast-on-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-fast-on-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-fast-on-runner.stdout",
+      "sourceSha256": "7359541d956da27c7b82b4540df194eb2dbb56bf7a6c17a24a123da35cf853ab",
+      "archivedSha256": "6574fd3714379ca47237314ed1cd8421958ba3a7d58bd6d4d2194513dc58ca11",
+      "encoding": "gzip"
+    },
+    "parent/parent-focused.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-focused.xml",
+      "sourceSha256": "f96339600991def3d4553bf2be02de699be0915e22cfeada8dfc841b5c06719d",
+      "archivedSha256": "f96339600991def3d4553bf2be02de699be0915e22cfeada8dfc841b5c06719d",
+      "encoding": "identity"
+    },
+    "parent/parent-helper-syntax-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-helper-syntax-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-helper-syntax-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-helper-syntax-runner.stdout",
+      "sourceSha256": "7bfd80331bc5f90d6623f8ed8fd6c6a7dea7ab5e1ea849aa492e6b17b8faa299",
+      "archivedSha256": "b1216efdaa44646f969522484f2dbd5884ddef7ac2b9538512aebe33b3f4f6d9",
+      "encoding": "gzip"
+    },
+    "parent/parent-helper-types-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-helper-types-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-helper-types-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-helper-types-runner.stdout",
+      "sourceSha256": "81b89820f2e4a12288f1f745e9fd0eb77707b807f8d2c4392ff12ef166771fb0",
+      "archivedSha256": "bb937dda41d97454ddd621dbc1e9bdce658f18e4c26ad22875d28f493220c0b3",
+      "encoding": "gzip"
+    },
+    "parent/parent-preservation-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-preservation-summary.json",
+      "sourceSha256": "5b321cf10f07618c0fc1526ce77666c60bac8f4c3d604289e9797bde71d0a36f",
+      "archivedSha256": "5b321cf10f07618c0fc1526ce77666c60bac8f4c3d604289e9797bde71d0a36f",
+      "encoding": "identity"
+    },
+    "parent/parent-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-receipt.json",
+      "sourceSha256": "80f5252cbd9513f13972efbe370155c66b785c1759613590c00b1e9c02936ff3",
+      "archivedSha256": "80f5252cbd9513f13972efbe370155c66b785c1759613590c00b1e9c02936ff3",
+      "encoding": "identity"
+    },
+    "parent/parent-selftest-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-selftest-summary.json",
+      "sourceSha256": "41d193070c23d95b4d39072c557d08284bf39fb356ac5194ec0fde3131d08868",
+      "archivedSha256": "41d193070c23d95b4d39072c557d08284bf39fb356ac5194ec0fde3131d08868",
+      "encoding": "identity"
+    },
+    "parent/parent-selftests-runner.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-selftests-runner.stderr",
+      "sourceSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "archivedSha256": "cfd889f20f894f14a8cb22e241c69f1493b1f7422eef5d527fce6974d3eb068d",
+      "encoding": "gzip"
+    },
+    "parent/parent-selftests-runner.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/parent-selftests-runner.stdout",
+      "sourceSha256": "626b066150ae2053e3a5b96d545941c2e3072a2614cdfee31024d690bfe8632c",
+      "archivedSha256": "d3b5cb0833edacaf0a0601938959d055c8993b34255ad2bb504a587d3e585ce6",
+      "encoding": "gzip"
+    },
+    "parent/source-bindings.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/source-bindings.json",
+      "sourceSha256": "2e464b88f1364c346de11970fe0f353fb24ee2346bba964c7307da54646488ac",
+      "archivedSha256": "2e464b88f1364c346de11970fe0f353fb24ee2346bba964c7307da54646488ac",
+      "encoding": "identity"
+    },
+    "parent/test_parent_ci_observer.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ci-observer-pqa4h552/test_parent_ci_observer.py",
+      "sourceSha256": "097db27b26440092fe3f8eb21f51a187182d3964be45320b398504a7016acc63",
+      "archivedSha256": "097db27b26440092fe3f8eb21f51a187182d3964be45320b398504a7016acc63",
+      "encoding": "identity"
+    },
+    "proposed-source/.github/workflows/ci.yml.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/.github/workflows/ci.yml",
+      "sourceSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+      "archivedSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+      "encoding": "identity"
+    },
+    "proposed-source/test/audit-recovery-tree.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/audit-recovery-tree.test.ts",
+      "sourceSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+      "archivedSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+      "encoding": "identity"
+    },
+    "proposed-source/test/helpers/recovery-bootstrap-diagnostics.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "sourceSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+      "archivedSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+      "encoding": "identity"
+    },
+    "proposed-source/test/helpers/recovery-bootstrap-diagnostics.selftest.mjs.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+      "sourceSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e",
+      "archivedSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e",
+      "encoding": "identity"
+    },
+    "source-hash-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/source-hash-manifest.json",
+      "sourceSha256": "d4f94e439de1704994cd2eb94e6b697d55c0625a833f7881832071529f0fed87",
+      "archivedSha256": "d4f94e439de1704994cd2eb94e6b697d55c0625a833f7881832071529f0fed87",
+      "encoding": "identity"
+    },
+    "verification-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/verification-summary.json",
+      "sourceSha256": "e53d4f647881754ff89eb09da2ca156c54021cfdbd3e9bdb6b107256b8fa5bf6",
+      "archivedSha256": "e53d4f647881754ff89eb09da2ca156c54021cfdbd3e9bdb6b107256b8fa5bf6",
+      "encoding": "identity"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "engine_value": {
+    "Client": {
+      "Version": "SYNTHETIC",
+      "Os": "linux",
+      "Arch": "amd64"
+    }
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/engine-missing-server/workspace"
+}

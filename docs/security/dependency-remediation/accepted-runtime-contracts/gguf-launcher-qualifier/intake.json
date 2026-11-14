@@ -1,0 +1,779 @@
+{
+  "groups": {
+    "delivery6": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/REPORT.md",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/manifest.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/proposal.patch",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.patch",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.yml.proposed",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/scope-ownership.json"
+    ],
+    "live3": [
+      "/Users/shersingh/github/qmd-mlx-search/finetune/LOCKED-JOBS.md",
+      "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_locked_job_submission.py",
+      "/Users/shersingh/github/qmd-mlx-search/finetune/tools/submit_locked_job.py"
+    ],
+    "parent42": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/docs/security/dependency-remediation/patched-dependencies.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/LOCKED-JOBS.md",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_gguf.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_gguf.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_onnx.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_onnx.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/analyze_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/analyze_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data_lfm2.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data_lfm2.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/schema.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/score_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/score_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/validate_schema.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/validate_schema.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval_retrieval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval_retrieval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/evals/queries.txt",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/grpo/grpo.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/grpo/grpo.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/lfm2/sft_lfm2.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/gguf_toolchain.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval_common.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/sft.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/sft.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/pyproject.toml",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/reward.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tests/test_locked_job_submission.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/qualify_gguf_image.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/submit_locked_job.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train_unsloth.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train_unsloth.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/uv.lock"
+    ],
+    "prior-artifacts": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/REPORT.md",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/review-result.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/review_support.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/test_probe_contract.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/intake.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/final-verification.json"
+    ],
+    "prior42": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/docs/security/dependency-remediation/patched-dependencies.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/LOCKED-JOBS.md",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_gguf.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_gguf.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_onnx.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_onnx.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/analyze_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/analyze_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data_lfm2.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data_lfm2.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/schema.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/score_data.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/score_data.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/validate_schema.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/validate_schema.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval_retrieval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval_retrieval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/evals/queries.txt",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/grpo/grpo.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/grpo/grpo.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/lfm2/sft_lfm2.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/gguf_toolchain.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval_common.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/sft.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/sft.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/pyproject.toml",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/reward.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tests/test_locked_job_submission.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tools/qualify_gguf_image.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tools/submit_locked_job.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train_unsloth.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train_unsloth.py.lock",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/uv.lock"
+    ],
+    "repair-artifacts": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/REPAIR-REPORT.md",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair-manifest.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair.patch",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/input.json",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract_green.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/green-test-binding.patch",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/review_support.py"
+    ]
+  },
+  "new_source_bindings": {
+    "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+    "finetune/LOCKED-JOBS.md": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+    "finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "finetune/convert_gguf.py.lock": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+    "finetune/convert_onnx.py": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+    "finetune/convert_onnx.py.lock": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+    "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+    "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+    "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+    "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/schema.py": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+    "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+    "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+    "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+    "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+    "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/evals/queries.txt": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+    "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+    "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+    "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+    "finetune/jobs/eval_common.py": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+    "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+    "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/pyproject.toml": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+    "finetune/reward.py": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+    "finetune/tests/test_locked_job_submission.py": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+    "finetune/tools/qualify_gguf_image.py": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+    "finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "finetune/train.py.lock": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+    "finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+    "finetune/train_unsloth.py.lock": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+    "finetune/uv.lock": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1"
+  },
+  "old_source_bindings": {
+    "docs/security/dependency-remediation/patched-dependencies.json": {
+      "sha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "size": 1201
+    },
+    "finetune/LOCKED-JOBS.md": {
+      "sha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "size": 14357
+    },
+    "finetune/convert_gguf.py": {
+      "sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "size": 7402
+    },
+    "finetune/convert_gguf.py.lock": {
+      "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "size": 336994
+    },
+    "finetune/convert_onnx.py": {
+      "sha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "size": 19643
+    },
+    "finetune/convert_onnx.py.lock": {
+      "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "size": 316024
+    },
+    "finetune/dataset/analyze_data.py": {
+      "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "size": 9063
+    },
+    "finetune/dataset/analyze_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/dataset/prepare_data.py": {
+      "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "size": 6501
+    },
+    "finetune/dataset/prepare_data.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "finetune/dataset/prepare_data_lfm2.py": {
+      "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "size": 3382
+    },
+    "finetune/dataset/prepare_data_lfm2.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "finetune/dataset/schema.py": {
+      "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "size": 7405
+    },
+    "finetune/dataset/score_data.py": {
+      "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "size": 3670
+    },
+    "finetune/dataset/score_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/dataset/validate_schema.py": {
+      "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "size": 3297
+    },
+    "finetune/dataset/validate_schema.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/eval.py": {
+      "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "size": 11652
+    },
+    "finetune/eval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "finetune/eval_retrieval.py": {
+      "sha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "size": 24556
+    },
+    "finetune/eval_retrieval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "finetune/evals/queries.txt": {
+      "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "size": 2280
+    },
+    "finetune/experiments/grpo/grpo.py": {
+      "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "size": 6165
+    },
+    "finetune/experiments/grpo/grpo.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py": {
+      "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "size": 4027
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/gguf_toolchain.py": {
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "size": 10991
+    },
+    "finetune/jobs/eval.py": {
+      "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "size": 18901
+    },
+    "finetune/jobs/eval.py.lock": {
+      "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "size": 271867
+    },
+    "finetune/jobs/eval_common.py": {
+      "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "size": 13332
+    },
+    "finetune/jobs/sft.py": {
+      "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "size": 4842
+    },
+    "finetune/jobs/sft.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/pyproject.toml": {
+      "sha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "size": 1828
+    },
+    "finetune/reward.py": {
+      "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "size": 28276
+    },
+    "finetune/tests/test_locked_job_submission.py": {
+      "sha256": "3bd023524ce03e38e55d4055862b27e90249642e132ecaa98f9c5ae3564db1e1",
+      "size": 39234
+    },
+    "finetune/tools/qualify_gguf_image.py": {
+      "sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+      "size": 3968
+    },
+    "finetune/tools/submit_locked_job.py": {
+      "sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "size": 24023
+    },
+    "finetune/train.py": {
+      "sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "size": 21309
+    },
+    "finetune/train.py.lock": {
+      "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "size": 604247
+    },
+    "finetune/train_unsloth.py": {
+      "sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "size": 9215
+    },
+    "finetune/train_unsloth.py.lock": {
+      "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "size": 603500
+    },
+    "finetune/uv.lock": {
+      "sha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "size": 651263
+    }
+  },
+  "positive_assertions_unchanged": true,
+  "positive_fixture_allowed_mutations": [
+    "single expected probe SHA literal"
+  ],
+  "protected": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/REPORT.md": {
+      "sha256": "13e2392db6a56a635f3cbb770016396a3881a3e36ef3d90263a20277aa9dc455",
+      "size": 9056
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/final-verification.json": {
+      "sha256": "919fa7a35c4bcb973ffc5b0e4bb224e9c7a75515900ecf95f7a7e84447d36923",
+      "size": 5933
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/intake.json": {
+      "sha256": "ceb59761b5be7a36865c38821534af93a471bc11360614e82e036b9fe391a2f2",
+      "size": 7818
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/docs/security/dependency-remediation/patched-dependencies.json": {
+      "sha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "size": 1201
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/LOCKED-JOBS.md": {
+      "sha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "size": 14357
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_gguf.py": {
+      "sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "size": 7402
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_gguf.py.lock": {
+      "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "size": 336994
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_onnx.py": {
+      "sha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "size": 19643
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/convert_onnx.py.lock": {
+      "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "size": 316024
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/analyze_data.py": {
+      "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "size": 9063
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/analyze_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data.py": {
+      "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "size": 6501
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data_lfm2.py": {
+      "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "size": 3382
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/prepare_data_lfm2.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/schema.py": {
+      "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "size": 7405
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/score_data.py": {
+      "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "size": 3670
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/score_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/validate_schema.py": {
+      "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "size": 3297
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/dataset/validate_schema.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval.py": {
+      "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "size": 11652
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval_retrieval.py": {
+      "sha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "size": 24556
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/eval_retrieval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/evals/queries.txt": {
+      "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "size": 2280
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/grpo/grpo.py": {
+      "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "size": 6165
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/grpo/grpo.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/lfm2/sft_lfm2.py": {
+      "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "size": 4027
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/experiments/lfm2/sft_lfm2.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/gguf_toolchain.py": {
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "size": 10991
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval.py": {
+      "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "size": 18901
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval.py.lock": {
+      "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "size": 271867
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/eval_common.py": {
+      "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "size": 13332
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/sft.py": {
+      "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "size": 4842
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/jobs/sft.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/pyproject.toml": {
+      "sha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "size": 1828
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/reward.py": {
+      "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "size": 28276
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tests/test_locked_job_submission.py": {
+      "sha256": "3bd023524ce03e38e55d4055862b27e90249642e132ecaa98f9c5ae3564db1e1",
+      "size": 39234
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tools/qualify_gguf_image.py": {
+      "sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+      "size": 3968
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tools/submit_locked_job.py": {
+      "sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "size": 24023
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train.py": {
+      "sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "size": 21309
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train.py.lock": {
+      "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "size": 604247
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train_unsloth.py": {
+      "sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "size": 9215
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/train_unsloth.py.lock": {
+      "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "size": 603500
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/uv.lock": {
+      "sha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "size": 651263
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/review-result.json": {
+      "sha256": "8765024c1c5db9da875e87910650f7a1ea4f4c3eecd747f9a60df9084235672d",
+      "size": 7772
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/review_support.py": {
+      "sha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "size": 4277
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/test_probe_contract.py": {
+      "sha256": "5f37af58a71aaddb1e97ceffaf1f09bb81c45042bd96c6a22585afed4cbdaae5",
+      "size": 1949
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/REPORT.md": {
+      "sha256": "f845e30d048c059ad93dff26e3d7b24eb6a9d242966919b08bc02f662f3c2a9d",
+      "size": 5535
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/manifest.json": {
+      "sha256": "eecd4e15341edff4c62b6c1c4750bad3a0d9e79eb88f46cb1b06b39467dbbb5c",
+      "size": 5999
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/proposal.patch": {
+      "sha256": "d858a625c036ed4c3bd826383f76b7b369271a2dcf1a389e8bf443ec3362719b",
+      "size": 26839
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.patch": {
+      "sha256": "15de0644d3ef36f39066ff4bee1def4bfdc7d714913d73c7b3442e45aa5c9d73",
+      "size": 3526
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.yml.proposed": {
+      "sha256": "2c145115e53c2948249ee36d2593c7e9419bdaacbd7fe8555f2da01f323cb23e",
+      "size": 3375
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/scope-ownership.json": {
+      "sha256": "0b66063d0a8acbe2e2c625c9170f2d3785b57b2ed5fe3d1c356e0b2f542df150",
+      "size": 2942
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/REPAIR-REPORT.md": {
+      "sha256": "6c8aa15ff01872c9e17d5c54d903e5217952f663e14e3d64b723f5b62fab2262",
+      "size": 3370
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/green-test-binding.patch": {
+      "sha256": "0057d40f72179f21c73a54773fdcec128c4fffbbaff1cd023c2152a46ec02e4c",
+      "size": 607
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/input.json": {
+      "sha256": "ad1261e39a7cce518573542711839227d66b88d8456fc3b0f40347782a17262b",
+      "size": 11134
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair-manifest.json": {
+      "sha256": "d1dcf0b61c96e1aeeecf5d383208f850e0f29e716ab41f0f358e64233702f094",
+      "size": 6217
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair.patch": {
+      "sha256": "50744121d38fdb998cce014e716302bf0e2010a0eff0a221d0649c94b0a48710",
+      "size": 4617
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/docs/security/dependency-remediation/patched-dependencies.json": {
+      "sha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "size": 1201
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/LOCKED-JOBS.md": {
+      "sha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "size": 14357
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_gguf.py": {
+      "sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "size": 7402
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_gguf.py.lock": {
+      "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "size": 336994
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_onnx.py": {
+      "sha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "size": 19643
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/convert_onnx.py.lock": {
+      "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "size": 316024
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/analyze_data.py": {
+      "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "size": 9063
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/analyze_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data.py": {
+      "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "size": 6501
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data_lfm2.py": {
+      "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "size": 3382
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/prepare_data_lfm2.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/schema.py": {
+      "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "size": 7405
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/score_data.py": {
+      "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "size": 3670
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/score_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/validate_schema.py": {
+      "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "size": 3297
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/dataset/validate_schema.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval.py": {
+      "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "size": 11652
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval_retrieval.py": {
+      "sha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "size": 24556
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/eval_retrieval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/evals/queries.txt": {
+      "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "size": 2280
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/grpo/grpo.py": {
+      "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "size": 6165
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/grpo/grpo.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/lfm2/sft_lfm2.py": {
+      "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "size": 4027
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/experiments/lfm2/sft_lfm2.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/gguf_toolchain.py": {
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "size": 10991
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval.py": {
+      "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "size": 18901
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval.py.lock": {
+      "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "size": 271867
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/eval_common.py": {
+      "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "size": 13332
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/sft.py": {
+      "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "size": 4842
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/jobs/sft.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/pyproject.toml": {
+      "sha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "size": 1828
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/reward.py": {
+      "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "size": 28276
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tests/test_locked_job_submission.py": {
+      "sha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "size": 42117
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/qualify_gguf_image.py": {
+      "sha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "size": 4366
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/submit_locked_job.py": {
+      "sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "size": 24023
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train.py": {
+      "sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "size": 21309
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train.py.lock": {
+      "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "size": 604247
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train_unsloth.py": {
+      "sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "size": 9215
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/train_unsloth.py.lock": {
+      "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "size": 603500
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/uv.lock": {
+      "sha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "size": 651263
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/review_support.py": {
+      "sha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "size": 4277
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract.py": {
+      "sha256": "5f37af58a71aaddb1e97ceffaf1f09bb81c45042bd96c6a22585afed4cbdaae5",
+      "size": 1949
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract_green.py": {
+      "sha256": "8a7b2ddbe50cf5025d115eadf3d056771b601ab649a1438366c79107c09985ff",
+      "size": 1949
+    },
+    "/Users/shersingh/github/qmd-mlx-search/finetune/LOCKED-JOBS.md": {
+      "sha256": "6b798d82f3f2a0624e182c248e3d85355ae031c49c9f751b8751ebdabc452d9b",
+      "size": 11946
+    },
+    "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_locked_job_submission.py": {
+      "sha256": "4f37a131b666d723d22428551f354333e5aae4ab30e5fdfd49cb0b60dd6936ab",
+      "size": 26129
+    },
+    "/Users/shersingh/github/qmd-mlx-search/finetune/tools/submit_locked_job.py": {
+      "sha256": "9f7333dec035129ec084fed14a5656552a29ea803e99b90740ec567815e51ae9",
+      "size": 23349
+    }
+  },
+  "python": {
+    "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "missing_requested_spelling": "security-venv/bin/python3.12.13",
+    "resolved": "/opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+    "verified_fallback_same_venv": true,
+    "version": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]"
+  },
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h"
+}

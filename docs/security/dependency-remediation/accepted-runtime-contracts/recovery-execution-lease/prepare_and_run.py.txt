@@ -1,0 +1,143 @@
+"""Independent source authentication and scratch-only focused execution."""
+import difflib
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+ROOT = Path(__file__).resolve().parent
+WORKER = Path('/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo')
+PARENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh')
+REPO = Path('/Users/shersingh/github/qmd-mlx-search')
+MIRROR = ROOT / 'mirror'
+MIRROR.mkdir()
+
+def dump(path, value):
+    path.write_text(json.dumps(value, indent=2) + '\n')
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+env = {
+    'PATH': '/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin',
+    'LANG': 'en_US.UTF-8', 'LC_ALL': 'en_US.UTF-8', 'CI': '1', 'REQUIRE_BUN': '1',
+    'BUN_EXECUTABLE': '/Users/shersingh/.bun/bin/bun', 'QMD_LLAMA_GPU': 'false',
+    'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_DATASETS_OFFLINE': '1',
+    'PYTHONDONTWRITEBYTECODE': '1', 'NO_COLOR': '1',
+}
+for key, value in {
+    'HOME': 'home', 'HERMES_HOME': 'hermes', 'HERMES_DIR': 'hermes', 'KNOWLEDGE_DIR': 'knowledge',
+    'XDG_CACHE_HOME': 'cache', 'XDG_CONFIG_HOME': 'config', 'XDG_DATA_HOME': 'data',
+    'HF_HOME': 'hf', 'HUGGINGFACE_HUB_CACHE': 'hf/hub', 'TRANSFORMERS_CACHE': 'hf/transformers',
+    'TMPDIR': 'tmp', 'TMP': 'tmp', 'TEMP': 'tmp',
+    'BUN_INSTALL_CACHE_DIR': 'cache/bun-install', 'BUN_RUNTIME_TRANSPILER_CACHE_PATH': 'cache/bun-transpiler',
+}.items():
+    directory = ROOT / value
+    directory.mkdir(parents=True, exist_ok=True)
+    env[key] = str(directory)
+dump(ROOT / 'environment.json', env)
+expected = json.loads((WORKER / 'candidate-source-manifest.json').read_text())['filesSha256']
+entry = json.loads((WORKER / 'entry-manifest.json').read_text())['filesSha256']
+public = json.loads((PARENT / 'input.json').read_text())['source_sha256']
+receipt = json.loads((WORKER / 'candidate-receipt.json').read_text())
+head = subprocess.run(['/usr/bin/git', 'rev-parse', 'HEAD'], cwd=REPO, env=env, capture_output=True, text=True, check=True).stdout.strip()
+assert head == receipt['entryHead']
+checks = {}
+for relative, digest in expected.items():
+    checks[relative] = {name: sha(base / relative) for name, base in {
+        'frozen': WORKER / 'candidate-source', 'live': REPO, 'parent_mirror': PARENT / 'mirror',
+    }.items()}
+    assert all(x == digest for x in checks[relative].values()), (relative, checks[relative], digest)
+for relative, digest in public.items():
+    source = PARENT / 'mirror' / relative
+    assert sha(source) == digest, relative
+    target = MIRROR / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+
+# Authenticate attribution without applying or reverting any live change.
+replay = ROOT / 'entry-replayed'
+for relative, digest in entry.items():
+    source = WORKER / 'entry' / relative
+    assert sha(source) == digest
+    target = replay / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+patch = WORKER / 'entry-delta.patch'
+result = subprocess.run(['/usr/bin/git', 'apply', '--check', str(patch)], cwd=replay, env=env, capture_output=True, text=True)
+assert result.returncode == 0, result.stderr
+result = subprocess.run(['/usr/bin/git', 'apply', str(patch)], cwd=replay, env=env, capture_output=True, text=True)
+assert result.returncode == 0, result.stderr
+replayed = {relative: sha(replay / relative) for relative in expected}
+assert replayed == expected
+changed = [relative for relative in expected if expected[relative] != entry.get(relative)]
+assert sorted(changed) == sorted(item['path'] for item in receipt['entryDelta'])
+deltas = {}
+for relative in changed:
+    a = (WORKER / 'entry' / relative).read_text().splitlines(keepends=True) if relative in entry else []
+    b = (replay / relative).read_text().splitlines(keepends=True)
+    delta = list(difflib.unified_diff(a, b, fromfile='a/' + relative, tofile='b/' + relative))
+    deltas[relative] = {'added': sum(x.startswith('+') and not x.startswith('+++') for x in delta),
+                        'removed': sum(x.startswith('-') and not x.startswith('---') for x in delta)}
+    (ROOT / ('delta-' + relative.replace('/', '_'))).write_text(''.join(delta))
+
+# A real owned node_modules directory; only leaf package aliases are shared.
+modules = MIRROR / 'node_modules'
+modules.mkdir()
+links = {}
+for package in (PARENT / 'mirror/node_modules').iterdir():
+    if package.name.startswith('.'):
+        continue
+    if package.name.startswith('@'):
+        (modules / package.name).mkdir()
+        leaves = list(package.iterdir())
+    else:
+        leaves = [package]
+    for leaf in leaves:
+        relative = leaf.relative_to(PARENT / 'mirror/node_modules')
+        resolved = leaf.resolve(strict=True)
+        (modules / relative).symlink_to(resolved, target_is_directory=resolved.is_dir())
+        links[str(relative)] = str(resolved)
+assert len(links) == 274, len(links)
+for name in ['.vite', '.cache', '.bun']:
+    (modules / name).mkdir()
+dump(ROOT / 'dependency-links.json', links)
+dump(ROOT / 'source-binding.json', {'head': head, 'candidate': checks, 'entryReplayed': replayed,
+    'changed': changed, 'deltas': deltas, 'publicSnapshot': public, 'publicFiles': len(public),
+    'entryDeltaPatchSha256': sha(patch), 'dependencies': len(links)})
+for executable, args, label in [
+    ('/Users/shersingh/.hermes/node/bin/node', ['--version'], 'node'),
+    ('/Users/shersingh/.bun/bin/bun', ['--version'], 'bun'),
+    ('/usr/bin/python3', ['-B', '-S', '--version'], 'python'),
+    ('/usr/bin/sw_vers', [], 'os'),
+]:
+    result = subprocess.run([executable, *args], env=env, capture_output=True, text=True, check=True)
+    (ROOT / (label + '-version.txt')).write_text(result.stdout + result.stderr)
+
+config = ROOT / 'vitest-isolated.config.mjs'
+config.write_text("import { defineConfig, mergeConfig } from './mirror/node_modules/vitest/dist/config.js';\n"
+    "import original from './mirror/vitest.config.ts';\n"
+    "export default mergeConfig(original, defineConfig({\n"
+    " root: new URL('./mirror/', import.meta.url).pathname,\n"
+    " cacheDir: new URL('./cache/vite/', import.meta.url).pathname,\n"
+    " test: { maxWorkers: 2 },\n}));\n")
+files = ['audit-recovery-startup', 'audit-recovery-transition', 'audit-recovery-tree',
+         'audit-native-bun-recovery', 'audit-recovery', 'phase5-recovery', 'audit-recovery-execution-admission']
+args = ['/Users/shersingh/.hermes/node/bin/node', 'node_modules/vitest/vitest.mjs', 'run',
+        '--config', str(config), '--configLoader', 'runner', '--cache=false', '--maxWorkers=2',
+        '--reporter=verbose', '--reporter=json', '--outputFile.json=' + str(ROOT / 'focused-tests.json'),
+        *['test/' + name + '.test.ts' for name in files]]
+dump(ROOT / 'focused-invocation.json', {'argv': args, 'cwd': str(MIRROR), 'env': env})
+started = time.monotonic()
+with (ROOT / 'focused-tests.log').open('w') as output:
+    result = subprocess.run(args, cwd=MIRROR, env=env, stdout=output, stderr=subprocess.STDOUT, timeout=240)
+dump(ROOT / 'focused-execution.json', {'exitCode': result.returncode, 'elapsedSeconds': time.monotonic() - started})
+report = json.loads((ROOT / 'focused-tests.json').read_text())
+summary = {key: report[key] for key in ['numTotalTestSuites', 'numPassedTestSuites', 'numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests', 'success']}
+summary['files'] = len(report['testResults'])
+dump(ROOT / 'focused-counts.json', summary)
+print(json.dumps({'root': str(ROOT), 'sourceFiles': len(public), 'candidateFiles': len(expected),
+    'deltaFiles': len(changed), 'dependencyAliases': len(links), 'executionExit': result.returncode, 'tests': summary}, indent=2))

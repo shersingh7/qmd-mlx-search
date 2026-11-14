@@ -1,0 +1,47 @@
+from pathlib import Path
+import json, hashlib, shutil, os
+ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+ACCEPT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo')
+binding = json.loads((ROOT/'reference/source-binding.json').read_text())
+index = json.loads((ROOT/'reference/report-index.json').read_text())
+# Apply only paths with no execution-lease overlap at this checkpoint.
+held = ['scripts/phase5_e2e_runner.ts','test/phase5-recovery.test.ts']
+applied = []
+for rel in binding['integration_paths']:
+    if rel in held: continue
+    src = ROOT/'reference/accepted19'/rel
+    dest = ROOT/'mirror'/rel
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(src,dest)
+    applied.append(rel)
+# Only original authenticated patch is read, never its old complete mirror.
+src = Path('/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source.patch')
+data = src.read_bytes()
+assert hashlib.sha256(data).hexdigest() == binding['base_source_patch']
+(ROOT/'reference/original-source.patch').write_bytes(data)
+# Relocate only authenticated reviewer probes after inspection; these copies
+# are evidence fixtures, never compiler roots of the owned source derivative.
+fixtures = ['sdk-isolated.config.mjs','probes/host-setup.mjs','probes/sdk-network-guard.mjs','sdk-probe/test/sdk-inlined-zod.test.ts','sdk-probe/test/zod-prefix-scope.test.ts','sdk-probe/node_modules/review-converter-native/index.mjs','sdk-probe/node_modules/review-converter-native/package.json','sdk-probe/node_modules/review-native-zod/index.mjs','sdk-probe/node_modules/review-native-zod/package.json']
+for rel in fixtures:
+    data = (ACCEPT/rel).read_bytes()
+    assert hashlib.sha256(data).hexdigest() == index['files'][rel], rel
+    out = ROOT/'reference/fixtures'/rel
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(data)
+# Snapshot all installed dependency entries without following directory links.
+DEP = Path('/Users/shersingh/github/qmd-mlx-search/node_modules')
+files = {}
+for folder, dirs, names in os.walk(DEP, followlinks=False):
+    for name in dirs + names:
+        p = Path(folder)/name
+        s = p.lstat()
+        item = {'size':s.st_size,'mtime_ns':s.st_mtime_ns,'mode':s.st_mode}
+        if p.is_symlink(): item['link'] = os.readlink(p)
+        elif p.is_file(): item['sha256'] = hashlib.sha256(p.read_bytes()).hexdigest()
+        files[str(p.relative_to(DEP))] = item
+(ROOT/'evidence/dependencies-before.json').write_text(json.dumps(files,indent=2)+'\n')
+(ROOT/'evidence/application-checkpoint.json').write_text(json.dumps({'applied17':applied,'heldLeasePaths':held,'dependencyEntries':len(files)},indent=2)+'\n')
+for rel in held:
+    p = ROOT/'mirror'/rel
+    assert p.read_bytes() == (ROOT/'baseline'/rel).read_bytes()
+print(json.dumps({'applied_count':len(applied),'held':held,'dependency_entries':len(files)},indent=2))

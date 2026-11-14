@@ -1,0 +1,138 @@
+{
+  "spec": "PASS",
+  "quality": "PASS",
+  "source_comparison_base": "346d905",
+  "launcher_rejection_predicate_ast_unchanged": true,
+  "launcher_ast_outside_check_env_name_unchanged": true,
+  "constant_value_error_diagnostic_no_input_reflection": true,
+  "existing_repository_tests_ast_unchanged": true,
+  "reviewed_python_sources_compile_without_writes": true,
+  "scoped_git_diff_check": "PASS",
+  "hashes": {
+    "/Users/shersingh/github/qmd-mlx-search/finetune/tools/submit_locked_job.py": {
+      "sha256": "9f7333dec035129ec084fed14a5656552a29ea803e99b90740ec567815e51ae9",
+      "unchanged": true
+    },
+    "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_locked_job_submission.py": {
+      "sha256": "4f37a131b666d723d22428551f354333e5aae4ab30e5fdfd49cb0b60dd6936ab",
+      "unchanged": true
+    },
+    "/Users/shersingh/github/qmd-mlx-search/finetune/LOCKED-JOBS.md": {
+      "sha256": "6b798d82f3f2a0624e182c248e3d85355ae031c49c9f751b8751ebdabc452d9b",
+      "unchanged": true
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-locked-launcher-independent-review/test_independent_launcher.py": {
+      "sha256": "2649aab306cf95573ff9286e9af8dab0796d586ac98398c7a77434beef2def03",
+      "unchanged": true
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-locked-launcher-independent-review/final-heldout-tests.xml": {
+      "sha256": "62aa83dc5494cff81ce8c5f3dcbdc9e77f689fe8a204f8e20cde6251e6a68dc0",
+      "unchanged": true
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-secret-refusal-red.xml": {
+      "sha256": "7f4926f0f869ce2437711de719424cd2eb0fb3191f85ea8a96cc77c44e33666a",
+      "unchanged": true
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-secret-refusal-green.xml": {
+      "sha256": "68d51e33d65d03e0c7050b88a034a0add73219a2308ee2a64c0d135e883e344f",
+      "unchanged": true
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-launcher-heldouts-green.xml": {
+      "sha256": "9afbeedd10d3bbe6476a7812faea236a0301e1e0c1668f19ab0041ba00101813",
+      "unchanged": true
+    }
+  },
+  "acceptance_executions": {
+    "independent": {
+      "tests": 101,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 101
+    },
+    "repository": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 78
+    },
+    "bounded": {
+      "tests": 42,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 42
+    },
+    "bounded-cli-final": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 12
+    }
+  },
+  "acceptance_total": {
+    "tests": 233,
+    "passed": 233,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "fresh_cli_audit_count": 12,
+  "fresh_cli_audit_violations": 0,
+  "fresh_cli_allowed_stdlib_environment_keys_observed": [
+    "COLUMNS",
+    "LANG",
+    "LANGUAGE",
+    "LC_ALL",
+    "LC_MESSAGES",
+    "LINES"
+  ],
+  "preserved_prior_xml": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-locked-launcher-independent-review/final-heldout-tests.xml": {
+      "tests": 101,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 100
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-secret-refusal-red.xml": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-secret-refusal-green.xml": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 78
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-launcher-heldouts-green.xml": {
+      "tests": 101,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 101
+    }
+  },
+  "harness_only_failed_runs_preserved": {
+    "bounded-cli": {
+      "tests": 12,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "bounded-cli-corrected": {
+      "tests": 12,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    }
+  }
+}

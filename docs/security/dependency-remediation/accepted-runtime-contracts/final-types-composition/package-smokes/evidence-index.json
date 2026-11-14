@@ -1,0 +1,15 @@
+{
+  "bun/httpReceipt.json": "8147a894bc9dc034f10c911e8d4f2cac6360cd036982a4dbd9bb50e52ed003ad",
+  "bun/stdioReceipt.json": "1ee2a888e13ea1e2fa8e3965ed3497dbbba757e917f24e529fbfddc947d9c666",
+  "evidence/package-smoke-bun-receipt.json": "b40fc1e4baea9199544d391af3b3f5f87c1ff576b69ff6517c6176a79fb229a4",
+  "evidence/package-smoke-bun.stderr.txt": "28679aabb27ecce4242661cd3adcffe3d0ca2dc2fde3782485c85ec66a86479d",
+  "evidence/package-smoke-bun.stdout.txt": "d34afe292d4f493ad9b3006e4f25558a215c367064c18e75148af5351044d5a6",
+  "evidence/package-smoke-executions.json": "3d250ccdf21ee64b89552e71e36ba14e48e267216c1ed88773684b4fea36a45e",
+  "evidence/package-smoke-node-receipt.json": "8387e5f6918c6aff726d17559c7ab46c94f3072148e40e36b2c931cd42a25f56",
+  "evidence/package-smoke-node.stderr.txt": "a661f220c46c82809fd890849e3fd17c2c4249910fad940b60a7f5892ee4f11d",
+  "evidence/package-smoke-node.stdout.txt": "d6450cbc57ba4c8ed0ed8cbe4cf75ca8684dcc372e07dd737ad8976ba16c535b",
+  "node/httpReceipt.json": "27d16cb58ebeed73ec0faf37e8dfa65602c37335cf233edaf128f7e9f8281843",
+  "node/stdioReceipt.json": "46f7763012b9663b9b61596e221b45345c8f56071a1ef426989d81b3bc408b6e",
+  "probes/run-package-smokes.py": "de727225018ea585d9c5fa639c31543839df7afc59b69446d8ef4533021f1736",
+  "tested-package.tgz": "224b30bc3057ce706a7f6a444d24d941daab8702337e585d655378cf34614aa0"
+}

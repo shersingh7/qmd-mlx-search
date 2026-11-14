@@ -1,0 +1,91 @@
+"""Exercise the frozen standalone main with real local base/SFT/GRPO assets."""
+from qual_common import *
+q = Qualification('standalone')
+error = None
+try:
+    torch = q.initialize_ml()
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from peft.tuners.lora.model import LoraModel
+    import convert_gguf
+    import gguf_toolchain
+    assert Path(convert_gguf.__file__) == FROZEN / 'finetune/convert_gguf.py'
+    assert Path(gguf_toolchain.__file__) == FROZEN / 'finetune/gguf_toolchain.py'
+    q.receipt['actual_composed_imports'] = {module.__name__: {'path': module.__file__, 'sha256': sha256(module.__file__)}
+        for module in (convert_gguf, gguf_toolchain)}
+    fixture = ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
+    assert not list(fixture.glob('*.py'))
+    assert 'auto_map' not in json.loads((fixture / 'config.json').read_text())
+    assert 'auto_map' not in json.loads((fixture / 'tokenizer_config.json').read_text())
+    real_model_load = AutoModelForCausalLM.from_pretrained
+    def observed_model_load(*args, **kwargs):
+        assert Path(args[0]) == fixture
+        model = real_model_load(*args, **kwargs)
+        q.receipt['base_load'] = {'path': str(args[0]), 'kwargs': {key: str(value) for key, value in kwargs.items()},
+                                  'resolved_class': type(model).__module__ + '.' + type(model).__name__,
+                                  'no_local_code_or_auto_map': True}
+        assert type(model).__module__.startswith('transformers.')
+        q.model_cpu('actual_standalone_device_map_auto_load', model)
+        return model
+    AutoModelForCausalLM.from_pretrained = staticmethod(observed_model_load)
+    real_tokenizer_load = AutoTokenizer.from_pretrained
+    def observed_tokenizer_load(*args, **kwargs):
+        tokenizer = real_tokenizer_load(*args, **kwargs)
+        assert type(tokenizer).__module__.startswith('transformers.')
+        assert len(tokenizer) == json.loads((fixture / 'config.json').read_text())['vocab_size']
+        q.receipt['tokenizer_load'] = {'path': str(args[0]), 'kwargs': kwargs,
+                                       'resolved_class': type(tokenizer).__module__ + '.' + type(tokenizer).__name__,
+                                       'length': len(tokenizer), 'stock_unmodified_save': True}
+        return tokenizer
+    AutoTokenizer.from_pretrained = staticmethod(observed_tokenizer_load)
+    real_merge = LoraModel.merge_and_unload
+    q.receipt['actual_merges'] = []
+    def observed_merge(self, *args, **kwargs):
+        observations = []
+        for name, module in self.model.named_modules():
+            if hasattr(module, 'lora_A') and 'default' in module.lora_A:
+                before = module.base_layer.weight.detach().clone()
+                delta = module.get_delta_weight('default').detach()
+                assert before.device.type == delta.device.type == 'cpu'
+                expected = (before.float() + delta.float()).to(before.dtype)
+                observations.append((name, module.base_layer, before, expected, int(torch.count_nonzero(delta))))
+        assert observations
+        result = real_merge(self, *args, **kwargs)
+        record = {'index': len(q.receipt['actual_merges']) + 1, 'modules': []}
+        for name, base_layer, before, expected, delta_nonzero in observations:
+            after = base_layer.weight.detach()
+            assert torch.equal(after, expected), 'Actual merge differs from numerical LoRA delta'
+            changed = int(torch.count_nonzero(after != before))
+            assert delta_nonzero > 0 and changed > 0
+            record['modules'].append({'name': name, 'delta_nonzero': delta_nonzero,
+                                       'base_weights_changed': changed, 'exact_expected_merge': True,
+                                       'device': str(after.device), 'dtype': str(after.dtype)})
+        q.model_cpu('actual_merge_' + str(record['index']), result)
+        q.receipt['actual_merges'].append(record)
+        return result
+    LoraModel.merge_and_unload = observed_merge
+    def deny_hub(*args, **kwargs):
+        raise AssertionError('No Hub authentication or write is authorized')
+    convert_gguf.HfApi = deny_hub
+    convert_gguf.login = deny_hub
+    sys.argv = ['convert_gguf.py', '--base', str(fixture),
+                '--sft', str(ROOT / 'RANDOM-NOT-TRAINED-sft-adapter'),
+                '--grpo', str(ROOT / 'RANDOM-NOT-TRAINED-grpo-adapter'),
+                '--output', 'fixture/RANDOM-Qwen3.5-standalone-gguf', '--no-upload']
+    q.receipt['entrypoint_argv'] = list(sys.argv)
+    convert_gguf.main()
+    assert len(q.receipt['actual_merges']) == 2
+    paths = sorted(Path(os.environ['TMPDIR']).glob('qmd-gguf-output-*/*.gguf'))
+    assert len(paths) == 4, paths
+    assert {p.name for p in paths} == {'RANDOM-Qwen3.5-standalone-' + suffix + '.gguf'
+                                      for suffix in ('f16', 'q4_k_m', 'q6_k', 'q8_0')}
+    assert all(item['returncode'] == 0 for item in q.receipt['commands'])
+    converter = next(item for item in q.receipt['commands'] if '--outfile' in item['argv'])
+    assert '--no-mtp' in converter['argv']
+    q.receipt['artifacts'] = [{'path': str(p), 'bytes': p.stat().st_size, 'sha256': sha256(p)} for p in paths]
+except BaseException as exc:
+    error = exc
+    raise
+finally:
+    receipt = q.finish(error)
+    print(json.dumps({key: receipt.get(key) for key in ('success', 'environment_unchanged', 'source_unchanged',
+                     'actual_merges', 'artifacts', 'error', 'max_rss_bytes_self', 'max_rss_bytes_child')}, indent=2))

@@ -1,0 +1,14 @@
+--- previous-reviewed-helper
++++ current-helper
+@@ -224,6 +224,11 @@
+                     raise ValueError('Unsupported uv marker parser form')
+                 operator = op.value
+                 if isinstance(left, Value) and isinstance(right, Variable):
++                    # Wildcards on the literal-left side are not symmetric:
++                    # swapping them changes uv's requirement activation domain.
++                    # Refuse this spelling rather than certify a different atom.
++                    if right.value in PYTHON and '*' in left.value:
++                        raise ValueError('Unsupported literal-left Python wildcard marker')
+                     left, right = right, left
+                     operator = {'<': '>', '>': '<', '<=': '>=', '>=': '<=', '==': '==', '!=': '!='}.get(operator)
+                 if not (isinstance(left, Variable) and isinstance(right, Value) and operator is not None):

@@ -1,0 +1,1 @@
+{"schemaVersion":1,"nativeBunOwnerDiagnostics":"not-implemented","status":"native-bun-owner-diagnostics-not-implemented","invocation":"existing-fast-timeout-case-in-place; other canonical files may run concurrently; no global-first-supervisor claim","restoration":{"channelUnsubscribed":true,"listenersRemoved":true}}

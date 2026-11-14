@@ -1,0 +1,84 @@
+{
+  "status": "REPAIR_PROPOSAL_PENDING_INDEPENDENT_SPEC_QUALITY",
+  "implementationDelegation": "deleg_53362e97",
+  "reviewDelegation": "deleg_34d9c9b4",
+  "reviewer": "sa-0-c0a2de91",
+  "workflowSha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+  "deliveryManifestSha256": "dcf3a5d3603121dd23c1ce86aa605bf6db91a6b009b9fa3ed7a132543961e88a",
+  "repairPatchSha256": "db0e846e4d8f06a538815a8d9a765462772f90dccf3253698dbc205df94edd88",
+  "newFileIntegrationPatchSha256": "ba2463a0f8417134b85ebe51b001a1b29b29208c8881a1943f44239f03aee932",
+  "deliveryRegularPathsVerified": 12170,
+  "deliverySpecialFixturesMetadataOnly": 47,
+  "parentSpecialFixturesMetadataOnly": [
+    {
+      "path": "evidence/permanent-parent/test_controller_killed_pipe_revocation/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_timeout_with_failed_docker_cleanup/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_timeout_descendant/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_early_failure_descendant/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_repeated_signals_during_registration/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_interrupt_descendant/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    },
+    {
+      "path": "evidence/permanent-parent/test_early_success_descendant/lifetime.fifo",
+      "type": 4096,
+      "readOrFollowed": false
+    }
+  ],
+  "parentFreshTests": {
+    "passed": 26,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "lifetimeCases": 7,
+    "allSevenTerminatedAtObservedReturn": true,
+    "syntaxActionlintPassed": true
+  },
+  "parentPatchCheckApply": {
+    "commands": 4,
+    "allExitZero": true,
+    "eachReplayMatchesThreeCandidatePaths": true
+  },
+  "bundle": {
+    "path": "evidence-bundle.tar.gz",
+    "sha256": "bf2eb57c3a0a0c74fd136fcd2f60fe1609163747f8e927825fe7af5da9b71416",
+    "bytes": 11451545,
+    "regularEntriesReadbackVerified": 12807,
+    "index": "bundle-index.json.gz",
+    "indexSha256": "d98e9e14e69b07877b93dddc10e2cebc4c0cfd3d0478d7e7227026ea101b831b"
+  },
+  "standaloneSha256": {
+    "REPORT.md": "c26378f8f860ddc2d415cd73d777ccbe3d7ae0f0275e807d08221c310ad27af7",
+    "DESIGN.md": "68356616b63243acf13f517cc83dec6d24c3dc62d486b0219e69bd99b382c6b4",
+    "delivery-result.json": "c83644108a75152537a27dbd7277117f44f8b21f9fc5b9afe8748e47d5f1c2dc",
+    "parent-verification.json": "977c7e32a5e0d91fe59acaca80cdce6af06d7dcfdc30dc6c336045cdc97722a4",
+    "parent-patch-replay.json": "072f9f50720b41d2bda84072e51f3d642656857aca949e6ee90df2f08f3b9343"
+  },
+  "originalS3CharacterizationStillFailed": true,
+  "protectedNegativesPreservedInBundle": true,
+  "fullDeliveryPreservedWithoutOpeningSpecialFixtures": true,
+  "liveIntegrated": false,
+  "DockerImageNativeCiQualified": false,
+  "restorePolicy": "Archive regular files only; restore beneath a fresh owned managed root, never into live repo. Original filenames are inside the bundle so they cannot expand repository compiler/test roots. Special fixture metadata retained, not recreated automatically."
+}

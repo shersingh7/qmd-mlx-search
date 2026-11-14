@@ -1,0 +1,7 @@
+{
+  "name": "supervisor-control-real-EBADF",
+  "owner_control_error": true,
+  "child_gate_delay": 0.05,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts/supervisor-control-real-EBADF",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py"
+}

@@ -503,6 +503,25 @@ def test_sdk_exception_details_and_secret_values_are_not_echoed(synthetic_repo, 
     assert "RuntimeError" in captured.err
 
 
+@pytest.mark.parametrize("submit", [False, True])
+@pytest.mark.parametrize("literal", [
+    "HF_TOKEN=SYNTHETIC_SECRET_NEVER_ECHO",
+    "HF_TOKEN SYNTHETIC_SECRET_NEVER_ECHO",
+    "HF_TOKEN\nSYNTHETIC_SECRET_NEVER_ECHO",
+])
+def test_malformed_secret_name_is_refused_without_echo(synthetic_repo, monkeypatch, capsys, submit, literal):
+    monkeypatch.setattr(launcher, "load_sdk", lambda: pytest.fail("invalid secret option reached SDK"))
+    options = ["--secret-env", literal]
+    if submit:
+        options.insert(0, "--submit")
+    assert launcher.main(argv("finetune/jobs/sft.py", *options)) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Unsupported environment name" in captured.err
+    assert "SYNTHETIC_SECRET_NEVER_ECHO" not in captured.out + captured.err
+    assert literal not in captured.out + captured.err
+
+
 def test_sdk_public_bucket_warning_is_fatal(synthetic_repo, monkeypatch, capsys):
     import warnings
     api = FakeApi()
@@ -514,3 +533,310 @@ def test_sdk_public_bucket_warning_is_fatal(synthetic_repo, monkeypatch, capsys)
     assert launcher.main(argv("finetune/jobs/sft.py", "--submit")) == 2
     assert not api.uploaded
     assert "no success confirmed" in capsys.readouterr().err
+
+
+# Independent acceptance expectations, not a second traversal of CODE_CLOSURE.
+GGUF_RUNNERS = ("finetune/convert_gguf.py", "finetune/train.py", "finetune/train_unsloth.py")
+GGUF_HELPER = "finetune/gguf_toolchain.py"
+GGUF_IMAGE = ("ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:"
+              "c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e")
+UNCHANGED_HELPERS = {
+    "finetune/convert_onnx.py": (),
+    "finetune/dataset/analyze_data.py": ("finetune/dataset/schema.py",),
+    "finetune/dataset/prepare_data.py": ("finetune/dataset/schema.py",),
+    "finetune/dataset/prepare_data_lfm2.py": ("finetune/dataset/schema.py",),
+    "finetune/dataset/score_data.py": ("finetune/dataset/schema.py", "finetune/reward.py"),
+    "finetune/dataset/validate_schema.py": ("finetune/dataset/schema.py",),
+    "finetune/eval.py": ("finetune/reward.py", "finetune/evals/queries.txt"),
+    "finetune/eval_retrieval.py": (),
+    "finetune/experiments/grpo/grpo.py": ("finetune/jobs/eval_common.py",),
+    "finetune/experiments/lfm2/sft_lfm2.py": (),
+    "finetune/jobs/eval.py": (),
+    "finetune/jobs/sft.py": ("finetune/jobs/eval_common.py",),
+}
+
+
+def expected_gguf_paths(runner):
+    paths = {runner, runner + ".lock", GGUF_HELPER}
+    if runner != "finetune/convert_gguf.py":
+        paths.update({"finetune/eval.py", "finetune/eval.py.lock", "finetune/reward.py",
+                      "finetune/evals/queries.txt"})
+    if runner == "finetune/train_unsloth.py":
+        paths.update({"finetune/train.py", "finetune/train.py.lock"})
+    return paths
+
+
+@pytest.fixture
+def real_export_sources(synthetic_repo):
+    """Stage actual source/lock bytes as DATA; never import/execute ML runners.
+
+    This intentionally requires the integrated GGUF bodies and helper. A launcher
+    proposal alone cannot qualify a future helper's bytes or export behavior.
+    """
+    source_root = LAUNCHER.parents[2]
+    paths = {launcher.POLICY_PATH}
+    for runner in GGUF_RUNNERS:
+        paths.update(expected_gguf_paths(runner))
+    for relative in paths:
+        destination = synthetic_repo / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((source_root / relative).read_bytes())
+    return synthetic_repo
+
+
+@pytest.mark.parametrize("runner", GGUF_RUNNERS)
+def test_gguf_closure_follows_real_imports_and_export_calls(real_export_sources, runner):
+    import ast
+    root = real_export_sources
+    plan, files = launcher.prepare(launcher.parse_args(argv(runner)))
+    assert set(files) == expected_gguf_paths(runner)
+    trees = {path: ast.parse(content) for path, content in files.items() if path.endswith(".py")}
+    # Walk real (including deferred) local imports, independent of the upload list.
+    for path, tree in trees.items():
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ImportFrom) or not node.module:
+                continue
+            candidate = Path(path).parent / (node.module.replace(".", "/") + ".py")
+            if (root / candidate).is_file():
+                assert candidate.as_posix() in files, (path, node.lineno, node.module)
+    imports = [node for node in ast.walk(trees[runner])
+               if isinstance(node, ast.ImportFrom) and node.module == "gguf_toolchain"]
+    assert imports, "Every GGUF-capable entrypoint must stage its actual prerequisite import"
+    helper_definitions = {node.name for node in trees[GGUF_HELPER].body
+                          if isinstance(node, (ast.FunctionDef, ast.ClassDef))}
+    for tree in trees.values():
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module == "gguf_toolchain":
+                assert {name.name for name in node.names} <= helper_definitions
+    exporter_tree = trees["finetune/convert_gguf.py" if runner == "finetune/convert_gguf.py" else "finetune/train.py"]
+    calls = {node.func.id for node in ast.walk(exporter_tree)
+             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)}
+    assert {"prepare_toolchain", "convert_model"} <= calls
+    if runner != "finetune/convert_gguf.py":
+        run_eval = next(node for node in trees["finetune/train.py"].body
+                        if isinstance(node, ast.FunctionDef) and node.name == "run_eval")
+        eval_path = ast.dump(ast.parse('Path(__file__).parent / "eval.py"', mode="eval").body)
+        assert any(isinstance(node, ast.Assign) and ast.dump(node.value) == eval_path
+                   for node in ast.walk(run_eval))
+        assert any(isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                   and isinstance(node.func.value, ast.Name) and node.func.value.id == "subprocess"
+                   and node.func.attr == "run" for node in ast.walk(run_eval))
+        query_path = ast.dump(ast.parse('Path(__file__).parent / "evals" / "queries.txt"', mode="eval").body)
+        assert any(isinstance(node, ast.Assign) and ast.dump(node.value) == query_path
+                   for node in trees["finetune/eval.py"].body)
+    if runner == "finetune/train_unsloth.py":
+        assert any(isinstance(node, ast.ImportFrom) and node.module == "train"
+                   and any(name.name == "export_gguf" for name in node.names)
+                   for node in ast.walk(trees[runner]))
+    assert plan["image"] == GGUF_IMAGE
+
+
+@pytest.mark.parametrize("runner", GGUF_RUNNERS)
+def test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv(real_export_sources, monkeypatch, capsys, runner):
+    import hashlib
+    monkeypatch.setattr(launcher, "load_sdk", lambda: pytest.fail("preview reached SDK"))
+    arguments = [str(real_export_sources / ".env"), "--image", "literal-script-value", "$(touch forbidden)", "*.jsonl", "", "--"]
+    seen = {}
+    original = launcher.stage_files
+
+    def inspect_stage(files, directory):
+        original(files, directory)
+        seen.update({p.relative_to(directory).as_posix(): p.read_bytes()
+                     for p in directory.rglob("*") if p.is_file()})
+
+    monkeypatch.setattr(launcher, "stage_files", inspect_stage)
+    assert launcher.main([*argv(runner), "--", *arguments]) == 0
+    manifest = json.loads(capsys.readouterr().out)
+    assert manifest["mode"] == "dry-run" and manifest["image"] == GGUF_IMAGE
+    assert manifest["command"][5:11] == ["uv", "run", "--locked", "--no-project", "--script", runner.removeprefix("finetune/")]
+    assert manifest["command"][11:] == arguments
+    assert set(seen) == expected_gguf_paths(runner)
+    assert seen[GGUF_HELPER] == (real_export_sources / GGUF_HELPER).read_bytes()
+    assert {entry["path"] for entry in manifest["files"]} == set(seen)
+    for entry in manifest["files"]:
+        assert entry["sha256"] == hashlib.sha256(seen[entry["path"]]).hexdigest()
+        assert entry["size"] == len(seen[entry["path"]])
+    assert not any(b"PRIVATE SENTINEL" in content for content in seen.values())
+
+
+@pytest.mark.parametrize("runner", GGUF_RUNNERS)
+@pytest.mark.parametrize("change", ["missing", "directory", "symlink", "hardlink", "fifo"])
+def test_changed_or_missing_gguf_helper_refused_before_sdk(synthetic_repo, monkeypatch, capsys, runner, change):
+    monkeypatch.setattr(launcher, "load_sdk", lambda: pytest.fail("unsafe helper reached SDK"))
+    helper = synthetic_repo / GGUF_HELPER
+    if helper.exists():
+        helper.unlink()
+    if change == "directory":
+        helper.mkdir()
+    elif change == "symlink":
+        helper.symlink_to(synthetic_repo / ".env")
+    elif change == "hardlink":
+        os.link(synthetic_repo / ".env", helper)
+    elif change == "fifo":
+        os.mkfifo(helper)
+    assert launcher.main(argv(runner, "--submit")) == 2
+    captured = capsys.readouterr()
+    assert not captured.out
+    assert "gguf_toolchain.py" in captured.err
+
+
+@pytest.mark.parametrize("runner,helpers", list(UNCHANGED_HELPERS.items()))
+def test_unrelated_runners_keep_lightweight_image_and_exact_closure(synthetic_repo, runner, helpers):
+    plan, files = launcher.prepare(launcher.parse_args(argv(runner)))
+    assert plan["image"] == launcher.DEFAULT_IMAGE
+    assert set(files) == {runner, runner + ".lock", *helpers}
+    assert GGUF_HELPER not in files
+
+
+@pytest.mark.parametrize("runner", [*GGUF_RUNNERS, "finetune/dataset/validate_schema.py", "finetune/eval.py"])
+@pytest.mark.parametrize("image", ["example.invalid/custom/image:literal@sha256:" + "d" * 64, "", " invalid image "])
+def test_explicit_image_is_literal_not_a_default_fallback(synthetic_repo, monkeypatch, capsys, runner, image):
+    monkeypatch.setattr(launcher, "load_sdk", lambda: pytest.fail("explicit-image preview reached SDK"))
+    args = launcher.parse_args(argv(runner, "--image", image))
+    assert args.image == image
+    assert launcher.prepare(args)[0]["image"] == image
+    assert launcher.main(argv(runner, "--image", image)) == 0
+    assert json.loads(capsys.readouterr().out)["image"] == image
+
+
+@pytest.mark.parametrize("runner", GGUF_RUNNERS)
+@pytest.mark.parametrize("image", [None, "example.invalid/explicit:literal"])
+def test_mocked_sdk_receives_and_reads_back_selected_image(synthetic_repo, monkeypatch, capsys, runner, image):
+    api = FakeApi()
+    fake_sdk(monkeypatch, api)
+    options = [] if image is None else ["--image", image]
+    assert launcher.main(argv(runner, "--submit", *options)) == 0
+    manifest = json.loads(capsys.readouterr().out)
+    assert api.job_spec["image"] == manifest["image"] == (GGUF_IMAGE if image is None else image)
+    assert set(api.uploaded) == expected_gguf_paths(runner)
+    assert api.uploaded[GGUF_HELPER] == (synthetic_repo / GGUF_HELPER).read_bytes()
+
+
+@pytest.mark.parametrize("runner", [*GGUF_RUNNERS, "finetune/dataset/validate_schema.py"])
+@pytest.mark.parametrize("override", [False, True])
+def test_real_cli_image_selection_is_stdlib_only(synthetic_repo, tmp_path, runner, override):
+    copied = synthetic_repo / "finetune/tools/submit_locked_job.py"
+    copied.parent.mkdir(exist_ok=True)
+    copied.write_bytes(LAUNCHER.read_bytes())
+    options = ["--image", "example.invalid/cli:literal"] if override else []
+    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(copied),
+                             *argv(runner, *options), "--", "--image", "script-literal"],
+                            cwd=tmp_path, env=dict(os.environ), capture_output=True, text=True, timeout=15)
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads(result.stdout)
+    assert manifest["image"] == ("example.invalid/cli:literal" if override else
+                                  GGUF_IMAGE if runner in GGUF_RUNNERS else launcher.DEFAULT_IMAGE)
+    assert manifest["command"][-2:] == ["--image", "script-literal"]
+
+
+@pytest.mark.parametrize("runner", GGUF_RUNNERS)
+def test_mocked_image_readback_change_is_not_success(synthetic_repo, monkeypatch, capsys, runner):
+    api = FakeApi()
+    fake_sdk(monkeypatch, api)
+    original = api.inspect_job
+
+    def wrong_image(**kwargs):
+        result = original(**kwargs)
+        result.docker_image = "example.invalid/unrequested:image"
+        return result
+
+    monkeypatch.setattr(api, "inspect_job", wrong_image)
+    assert launcher.main(argv(runner, "--submit", "--image", "example.invalid/requested:literal")) == 2
+    captured = capsys.readouterr()
+    assert not captured.out and "readback failed" in captured.err
+    assert [name for name, _ in api.calls].count("run_job") == 1
+
+
+@pytest.mark.parametrize("missing", ["git", "cc", "c++", "make", "uv"])
+def test_native_image_probe_missing_prerequisite_is_bounded_and_offline(tmp_path, missing):
+    probe = LAUNCHER.parent / "qualify_gguf_image.py"
+    tools = tmp_path / "synthetic-tools"
+    tools.mkdir()
+    for name in ("git", "cc", "c++", "make", "uv"):
+        if name != missing:
+            path = tools / name
+            path.write_text("#!/bin/sh\nprintf '%s\\n' 'SYNTHETIC tool version'\n")
+            path.chmod(0o700)
+    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)],
+                            env={**os.environ, "PATH": str(tools)}, cwd=tmp_path,
+                            capture_output=True, text=True, timeout=15)
+    assert result.returncode == 2 and not result.stdout
+    assert "missing native prerequisite: " + missing in result.stderr
+    assert set(tmp_path.iterdir()) == {tools}
+
+
+def test_native_image_probe_wrong_uv_version_fails_before_build(tmp_path):
+    probe = LAUNCHER.parent / "qualify_gguf_image.py"
+    tools = tmp_path / "synthetic-tools"
+    tools.mkdir()
+    for name in ("git", "cc", "c++", "make", "uv"):
+        path = tools / name
+        path.write_text("#!/bin/sh\nprintf '%s\\n' 'uv 0.0.0'\n")
+        path.chmod(0o700)
+    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)],
+                            env={**os.environ, "PATH": str(tools), "TMPDIR": str(tmp_path)}, cwd=tmp_path,
+                            capture_output=True, text=True, timeout=15)
+    assert result.returncode == 2 and not result.stdout
+    assert "requires uv 0.11.18" in result.stderr
+    assert set(tmp_path.iterdir()) == {tools}
+
+
+@pytest.mark.parametrize("banner", [
+    "uv 0.11.18",
+    "uv 0.11.18 (x86_64-unknown-linux-musl)",
+    "uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)",
+])
+def test_native_image_probe_accepts_exact_release_with_build_metadata(tmp_path, banner):
+    """Synthetic uv display, REAL host compilation; not image qualification."""
+    import shlex
+
+    probe = LAUNCHER.parent / "qualify_gguf_image.py"
+    tools = tmp_path / "synthetic-version-only"
+    tools.mkdir()
+    uv = tools / "uv"
+    uv.write_text("#!/bin/sh\nprintf '%s\\n' " + shlex.quote(banner) + "\n")
+    uv.chmod(0o700)
+    env = {"PATH": str(tools) + os.pathsep + os.environ.get("PATH", os.defpath),
+           "HOME": str(tmp_path), "TMPDIR": str(tmp_path), "PYTHONDONTWRITEBYTECODE": "1",
+           "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1",
+           "QMD_LLAMA_GPU": "false", "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
+    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)], env=env, cwd=tmp_path,
+                            capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, result.stderr
+    receipt = json.loads(result.stdout)
+    assert receipt["versions"]["uv"] == banner
+    assert receipt["native_only"] is False
+    assert receipt["outputs"] == ["qmd-c-ok", "qmd-cxx-ok"]
+    assert receipt["locked_python_converter_training_gpu_cloud_qualified"] is False
+    assert set(tmp_path.iterdir()) == {tools}
+
+
+@pytest.mark.parametrize("banner", [
+    "uv 0.11.17 (x86_64-unknown-linux-musl)",
+    "uv 0.11.180 (x86_64-unknown-linux-musl)",
+    "uv 0.11.18+1 (e32666915 2026-06-01 x86_64-unknown-linux-musl)",
+    "uv 0.11.18rc1 (x86_64-unknown-linux-musl)",
+    "uv 0.11.18.dev1 (x86_64-unknown-linux-musl)",
+    "uv 0.11.18 trailing",
+    "other 0.11.18",
+    "uv 0.11.18 ()",
+    "uv 0.11.18 (unterminated",
+    "uv 0.11.18 (x86_64-unknown-linux-musl) trailing",
+])
+def test_native_image_probe_does_not_normalize_or_prefix_match_release(tmp_path, banner):
+    import shlex
+
+    probe = LAUNCHER.parent / "qualify_gguf_image.py"
+    tools = tmp_path / "synthetic-tools"
+    tools.mkdir()
+    for name in ("git", "cc", "c++", "make", "uv"):
+        executable = tools / name
+        executable.write_text("#!/bin/sh\nprintf '%s\\n' " + shlex.quote(banner) + "\n")
+        executable.chmod(0o700)
+    env = {"PATH": str(tools), "HOME": str(tmp_path), "TMPDIR": str(tmp_path),
+           "PYTHONDONTWRITEBYTECODE": "1", "HF_HUB_OFFLINE": "1", "QMD_LLAMA_GPU": "false"}
+    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)], env=env, cwd=tmp_path,
+                            capture_output=True, text=True, timeout=15)
+    assert result.returncode == 2 and not result.stdout
+    assert "requires uv 0.11.18" in result.stderr
+    assert set(tmp_path.iterdir()) == {tools}

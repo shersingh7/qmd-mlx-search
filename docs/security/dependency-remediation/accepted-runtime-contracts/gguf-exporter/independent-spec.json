@@ -1,0 +1,235 @@
+{
+  "SPEC": "PASS",
+  "scope": "Composed seven-file cold-export code proposal, not integration/release acceptance",
+  "fresh_runs": {
+    "portable-installed": {
+      "tests": 183,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 183,
+      "by_classname": {
+        "mirror.finetune.tests.test_gguf_toolchain": 74,
+        "mirror.finetune.tests.test_finetune_correctness": 31,
+        "mirror.finetune.tests.test_gguf_structure": 78
+      },
+      "xml_sha256": "cb3a10a66cc96d85ef07fdcd2d6b82828a0ee2a3225e7fb550f5fa055b9c0391",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/portable-installed/pytest.xml",
+      "reader": {
+        "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/gguf_reader.py",
+        "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad"
+      },
+      "deselected": 6
+    },
+    "portable-pinned": {
+      "tests": 183,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 183,
+      "by_classname": {
+        "mirror.finetune.tests.test_gguf_toolchain": 74,
+        "mirror.finetune.tests.test_finetune_correctness": 31,
+        "mirror.finetune.tests.test_gguf_structure": 78
+      },
+      "xml_sha256": "7461c4131f3b7a485df9ccd18b5655e3fcf3da960337bb4c1e8df3d6c4de7fbd",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/portable-pinned/pytest.xml",
+      "reader": {
+        "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_reader.py",
+        "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e"
+      },
+      "deselected": 6
+    },
+    "counterexamples": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10,
+      "by_classname": {
+        "test_acceptance_counterexamples": 10
+      },
+      "xml_sha256": "ddf93243a2fc460549a3def898016d45d3bfd4b403922580a41b673589851578",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/counterexamples/pytest.xml",
+      "reader": {
+        "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_reader.py",
+        "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e"
+      },
+      "deselected": 0
+    },
+    "independent-v2-installed": {
+      "tests": 119,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 119,
+      "by_classname": {
+        "test_independent_contracts": 119
+      },
+      "xml_sha256": "026640deb5bc6316146bb79a1e65c23f8ef6dd0a97ec2ac050efcc534f83889e",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/pytest.xml",
+      "reader": {
+        "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/gguf_reader.py",
+        "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad"
+      },
+      "deselected": 0
+    },
+    "independent-v2-pinned": {
+      "tests": 119,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 119,
+      "by_classname": {
+        "test_independent_contracts": 119
+      },
+      "xml_sha256": "7fa6c4b599f299d2ae3977f0b4be9567798a84f7253170179cce57d651688ce4",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/pytest.xml",
+      "reader": {
+        "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_reader.py",
+        "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e"
+      },
+      "deselected": 0
+    }
+  },
+  "fresh_executed_cases": 614,
+  "independent_resources": {
+    "independent-v2-installed": {
+      "cases": 9,
+      "observed_mappings": 153,
+      "retained_exceptions": 153,
+      "all_closed": true,
+      "fd_pairs": [
+        [
+          12,
+          12
+        ]
+      ]
+    },
+    "independent-v2-pinned": {
+      "cases": 9,
+      "observed_mappings": 153,
+      "retained_exceptions": 153,
+      "all_closed": true,
+      "fd_pairs": [
+        [
+          12,
+          12
+        ]
+      ]
+    }
+  },
+  "previous_evidence_verified": {
+    "red/counterexamples.xml": {
+      "tests": 10,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2,
+      "by_classname": {
+        "test_acceptance_counterexamples": 10
+      },
+      "xml_sha256": "7ccd577fd1a3bf1dfc9125133f7a550b83427f185ff30ef13d9be37a89b8c1be",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/red/counterexamples.xml"
+    },
+    "green/counterexamples.xml": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10,
+      "by_classname": {
+        "test_acceptance_counterexamples": 10
+      },
+      "xml_sha256": "9f91d24b379eb76b29a0b18467e0e5c822b396aba9076838b8c26423fe2fe611",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/green/counterexamples.xml"
+    },
+    "red/portable.xml": {
+      "tests": 183,
+      "failures": 55,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 128,
+      "by_classname": {
+        "tests.test_gguf_toolchain": 74,
+        "tests.test_finetune_correctness": 31,
+        "tests.test_gguf_structure": 78
+      },
+      "xml_sha256": "62a72c694fea997bca659acacdbd1df1707758eb8a7e7aa31f2eb405dff14b6f",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/red/portable.xml"
+    },
+    "green-exact/portable.xml": {
+      "tests": 183,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 183,
+      "by_classname": {
+        "tests.test_gguf_toolchain": 74,
+        "tests.test_finetune_correctness": 31,
+        "tests.test_gguf_structure": 78
+      },
+      "xml_sha256": "8d9e37807d3ce7ece68e78234f9a3f759ccb5d3bd87442c12249736f5ca40497",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/green-exact/portable.xml"
+    },
+    "green-pinned-exact/portable.xml": {
+      "tests": 183,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 183,
+      "by_classname": {
+        "tests.test_gguf_toolchain": 74,
+        "tests.test_finetune_correctness": 31,
+        "tests.test_gguf_structure": 78
+      },
+      "xml_sha256": "9f233c5350f3ff2a9b1849cca50a861c80225fd1168f49a585b21773bf1c8ab5",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/green-pinned-exact/portable.xml"
+    },
+    "legacy-heldouts/heldouts.xml": {
+      "tests": 32,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 30,
+      "by_classname": {
+        "qmd-gguf-toolchain-qtll2q_e.review.test_heldout_contracts": 32
+      },
+      "xml_sha256": "6c5418d138a2460edd986c1caa0d8b7d7dfc13feaade9383d8010464def18e69",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/legacy-heldouts/heldouts.xml"
+    },
+    "legacy-heldouts-v2/heldouts.xml": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 32,
+      "by_classname": {
+        "qmd-gguf-toolchain-qtll2q_e.review.test_heldout_contracts": 32
+      },
+      "xml_sha256": "575878c9c51adcbd636a174067cede731368a07ac2887beb3ac7936247248fa1",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/legacy-heldouts-v2/heldouts.xml"
+    }
+  },
+  "previous_canonical": {
+    "tests": 183,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 183,
+    "by_classname": {
+      "tests.test_gguf_toolchain": 74,
+      "tests.test_finetune_correctness": 31,
+      "tests.test_gguf_structure": 78
+    },
+    "xml_sha256": "8b641d5580d30a68953b4bb782de5f08302b585403ee22ce696ad2f991480da4",
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/canonical-final-pytest.xml"
+  },
+  "limits": [
+    "No native converter/build/inference/training/network/Hub write run in this review.",
+    "Installed GGUF package is 0.19.0; pinned reader identity comes from exact Git-bound source, not package metadata.",
+    "All retained real artifacts are old-proposal conversion positives, not fresh changed-helper native execution.",
+    "Two portable runs each deselect 6 unrelated numerical tests. No fresh 47-test legacy assertion claim."
+  ],
+  "QUALITY": "PENDING; may proceed after this local SPEC gate"
+}

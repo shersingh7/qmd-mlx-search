@@ -1,0 +1,198 @@
+"""Independent narrow parser/CLI contracts; no exporter/helper/ML execution."""
+from __future__ import annotations
+import hashlib
+import json
+from pathlib import Path
+import runpy
+import shlex
+import shutil
+import subprocess
+import sys
+
+import pytest
+
+S = runpy.run_path(str(Path(__file__).with_name('review_support.py')))
+PROBE = S['REPO'] / 'finetune/tools/qualify_gguf_image.py'
+EXPECTED_SHA = '72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc'
+assert hashlib.sha256(PROBE.read_bytes()).hexdigest() == EXPECTED_SHA
+P = runpy.run_path(str(PROBE))  # stdlib-only definitions; does not invoke qualify.
+
+ACCEPT = [
+    ('bare', 'uv 0.11.18'),
+    ('target', 'uv 0.11.18 (x86_64-unknown-linux-musl)'),
+    ('commit-target', 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)'),
+    ('darwin-target', 'uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)'),
+]
+UNPINNED = [
+    '0.11.17', '0.11.180', '0.11.18.1', '0.11.18+0', '0.11.18+23',
+    '0.11.18+commit', '0.11.18rc1', '0.11.18.dev1', '0.11.18a1', 'v0.11.18',
+]
+MALFORMED = [
+    '', 'UV 0.11.18', 'uv0.11.18', 'uv  0.11.18', 'uv\t0.11.18',
+    'uv 0.11.18()', 'uv 0.11.18 ((target))',
+    'uv 0.11.18 (target) (extra)', 'uv 0.11.18 (target', 'uv 0.11.18 trailing',
+]
+
+@pytest.mark.parametrize('label,banner', ACCEPT)
+def test_parser_accepts_upstream_release_without_authenticating_metadata(label, banner):
+    assert P['_uv_release'](banner) == '0.11.18'
+
+@pytest.mark.parametrize('release', UNPINNED)
+def test_parser_retains_entire_unpinned_release_token(release):
+    banner = f'uv {release} (e32666915 2026-06-01 x86_64-unknown-linux-musl)'
+    assert P['_uv_release'](banner) == release
+    assert P['_uv_release'](banner) != '0.11.18'
+
+@pytest.mark.parametrize('banner', MALFORMED)
+def test_parser_fullmatches_the_declared_grammar(banner):
+    assert P['_uv_release'](banner) is None
+
+
+def tools(tmp_path, banner=None, *, real=False):
+    folder = tmp_path / 'tools'
+    folder.mkdir()
+    log = tmp_path / 'tools.log'
+    base_path = S['environment']('tool-discovery')['PATH']
+    for name in ('git', 'cc', 'c++', 'make'):
+        script = '#!/bin/sh\n'
+        script += "printf '%s\\n' " + shlex.quote(name) + '" $*" >> ' + shlex.quote(str(log)) + '\n'
+        if real:
+            actual = shutil.which(name, path=base_path)
+            assert actual, name
+            script += 'exec ' + shlex.quote(actual) + ' "$@"\n'
+        else:
+            script += '[ "$#" -eq 1 ] && [ "$1" = --version ] || exit 70\n'
+            script += "printf '%s\\n' 'synthetic public version control'\n"
+        tool = folder / name
+        tool.write_text(script)
+        tool.chmod(0o700)
+    if banner is not None:
+        uv = folder / 'uv'
+        uv.write_text('#!/bin/sh\n' + "printf '%s\\n' 'uv --version' >> " + shlex.quote(str(log)) + '\n' +
+                      "printf '%s\\n' " + shlex.quote(banner) + '\n')
+        uv.chmod(0o700)
+    return folder, log
+
+
+def invoke(label, tmp_path, folder, flags=(), *, simulated_minor=None):
+    env = S['environment']('heldout-' + label)
+    # Deliberately exclude user/Homebrew tools after explicitly resolving the
+    # four real host prerequisites. No ambient uv is available in this PATH.
+    env['PATH'] = str(folder) + ':/usr/bin:/bin'
+    command = [sys.executable, '-I', '-B', '-S', str(PROBE), *flags]
+    if simulated_minor is not None:
+        body = ('import runpy,sys; m=runpy.run_path(' + repr(str(PROBE)) + '); '
+                + f'sys.version_info=(3,{simulated_minor},0,"final",0); '
+                + 'raise SystemExit(m["main"](' + repr(list(flags)) + '))')
+        command = [sys.executable, '-I', '-B', '-S', '-c', body]
+    result = subprocess.run(command, env=env, cwd=tmp_path,
+                            capture_output=True, text=True, timeout=120)
+    record = {'command':command, 'environment':env, 'cwd':str(tmp_path),
+              'returncode':result.returncode, 'stdout':result.stdout, 'stderr':result.stderr,
+              'probe_source_sha256':EXPECTED_SHA, 'simulated_python_minor':simulated_minor,
+              'image_executed':False, 'scope':'public host prerequisite probe only'}
+    log = tmp_path / 'tools.log'
+    record['tool_calls'] = log.read_text().splitlines() if log.exists() else []
+    (S['ROOT'] / 'evidence' / ('heldout-' + label + '.json')).write_text(json.dumps(record,indent=2,sort_keys=True))
+    return result, record
+
+
+def assert_receipt(result, *, banner=None, native_only=False):
+    assert result.returncode == 0, result.stderr
+    assert not result.stderr
+    receipt = json.loads(result.stdout)
+    assert receipt['status'] == 'pass'
+    assert receipt['scope'] == 'native CPU C/C++ prerequisites only'
+    assert receipt['native_only'] is native_only
+    assert receipt['locked_python_converter_training_gpu_cloud_qualified'] is False
+    assert receipt['probe_sha256'] == EXPECTED_SHA
+    assert receipt['outputs'] == ['qmd-c-ok', 'qmd-cxx-ok']
+    assert set(receipt['versions']) == ({'git','cc','c++','make'} if native_only else {'git','cc','c++','make','uv'})
+    if banner is not None:
+        assert receipt['versions']['uv'] == banner
+    return receipt
+
+
+@pytest.mark.parametrize('label,banner', ACCEPT)
+def test_full_cli_compiles_with_upstream_banner_and_keeps_receipt_scope(tmp_path,label,banner):
+    folder, log = tools(tmp_path,banner,real=True)
+    result, record = invoke('positive-' + label,tmp_path,folder)
+    assert_receipt(result,banner=banner)
+    assert any(line.startswith('make -j2 ') for line in record['tool_calls'])
+    assert [line for line in record['tool_calls'] if line.startswith('uv ')] == ['uv --version']
+    assert set(tmp_path.iterdir()) == {folder,log}
+
+
+BAD_CLI = [('release-' + str(i), f'uv {v} (x86_64-unknown-linux-musl)') for i,v in enumerate(UNPINNED)]
+BAD_CLI += [('grammar-' + str(i), v) for i,v in enumerate(MALFORMED)]
+
+@pytest.mark.parametrize('label,banner', BAD_CLI)
+def test_full_cli_refuses_unpinned_or_malformed_before_build(tmp_path,label,banner):
+    folder, log = tools(tmp_path,banner)
+    result, record = invoke(label,tmp_path,folder)
+    assert result.returncode != 0 and not result.stdout
+    assert not any(line.startswith('make -j') for line in record['tool_calls'])
+    if banner:
+        assert result.returncode == 2
+        assert 'image probe requires uv 0.11.18' in result.stderr
+    # Empty output also must refuse; do not enshrine the old diagnostic bug
+    # (an uncaught first-line IndexError) as an acceptance requirement.
+    assert set(tmp_path.iterdir()) == {folder,log}
+
+
+@pytest.mark.parametrize('uv_present', [False,True])
+def test_native_only_omits_uv_even_if_its_release_is_wrong(tmp_path,uv_present):
+    folder, log = tools(tmp_path,'uv 0.11.17' if uv_present else None,real=True)
+    result, record = invoke('native-' + str(uv_present),tmp_path,folder, ['--native-only'])
+    assert_receipt(result,native_only=True)
+    assert not any(line.startswith('uv ') for line in record['tool_calls'])
+    assert set(tmp_path.iterdir()) == {folder,log}
+
+
+def test_full_cli_missing_uv_refuses_before_any_tool_execution(tmp_path):
+    folder, log = tools(tmp_path,real=True)
+    result, record = invoke('full-missing-uv',tmp_path,folder)
+    assert result.returncode == 2 and not result.stdout
+    assert 'missing native prerequisite: uv' in result.stderr
+    assert record['tool_calls'] == []
+    assert not log.exists()
+
+
+@pytest.mark.parametrize('minor', [11,13])
+def test_full_python_gate_unchanged_in_simulated_minor_control(tmp_path,minor):
+    folder, log = tools(tmp_path,'uv 0.11.18')
+    result, record = invoke('wrong-python-' + str(minor),tmp_path,folder, simulated_minor=minor)
+    assert result.returncode == 2 and not result.stdout
+    assert 'image probe requires Python 3.12' in result.stderr
+    assert not any(line.startswith('make -j') for line in record['tool_calls'])
+
+
+def test_native_only_skips_simulated_python_gate_without_claiming_converter(tmp_path):
+    folder, log = tools(tmp_path,real=True)
+    result, record = invoke('native-simulated-python',tmp_path,folder,
+                            ['--native-only'],simulated_minor=11)
+    assert_receipt(result,native_only=True)
+
+
+@pytest.mark.parametrize('flags', [
+    ['--native-only=false'], ['--uv-version=0.11.18'], ['unexpected'], ['--','--native-only'],
+])
+def test_cli_does_not_accept_undocumented_gate_bypass_arguments(tmp_path,flags):
+    folder, log = tools(tmp_path,'uv 0.11.17')
+    label = 'arguments-' + hashlib.sha256(repr(flags).encode()).hexdigest()[:10]
+    result, record = invoke(label,tmp_path,folder,flags)
+    assert result.returncode == 2 and not result.stdout
+    if flags == ['--native-only=false']:
+        assert "ignored explicit argument 'false'" in result.stderr
+    else:
+        assert 'unrecognized arguments:' in result.stderr
+    assert record['tool_calls'] == []
+
+
+def test_help_is_not_a_qualification_receipt_and_calls_no_tools(tmp_path):
+    folder, log = tools(tmp_path,'uv 0.11.17')
+    result, record = invoke('help',tmp_path,folder,['--help'])
+    assert result.returncode == 0 and not result.stderr
+    assert '--native-only' in result.stdout
+    assert not result.stdout.lstrip().startswith('{')
+    assert record['tool_calls'] == []

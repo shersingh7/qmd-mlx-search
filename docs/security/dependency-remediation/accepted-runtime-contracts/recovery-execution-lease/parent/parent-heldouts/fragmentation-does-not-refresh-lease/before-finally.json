@@ -1,0 +1,118 @@
+{
+  "name": "fragmentation-does-not-refresh-lease",
+  "guardFired": false,
+  "elapsedMs": 575.2603340000002,
+  "exitCode": 0,
+  "supervisorPid": 38092,
+  "supervisorAbsent": true,
+  "workers": [
+    38093
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38093
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38092,
+      "sessionId": 38092
+    },
+    {
+      "type": "ready",
+      "pid": 38093,
+      "sessionId": 38092,
+      "processGroupId": 38093
+    },
+    {
+      "type": "exit",
+      "exitCode": 125,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        38093
+      ],
+      "timedOut": true,
+      "errors": [
+        "Recovery worker timed out after 200ms (PID 38093)",
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 38093,
+      "owner": 38092,
+      "at": 0.52250175,
+      "allowed": false,
+      "remainingMs": -237.02108299999998,
+      "deadline": 0.28543087500000003
+    }
+  ],
+  "groupSignals": [
+    {
+      "kind": "group-signal",
+      "pid": 38093,
+      "owner": 38092,
+      "at": 0.525391166,
+      "group": 38092,
+      "signal": 15,
+      "pinned": true,
+      "currentSession": 38092,
+      "termBlocked": true
+    },
+    {
+      "kind": "group-signal",
+      "pid": 38093,
+      "owner": 38092,
+      "at": 0.5261575,
+      "group": 38092,
+      "signal": 19,
+      "pinned": true,
+      "currentSession": 38092,
+      "termBlocked": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 116.85875000000001
+    }
+  ],
+  "sent": [
+    {
+      "hex": "53",
+      "elapsedMs": 116.87825000000007
+    },
+    {
+      "hex": "32",
+      "elapsedMs": 170.93783400000007
+    },
+    {
+      "hex": "3030",
+      "elapsedMs": 224.98470900000012
+    },
+    {
+      "hex": "0a",
+      "elapsedMs": 279.02454200000017
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 285.2822500000003
+    }
+  ],
+  "stderr": "",
+  "eventCount": 19
+}

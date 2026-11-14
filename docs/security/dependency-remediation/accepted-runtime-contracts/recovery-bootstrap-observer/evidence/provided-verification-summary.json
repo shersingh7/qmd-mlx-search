@@ -1,0 +1,459 @@
+{
+  "status": "LOCAL_TEST_ONLY_PROPOSAL_VERIFIED; parent review/integration/real CI pending",
+  "patchSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+  "changes": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "originalSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "proposedSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f"
+    },
+    {
+      "path": "test/audit-recovery-tree.test.ts",
+      "originalSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "proposedSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "originalSha256": null,
+      "proposedSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+      "originalSha256": null,
+      "proposedSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e"
+    }
+  ],
+  "finalFocused": [
+    {
+      "label": "fast-on-hashbound",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 7,
+      "elapsedMs": 246,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 14578
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          14579
+        ],
+        "processGroupId": 14579,
+        "sessionId": 14578
+      }
+    },
+    {
+      "label": "fast-off-hashbound",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 7,
+      "elapsedMs": 221,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 14622
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          14623
+        ],
+        "processGroupId": 14623,
+        "sessionId": 14622
+      }
+    }
+  ],
+  "observerEvents": [
+    {
+      "event": "spawn-returned",
+      "tMs": 0.111
+    },
+    {
+      "event": "owner.spawn",
+      "tMs": 0.262
+    },
+    {
+      "event": "control.end",
+      "tMs": 242.099
+    },
+    {
+      "event": "stderr.end",
+      "tMs": 242.533
+    },
+    {
+      "event": "stdout.end",
+      "tMs": 242.616
+    },
+    {
+      "event": "stdout.close",
+      "tMs": 243.115
+    },
+    {
+      "event": "stderr.close",
+      "tMs": 243.139
+    },
+    {
+      "event": "control.close",
+      "tMs": 243.151
+    },
+    {
+      "event": "owner.exit",
+      "tMs": 243.266
+    },
+    {
+      "event": "owner.close",
+      "tMs": 243.534
+    }
+  ],
+  "nodeCloseCounter": {
+    "needed": 4,
+    "got": 4,
+    "scope": "Node-private-read-only-not-kernel-state"
+  },
+  "selftests": {
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "controls": [
+      {
+        "evidence": "diagnostic-control-natural-close",
+        "ends": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        },
+        "closeCounter": {
+          "needed": 4,
+          "got": 4,
+          "scope": "Node-private-read-only-not-kernel-state"
+        }
+      },
+      {
+        "evidence": "diagnostic-control-known-fixture-FD3-writer",
+        "ends": {
+          "stdout": true,
+          "stderr": true,
+          "control": false
+        },
+        "closeCounter": {
+          "needed": 4,
+          "got": 3,
+          "scope": "Node-private-read-only-not-kernel-state"
+        },
+        "causality": "not-established-by-runtime-events"
+      },
+      {
+        "evidence": "diagnostic-control-delayed-reader",
+        "closeDelayMs": 40.370000000000005,
+        "ends": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        },
+        "causality": "not-established-by-runtime-events"
+      },
+      {
+        "evidence": "diagnostic-control-forced-destroy",
+        "ends": {
+          "stdout": false,
+          "stderr": false,
+          "control": false
+        },
+        "preForcedClosure": {
+          "source": "existing-result.transportFailure-before-destroy",
+          "tMs": null,
+          "transportFailure": {
+            "prepared": false,
+            "supervisorExited": false,
+            "supervisorCloseObserved": false,
+            "stdout": {
+              "bytes": 0,
+              "ended": false,
+              "closed": false,
+              "destroyed": false
+            },
+            "stderr": {
+              "bytes": 0,
+              "ended": false,
+              "closed": false,
+              "destroyed": false
+            },
+            "proof": {
+              "bytes": 0,
+              "ended": false,
+              "closed": false,
+              "destroyed": false
+            }
+          }
+        },
+        "cleanup": {
+          "pipesClosed": false,
+          "forcedPipeClose": true,
+          "containmentVerified": false
+        }
+      }
+    ]
+  },
+  "nativeImportOnly": {
+    "passed": 1,
+    "filtered": 7,
+    "runtime": "Bun1.3.8",
+    "nativeOwnerDiagnostics": "not-implemented",
+    "receipt": {
+      "schemaVersion": 1,
+      "nativeBunOwnerDiagnostics": "not-implemented",
+      "status": "native-bun-owner-diagnostics-not-implemented",
+      "invocation": "existing-fast-timeout-case-in-place; other canonical files may run concurrently; no global-first-supervisor claim",
+      "restoration": {
+        "channelUnsubscribed": true,
+        "listenersRemoved": true
+      }
+    }
+  },
+  "actualPostCanonicalFallback": {
+    "elapsedMs": 966.2328340000001,
+    "closeCounter": {
+      "needed": 4,
+      "got": 2,
+      "scope": "Node-private-read-only-not-kernel-state"
+    },
+    "receipt": {
+      "launch": {
+        "state": "started",
+        "supervisorPid": 15609,
+        "admissionGranted": true,
+        "supervisorReaped": true
+      },
+      "timedOut": false,
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "pipesClosed": false,
+        "forcedPipeClose": true,
+        "containmentVerified": false
+      },
+      "preForcedClosure": {
+        "source": "existing-result.transportFailure-before-destroy",
+        "tMs": null,
+        "transportFailure": {
+          "prepared": true,
+          "supervisorExited": true,
+          "supervisorCloseObserved": false,
+          "stdout": {
+            "bytes": 0,
+            "ended": false,
+            "closed": false,
+            "destroyed": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "ended": false,
+            "closed": false,
+            "destroyed": false
+          },
+          "proof": {
+            "bytes": 484,
+            "ended": true,
+            "closed": true,
+            "destroyed": true
+          }
+        }
+      },
+      "protocolEventTimes": "not-observed-no-data-or-write-hooks"
+    },
+    "notCIOrColdProof": true
+  },
+  "ownSourcePreservation": {
+    "frozenFiles": 244,
+    "canonicalTestRecoveredByteForByte": true,
+    "originalItCalls": 8,
+    "originalLaunchCalls": 7,
+    "unchangedStrategyAndTriggers": true,
+    "sourceFilesOnlyChanged": [
+      ".github/workflows/ci.yml",
+      "test/audit-recovery-tree.test.ts",
+      "test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"
+    ]
+  },
+  "typeValidation": {
+    "boundedSameSourceBefore": 65,
+    "boundedSameSourceAfter": 65,
+    "newDiagnostics": 0,
+    "helperStrictCheckExit": 0,
+    "exploratoryRoot": {
+      "before": 67,
+      "after": 67,
+      "disqualifiedForFrozenScope": true,
+      "reason": "whole-snapshot allowJs followed absolute live-source imports in archived documentation .mjs; parse-only, not executed; no live writes. Final bounded validation excludes those JS docs and guards every source-file read."
+    },
+    "canonicalRoot61Gate": "separate parent-owned gate; not repaired or qualified here"
+  },
+  "shellSyntax": [
+    {
+      "step": "Install SQLite (Ubuntu)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "dc5c828e07f89d1ab0fce87ef92a038bfd0a1c3699767eb7fd1abaef545ab0c7",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Install SQLite (macOS)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "9ed45ebf97c7ad95b0b8699ca843d380f636dbedd9977977542468b63f9d2430",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Frozen dependencies (no implicit lifecycle scripts)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "2bfc1364b429016df7ef482ad40d37e06d4c729581e3e6275c2377801a3b7eaf",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Build Node SQLite addon for the Vitest runner",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "db6c8c61660477175b25f2c98cb27afdb948807dba6f468b99650da521e37030",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Static macOS bootstrap metadata (no added interpreter launch)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "f31c4d4e16adb01a8757d632a48668557fece30c4b3062c31ffc338a867f39ab",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Full source build",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "6b2042ecf1413e3d06577176ce50f0b96391e2de20d38cf99bac2f111ba95ae3",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Real launcher argv/runtime tests",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "d0c34dc7189da27b68063d95e6d1fd2e248a4c95faf0dd01c22b3d44226c7d1b",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Node tests",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "2f4a95284f2678d8f7f5db458c41a25c0dfdce792c61423e96eb9fd5ab44915a",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Vitest suite through Bun's package-script launcher",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "08e17c239da1401735059775a2d9b557065ac88ff1e414a0930a21f98a48be5a",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "Real isolated tarball install and CLI/SQLite smoke",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "c7fa786c195d27665745acd064ff062fa729e31472e2c9229416fa1ffe302968",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "step": "After-canonical Node diagnostic controls",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "inputSha256": "9320f16811ad5af0057464fda244470d9d693568538bfec7e3f1ab9f44e699be",
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "actionlint": {
+    "publishedVersion": "v1.7.12",
+    "binarySha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388",
+    "exitCode": 0,
+    "shellcheck": "not installed; disabled explicitly; bash -n checked workflow run scripts"
+  },
+  "actualHost": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "kernel": "27.2.0",
+    "osVersion": "Darwin Kernel Version 27.2.0: Thu Oct 15 00:00:57 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T6020",
+    "swVers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131",
+    "cpuModel": "Apple M2 Pro"
+  },
+  "actualNode": {
+    "metadataNode": "22.22.3",
+    "executable": "/Users/shersingh/.hermes/node/bin/node",
+    "uv": "1.51.0",
+    "packageLauncher": "local-node-after-first-focused-case",
+    "expectedMainSuiteHost": "Node (package.json test explicitly invokes node); actual observed host is in fast-timeout artifact"
+  },
+  "ciExecuted": false,
+  "originalCICause": "unproven",
+  "limits": {
+    "events": 32,
+    "canonicalExecutionMs": 200,
+    "productionTeardownMs": 800,
+    "canonicalGuardMs": 1800,
+    "canonicalElapsedExclusiveBoundMs": 1500
+  },
+  "remaining": [
+    "Parent independent review of proposal and lease interaction",
+    "Parent full canonical suite/build/type integration",
+    "Real macOS CI artifacts at exact candidate source head and actual checkout; inspect actual first-case scheduling",
+    "Native Bun native-owner tracing not implemented; existing native ownership suite still required",
+    "No kernel holder or first selected-interpreter identity proof; optional separately labeled probe required if runtime trace remains ambiguous"
+  ]
+}

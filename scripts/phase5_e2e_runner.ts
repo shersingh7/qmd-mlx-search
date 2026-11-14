@@ -5,8 +5,8 @@
  * against curated public fixtures in disposable shadow databases.
  */
 
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSync, linkSync, existsSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { accessSync, constants as fsConstants, statSync, mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSync, linkSync, existsSync } from "node:fs";
+import { constants as osConstants, tmpdir } from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
@@ -37,11 +37,14 @@ import { disposeDefaultLlamaCpp } from "../src/llm.js";
 export interface RecoveryProcessResult {
   pid?: number;
   launch: {
-    /** No-start proof requires withheld admission AND an observed supervisor reap. */
-    state: "not-started" | "started" | "unconfirmed";
+    /** No-start requires withheld S or an explicit no-creation acknowledgement,
+     * plus observed reap/drains. Preflight no-attempt never claims a reap. */
+    state: "not-attempted" | "not-started" | "started" | "unconfirmed";
     supervisorPid?: number;
     admissionGranted: boolean;
     supervisorReaped: boolean;
+    /** Required for a no-start receipt after S; never inferred from missing PID. */
+    noStartProof?: "supervisor-acknowledgement";
   };
   exitCode: number | null;
   signal: NodeJS.Signals | null;
@@ -50,6 +53,15 @@ export interface RecoveryProcessResult {
   stderr: string;
   report?: RecoveryWorkerResult;
   error?: string;
+  /** Snapshot BEFORE any forced stream close; evidence, never cleanup proof. */
+  transportFailure?: {
+    prepared: boolean;
+    supervisorExited: boolean;
+    supervisorCloseObserved: boolean;
+    stdout: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+    stderr: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+    proof: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+  };
   cleanup: {
     processGroupId?: number;
     /** False for a proved not-started launch: no worker ever existed to reap. */
@@ -120,6 +132,18 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   // Never consume a stale report from a previous invocation.
   if (existsSync(options.outputJson)) throw new Error(`Worker report already exists: ${options.outputJson}`);
   if (process.platform === "win32") throw new Error("Recovery session containment requires POSIX");
+  // Validate this cheap prerequisite before cold interpreter bootstrap can use
+  // the execution deadline. Python rechecks at use; this is not a TOCTOU claim.
+  try {
+    if (!statSync(executable).isFile()) throw new Error("worker executable is not an executable regular file");
+    accessSync(executable, fsConstants.X_OK);
+  } catch (error) {
+    return { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
+      error: `Recovery worker spawn failed (executable preflight): ${String(error)}`,
+      launch: { state: "not-attempted", admissionGranted: false, supervisorReaped: false },
+      cleanup: { childReaped: false, groupTerminated: true, sessionTerminated: true, pipesClosed: true,
+        forcedPipeClose: false, sigkillUsed: false, containmentVerified: false, processGroups: [] } };
+  }
   return await new Promise(resolve => {
     const receipt: RecoveryProcessResult = { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
       launch: { state: "unconfirmed", admissionGranted: false, supervisorReaped: false },
@@ -148,7 +172,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         stdin: { write(data: Uint8Array): number; flush(): number | Promise<number>; end(): number | Promise<number> };
         stdout: import("node:stream/web").ReadableStream<Uint8Array>;
         stderr: import("node:stream/web").ReadableStream<Uint8Array>;
-        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void; kill(signal: NodeJS.Signals): void;
+        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void; kill(signal: number): void;
       };
       const bun = (globalThis as unknown as { Bun: {
         spawn(command: string[], options: typeof supervisorOptions): NativeProcess;
@@ -174,7 +198,9 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       const control = Readable.fromWeb(bun.file(native.stdio[3]!).stream());
       const child = Object.assign(new EventEmitter(), {
         pid: native.pid, stdin, stdout, stderr, unref: () => native.unref(),
-        kill: (signal: NodeJS.Signals) => { native.kill(signal); return true; },
+        // Bun 1.3.8 silently ignores string SIGCONT on Darwin. Use the actual
+        // platform signal number with its native owned-process API, not kill(pid).
+        kill: (signal: NodeJS.Signals) => { native.kill(osConstants.signals[signal]); return true; },
       });
       let exited = false;
       let emittedClose = false;
@@ -210,7 +236,9 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     let prepared = false;
     let notStartedReceived = false;
     let protocolFailed = false;
+    const transportBytes = { stdout: 0, stderr: 0, proof: 0 };
     let supervisorKillRequested = false;
+    let supervisorInterruptRequested = false;
     let workerExited = false;
     let stopStarted: number | undefined;
     let cleanupPoll: ReturnType<typeof setInterval> | undefined;
@@ -235,7 +263,23 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         child.stdin.write(signal === "SIGKILL" ? "K" : "T");
       }
     };
-    const onParentExit = () => { killUnadmittedSupervisor(); requestStop("SIGKILL"); child.stdin.end(); };
+    const interruptOwnedSupervisor = () => {
+      if (!receipt.launch.admissionGranted || helperExited) return;
+      // TERM interrupts startup but never discards registered Python anchors.
+      // Queue TERM before CONT so a stopped creation transition unwinds before
+      // user work can be admitted. Use only this runtime's owned exact handle.
+      try {
+        if (!supervisorInterruptRequested && !workerExited && !cleanupReceived && !barrier) {
+          supervisorInterruptRequested = true;
+          child.kill("SIGTERM");
+        }
+        // Even an observed barrier/exit/cleanup may have stopped its owner
+        // before the next protocol step. Resume without inventing a TERM error.
+        child.kill("SIGCONT");
+      }
+      catch (error) { addError(`Recovery supervisor interruption failed: ${String(error)}`); }
+    };
+    const onParentExit = () => { killUnadmittedSupervisor(); requestStop("SIGKILL"); interruptOwnedSupervisor(); child.stdin.end(); };
     const onParentTerm = () => { addError("Recovery worker interrupted by parent SIGTERM"); stop("SIGKILL"); };
     const onParentInt = () => { addError("Recovery worker interrupted by parent SIGINT"); stop("SIGKILL"); };
     const finish = () => {
@@ -247,16 +291,19 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       process.removeListener("SIGTERM", onParentTerm);
       process.removeListener("SIGINT", onParentInt);
       child.stdin.end();
-      const noStartProved = !receipt.launch.admissionGranted && !protocolFailed && receipt.pid === undefined
+      const noStartProved = (!receipt.launch.admissionGranted || notStartedReceived) && !protocolFailed && receipt.pid === undefined
         && receipt.launch.supervisorPid !== undefined && receipt.launch.supervisorReaped && closed
         && !receipt.cleanup.forcedPipeClose;
       if (noStartProved) {
         receipt.launch.state = "not-started";
+        if (receipt.launch.admissionGranted) receipt.launch.noStartProof = "supervisor-acknowledgement";
         // No worker existed; childReaped intentionally remains false. Only the
         // empty session is proved, not no-fork containment or successful work.
         receipt.cleanup.groupTerminated = true;
         receipt.cleanup.sessionTerminated = true;
-        addError("Recovery worker was not started: launch admission was withheld");
+        addError(receipt.launch.admissionGranted
+          ? "Recovery worker was not started: supervisor acknowledged cancellation before creation"
+          : "Recovery worker was not started: launch admission was withheld");
       } else if (!receipt.cleanup.childReaped || !receipt.cleanup.groupTerminated || !receipt.cleanup.sessionTerminated
         || !cleanupReceived || !receipt.launch.supervisorReaped) addError("Recovery worker cleanup lacks complete owned-session proof");
       if (!receipt.cleanup.containmentVerified && !options.command && receipt.pid !== undefined) {
@@ -289,15 +336,21 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     const checkCleanup = () => {
       if (settled || stopStarted === undefined) return;
       receipt.cleanup.pipesClosed = closed;
-      if (helperExited && closed && (cleanupReceived || !receipt.launch.admissionGranted)) { finish(); return; }
+      if (helperExited && closed && (cleanupReceived || !receipt.launch.admissionGranted || notStartedReceived)) { finish(); return; }
       if (performance.now() - stopStarted < teardownMs) return;
       if (!helperExited || !cleanupReceived) addError("Recovery supervisor did not provide bounded cleanup proof");
       if (!closed) {
+        const snapshot = (stream: Readable, bytes: number) => ({ bytes, ended: stream.readableEnded,
+          closed: stream.closed, destroyed: stream.destroyed });
+        receipt.transportFailure = { prepared, supervisorExited: helperExited, supervisorCloseObserved: closed,
+          stdout: snapshot(child.stdout, transportBytes.stdout), stderr: snapshot(child.stderr, transportBytes.stderr),
+          proof: snapshot(control, transportBytes.proof) };
         addError("Recovery worker pipes did not close within teardown budget");
         receipt.cleanup.forcedPipeClose = true;
         child.stdout.destroy();
         child.stderr.destroy();
-        receipt.cleanup.pipesClosed = child.stdout.destroyed && child.stderr.destroyed;
+        // destroyed is not drained. Never turn a local forced close into proof
+        // that all writers (possibly still in interpreter bootstrap) exited.
       }
       control.destroy();
       if (!helperExited) { requestStop("SIGKILL"); child.stdin.destroy(); child.unref(); }
@@ -312,6 +365,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         requestStop(signal);
         cleanupPoll = setInterval(checkCleanup, 10);
       } else if (signal === "SIGKILL") requestStop(signal);
+      interruptOwnedSupervisor();
       checkCleanup();
     };
     const timeout = () => {
@@ -325,6 +379,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     process.once("exit", onParentExit);
     control.on("data", (chunk: Buffer) => {
       if (settled) return;
+      transportBytes.proof += chunk.length;
       controlLine += chunk.toString();
       let newline: number;
       while ((newline = controlLine.indexOf("\n")) !== -1) {
@@ -339,12 +394,16 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
             if (stopStarted !== undefined || helperExited) continue;
             // A ready event can beat a delayed timer callback after the actual
             // deadline. Check the clock rather than granting late admission.
-            if (performance.now() >= executionDeadline) { timeout(); continue; }
+            const remainingMs = Math.floor(executionDeadline - performance.now());
+            if (remainingMs <= 0) { timeout(); continue; }
             if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Supervisor admission channel is closed");
             receipt.launch.admissionGranted = true;
-            child.stdin.write("S");
+            // PREPARED's Python-side anchor precedes this subtraction. Charging
+            // the remaining duration from that earlier anchor is conservative;
+            // never compare independent runtime monotonic clock epochs.
+            child.stdin.write(`S${remainingMs}\n`);
           } else if (message.type === "not-started") {
-            if (notStartedReceived || receipt.launch.admissionGranted || receipt.pid !== undefined
+            if (notStartedReceived || receipt.pid !== undefined
               || message.supervisorPid !== child.pid || message.sessionId !== child.pid
               || !["spawn-error", "cancelled", "parent-channel-closed", "parent-interrupted", "admission-timeout"].includes(message.reason)) {
               throw new Error("Invalid supervisor no-start identity");
@@ -359,6 +418,11 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
             receipt.launch.state = "started";
             receipt.cleanup.processGroupId = message.processGroupId;
             receipt.cleanup.sessionId = message.sessionId;
+            if (stopStarted === undefined && !helperExited) {
+              if (performance.now() >= executionDeadline) { timeout(); continue; }
+              if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Worker execution admission channel is closed");
+              child.stdin.write("E");
+            }
           } else if (message.type === "exit") {
             if (workerExited || receipt.pid === undefined
               || !(message.exitCode === null || Number.isSafeInteger(message.exitCode))
@@ -395,6 +459,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     });
     child.stdout.on("data", (chunk: Buffer) => {
       if (settled) return;
+      transportBytes.stdout += chunk.length;
       const text = chunk.toString();
       receipt.stdout = (receipt.stdout + text).slice(-logLimit);
       pendingLine += text;
@@ -421,7 +486,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
       }
       if (pendingLine.length > logLimit) { addError("Recovery worker exceeded bounded protocol line length"); stop("SIGKILL"); }
     });
-    child.stderr.on("data", (chunk: Buffer) => { receipt.stderr = (receipt.stderr + chunk.toString()).slice(-logLimit); });
+    child.stderr.on("data", (chunk: Buffer) => { transportBytes.stderr += chunk.length; receipt.stderr = (receipt.stderr + chunk.toString()).slice(-logLimit); });
     child.stdin.on("error", error => { if ((error as NodeJS.ErrnoException).code !== "EPIPE") addError(`Recovery supervisor control failed: ${error.message}`); });
     control.on("end", () => {
       if (!controlLine.length || settled) return;
@@ -481,11 +546,21 @@ export function verifyRetrievalEquivalence(
   const details: Array<{ queryId: string; docOrderMatch: boolean; scoreToleranceMatch: boolean; diff?: string }> = [];
   let allMatch = true;
 
-  const validQueries = (stage: StageMetrics) => new Set(stage.queryDetails.map(q => q.queryId)).size === stage.queryDetails.length
-    && stage.queryDetails.every(q => typeof q.queryId === "string" && q.queryId.length > 0 && !q.error
-      && Array.isArray(q.topDocIds) && q.topDocIds.length > 0
-      && q.topDocIds.every(id => typeof id === "string" && id.length > 0)
-      && new Set(q.topDocIds).size === q.topDocIds.length);
+  const validQueries = (stage: StageMetrics) => {
+    const queryIds = new Set<string>();
+    // Dense iteration observes missing slots; map/every silently skip holes.
+    for (const q of stage.queryDetails) {
+      if (!q || typeof q.queryId !== "string" || q.queryId.length === 0 || q.error
+        || queryIds.has(q.queryId) || !Array.isArray(q.topDocIds) || q.topDocIds.length === 0) return false;
+      queryIds.add(q.queryId);
+      const docIds = new Set<string>();
+      for (const id of q.topDocIds) {
+        if (typeof id !== "string" || id.length === 0 || docIds.has(id)) return false;
+        docIds.add(id);
+      }
+    }
+    return true;
+  };
   if (!Number.isFinite(tolerance) || tolerance < 0 || !validQueries(pre) || !validQueries(post)
     || !pre.queryDetails.length || pre.queryDetails.length !== post.queryDetails.length) {
     return {
@@ -497,14 +572,31 @@ export function verifyRetrievalEquivalence(
   for (let i = 0; i < pre.queryDetails.length; i++) {
     const qPre = pre.queryDetails[i];
     const qPost = post.queryDetails[i];
+    if (!qPre || !qPost) {
+      return {
+        identical: false,
+        details: [{ queryId: "all", docOrderMatch: false, scoreToleranceMatch: false, diff: `Missing query detail at index ${i}` }],
+      };
+    }
     const docOrderMatch = JSON.stringify(qPre.topDocIds) === JSON.stringify(qPost.topDocIds);
     const hitMatch = qPre.hitAt5 === qPost.hitAt5 && qPre.rank1 === qPost.rank1;
 
-    const scoreToleranceMatch = Array.isArray(qPre.scores) && Array.isArray(qPost.scores)
+    let scoreToleranceMatch = Array.isArray(qPre.scores) && Array.isArray(qPost.scores)
       && qPre.scores.length > 0 && qPre.scores.length === qPost.scores.length
       && qPre.scores.length === qPre.topDocIds.length
-      && qPost.scores.length === qPost.topDocIds.length
-      && qPre.scores.every((score, j) => Number.isFinite(score) && Number.isFinite(qPost.scores[j]) && Math.abs(score - qPost.scores[j]) <= tolerance);
+      && qPost.scores.length === qPost.topDocIds.length;
+    if (scoreToleranceMatch) {
+      for (let j = 0; j < qPre.scores.length; j++) {
+        const preScore = qPre.scores[j];
+        const postScore = qPost.scores[j];
+        if (typeof preScore !== "number" || !Number.isFinite(preScore)
+          || typeof postScore !== "number" || !Number.isFinite(postScore)
+          || Math.abs(preScore - postScore) > tolerance) {
+          scoreToleranceMatch = false;
+          break;
+        }
+      }
+    }
     if (!docOrderMatch || !hitMatch || !scoreToleranceMatch || qPre.queryId !== qPost.queryId) {
       allMatch = false;
       details.push({
@@ -602,6 +694,7 @@ function computeLatencies(latencies: number[]): { avg: number; p50: number; p95:
   const avg = sorted.reduce((sum, v) => sum + v, 0) / sorted.length;
   const p50 = sorted[Math.floor(sorted.length * 0.5)];
   const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
+  if (p50 === undefined || p95 === undefined) throw new Error("Missing latency percentile sample");
   return {
     avg: Math.round(avg * 100) / 100,
     p50: Math.round(p50 * 100) / 100,
@@ -669,8 +762,8 @@ async function evaluateRetrievalStage(
 
     const relSet = new Set(q.relevantDocIds);
     let rank1: number | null = null;
-    for (let i = 0; i < topIds.length; i++) {
-      if (relSet.has(topIds[i])) {
+    for (const [i, id] of topIds.entries()) {
+      if (relSet.has(id)) {
         rank1 = i + 1;
         break;
       }
@@ -1311,7 +1404,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const skipGguf = args.includes("--skip-gguf");
   const skipMlx = args.includes("--skip-mlx");
   const mlxPortIdx = args.indexOf("--mlx-port");
-  const mlxPort = mlxPortIdx !== -1 && args[mlxPortIdx + 1] ? parseInt(args[mlxPortIdx + 1], 10) : 8797;
+  const mlxPortArg = mlxPortIdx !== -1 ? args[mlxPortIdx + 1] : undefined;
+  const mlxPort = mlxPortArg ? parseInt(mlxPortArg, 10) : 8797;
   const modelIdx = args.indexOf("--mlx-model-path");
   const mlxModelPath = modelIdx !== -1 ? args[modelIdx + 1] : undefined;
   const workerTimeoutIdx = args.indexOf("--worker-timeout-ms");

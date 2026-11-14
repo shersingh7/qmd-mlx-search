@@ -1,0 +1,30 @@
+{
+  "node": {
+    "focused": {
+      "passed": 246,
+      "skipped": 40
+    },
+    "focused_files": 13,
+    "guard_cases": 44,
+    "sdk_checks": 3,
+    "sdk_tool_calls": 20,
+    "sdk_positive_inputs": 4,
+    "sdk_negative_inputs": 14,
+    "sdk_negative_outputs": 2,
+    "strict_root_exit_code": 0
+  },
+  "bun": {
+    "focused": {
+      "passed": 224,
+      "skipped": 40
+    },
+    "focused_files": 13,
+    "guard_cases": 22,
+    "sdk_checks": 3,
+    "sdk_tool_calls": 20,
+    "sdk_positive_inputs": 4,
+    "sdk_negative_inputs": 14,
+    "sdk_negative_outputs": 2,
+    "strict_root_exit_code": 0
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "--reverse",
+    "--check",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/proposal.patch"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/composition-replay",
+  "name": "compose-reverse-base-check",
+  "returncode": 0,
+  "seconds": 0.010274041967932135,
+  "stderr": "",
+  "stdout": ""
+}

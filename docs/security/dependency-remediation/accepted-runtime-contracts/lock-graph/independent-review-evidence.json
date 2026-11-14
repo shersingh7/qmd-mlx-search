@@ -1,0 +1,247 @@
+{
+  "spec": "PASS",
+  "r2": "closed for reviewed working-tree source identities",
+  "quality": "PASS",
+  "blocking_findings": [],
+  "reviewed_helper_lines": 616,
+  "production_delta_added_lines": 5,
+  "source_sha256": {
+    "scripts/verify_patched_dependencies.py": "3925f9ae6602688848530aa37f59d015c6230b1562a78d7a2ed64f67059706ea",
+    "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596",
+    "test/security/test_patched_dependencies.py": "5a6b7df95337a05a7393c5576eeeae32b150b71b81711add23cbbffe50515dcb",
+    "test/security/test_uv_lock_graph.py": "578b385e3940d17b9807793bc4acc9bf11275d64de7de89c1921aa7aa57da432"
+  },
+  "protected_nonowned_sha256": {
+    "scripts/check_dependency_security.py": "6e4cd563e6907a3e3cc01ef3c236c65284c256e8e6d2058596429d64fbd4cf30",
+    "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+    "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+    "finetune/pyproject.toml": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+    "finetune/uv.lock": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+    ".github/workflows/dependency-security.yml": "65fec54b39fddb586d920cb3ea4bb97d6946e7eacd9acf7c2b9c1091c8e0eafb",
+    "test/security/test_dependency_security.py": "66c715c750aea9f4eb0ea5b0292ed78e5deaff234109c888c9530b30674011ae",
+    "finetune/tests/test_script_source_policy.py": "beaabc12311d9c8e82f53b8d2a6351ce97af6f1a4bb379a9e3933d9fe7999957",
+    "finetune/tests/test_dependency_policy.py": "e9d7a81ce1cd1eeabcfc38fd183e91903377c89b0eef439acf477ce081f79642"
+  },
+  "runner_header_sha256": {
+    "finetune/convert_gguf.py": "da3e5f96accf2c56a2644af6ac0c6e99083ef0ec0ca2e778725c9c23450093d1",
+    "finetune/convert_onnx.py": "6dacdbe3cf3fc9f34f7e2042fc7b1df95ab132b0948dbdcbf7f08e780630d0e0",
+    "finetune/dataset/analyze_data.py": "f829a6f801c4fc345d113d6a67f5ad0cf11848b4ec29c0b189a16d42050a41a0",
+    "finetune/dataset/prepare_data.py": "0a62173afd422a8c4fd5ecbd6f20e5752f68d00cba7e4716ac18574a379cdf24",
+    "finetune/dataset/prepare_data_lfm2.py": "0a62173afd422a8c4fd5ecbd6f20e5752f68d00cba7e4716ac18574a379cdf24",
+    "finetune/dataset/score_data.py": "f829a6f801c4fc345d113d6a67f5ad0cf11848b4ec29c0b189a16d42050a41a0",
+    "finetune/dataset/validate_schema.py": "f829a6f801c4fc345d113d6a67f5ad0cf11848b4ec29c0b189a16d42050a41a0",
+    "finetune/eval.py": "650081262095ac5506da34910da8fb7d8e4de4d795faa27f304a4de493fdb660",
+    "finetune/eval_retrieval.py": "650081262095ac5506da34910da8fb7d8e4de4d795faa27f304a4de493fdb660",
+    "finetune/experiments/grpo/grpo.py": "be06c02320c6ae68dd03f610d29b173caa951b6ee53f648d9ea28dc577e2f3b4",
+    "finetune/experiments/lfm2/sft_lfm2.py": "be06c02320c6ae68dd03f610d29b173caa951b6ee53f648d9ea28dc577e2f3b4",
+    "finetune/jobs/eval.py": "df3e9d039f71e411d43181cd767023332c6c2a9d6b46bef4d0331db0920865e8",
+    "finetune/jobs/sft.py": "be06c02320c6ae68dd03f610d29b173caa951b6ee53f648d9ea28dc577e2f3b4",
+    "finetune/train.py": "53f085645190d17c923adc3c9adf9b553f9b1792c7dcf511f7f0f250b7bf2965",
+    "finetune/train_unsloth.py": "8be5c7607f88cfc2a2e1fdfcfc13adab44af4ac738c6aa8dd6f47d9cf6827a08"
+  },
+  "script_lock_sha256": {
+    "finetune/convert_gguf.py.lock": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+    "finetune/convert_onnx.py.lock": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+    "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+    "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/train.py.lock": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+    "finetune/train_unsloth.py.lock": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1"
+  },
+  "wheel_sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+  "original_evidence_sha256": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/REVIEW.md": "ac5cdf9520ebae53983512eb49e3a9ba9c31d57de5e204dbacdfd2f179665731",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/review-evidence.json": "80333b5d1f0a90f05607ff25db555984fe7d95eca92a2088f2e7b0722f4e688a",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/test_reversed_wildcard_required_refusal.py": "859dfe9cf5d81d0e307ab5f508c3c47fdf264c1637e17a3b0360823a5eb380fc",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/reversed-wildcard-required-refusal-RED.xml": "24c1ad959e556220ac388e618e38a8b5d2dc1f82d852db7cf8337a1cf3e3baab",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/uv-conditional-root-confirmed-receipts.json": "d5eddd9b697021a851363157d725c3f3e16e83524a003e20501ca3b020c1e16c",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/uv-conditional-root-receipts.json": "497077c9f12d571b3d002e728f44cecc57033a65e81dcd0cfa617ec53f53d66a",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-lock-binding-review-f83c829b/REVIEW.md": "25ada8cd41e2b3718c999136dec6075b2846f7673fef31a999167219c062cb43",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-lock-binding-review-f83c829b/required-refusal-RED.xml": "2daa5ba16ae87f391c6d12e18f6e52995bbfb24f93479a3ca7540ee0aefb0da1"
+  },
+  "original_r2_red": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-graph-reacceptance-5cf51e63/reversed-wildcard-required-refusal-RED.xml",
+    "testcase_elements": 4,
+    "declared_tests": 4,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "time": 5.112,
+    "by_test_file": {
+      "test_reversed_wildcard_required_refusal": 4
+    }
+  },
+  "all_frozen_file_hashes_unchanged": 74,
+  "junit": {
+    "full-targeted": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/full-targeted.xml",
+      "testcase_elements": 453,
+      "declared_tests": 496,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 40.538,
+      "by_test_file": {
+        "test_dependency_security.AuditProviderTests": 5,
+        "test_dependency_security.DependencySecurityTests": 15,
+        "test_nix_packaging.NixPackagingContracts": 7,
+        "test_patched_dependencies": 305,
+        "test_uv_lock_graph": 99,
+        "tests.test_dependency_policy": 3,
+        "tests.test_script_source_policy": 19
+      }
+    },
+    "original-and-new-r2": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/original-and-new-r2.xml",
+      "testcase_elements": 166,
+      "declared_tests": 166,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 5.402,
+      "by_test_file": {
+        "test_original_r2_replay": 4,
+        "test_r2_heldout": 162
+      }
+    },
+    "quality-contracts": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/quality-contracts.xml",
+      "testcase_elements": 52,
+      "declared_tests": 52,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 1.942,
+      "by_test_file": {
+        "test_previous_heldout_contracts": 29,
+        "test_quality_contracts": 23
+      }
+    }
+  },
+  "fresh_case_elements": 671,
+  "fresh_declared_tests_including_subtests": 714,
+  "cli_matrix": {
+    "count": 51,
+    "unsupported_complete_graph_refusals": 24,
+    "normal_positive_cases": 24,
+    "baselines": 3,
+    "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/r2-cli-receipts-v2.json"
+  },
+  "all_graphs": {
+    "count": 16,
+    "python_package_instances": 931,
+    "all_uv_checks_passed": true,
+    "lightweight": [
+      {
+        "lock": "finetune/dataset/analyze_data.py.lock",
+        "instances": 5,
+        "accelerate": 0,
+        "torch": 0
+      },
+      {
+        "lock": "finetune/dataset/prepare_data.py.lock",
+        "instances": 36,
+        "accelerate": 0,
+        "torch": 0
+      },
+      {
+        "lock": "finetune/dataset/prepare_data_lfm2.py.lock",
+        "instances": 36,
+        "accelerate": 0,
+        "torch": 0
+      },
+      {
+        "lock": "finetune/dataset/score_data.py.lock",
+        "instances": 5,
+        "accelerate": 0,
+        "torch": 0
+      },
+      {
+        "lock": "finetune/dataset/validate_schema.py.lock",
+        "instances": 5,
+        "accelerate": 0,
+        "torch": 0
+      }
+    ]
+  },
+  "live_cli": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+      "-B",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/scripts/check_dependency_security.py",
+      "--repo",
+      "/Users/shersingh/github/qmd-mlx-search",
+      "--output",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/cli-reports/live-current-valid.json"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+    "exit_code": 0,
+    "stdout": "{\n  \"passed\": true,\n  \"created_at\": \"2026-11-13T22:31:19.028014+00:00\",\n  \"alerts_checked\": 262,\n  \"affected_alerts\": 0,\n  \"source_binding\": {\n    \"status\": \"verified_source_binding\",\n    \"scope\": \"source_binding_only\",\n    \"policy_path\": \"docs/security/dependency-remediation/patched-dependencies.json\",\n    \"advisory\": \"GHSA-4j2p-28q2-5m79\",\n    \"resolved_instances\": 11,\n    \"version\": \"1.15.0+qmd.2\",\n    \"wheel_path\": \"finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl\",\n    \"sha256\": \"abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6\",\n    \"commit\": \"f452290f116934a4f126fe8e513c565e97a8c94f\",\n    \"runner_paths\": [\n      \"finetune/convert_gguf.py\",\n      \"finetune/convert_onnx.py\",\n      \"finetune/dataset/analyze_data.py\",\n      \"finetune/dataset/prepare_data.py\",\n      \"finetune/dataset/prepare_data_lfm2.py\",\n      \"finetune/dataset/score_data.py\",\n      \"finetune/dataset/validate_schema.py\",\n      \"finetune/eval.py\",\n      \"finetune/eval_retrieval.py\",\n      \"finetune/experiments/grpo/grpo.py\",\n      \"finetune/experiments/lfm2/sft_lfm2.py\",\n      \"finetune/jobs/eval.py\",\n      \"finetune/jobs/sft.py\",\n      \"finetune/train.py\",\n      \"finetune/train_unsloth.py\"\n    ],\n    \"script_lock_paths\": [\n      \"finetune/convert_gguf.py.lock\",\n      \"finetune/convert_onnx.py.lock\",\n      \"finetune/dataset/analyze_data.py.lock\",\n      \"finetune/dataset/prepare_data.py.lock\",\n      \"finetune/dataset/prepare_data_lfm2.py.lock\",\n      \"finetune/dataset/score_data.py.lock\",\n      \"finetune/dataset/validate_schema.py.lock\",\n      \"finetune/eval.py.lock\",\n      \"finetune/eval_retrieval.py.lock\",\n      \"finetune/experiments/grpo/grpo.py.lock\",\n      \"finetune/experiments/lfm2/sft_lfm2.py.lock\",\n      \"finetune/jobs/eval.py.lock\",\n      \"finetune/jobs/sft.py.lock\",\n      \"finetune/train.py.lock\",\n      \"finetune/train_unsloth.py.lock\"\n    ],\n    \"script_lock_sha256\": {\n      \"finetune/convert_gguf.py.lock\": \"f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332\",\n      \"finetune/convert_onnx.py.lock\": \"43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0\",\n      \"finetune/dataset/analyze_data.py.lock\": \"a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605\",\n      \"finetune/dataset/prepare_data.py.lock\": \"5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e\",\n      \"finetune/dataset/prepare_data_lfm2.py.lock\": \"5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e\",\n      \"finetune/dataset/score_data.py.lock\": \"a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605\",\n      \"finetune/dataset/validate_schema.py.lock\": \"a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605\",\n      \"finetune/eval.py.lock\": \"153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4\",\n      \"finetune/eval_retrieval.py.lock\": \"153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4\",\n      \"finetune/experiments/grpo/grpo.py.lock\": \"e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa\",\n      \"finetune/experiments/lfm2/sft_lfm2.py.lock\": \"e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa\",\n      \"finetune/jobs/eval.py.lock\": \"964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d\",\n      \"finetune/jobs/sft.py.lock\": \"e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa\",\n      \"finetune/train.py.lock\": \"a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558\",\n      \"finetune/train_unsloth.py.lock\": \"553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1\"\n    },\n    \"unbound_instances\": 0\n  },\n  \"graph_instances\": 1772\n}\n",
+    "stderr": "",
+    "label": "live-current-valid",
+    "output": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/cli-reports/live-current-valid.json",
+    "passed": true,
+    "proofs": 11,
+    "error": null,
+    "graph_instances": 1772,
+    "alerts_checked": 262,
+    "affected_alerts": 0
+  },
+  "runtimes": {
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "--version"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)\n",
+      "stderr": ""
+    },
+    "python": {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "-B",
+        "-c",
+        "import sys;print(sys.version);print(sys.executable)"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]\n/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12\n",
+      "stderr": ""
+    }
+  },
+  "git_diff_check": {
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "cwd": "/Users/shersingh/github/qmd-mlx-search",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "head_before": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+  "head_after": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+  "scope_limits": [
+    "declared/recorded static graph consistency, not a full resolver",
+    "does not reconstruct absent upstream metadata or authenticate ordinary registry artifacts",
+    "does not prove platform-wheel availability or application compatibility",
+    "dimension/input budgets are not a global operation-count or wall-clock SLA",
+    "repository reads are bounded per-file, not an atomic concurrent whole-repository snapshot",
+    "native CI, final integration/default-branch closure remain parent-owned"
+  ],
+  "issues": [
+    "First additional CLI probe stopped after the root matrix because full train.py contains two gguf literals. The revised probe changes only the PEP header; the complete fresh v2 matrix passed. Earlier artifacts retained; no product assertions or inputs changed."
+  ],
+  "writes": "only this owned scratch directory; no repository/config/skills/docs edits, staging, commit, push, downloads or product execution"
+}

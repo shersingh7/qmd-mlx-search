@@ -11,6 +11,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { executeRecoveryWorker, type RecoveryProcessResult } from "../scripts/phase5_e2e_runner.js";
+import { beginRecoveryBootstrapDiagnostics } from "./helpers/recovery-bootstrap-diagnostics.mjs";
 
 function alive(pid: number): boolean {
   try { process.kill(pid, 0); return true; }
@@ -39,12 +40,15 @@ async function fastTimeoutCase() {
   let guard: ReturnType<typeof setTimeout> | undefined;
   let guardFired = false;
   const finallyKilled: number[] = [];
+  // No extra launch/warmup: observe this existing invocation only when opted in.
+  const bootstrapDiagnostics = beginRecoveryBootstrapDiagnostics();
   try {
     const timeoutMs = 200;
     const started = performance.now();
     helper = executeRecoveryWorker({ dbPath: path.join(root, "shadow-unused.sqlite"), docsDir: root,
       action: "resume", outputJson: path.join(root, "absent-report.json"), stateRoot: path.join(root, "state"),
       timeoutMs, command: ["/usr/bin/python3", "-S", "-c", "import time; time.sleep(60)"] });
+    bootstrapDiagnostics.attachAfterLaunch();
     result = await Promise.race([helper, new Promise<never>((_resolve, reject) => {
       guard = setTimeout(() => { guardFired = true; reject(new Error("200ms helper exceeded bounded teardown")); }, 1_800);
     })]);
@@ -66,7 +70,8 @@ async function fastTimeoutCase() {
     // fixture cleanup. Cold bootstrap may be refused BEFORE launch admission;
     // that state has its own positive identity/reap contract, not optional proof.
     if (result.launch.state === "not-started") {
-      expect(result.launch.admissionGranted).toBe(false);
+      if (result.launch.admissionGranted) expect(result.launch.noStartProof).toBe("supervisor-acknowledgement");
+      else expect(result.launch.noStartProof).toBeUndefined();
       expect(result.pid).toBeUndefined();
       expect(result.exitCode).toBeNull();
       expect(result.signal).toBeNull();
@@ -84,7 +89,8 @@ async function fastTimeoutCase() {
       pipesClosed: true, forcedPipeClose: false, containmentVerified: false });
   } finally {
     if (guard) clearTimeout(guard);
-    result ??= await helper;
+    try { result ??= await helper; }
+    finally { bootstrapDiagnostics.finish(result); }
     if (result?.pid !== undefined) {
       if (alive(result.pid)) { finallyKilled.push(result.pid); process.kill(result.pid, "SIGKILL"); }
       await waitAbsent(result.pid);
@@ -245,7 +251,7 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
       expect(workerRequests, result.stderr).toBeGreaterThan(0);
       expect(existsSync(dbPath)).toBe(true);
     }
-    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, pipesClosed: true });
+    expect(result.cleanup).toMatchObject({ childReaped: true, groupTerminated: true, pipesClosed: mode !== "escaped-pipe" });
     if (mode === "timeout" || mode === "real-worker") {
       expect(result.timedOut).toBe(true);
       expect(elapsedMs).toBeGreaterThanOrEqual(timeoutMs);
@@ -267,13 +273,16 @@ async function treeCase(mode: "timeout" | "leader-exit" | "real-worker" | "escap
       expect(result.exitCode).toBe(0);
       expect(result.signal).toBeNull();
       expect(result.cleanup).toMatchObject({ forcedPipeClose: true });
+      expect(result.transportFailure).toMatchObject({ prepared: true, supervisorExited: true, supervisorCloseObserved: false,
+        stdout: { ended: false, closed: false, destroyed: false }, stderr: { ended: false, closed: false, destroyed: false },
+        proof: { ended: true } });
       expect(alive(pids!.grandchild)).toBe(true);
     }
     console.log(JSON.stringify({ evidence: "recovery-tree-before-finally", mode, timeoutMs, elapsedMs: Math.round(elapsedMs),
       fixtureStartupDelayMs, fixtureStartupMs: Math.round(fixtureStartupMs!), postReleaseMs: Math.round(postReleaseMs), workerRequests,
       helper: result.pid, grandchild: pids!.grandchild, parentAbsent: !alive(pids!.parent),
       grandchildAbsent: !alive(pids!.grandchild), sentinelAlive: alive(sentinel.pid!), guardFired,
-      error: result.error ?? null, cleanup: result.cleanup }));
+      error: result.error ?? null, cleanup: result.cleanup, transportFailure: result.transportFailure }));
   } finally {
     if (guard) clearTimeout(guard);
     if (!pids && existsSync(pidFile)) pids = JSON.parse(readFileSync(pidFile, "utf8"));
@@ -427,7 +436,9 @@ with open(${JSON.stringify(proofPath)}, 'w') as result:
       pendingProtocol = pendingProtocol.slice(newline + 1);
       if (message.type === "prepared") {
         expect(message).toMatchObject({ supervisorPid: supervisor.pid, sessionId: supervisor.pid });
-        supervisor.stdin!.write("S");
+        supervisor.stdin!.write("S500\n");
+      } else if (message.type === "ready") {
+        supervisor.stdin!.write("E");
       }
     }
   });

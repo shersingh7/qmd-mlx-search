@@ -1,0 +1,1013 @@
+diff --git a/src/bench-rerank.ts b/src/bench-rerank.ts
+--- a/src/bench-rerank.ts
++++ b/src/bench-rerank.ts
+@@ -19,7 +19,9 @@
+   type LlamaModel,
+ } from "node-llama-cpp";
+ import { homedir } from "os";
+-import { join } from "path";
++import { join, resolve } from "path";
++import { pathToFileURL } from "node:url";
++import { inspect } from "node:util";
+ import { cpus } from "os";
+ 
+ // ============================================================================
+@@ -96,6 +98,17 @@
+   peakRss: number;        // bytes
+ }
+ 
++// A failed release invalidates further measurements in this process.
++class BenchmarkCleanupError extends AggregateError {}
++
++async function disposeOwned(resources: readonly { dispose(): void | Promise<void> }[]): Promise<unknown[]> {
++  const errors: unknown[] = [];
++  for (const resource of resources) {
++    try { await resource.dispose(); } catch (error) { errors.push(error); }
++  }
++  return errors;
++}
++
+ async function benchmarkConfig(
+   model: LlamaModel,
+   llama: Llama,
+@@ -109,79 +122,92 @@
+   // Create contexts. On CPU, split threads evenly across contexts.
+   const cpuThreads = !llama.gpu ? Math.floor(llama.cpuMathCores / parallelism) : 0;
+   const contexts: Awaited<ReturnType<LlamaModel["createRankingContext"]>>[] = [];
+-  for (let i = 0; i < parallelism; i++) {
+-    try {
+-      contexts.push(await model.createRankingContext({
+-        contextSize: CONTEXT_SIZE,
+-        // Ranking contexts inherit the model's defaultContextFlashAttention;
+-        // node-llama-cpp 3.22.3 has no per-ranking-context flash option.
+-        ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
+-      }));
+-    } catch {
+-      if (contexts.length === 0) {
+-        // Retry the first context once with the same supported options.
++  const operationErrors: unknown[] = [];
++  try {
++    for (let i = 0; i < parallelism; i++) {
++      try {
+         contexts.push(await model.createRankingContext({
+           contextSize: CONTEXT_SIZE,
++          // Ranking contexts inherit the model's defaultContextFlashAttention;
++          // node-llama-cpp 3.22.3 has no per-ranking-context flash option.
+           ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
+         }));
++      } catch {
++        if (contexts.length === 0) {
++          // Retry the first context once with the same supported options.
++          contexts.push(await model.createRankingContext({
++            contextSize: CONTEXT_SIZE,
++            ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
++          }));
++        }
++        break;
+       }
+-      break;
+     }
+-  }
+-  const actualParallelism = contexts.length;
+-  const firstContext = contexts[0];
+-  if (!firstContext) throw new Error("No ranking contexts created");
+-
+-  // Measure VRAM after context creation
+-  const vramAfter = llama.gpu ? await llama.getVramState() : null;
+-  const vramUsed = vramBefore && vramAfter ? vramAfter.used - vramBefore.used : 0;
+-  const vramPerCtx = actualParallelism > 0 ? vramUsed / actualParallelism : 0;
+-
+-  // Warm up
+-  await firstContext.rankAll(QUERY, docs.slice(0, 2));
+-
+-  // Benchmark iterations
+-  const times: number[] = [];
+-  let peakRss = getMemUsage().rss;
+-
+-  for (let iter = 0; iter < ITERATIONS; iter++) {
+-    const chunkSize = Math.ceil(docs.length / actualParallelism);
+-
+-    const t0 = performance.now();
+-    const allScores = await Promise.all(
+-      contexts.map((context, i) => {
+-        const chunk = docs.slice(i * chunkSize, (i + 1) * chunkSize);
+-        return chunk.length > 0 ? context.rankAll(QUERY, chunk) : Promise.resolve([]);
+-      })
++    const actualParallelism = contexts.length;
++    const firstContext = contexts[0];
++    if (!firstContext) throw new Error("No ranking contexts created");
++
++    // Measure VRAM after context creation
++    const vramAfter = llama.gpu ? await llama.getVramState() : null;
++    const vramUsed = vramBefore && vramAfter ? vramAfter.used - vramBefore.used : 0;
++    const vramPerCtx = actualParallelism > 0 ? vramUsed / actualParallelism : 0;
++
++    // Warm up
++    await firstContext.rankAll(QUERY, docs.slice(0, 2));
++
++    // Benchmark iterations
++    const times: number[] = [];
++    let peakRss = getMemUsage().rss;
++
++    for (let iter = 0; iter < ITERATIONS; iter++) {
++      const chunkSize = Math.ceil(docs.length / actualParallelism);
++
++      const t0 = performance.now();
++      // Async callbacks also capture synchronous refusals. Do not release any
++      // context until every started ranking has settled, even if a sibling fails.
++      const outcomes = await Promise.allSettled(
++        contexts.map(async (context, i) => {
++          const chunk = docs.slice(i * chunkSize, (i + 1) * chunkSize);
++          return chunk.length > 0 ? context.rankAll(QUERY, chunk) : [];
++        })
++      );
++      const elapsed = performance.now() - t0;
++      times.push(elapsed);
++      const failures = outcomes.filter((entry): entry is PromiseRejectedResult => entry.status === "rejected");
++      if (failures.length === 1) throw failures[0]!.reason;
++      if (failures.length > 1) throw new AggregateError(failures.map(entry => entry.reason), "Ranking operations failed");
++
++      // Verify scores are valid
++      const flat = outcomes.flatMap(entry => entry.status === "fulfilled" ? entry.value : []);
++      if (flat.some(s => s < 0 || s > 1 || isNaN(s))) {
++        throw new Error("Invalid scores detected");
++      }
++
++      const currentRss = getMemUsage().rss;
++      if (currentRss > peakRss) peakRss = currentRss;
++    }
++
++    const med = median(times);
++    return {
++      parallelism: actualParallelism,
++      contextSize: CONTEXT_SIZE,
++      flashAttention: model.defaultContextFlashAttention,
++      times,
++      medianMs: med,
++      docsPerSec: (docs.length / med) * 1000,
++      vramPerContext: vramPerCtx,
++      totalVram: vramUsed,
++      peakRss,
++    };
++  } catch (error) {
++    operationErrors.push(error);
++    throw error;
++  } finally {
++    const cleanupErrors = await disposeOwned(contexts);
++    if (cleanupErrors.length) throw new BenchmarkCleanupError(
++      [...operationErrors, ...cleanupErrors], "Ranking context cleanup failed; benchmark cannot continue",
+     );
+-    const elapsed = performance.now() - t0;
+-    times.push(elapsed);
+-
+-    // Verify scores are valid
+-    const flat = allScores.flat();
+-    if (flat.some(s => s < 0 || s > 1 || isNaN(s))) {
+-      throw new Error("Invalid scores detected");
+-    }
+-
+-    const currentRss = getMemUsage().rss;
+-    if (currentRss > peakRss) peakRss = currentRss;
+-  }
+-
+-  // Cleanup
+-  for (const ctx of contexts) await ctx.dispose();
+-
+-  const med = median(times);
+-  return {
+-    parallelism: actualParallelism,
+-    contextSize: CONTEXT_SIZE,
+-    flashAttention: model.defaultContextFlashAttention,
+-    times,
+-    medianMs: med,
+-    docsPerSec: (docs.length / med) * 1000,
+-    vramPerContext: vramPerCtx,
+-    totalVram: vramUsed,
+-    peakRss,
+-  };
++  }
+ }
+ 
+ // ============================================================================
+@@ -198,75 +224,94 @@
+     build: "autoAttempt",
+     logLevel: LlamaLogLevel.error
+   });
+-  let gpuLabel: string = llama.gpu === false
+-    ? "cpu"
+-    : llama.gpu;
+-
+-  // System info
+-  const cpuInfo = cpus();
+-  const cpuModel = cpuInfo[0]?.model || "unknown";
+-  const cpuCount = cpuInfo.length;
+-
+-  console.log("System");
+-  console.log(`  CPU:       ${cpuModel}`);
+-  console.log(`  Cores:     ${cpuCount} (${llama.cpuMathCores} math)`);
+-  console.log(`  Device:    ${gpuLabel}`);
+-
+-  if (llama.gpu) {
+-    const gpuNames = await llama.getGpuDeviceNames();
+-    const counts = new Map<string, number>();
+-    for (const name of gpuNames) counts.set(name, (counts.get(name) || 0) + 1);
+-    const devStr = Array.from(counts.entries())
+-      .map(([name, n]) => n > 1 ? `${n}× ${name}` : name).join(", ");
+-    console.log(`  GPU:       ${devStr}`);
+-    const vram = await llama.getVramState();
+-    console.log(`  VRAM:      ${formatBytes(vram.total)} total, ${formatBytes(vram.free)} free`);
+-  }
+-
+-  console.log(`  RAM:       ${formatBytes(getMemUsage().rss)} RSS at start`);
+-
+-  // Load model
+-  console.log(`\nModel`);
+-  console.log(`  URI:       ${RERANK_MODEL}`);
+-  const modelPath = await resolveModelFile(RERANK_MODEL, MODEL_CACHE);
+-  const vramPreModel = llama.gpu ? await llama.getVramState() : null;
+-  const model = await llama.loadModel({ modelPath });
+-  const vramPostModel = llama.gpu ? await llama.getVramState() : null;
+-  const modelVram = vramPreModel && vramPostModel ? vramPostModel.used - vramPreModel.used : 0;
+-  console.log(`  Params:    ${model.trainContextSize} train ctx`);
+-  if (modelVram > 0) console.log(`  VRAM:      ${formatBytes(modelVram)} (model weights)`);
+-
+-  // Generate test docs
+-  const docs = generateDocs(DOC_COUNT);
+-  console.log(`\nBenchmark`);
+-  console.log(`  Documents: ${DOC_COUNT}`);
+-  console.log(`  Ctx size:  ${CONTEXT_SIZE}`);
+-  console.log(`  Iterations:${ITERATIONS}`);
+-  console.log(`  Query:     "${QUERY.slice(0, 50)}..."`);
+-
+-  // Run benchmarks
+   const results: BenchResult[] = [];
+-
+-  for (const p of PARALLEL_CONFIGS) {
+-    if (!llama.gpu && p > 1) {
+-      // CPU: only test if we have enough cores (at least 4 per context)
+-      if (llama.cpuMathCores < p * 4) {
+-        console.log(`\n  [${p} ctx] skipped (need ${p * 4} cores, have ${llama.cpuMathCores})`);
+-        continue;
++  let model: LlamaModel | undefined;
++  const operationErrors: unknown[] = [];
++  try {
++    const gpuLabel = llama.gpu === false ? "cpu" : llama.gpu;
++
++    // System info
++    const cpuInfo = cpus();
++    const cpuModel = cpuInfo[0]?.model || "unknown";
++    const cpuCount = cpuInfo.length;
++
++    console.log("System");
++    console.log(`  CPU:       ${cpuModel}`);
++    console.log(`  Cores:     ${cpuCount} (${llama.cpuMathCores} math)`);
++    console.log(`  Device:    ${gpuLabel}`);
++
++    if (llama.gpu) {
++      const gpuNames = await llama.getGpuDeviceNames();
++      const counts = new Map<string, number>();
++      for (const name of gpuNames) counts.set(name, (counts.get(name) || 0) + 1);
++      const devStr = Array.from(counts.entries())
++        .map(([name, n]) => n > 1 ? `${n}× ${name}` : name).join(", ");
++      console.log(`  GPU:       ${devStr}`);
++      const vram = await llama.getVramState();
++      console.log(`  VRAM:      ${formatBytes(vram.total)} total, ${formatBytes(vram.free)} free`);
++    }
++
++    console.log(`  RAM:       ${formatBytes(getMemUsage().rss)} RSS at start`);
++
++    // Load model
++    console.log(`\nModel`);
++    console.log(`  URI:       ${RERANK_MODEL}`);
++    const modelPath = await resolveModelFile(RERANK_MODEL, MODEL_CACHE);
++    const vramPreModel = llama.gpu ? await llama.getVramState() : null;
++    model = await llama.loadModel({ modelPath });
++    const vramPostModel = llama.gpu ? await llama.getVramState() : null;
++    const modelVram = vramPreModel && vramPostModel ? vramPostModel.used - vramPreModel.used : 0;
++    console.log(`  Params:    ${model.trainContextSize} train ctx`);
++    if (modelVram > 0) console.log(`  VRAM:      ${formatBytes(modelVram)} (model weights)`);
++
++    // Generate test docs
++    const docs = generateDocs(DOC_COUNT);
++    console.log(`\nBenchmark`);
++    console.log(`  Documents: ${DOC_COUNT}`);
++    console.log(`  Ctx size:  ${CONTEXT_SIZE}`);
++    console.log(`  Iterations:${ITERATIONS}`);
++    console.log(`  Query:     "${QUERY.slice(0, 50)}..."`);
++
++    // Run benchmarks
++    const configErrors: unknown[] = [];
++    for (const p of PARALLEL_CONFIGS) {
++      if (!llama.gpu && p > 1) {
++        // CPU: only test if we have enough cores (at least 4 per context)
++        if (llama.cpuMathCores < p * 4) {
++          console.log(`\n  [${p} ctx] skipped (need ${p * 4} cores, have ${llama.cpuMathCores})`);
++          continue;
++        }
++      }
++
++      // The public ranking API uses the model default; do not label an ignored
++      // per-context option as a flash/no-flash comparison.
++      process.stdout.write(`\n  [${p} ctx, flash=${model.defaultContextFlashAttention}] running...`);
++      try {
++        const r = await benchmarkConfig(model, llama, docs, p);
++        results.push(r);
++        process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
++      } catch (error) {
++        // Failed cleanup contaminates later configurations: stop, release the
++        // parents, and propagate it instead of publishing a misleading summary.
++        if (error instanceof BenchmarkCleanupError) throw error;
++        configErrors.push(error);
++        process.stdout.write(` failed: ${error instanceof Error ? error.message : String(error)}\n`);
+       }
+     }
+-
+-    // The public ranking API uses the model default; do not label an ignored
+-    // per-context option as a flash/no-flash comparison.
+-    process.stdout.write(`\n  [${p} ctx, flash=${model.defaultContextFlashAttention}] running...`);
+-    try {
+-      const r = await benchmarkConfig(model, llama, docs, p);
+-      results.push(r);
+-      process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
+-    } catch (e: any) {
+-      process.stdout.write(` failed: ${e.message}\n`);
+-    }
+-  }
++    if (!results.length) throw new AggregateError(configErrors, "No benchmark configurations succeeded");
++  } catch (error) {
++    operationErrors.push(error);
++    throw error;
++  } finally {
++    // Contexts have settled and had every release attempted by benchmarkConfig.
++    // Always attempt both parent releases, in dependency order.
++    const cleanupErrors = await disposeOwned([...(model ? [model] : []), llama]);
++    if (cleanupErrors.length) throw new BenchmarkCleanupError(
++      [...operationErrors, ...cleanupErrors], "Benchmark resource cleanup failed",
++    );
++  }
++
++  // Publish the summary only after parent cleanup succeeds.
+ 
+   // Summary table
+   console.log("\n═══════════════════════════════════════════════════════════════");
+@@ -303,8 +348,14 @@
+   }
+ 
+   console.log("");
+-  await model.dispose();
+-  await llama.dispose();
+-}
+-
+-main().catch(console.error);
++}
++
++// Native entrypoint flags handle symlinks on Node/Bun; retain a URL fallback
++// for older Node 22 releases without import.meta.main. Imports never launch it.
++if (import.meta.main ?? (process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)) {
++  main().catch(error => {
++    // Keep nested primary/cleanup failures visible on Node as well as Bun.
++    console.error(inspect(error, { depth: null, colors: false }));
++    process.exitCode = 1;
++  });
++}
+diff --git a/src/llm.ts b/src/llm.ts
+--- a/src/llm.ts
++++ b/src/llm.ts
+@@ -1061,10 +1061,8 @@
+    * Load rerank contexts (lazy). Creates multiple contexts for parallel ranking.
+    * Each context has its own sequence, so they can evaluate independently.
+    *
+-   * Tuning choices:
+-   * - contextSize 1024: reranking chunks are ~800 tokens max, 1024 is plenty
+-   * - flashAttention: ~20% less VRAM per context (568 vs 711 MB)
+-   * - Combined: drops from 11.6 GB (auto, no flash) to 568 MB per context (20×)
++   * Ranking contexts inherit the model's default attention selection. The
++   * installed API has no per-ranking-context flashAttention option.
+    */
+   // Qwen3 reranker template adds ~200 tokens overhead (system prompt, tags, etc.)
+   // Default 2048 was too small for longer documents (e.g. session transcripts,
+@@ -1097,9 +1095,10 @@
+         contextSize: LlamaCpp.RERANK_CONTEXT_SIZE,
+         createSignal: lifecycleFor(this).signal,
+         ...(threads > 0 ? { threads } : {}),
+-      };
++      } satisfies NonNullable<Parameters<LlamaModel["createRankingContext"]>[0]>;
+       const contexts = await this.createContextPool(n, async () => {
+-        try { return await model.createRankingContext({ ...contextOptions, flashAttention: true } as any); }
++        // Retry a transient creation refusal once with the same supported options.
++        try { return await model.createRankingContext(contextOptions); }
+         catch (error) {
+           this.checkOperation();
+           return model.createRankingContext(contextOptions);
+diff --git a/test/llm.test.ts b/test/llm.test.ts
+--- a/test/llm.test.ts
++++ b/test/llm.test.ts
+@@ -8,6 +8,11 @@
+  */
+ 
+ import { describe, test, expect, beforeAll, afterAll, vi } from "vitest";
++import { readFileSync } from "node:fs";
++import { createRequire } from "node:module";
++import { dirname, join } from "node:path";
++import type { LlamaModel } from "node-llama-cpp";
++import * as ts from "typescript";
+ import {
+   LlamaCpp,
+   getDefaultLlamaCpp,
+@@ -190,6 +195,133 @@
+     expect(scoreByFile.get("a.md")).toBe(0.9);
+     expect(scoreByFile.get("b.md")).toBe(0.9);
+     expect(scoreByFile.get("c.md")).toBe(0.2);
++  });
++});
++
++describe("LlamaCpp supported ranking-context options and bounded creation", () => {
++  type RankingOptions = NonNullable<Parameters<LlamaModel["createRankingContext"]>[0]>;
++  const dependencyRoot = dirname(createRequire(import.meta.url).resolve("node-llama-cpp"));
++  const declarations = ts.createSourceFile("ranking.d.ts", readFileSync(join(dependencyRoot, "evaluator/LlamaRankingContext.d.ts"), "utf8"), ts.ScriptTarget.Latest, true);
++  const optionsType = declarations.statements.find(node => ts.isTypeAliasDeclaration(node) && node.name.text === "LlamaRankingContextOptions");
++  if (!optionsType || !ts.isTypeAliasDeclaration(optionsType) || !ts.isTypeLiteralNode(optionsType.type)) throw new Error("Installed ranking options declaration not found");
++  const supported = optionsType.type.members.map(node => node.name?.getText(declarations));
++  const context = () => ({ dispose: vi.fn(async () => {}) });
++  function setup(threads = 8, count = 7) {
++    const llm = new LlamaCpp({ embedBackend: "gguf", inactivityTimeoutMs: 0 }) as any;
++    const createRankingContext = vi.fn(async (_options: RankingOptions) => context());
++    llm.ensureRerankModel = vi.fn(async () => ({ createRankingContext }));
++    llm.computeParallelism = vi.fn(async () => count);
++    llm.threadsPerContext = vi.fn(async () => threads);
++    return { llm, createRankingContext };
++  }
++  function assertSupported(options: RankingOptions) {
++    expect(Object.keys(options).filter(key => !supported.includes(key))).toEqual([]);
++    expect(options).not.toHaveProperty("flashAttention");
++    expect(options.createSignal).toBeInstanceOf(AbortSignal);
++    expect(options.createSignal!.aborted).toBe(false);
++  }
++  test("installed declarations and runtime agree: no per-ranking-context flash option", () => {
++    expect(supported).toEqual(["contextSize", "batchSize", "threads", "createSignal", "template", "ignoreMemorySafetyChecks"]);
++    const runtime = ts.createSourceFile("ranking.js", readFileSync(join(dependencyRoot, "evaluator/LlamaRankingContext.js"), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
++    const ranking = runtime.statements.find(ts.isClassDeclaration);
++    const create = ranking?.members.find(node => ts.isMethodDeclaration(node) && node.name.getText(runtime) === "_create");
++    expect(create && ts.isMethodDeclaration(create) && create.parameters[1]?.name.getText(runtime)).toBe("{ contextSize, batchSize, threads, createSignal, template, ignoreMemorySafetyChecks }");
++    expect(create?.getText(runtime)).not.toContain("flashAttention");
++  });
++  test.each([0, 8])("only forwards supported options, preserving threads=%s and the four-context cap", async threads => {
++    const { llm, createRankingContext } = setup(threads);
++    try {
++      const contexts = await llm.ensureRerankContexts();
++      expect(contexts).toHaveLength(4);
++      expect(createRankingContext).toHaveBeenCalledTimes(4);
++      expect(llm.computeParallelism).toHaveBeenCalledWith(1000);
++      expect(llm.threadsPerContext).toHaveBeenCalledWith(4);
++      for (const [options] of createRankingContext.mock.calls) {
++        assertSupported(options);
++        expect(options.contextSize).toBe((LlamaCpp as any).RERANK_CONTEXT_SIZE);
++        expect(Object.keys(options).sort()).toEqual(threads > 0 ? ["contextSize", "createSignal", "threads"] : ["contextSize", "createSignal"]);
++        if (threads > 0) expect(options.threads).toBe(threads);
++      }
++      expect(await llm.ensureRerankContexts()).toBe(contexts);
++    } finally { await llm.dispose(); }
++  });
++  test("retry is once with the same supported options and signal, not a flash fallback", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    const ctx = context();
++    createRankingContext.mockRejectedValueOnce(new Error("transient")).mockResolvedValueOnce(ctx);
++    try {
++      expect(await llm.ensureRerankContexts()).toEqual([ctx]);
++      expect(createRankingContext).toHaveBeenCalledTimes(2);
++      const options = createRankingContext.mock.calls.map(call => call[0]);
++      options.forEach(assertSupported);
++      expect(options[0]).toEqual(options[1]);
++      expect(options[0]!.createSignal).toBe(options[1]!.createSignal);
++    } finally { await llm.dispose(); }
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++  });
++  test("exhausted retry cleans earlier owned contexts and does not publish a partial pool", async () => {
++    const { llm, createRankingContext } = setup(8, 2);
++    const ctx = context();
++    const fault = new Error("capacity");
++    createRankingContext.mockResolvedValueOnce(ctx).mockRejectedValue(fault);
++    try {
++      await expect(llm.ensureRerankContexts()).rejects.toBe(fault);
++      expect(createRankingContext).toHaveBeenCalledTimes(3);
++      expect(llm.rerankContexts).toEqual([]);
++      expect(ctx.dispose).toHaveBeenCalledTimes(1);
++    } finally { await llm.dispose(); }
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++  });
++  test("close cancellation aborts createSignal and prevents the retry", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    let started!: () => void;
++    const began = new Promise<void>(resolve => { started = resolve; });
++    let signal!: AbortSignal;
++    createRankingContext.mockImplementationOnce(options => {
++      signal = options.createSignal!;
++      started();
++      return new Promise((_, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true }));
++    });
++    const work = llm.ensureRerankContexts();
++    const rejected = expect(work).rejects.toThrow(/clos|dispos/i);
++    await began;
++    await llm.dispose();
++    await rejected;
++    expect(signal.aborted).toBe(true);
++    expect(createRankingContext).toHaveBeenCalledTimes(1);
++    expect(llm.rerankContexts).toEqual([]);
++  });
++  test("a context arriving after close remains owned and is released, not published", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    let release!: (ctx: ReturnType<typeof context>) => void;
++    let started!: () => void;
++    const began = new Promise<void>(resolve => { started = resolve; });
++    createRankingContext.mockImplementationOnce(() => { started(); return new Promise(resolve => { release = resolve; }); });
++    const ctx = context();
++    const work = llm.ensureRerankContexts();
++    const rejected = expect(work).rejects.toThrow(/clos|dispos/i);
++    await began;
++    const closing = llm.dispose();
++    release(ctx);
++    await rejected;
++    await closing;
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++    expect(createRankingContext).toHaveBeenCalledTimes(1);
++    expect(llm.rerankContexts).toEqual([]);
++  });
++  test("model loading still forwards only modelPath and lifecycle loadSignal", async () => {
++    const llm = new LlamaCpp({ embedBackend: "gguf", inactivityTimeoutMs: 0 }) as any;
++    const model = { dispose: vi.fn(async () => {}) };
++    const llama = { loadModel: vi.fn(async (_options: object) => model), dispose: vi.fn(async () => {}) };
++    llm.llama = llama;
++    llm.ensureLlama = vi.fn(async () => llama);
++    llm.resolveModel = vi.fn(async () => "/synthetic/model.gguf");
++    try {
++      expect(await llm.ensureRerankModel()).toBe(model);
++      const options = llama.loadModel.mock.calls[0]![0];
++      expect(Object.keys(options).sort()).toEqual(["loadSignal", "modelPath"]);
++      expect(options).toMatchObject({ modelPath: "/synthetic/model.gguf", loadSignal: expect.any(AbortSignal) });
++    } finally { await llm.dispose(); }
+   });
+ });
+ 
+diff --git a/test/bench-rerank-lifecycle.test.ts b/test/bench-rerank-lifecycle.test.ts
+new file mode 100644
+--- /dev/null
++++ b/test/bench-rerank-lifecycle.test.ts
+@@ -0,0 +1,458 @@
++import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
++import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
++import { join } from "node:path";
++import { tmpdir } from "node:os";
++import { pathToFileURL } from "node:url";
++import { spawnSync } from "node:child_process";
++import { createHash } from "node:crypto";
++import * as ts from "typescript";
++
++// Synthetic ownership/CLI tests only: no native library, models, GPU or inference.
++// Run the complete actual module after changing ONLY its external dependency
++// import and adding test exports. Verify the emitted executable bodies are exact.
++type Context = {
++  rankAll: ReturnType<typeof vi.fn<(query: string, docs: string[]) => Promise<number[]>>>;
++  dispose: ReturnType<typeof vi.fn<() => Promise<void>>>;
++};
++function fixture() {
++  const events: string[] = [];
++  const contexts: Context[] = [];
++  const model = {
++    defaultContextFlashAttention: "auto" as const,
++    trainContextSize: 4096,
++    createRankingContext: vi.fn(async (_options: object) => {
++      const index = contexts.length;
++      const context: Context = {
++        rankAll: vi.fn(async (_query: string, docs: string[]) => docs.map(() => 0.5)),
++        dispose: vi.fn(async () => { events.push(`context:${index}`); }),
++      };
++      contexts.push(context);
++      return context;
++    }),
++    dispose: vi.fn(async () => { events.push("model"); }),
++  };
++  const llama = {
++    gpu: false as false | "metal",
++    cpuMathCores: 8,
++    getVramState: vi.fn(async () => ({ used: 100, total: 1000, free: 900 })),
++    getGpuDeviceNames: vi.fn(async () => ["synthetic"]),
++    loadModel: vi.fn(async (_options: object) => model),
++    dispose: vi.fn(async () => { events.push("llama"); }),
++  };
++  return { contexts, model, llama, events };
++}
++type Fixture = ReturnType<typeof fixture>;
++type BenchResult = { parallelism: number; times: number[]; medianMs: number; docsPerSec: number; flashAttention: boolean | "auto" };
++type BenchModule = {
++  benchmarkConfig(model: Fixture["model"], llama: Fixture["llama"], docs: string[], parallelism: number): Promise<BenchResult>;
++  main(): Promise<void>;
++};
++let bench: BenchModule;
++let native: { setBackend(llama: Fixture["llama"], resolve?: () => Promise<string>): void };
++let directory: string;
++let modulePath: string;
++const docs = ["a", "b", "c", "d"];
++
++const nativeStub = `
++import { appendFileSync } from "node:fs";
++const mode = process.env.QMD_BENCH_FAKE_MODE;
++const trace = (event) => { if (process.env.QMD_BENCH_FAKE_TRACE) appendFileSync(process.env.QMD_BENCH_FAKE_TRACE, event + "\\n"); };
++let backend;
++let resolve;
++export function setBackend(value, resolver = async () => "/synthetic/model.gguf") { backend = value; resolve = resolver; }
++export const LlamaLogLevel = { error: "error" };
++export async function resolveModelFile() {
++  trace("resolve");
++  if (resolve) return resolve();
++  if (mode === "resolve-failure") throw new Error("resolve-fault");
++  return "/synthetic/model.gguf";
++}
++export async function getLlama() {
++  trace("llama:create");
++  if (backend) return backend;
++  if (!mode) throw new Error("synthetic backend not configured");
++  let index = 0;
++  const model = {
++    defaultContextFlashAttention: "auto", trainContextSize: 4096,
++    async createRankingContext(options) {
++      if (Object.keys(options).some(key => !["contextSize", "threads"].includes(key))) throw new Error("unsupported-context-option");
++      const id = index++;
++      trace("context:create:" + id);
++      return {
++        async rankAll(_query, docs) {
++          trace("rank:" + id);
++          if (mode === "rank-failure" || mode === "operation-cleanup-failure") throw new Error("rank-fault");
++          return docs.map(() => 0.5);
++        },
++        async dispose() {
++          trace("context:dispose:" + id);
++          if (mode === "context-cleanup-failure") throw new Error("context-cleanup-fault");
++        }
++      };
++    },
++    async dispose() {
++      trace("model:dispose");
++      if (mode === "model-cleanup-failure" || mode === "operation-cleanup-failure") throw new Error("model-cleanup-fault");
++    }
++  };
++  return {
++    gpu: false, cpuMathCores: 4,
++    async loadModel() { trace("model:create"); return model; },
++    async dispose() {
++      trace("llama:dispose");
++      if (mode === "operation-cleanup-failure") throw new Error("llama-cleanup-fault");
++    }
++  };
++}
++`;
++
++beforeAll(async () => {
++  directory = mkdtempSync(join(tmpdir(), "qmd-bench-lifecycle-"));
++  const sourcePath = new URL("../src/bench-rerank.ts", import.meta.url);
++  const source = readFileSync(sourcePath, "utf8");
++  const ast = ts.createSourceFile("bench-rerank.ts", source, ts.ScriptTarget.Latest, true);
++  const imports = ast.statements.filter(ts.isImportDeclaration);
++  const dependency = imports.filter(node => ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === "node-llama-cpp");
++  expect(dependency).toHaveLength(1);
++  const specifier = dependency[0]!.moduleSpecifier;
++  const stubPath = join(directory, "synthetic-native.mjs");
++  writeFileSync(stubPath, nativeStub, { flag: "wx" });
++  const rewritten = source.slice(0, specifier.getStart(ast)) + JSON.stringify(pathToFileURL(stubPath).href) + source.slice(specifier.end);
++  const compile = (text: string) => ts.transpileModule(text, {
++    compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext },
++    reportDiagnostics: true,
++  });
++  const original = compile(source);
++  const compiled = compile(rewritten + "\nexport { benchmarkConfig, main };\n");
++  expect(compiled.diagnostics).toEqual([]);
++  const bodies = (text: string) => {
++    const parsed = ts.createSourceFile("bench.mjs", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
++    return parsed.statements.filter(node => !ts.isImportDeclaration(node) && !ts.isExportDeclaration(node))
++      .map(node => node.getText(parsed)).join("\n");
++  };
++  expect(bodies(compiled.outputText)).toBe(bodies(original.outputText));
++  if (process.env.QMD_BENCH_TEST_RECEIPT) writeFileSync(process.env.QMD_BENCH_TEST_RECEIPT, JSON.stringify({
++    executable: process.execPath, versions: process.versions,
++    sourceSha256: createHash("sha256").update(source).digest("hex"),
++    exactExecutableBodiesVerified: true, syntheticResourcesOnly: true, nativeModelOrGpuRuns: 0,
++  }, null, 2), { flag: "wx" });
++  modulePath = join(directory, "actual-benchmark.mjs");
++  writeFileSync(modulePath, compiled.outputText, { flag: "wx" });
++  native = await import(pathToFileURL(stubPath).href) as typeof native;
++  bench = await import(pathToFileURL(modulePath).href) as BenchModule;
++});
++afterAll(() => { if (directory) rmSync(directory, { recursive: true, force: true }); });
++
++async function acquired(f: Fixture, count = 2) {
++  for (let i = 0; i < count; i++) await f.model.createRankingContext({});
++  f.model.createRankingContext.mockReset();
++  for (const context of f.contexts) f.model.createRankingContext.mockResolvedValueOnce(context);
++}
++function allClosed(f: Fixture) {
++  expect(f.contexts.map(context => context.dispose.mock.calls.length)).toEqual(f.contexts.map(() => 1));
++}
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  const promise = new Promise<T>(done => { resolve = done; });
++  return { promise, resolve };
++}
++async function runMain(f: Fixture, resolver?: () => Promise<string>) {
++  native.setBackend(f.llama, resolver);
++  const log = vi.spyOn(console, "log").mockImplementation(() => {});
++  const write = vi.spyOn(process.stdout, "write").mockReturnValue(true);
++  try { await bench.main(); }
++  finally { log.mockRestore(); write.mockRestore(); }
++}
++
++describe("rerank benchmark ownership", () => {
++  test("successful runs retain measurement, default attention and CPU routing", async () => {
++    const f = fixture();
++    const result = await bench.benchmarkConfig(f.model, f.llama, docs, 2);
++    expect(result.parallelism).toBe(2);
++    expect(result.flashAttention).toBe("auto");
++    expect(result.times).toHaveLength(3);
++    expect(result.times.every(value => Number.isFinite(value) && value >= 0)).toBe(true);
++    expect(f.model.createRankingContext.mock.calls).toEqual(Array.from({ length: 2 }, () => [{ contextSize: 2048, threads: 4 }]));
++    expect(f.contexts[0]!.rankAll.mock.calls.slice(1).map(call => call[1])).toEqual(Array.from({ length: 3 }, () => docs.slice(0, 2)));
++    expect(f.contexts[1]!.rankAll.mock.calls.map(call => call[1])).toEqual(Array.from({ length: 3 }, () => docs.slice(2)));
++    allClosed(f);
++  });
++  test("contexts with empty chunks are released without starting rankings", async () => {
++    const f = fixture();
++    const result = await bench.benchmarkConfig(f.model, f.llama, ["only"], 4);
++    expect(result.parallelism).toBe(4);
++    expect(f.contexts.slice(1).map(context => context.rankAll.mock.calls.length)).toEqual([0, 0, 0]);
++    allClosed(f);
++  });
++  test("partial capacity is still usable and owned", async () => {
++    const f = fixture();
++    await acquired(f, 1);
++    f.model.createRankingContext.mockRejectedValueOnce(new Error("capacity"));
++    const result = await bench.benchmarkConfig(f.model, f.llama, docs, 4);
++    expect(result.parallelism).toBe(1);
++    expect(f.model.createRankingContext).toHaveBeenCalledTimes(2);
++    allClosed(f);
++  });
++  test("first-context retry stays bounded with identical supported options", async () => {
++    const f = fixture();
++    await acquired(f, 1);
++    f.model.createRankingContext.mockReset().mockRejectedValueOnce(new Error("capacity")).mockResolvedValueOnce(f.contexts[0]!);
++    const result = await bench.benchmarkConfig(f.model, f.llama, docs, 4);
++    expect(result.parallelism).toBe(1);
++    expect(f.model.createRankingContext.mock.calls).toEqual(Array.from({ length: 2 }, () => [{ contextSize: 2048, threads: 2 }]));
++    allClosed(f);
++  });
++  test("exhausted first-context retry propagates and acquires nothing", async () => {
++    const f = fixture();
++    const fault = new Error("retry exhausted");
++    f.model.createRankingContext.mockRejectedValue(fault);
++    await expect(bench.benchmarkConfig(f.model, f.llama, docs, 4)).rejects.toBe(fault);
++    expect(f.model.createRankingContext).toHaveBeenCalledTimes(2);
++    expect(f.contexts).toEqual([]);
++  });
++  test("zero contexts refuse without ranking or disposal", async () => {
++    const f = fixture();
++    await expect(bench.benchmarkConfig(f.model, f.llama, docs, 0)).rejects.toThrow("No ranking contexts created");
++    expect(f.model.createRankingContext).not.toHaveBeenCalled();
++  });
++  test("post-acquisition metadata failure releases every context", async () => {
++    const f = fixture();
++    f.llama.gpu = "metal";
++    const fault = new Error("vram metadata");
++    f.llama.getVramState.mockResolvedValueOnce({ used: 0, total: 1000, free: 1000 }).mockRejectedValueOnce(fault);
++    await expect(bench.benchmarkConfig(f.model, f.llama, docs, 2)).rejects.toBe(fault);
++    allClosed(f);
++    expect(f.contexts[0]!.rankAll).not.toHaveBeenCalled();
++    expect(f.model.createRankingContext.mock.calls).toEqual(Array.from({ length: 2 }, () => [{ contextSize: 2048 }]));
++  });
++  test("warmup failure releases every context", async () => {
++    const f = fixture();
++    await acquired(f);
++    const fault = new Error("warmup");
++    f.contexts[0]!.rankAll.mockRejectedValueOnce(fault);
++    await expect(bench.benchmarkConfig(f.model, f.llama, docs, 2)).rejects.toBe(fault);
++    allClosed(f);
++  });
++  test.each([NaN, -0.1, 1.1])("score validation failure releases every context (%s)", async score => {
++    const f = fixture();
++    await acquired(f);
++    f.contexts[1]!.rankAll.mockResolvedValue([score]);
++    await expect(bench.benchmarkConfig(f.model, f.llama, docs, 2)).rejects.toThrow("Invalid scores detected");
++    allClosed(f);
++  });
++  test.each([false, true])("drains started rankings before disposal, including sync throw=%s", async sync => {
++    const f = fixture();
++    await acquired(f);
++    const started = deferred<void>();
++    const release = deferred<number[]>();
++    const fault = new Error("ranking");
++    f.contexts[0]!.rankAll.mockResolvedValueOnce([0.5]).mockImplementationOnce(() => {
++      if (sync) throw fault;
++      return Promise.reject(fault);
++    });
++    let active = false;
++    f.contexts[1]!.rankAll.mockImplementationOnce(async () => {
++      active = true;
++      started.resolve();
++      try { return await release.promise; } finally { active = false; }
++    });
++    for (const context of f.contexts) context.dispose.mockImplementation(async () => { expect(active).toBe(false); });
++    let returned = false;
++    const work = bench.benchmarkConfig(f.model, f.llama, docs, 2).finally(() => { returned = true; });
++    const outcome = work.catch(error => error as unknown);
++    let timer: ReturnType<typeof setTimeout> | undefined;
++    const timeout = new Promise<never>((_, reject) => {
++      timer = setTimeout(() => reject(new Error("sibling was not started")), 1000);
++    });
++    try {
++      // Race is a test bound, never a production cancellation/disposal timeout.
++      await Promise.race([started.promise, timeout]);
++      await new Promise<void>(resolve => setImmediate(resolve));
++      expect(returned).toBe(false);
++      expect(f.contexts.map(context => context.dispose.mock.calls.length)).toEqual([0, 0]);
++    } finally {
++      clearTimeout(timer);
++      release.resolve([0.5]);
++      await outcome;
++    }
++    expect(await outcome).toBe(fault);
++    allClosed(f);
++  });
++  test("retains multiple parallel ranking failures", async () => {
++    const f = fixture();
++    await acquired(f);
++    const faults = [new Error("rank 0"), new Error("rank 1")];
++    f.contexts[0]!.rankAll.mockResolvedValueOnce([0.5]).mockRejectedValueOnce(faults[0]);
++    f.contexts[1]!.rankAll.mockRejectedValueOnce(faults[1]);
++    const error = await bench.benchmarkConfig(f.model, f.llama, docs, 2).catch(error => error as AggregateError);
++    expect(error).toBeInstanceOf(AggregateError);
++    expect((error as AggregateError).errors).toEqual(faults);
++    allClosed(f);
++  });
++  test.each([false, true])("attempts all cleanup and retains primary failure=%s", async primary => {
++    const f = fixture();
++    await acquired(f);
++    const operation = new Error("operation");
++    const cleanup = [new Error("dispose 0"), new Error("dispose 1")];
++    if (primary) f.contexts[0]!.rankAll.mockRejectedValueOnce(operation);
++    f.contexts.forEach((context, i) => context.dispose.mockRejectedValueOnce(cleanup[i]));
++    const error = await bench.benchmarkConfig(f.model, f.llama, docs, 2).catch(error => error as AggregateError);
++    expect(error).toBeInstanceOf(AggregateError);
++    expect((error as AggregateError).errors).toEqual(primary ? [operation, ...cleanup] : cleanup);
++    allClosed(f);
++  });
++});
++
++describe("rerank benchmark top-level ownership", () => {
++  test("resolution failure still releases llama", async () => {
++    const f = fixture();
++    const fault = new Error("resolve");
++    await expect(runMain(f, async () => { throw fault; })).rejects.toBe(fault);
++    expect(f.events).toEqual(["llama"]);
++    expect(f.llama.loadModel).not.toHaveBeenCalled();
++  });
++  test("model-load failure still releases llama", async () => {
++    const f = fixture();
++    const fault = new Error("load");
++    f.llama.loadModel.mockRejectedValueOnce(fault);
++    await expect(runMain(f)).rejects.toBe(fault);
++    expect(f.events).toEqual(["llama"]);
++    expect(f.model.dispose).not.toHaveBeenCalled();
++  });
++  test("system metadata failure still releases llama", async () => {
++    const f = fixture();
++    f.llama.gpu = "metal";
++    const fault = new Error("device metadata");
++    f.llama.getGpuDeviceNames.mockRejectedValueOnce(fault);
++    await expect(runMain(f)).rejects.toBe(fault);
++    expect(f.events).toEqual(["llama"]);
++    expect(f.llama.loadModel).not.toHaveBeenCalled();
++  });
++  test("post-model metadata failure releases model then llama", async () => {
++    const f = fixture();
++    const fault = new Error("metadata");
++    Object.defineProperty(f.model, "trainContextSize", { get() { throw fault; } });
++    await expect(runMain(f)).rejects.toBe(fault);
++    expect(f.events).toEqual(["model", "llama"]);
++  });
++  test("no valid results is fatal and still cleans up in order", async () => {
++    const f = fixture();
++    f.llama.cpuMathCores = 4;
++    await acquired(f, 1);
++    const fault = new Error("rank");
++    f.contexts[0]!.rankAll.mockRejectedValueOnce(fault);
++    const error = await runMain(f).catch(error => error as AggregateError);
++    expect(error).toBeInstanceOf(AggregateError);
++    expect((error as AggregateError).errors).toEqual([fault]);
++    expect(f.events).toEqual(["context:0", "model", "llama"]);
++  });
++  test("ordinary per-config failure can still produce partial valid results", async () => {
++    const f = fixture();
++    f.llama.cpuMathCores = 16;
++    const original = f.model.createRankingContext.getMockImplementation()!;
++    f.model.createRankingContext.mockImplementationOnce(async options => {
++      const context = await original(options);
++      context.rankAll.mockRejectedValueOnce(new Error("first config"));
++      return context;
++    });
++    await runMain(f);
++    expect(f.contexts).toHaveLength(7); // 1 failed + 2 + 4; 8 skipped by the unchanged CPU gate.
++    allClosed(f);
++    expect(f.events.slice(-2)).toEqual(["model", "llama"]);
++  });
++  test("context cleanup failure is fatal: no next config or summary", async () => {
++    const f = fixture();
++    f.llama.cpuMathCores = 32;
++    await acquired(f, 1);
++    const fault = new Error("context cleanup");
++    f.contexts[0]!.dispose.mockRejectedValueOnce(fault);
++    const error = await runMain(f).catch(error => error as AggregateError);
++    expect(error).toBeInstanceOf(AggregateError);
++    expect((error as AggregateError).errors).toEqual([fault]);
++    expect(f.model.createRankingContext).toHaveBeenCalledTimes(1);
++    expect(f.events).toEqual(["model", "llama"]);
++  });
++  test("successful summary follows all parent releases", async () => {
++    const f = fixture();
++    f.llama.cpuMathCores = 4;
++    native.setBackend(f.llama);
++    const log = vi.spyOn(console, "log").mockImplementation(message => {
++      if (message === "  Results") f.events.push("summary");
++    });
++    const write = vi.spyOn(process.stdout, "write").mockReturnValue(true);
++    try {
++      await bench.main();
++      expect(f.events).toEqual(["context:0", "model", "llama", "summary"]);
++    } finally { log.mockRestore(); write.mockRestore(); }
++  });
++  test("parent cleanup failures are all attempted and block summary publication", async () => {
++    const f = fixture();
++    f.llama.cpuMathCores = 4;
++    const failures = [new Error("model cleanup"), new Error("llama cleanup")];
++    f.model.dispose.mockRejectedValueOnce(failures[0]);
++    f.llama.dispose.mockRejectedValueOnce(failures[1]);
++    native.setBackend(f.llama);
++    const log = vi.spyOn(console, "log").mockImplementation(() => {});
++    const write = vi.spyOn(process.stdout, "write").mockReturnValue(true);
++    try {
++      const error = await bench.main().catch(error => error as AggregateError);
++      expect(error).toBeInstanceOf(AggregateError);
++      expect((error as AggregateError).errors).toEqual(failures);
++      expect(log.mock.calls.flat().join("\n")).not.toMatch(/Results|Best:/);
++      expect(f.model.dispose).toHaveBeenCalledTimes(1);
++      expect(f.llama.dispose).toHaveBeenCalledTimes(1);
++    } finally { log.mockRestore(); write.mockRestore(); }
++  });
++});
++
++describe("actual benchmark entrypoint (synthetic dependency only)", () => {
++  test("importing the complete module does not acquire models or emit benchmark output", () => {
++    const trace = join(directory, "import.trace");
++    writeFileSync(trace, "", { flag: "wx" });
++    const result = spawnSync(process.execPath, ["--input-type=module", "-e", `await import(${JSON.stringify(pathToFileURL(modulePath).href)})`], {
++      cwd: directory, env: { ...process.env, QMD_BENCH_FAKE_MODE: "success", QMD_BENCH_FAKE_TRACE: trace }, encoding: "utf8", timeout: 10000,
++    });
++    expect(result.error).toBeUndefined();
++    expect(result.status).toBe(0);
++    expect(result.stdout).toBe("");
++    expect(result.stderr).toBe("");
++    expect(readFileSync(trace, "utf8")).toBe("");
++  });
++  test.each(["success", "rank-failure"])("symlink entrypoint runs rather than silently exiting (%s)", mode => {
++    const entry = join(directory, `${mode}-entry.mjs`);
++    symlinkSync(modulePath, entry);
++    const result = spawnSync(process.execPath, [entry, "--quick"], {
++      cwd: directory, env: { ...process.env, QMD_BENCH_FAKE_MODE: mode }, encoding: "utf8", timeout: 10000,
++    });
++    expect(result.error).toBeUndefined();
++    expect(result.status).toBe(mode === "success" ? 0 : 1);
++    expect(result.stdout).toContain("QMD Reranker Benchmark");
++    if (mode === "success") expect(result.stdout).toContain("Best:");
++  });
++  test.each([
++    ["success", 0, ["model:dispose", "llama:dispose"]],
++    ["resolve-failure", 1, ["llama:dispose"]],
++    ["rank-failure", 1, ["context:dispose:0", "model:dispose", "llama:dispose"]],
++    ["context-cleanup-failure", 1, ["context:dispose:0", "model:dispose", "llama:dispose"]],
++    ["model-cleanup-failure", 1, ["context:dispose:0", "model:dispose", "llama:dispose"]],
++    ["operation-cleanup-failure", 1, ["context:dispose:0", "model:dispose", "llama:dispose"]],
++  ] as const)("CLI mode %s has honest exit and cleanup", (mode, code, suffix) => {
++    const trace = join(directory, `${mode}.trace`);
++    writeFileSync(trace, "", { flag: "wx" });
++    const result = spawnSync(process.execPath, [modulePath, "--quick"], {
++      cwd: directory, env: { ...process.env, QMD_BENCH_FAKE_MODE: mode, QMD_BENCH_FAKE_TRACE: trace }, encoding: "utf8", timeout: 10000,
++    });
++    expect(result.error).toBeUndefined();
++    expect(result.status).toBe(code);
++    const events = readFileSync(trace, "utf8").trim().split("\n");
++    expect(events.slice(-suffix.length)).toEqual(suffix);
++    if (code === 0) expect(result.stdout).toContain("Best:");
++    else {
++      expect(result.stdout).not.toMatch(/Results|Best:/);
++      expect(result.stderr).not.toBe("");
++    }
++    if (mode === "operation-cleanup-failure") {
++      for (const message of ["rank-fault", "model-cleanup-fault", "llama-cleanup-fault"]) expect(result.stderr).toContain(message);
++    }
++  });
++});

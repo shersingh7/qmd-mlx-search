@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror
+
+···············································-------------------------------························································---------·························································································································
+
+ Test Files  13 passed (13)
+      Tests  224 passed | 40 skipped (264)
+   Start at  21:15:49
+   Duration  2.03s (transform 529ms, setup 65ms, import 2.10s, tests 1.06s, environment 1ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/bun-composed-focused-results.json

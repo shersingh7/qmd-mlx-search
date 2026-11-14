@@ -1,0 +1,171 @@
+"""Semantic-call instrumentation of unchanged recovery source for held-out probes."""
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import sys
+import time
+
+SPEC = json.loads(Path(sys.argv[2]).read_text())
+SOURCE = SPEC['source']
+ROOT = Path(SPEC['root'])
+os.dup2(1, 3)
+sys.path.insert(0, os.path.dirname(SOURCE))
+code = Path(SOURCE).read_bytes()
+scope = {'__name__': 'independent_heldout'}
+exec(compile(code, SOURCE, 'exec'), scope)
+owner = os.getpid()
+original_read, original_write, original_fork = os.read, os.write, os.fork
+original_waitpid, original_setpgid, original_killpg = os.waitpid, os.setpgid, os.killpg
+original_select, original_signal = select.select, signal.signal
+
+def event(kind, **values):
+    record = {'kind': kind, 'pid': os.getpid(), 'owner': owner, 'at': time.monotonic(), **values}
+    with (ROOT / 'events.jsonl').open('a') as output:
+        output.write(json.dumps(record) + '\n')
+    (ROOT / ('event-' + kind)).touch()
+
+event('source', sha256=hashlib.sha256(code).hexdigest(), executable=sys.executable, python=sys.version,
+      monotonic=str(time.get_clock_info('monotonic')))
+
+original_send = scope['send']
+def send(message):
+    if message['type'] == 'prepared':
+        frame = sys._getframe().f_back
+        event('prepared-anchor', preparedAt=frame.f_locals.get('prepared_at'),
+              deadline=frame.f_locals.get('admission_deadline'))
+        time.sleep(SPEC.get('prepared_delay', 0))
+    if message['type'] == 'ready' and SPEC.get('proof_error'):
+        os.close(3)
+        event('proof-fd-closed')
+    return original_send(message)
+scope['send'] = send
+
+original_allowed = scope['execution_allowed']
+def allowed(parent_read, deadline):
+    event('child-gate-enter', deadline=deadline, fd=parent_read,
+          inheritable=os.get_inheritable(parent_read), blocking=os.get_blocking(parent_read))
+    time.sleep(SPEC.get('child_gate_delay', 0))
+    if SPEC.get('child_fd_error'):
+        os.close(parent_read)
+        event('child-fd-closed')
+    before = time.monotonic()
+    result = original_allowed(parent_read, deadline)
+    event('child-gate-result', allowed=result, remainingMs=(deadline-before)*1000, deadline=deadline)
+    return result
+scope['execution_allowed'] = allowed
+
+original_contain = scope['no_fork']
+def contain():
+    event('containment-enter')
+    original_contain()
+    event('containment-applied')
+    time.sleep(SPEC.get('containment_delay', 0))
+scope['no_fork'] = contain
+
+original_refuse = scope['refuse_execution']
+def refuse(session):
+    event('refusal-enter', target=session, currentGroup=os.getpgrp(), currentSession=os.getsid(0))
+    return original_refuse(session)
+scope['refuse_execution'] = refuse
+
+def setpgid(pid, group):
+    try:
+        value = original_setpgid(pid, group)
+    except OSError as error:
+        event('setpgid-error', target=pid, group=group, errno=error.errno)
+        raise
+    event('setpgid', target=pid, group=group, currentGroup=os.getpgrp(), currentSession=os.getsid(0))
+    return value
+
+def killpg(group, number):
+    event('group-signal', group=group, signal=number, pinned=os.getpgrp()==group,
+          currentSession=os.getsid(0), termBlocked=signal.SIGTERM in signal.pthread_sigmask(signal.SIG_BLOCK, set()))
+    return original_killpg(group, number)
+os.setpgid, os.killpg = setpgid, killpg
+
+def read(fd, n):
+    data = original_read(fd, n)
+    if os.getpid() == owner and fd == 0:
+        frame = sys._getframe().f_back
+        while frame and not (frame.f_code.co_filename == SOURCE and frame.f_code.co_name == 'main'):
+            frame = frame.f_back
+        event('control-read', dataHex=data.hex(), preExec=frame is not None and frame.f_locals.get('launch_eof') is False)
+        if data.startswith(b'S') and SPEC.get('s_read_delay'):
+            event('s-consumed')
+            time.sleep(SPEC['s_read_delay'])
+        if data == b'E' and SPEC.get('consumed_hold'):
+            event('e-consumed')
+            time.sleep(SPEC['consumed_hold'])
+    return data
+
+def write(fd, data):
+    if os.getpid() == owner and fd != 3 and data == b'E' and SPEC.get('queue_before_forward'):
+        event('await-cancel')
+        readable, _, _ = original_select([0], [], [], .050)
+        event('cancel-readable', readable=bool(readable))
+        assert readable, 'held-out queue must be actually readable before forwarding'
+    value = original_write(fd, data)
+    if os.getpid() == owner and fd != 3 and data == b'E':
+        event('e-forwarded')
+        if SPEC.get('owner_control_error'):
+            os.close(0)
+            event('control-fd-closed')
+        time.sleep(SPEC.get('forward_hold', 0))
+    return value
+
+def fork():
+    if os.getpid() == owner and SPEC.get('pre_fork_delay'):
+        event('before-fork')
+        time.sleep(SPEC['pre_fork_delay'])
+    pid = original_fork()
+    if pid:
+        frame = sys._getframe().f_back
+        event('fork-parent', child=pid, inheritedDeadline=frame.f_locals.get('admission_deadline'))
+    else:
+        event('fork-child')
+    return pid
+
+def waitpid(*args):
+    result = original_waitpid(*args)
+    event('waitpid', reaped=result[0], status=result[1])
+    return result
+
+def selecting(reads, writes, errors, timeout=None):
+    result = original_select(reads, writes, errors, timeout)
+    if os.getpid() == owner and timeout == 0 and reads == [0] and result[0] and SPEC.get('poll_hold'):
+        frame = sys._getframe().f_back
+        pre_exec = frame.f_code.co_filename == SOURCE and frame.f_locals.get('launch_eof') is False
+        if pre_exec:
+            event('pre-exec-readable-held')
+            time.sleep(SPEC['poll_hold'])
+    return result
+os.read, os.write, os.fork, os.waitpid, select.select = read, write, fork, waitpid, selecting
+
+if SPEC.get('double_term'):
+    tree = ast.parse(code, SOURCE)
+    main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
+    target = next(node.body[0].lineno for node in ast.walk(main) if isinstance(node, ast.ExceptHandler)
+                  and isinstance(node.type, ast.Name) and node.type.id == 'StartupCancelled')
+    second_sent = False
+    def installing(number, handler):
+        if callable(handler) and number in (signal.SIGTERM, signal.SIGINT):
+            def observed(*args):
+                event('interrupt-handler', signal=number)
+                return handler(*args)
+            return original_signal(number, observed)
+        return original_signal(number, handler)
+    signal.signal = installing
+    def trace(frame, kind, argument):
+        global second_sent
+        if not second_sent and os.getpid() == owner and kind == 'line' and frame.f_code.co_filename == SOURCE and frame.f_lineno == target:
+            second_sent = True
+            event('second-term-at-exception-transfer')
+            os.kill(os.getpid(), signal.SIGTERM)
+        return trace
+    sys.settrace(trace)
+
+scope['main']()

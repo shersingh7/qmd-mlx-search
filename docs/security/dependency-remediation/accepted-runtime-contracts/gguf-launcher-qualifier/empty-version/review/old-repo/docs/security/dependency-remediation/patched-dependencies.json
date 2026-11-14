@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "accelerate": {
+    "advisory": "GHSA-4j2p-28q2-5m79",
+    "version": "1.15.0+qmd.2",
+    "wheel_path": "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl",
+    "sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "commit": "f452290f116934a4f126fe8e513c565e97a8c94f",
+    "immutable_url": "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl#sha256=abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "runner_paths": [
+      "finetune/convert_gguf.py",
+      "finetune/convert_onnx.py",
+      "finetune/dataset/analyze_data.py",
+      "finetune/dataset/prepare_data.py",
+      "finetune/dataset/prepare_data_lfm2.py",
+      "finetune/dataset/score_data.py",
+      "finetune/dataset/validate_schema.py",
+      "finetune/eval.py",
+      "finetune/eval_retrieval.py",
+      "finetune/experiments/grpo/grpo.py",
+      "finetune/experiments/lfm2/sft_lfm2.py",
+      "finetune/jobs/eval.py",
+      "finetune/jobs/sft.py",
+      "finetune/train.py",
+      "finetune/train_unsloth.py"
+    ]
+  }
+}

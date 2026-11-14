@@ -185,5 +185,56 @@ describe("Phase 5 Public Fixtures & Recovery Unit Tests", () => {
       expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
       expect(verifyRetrievalEquivalence(post, post).identical).toBe(false);
     });
+
+    it("refuses sparse score slots in either or both retrieval reports", () => {
+      for (const filledSlots of [[], [0], [1]]) {
+        for (const missingSide of ["pre", "post", "both"]) {
+          const pre = stage();
+          const post = stage();
+          const sparse = new Array<number>(2);
+          for (const index of filledSlots) sparse[index] = index === 0 ? 0.9 : 0.6;
+          if (missingSide !== "post") pre.queryDetails[0]!.scores = sparse;
+          if (missingSide !== "pre") post.queryDetails[0]!.scores = sparse;
+          expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
+        }
+      }
+    });
+
+    it("refuses sparse document IDs in either or both retrieval reports", () => {
+      for (const filledSlots of [[], [0], [1]]) {
+        for (const missingSide of ["pre", "post", "both"]) {
+          const pre = stage();
+          const post = stage();
+          const sparse = new Array<string>(2);
+          for (const index of filledSlots) sparse[index] = index === 0 ? "doc-1" : "doc-2";
+          if (missingSide !== "post") pre.queryDetails[0]!.topDocIds = sparse;
+          if (missingSide !== "pre") post.queryDetails[0]!.topDocIds = sparse;
+          expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
+        }
+      }
+    });
+
+    it("refuses explicitly undefined query details without throwing", () => {
+      for (const missingSide of ["pre", "post", "both"]) {
+        const pre = stage();
+        const post = stage();
+        if (missingSide !== "post") Object.defineProperty(pre.queryDetails, "0", { value: undefined });
+        if (missingSide !== "pre") Object.defineProperty(post.queryDetails, "0", { value: undefined });
+        expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
+      }
+    });
+
+    it("refuses missing query slots in either retrieval report without throwing", () => {
+      for (const missingSide of ["pre", "post", "both"]) {
+        const pre = stage();
+        const post = stage();
+        if (missingSide !== "post") pre.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
+        if (missingSide !== "pre") post.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
+        expect(verifyRetrievalEquivalence(pre, post)).toMatchObject({
+          identical: false,
+          details: [{ docOrderMatch: false, scoreToleranceMatch: false }],
+        });
+      }
+    });
   });
 });

@@ -1,0 +1,9 @@
+{
+  "classification": "Parent serial-controller timeout closed the second worker stdout, producing pytest terminal BrokenPipe internal error; no product assertion failures",
+  "completed_and_not_repeated": "independent-v2-installed:119 passed, collected exit0",
+  "interrupted_scope": "independent-v2-pinned:85 XML testcase elements including1 internal error; not a completed pass",
+  "resume": "Run only pinned reader scope directly, fresh independent-v3-pinned output directory, without a serial subprocess controller",
+  "product_test_deadlines_and_oracles_changed": false,
+  "original_receipts_preserved": true,
+  "matching_old_workers_remaining": 0
+}

@@ -6,6 +6,7 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import { z } from "zod";
 import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
 import { existsSync, lstatSync, readFileSync, symlinkSync, writeFileSync, unlinkSync } from "fs";
 import { tmpdir } from "os";
@@ -14,7 +15,7 @@ import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { sourceCliCommand } from "./helpers/source-cli.js";
 import { setTimeout as sleep } from "timers/promises";
-import { buildEditorUri, termLink } from "../src/cli/qmd.ts";
+import { buildEditorUri, termLink } from "../src/cli/qmd.js";
 
 // Test fixtures directory and database path
 let testDir: string;
@@ -1335,6 +1336,12 @@ describe("mcp http daemon", () => {
   let daemonConfigDir: string;
 
   type DaemonRecord = { version: 1; pid: number; port: number; instanceToken: string };
+  const healthSchema = z.object({
+    status: z.literal("ok"),
+    uptime: z.number().int().nonnegative(),
+    pid: z.number().int().positive(),
+    instanceToken: z.string().uuid(),
+  });
   const spawnedRecords: DaemonRecord[] = [];
   const foregroundProcesses: import("child_process").ChildProcess[] = [];
 
@@ -1360,7 +1367,7 @@ describe("mcp http daemon", () => {
   async function stopOwnedFixture(record: DaemonRecord): Promise<void> {
     if (!pidAlive(record.pid)) return;
     const response = await fetch(`http://localhost:${record.port}/health`, { signal: AbortSignal.timeout(2000) });
-    const health = await response.json();
+    const health = healthSchema.parse(await response.json());
     // Never signal a bare/stale PID from a test record without listener identity.
     expect(health.pid).toBe(record.pid);
     expect(health.instanceToken).toBe(record.instanceToken);
@@ -1464,7 +1471,7 @@ describe("mcp http daemon", () => {
 
       const res = await fetch(`http://localhost:${port}/health`);
       expect(res.status).toBe(200);
-      const body = await res.json();
+      const body = healthSchema.parse(await res.json());
       expect(body.status).toBe("ok");
     } finally {
       proc.kill("SIGTERM");

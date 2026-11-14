@@ -1,0 +1,48 @@
+--- original/qualify_pinned.py
++++ parent-path-adapter/qualify_pinned.py
+@@ -1,5 +1,6 @@
+ """Second maintained-reader readback of every new artifact, using actual fetched bytes."""
+ from qual_common import *
++INPUT_ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh')
+ from collections import Counter
+ import gc
+ q = Qualification('pinned')
+@@ -15,24 +16,24 @@
+         assert all(c['returncode'] == 0 for c in receipt['commands'])
+         identity = next(c['actual_pinned_gguf_identity'] for c in receipt['commands'] if 'actual_pinned_gguf_identity' in c)
+         directory = Path(identity['retained'])
+-        assert directory == ROOT / 'actual-pinned-reader' / name / 'gguf'
++        assert directory == INPUT_ROOT / 'actual-pinned-reader' / name / 'gguf'
+         assert {str(p.relative_to(directory)): sha256(p) for p in directory.rglob('*') if p.is_file()} == identity['files_sha256']
+         identities.append(identity)
+     assert identities[0]['files_sha256'] == identities[1]['files_sha256']
+     for name in list(sys.modules):
+         if name == 'gguf' or name.startswith('gguf.'):
+             del sys.modules[name]
+-    sys.path.insert(0, str(ROOT / 'actual-pinned-reader/standalone'))
++    sys.path.insert(0, str(INPUT_ROOT / 'actual-pinned-reader/standalone'))
+     import gguf
+     import gguf.gguf_reader as reader_module
+-    assert Path(gguf.__file__) == ROOT / 'actual-pinned-reader/standalone/gguf/__init__.py'
++    assert Path(gguf.__file__) == INPUT_ROOT / 'actual-pinned-reader/standalone/gguf/__init__.py'
+     assert sha256(reader_module.__file__) == 'd0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e'
+     q.receipt['actual_pinned_reader_identity'] = {'source_revision': SOURCE_REVISION, 'module_path': gguf.__file__,
+         'reader_path': reader_module.__file__, 'reader_sha256': sha256(reader_module.__file__),
+         'full_package_files_sha256': identities[0]['files_sha256'],
+         'both_fresh_export_checkout_packages_identical': True}
+-    tokenizer_source = json.loads((ROOT / 'public-tokenizer/tokenizer.json').read_text())
+-    public_config = json.loads((ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
++    tokenizer_source = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer.json').read_text())
++    public_config = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
+     vocab = dict(tokenizer_source['model']['vocab'])
+     vocab.update({entry['content']: entry['id'] for entry in tokenizer_source['added_tokens']})
+     vocab.update({entry['content']: int(index) for index, entry in public_config['added_tokens_decoder'].items()})
+@@ -46,7 +47,7 @@
+     assert len(installed['parsed_artifacts']) == 7
+     for reference in installed['parsed_artifacts']:
+         path = Path(reference['path'])
+-        assert path.is_relative_to(ROOT) and path.stat().st_size == reference['bytes']
++        assert path.is_relative_to(INPUT_ROOT) and path.stat().st_size == reference['bytes']
+         assert sha256(path) == reference['sha256']
+         reader = gguf.GGUFReader(path, mode='r')
+         mapping = reader.data._mmap

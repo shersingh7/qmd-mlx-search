@@ -1,0 +1,68 @@
+import fs from "node:fs";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const mirror = path.join(root, "mirror");
+const node = "/Users/shersingh/.hermes/node/bin/node";
+export function cleanEnv(label) {
+  const base = path.join(root, "environments", label);
+  const env = {};
+  for (const [key, value] of Object.entries({ HOME:"home", HERMES_HOME:"hermes", HERMES_DIR:"hermes", HERMES_KNOWLEDGE_DIR:"knowledge",
+    KNOWLEDGE_DIR:"knowledge", XDG_CACHE_HOME:"cache", XDG_CONFIG_HOME:"config", XDG_DATA_HOME:"data", HF_HOME:"hf", HF_HUB_CACHE:"hf/hub",
+    TRANSFORMERS_CACHE:"hf/transformers", TMPDIR:"tmp", TMP:"tmp", TEMP:"tmp", BUN_INSTALL_CACHE_DIR:"bun", npm_config_cache:"npm" })) {
+    env[key] = path.join(base, value); fs.mkdirSync(env[key], { recursive:true });
+  }
+  Object.assign(env, { PATH:"/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin:/usr/sbin:/sbin", LANG:"en_US.UTF-8", LC_ALL:"en_US.UTF-8",
+    CI:"1", REQUIRE_BUN:"1", QMD_LLAMA_GPU:"false", HF_HUB_OFFLINE:"1", TRANSFORMERS_OFFLINE:"1", HF_DATASETS_OFFLINE:"1", UV_OFFLINE:"1",
+    npm_config_offline:"true", PYTHONDONTWRITEBYTECODE:"1", PYTHONNOUSERSITE:"1", TOKENIZERS_PARALLELISM:"false" });
+  return env;
+}
+const mode = process.argv[2];
+const label = process.argv[3] ?? mode;
+if (["root-types-before", "root-types-after"].includes(mode)) throw new Error("Retired exploratory mode: archived documentation JS has absolute live-source imports. Use the guarded bounded validator; do not replay this as frozen qualification.");
+const commands = {
+  red: [node, ["--test", "--test-concurrency=1", "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"]],
+  selftests: [node, ["--test", "--test-concurrency=1", "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"]],
+  "fast-on": [node, ["node_modules/vitest/vitest.mjs", "run", "test/audit-recovery-tree.test.ts", "--maxWorkers=2", "--reporter=verbose", "--reporter=json", `--outputFile.json=${root}/evidence/${label}.json`, "--testNamePattern=bounds a 200ms execution deadline without assuming cold-command readiness"]],
+  "fast-off": [node, ["node_modules/vitest/vitest.mjs", "run", "test/audit-recovery-tree.test.ts", "--maxWorkers=2", "--reporter=verbose", "--reporter=json", `--outputFile.json=${root}/evidence/${label}.json`, "--testNamePattern=bounds a 200ms execution deadline without assuming cold-command readiness"]],
+  "bun-fast-on": ["/Users/shersingh/.bun/bin/bun", ["test", "./test/audit-recovery-tree.test.ts", "--test-name-pattern", "bounds a 200ms execution deadline without assuming cold-command readiness", "--timeout", "30000"]],
+  "actionlint": ["/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-lttemms0/actionlint", ["-shellcheck=", ".github/workflows/ci.yml"]],
+  "actionlint-published": ["/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint", ["-shellcheck=", ".github/workflows/ci.yml"]],
+  "helper-typecheck": [node, ["node_modules/typescript/bin/tsc", "--noEmit", "--allowJs", "--checkJs", "--strict", "--skipLibCheck", "--module", "NodeNext", "--moduleResolution", "NodeNext", "--target", "ESNext", "test/helpers/recovery-bootstrap-diagnostics.mjs"]],
+  "metadata": [node, ["test/helpers/recovery-bootstrap-diagnostics.mjs", "--metadata", path.join(root, "evidence", `${label}-artifacts`)]],
+  "root-types-before": [node, ["node_modules/typescript/bin/tsc", "--noEmit", "--project", "../original/tsconfig.json"]],
+  "root-types-after": [node, ["node_modules/typescript/bin/tsc", "--noEmit", "--project", "tsconfig.json"]],
+  "syntax-helper": [node, ["--check", "test/helpers/recovery-bootstrap-diagnostics.mjs"]],
+  "syntax-controls": [node, ["--check", "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"]],
+  "validate": [node, [path.join(root,"harness/validate.mjs")]],
+  "actual-fallback": [node, ["--import", path.join(mirror,"scripts/phase5_recovery_process_loader.mjs"), path.join(root,"harness/actual-fallback-control.mjs")]],
+  "finalize": [node, [path.join(root,"harness/finalize.mjs")]],
+};
+if (!(mode in commands)) throw new Error("unknown mode");
+const [executable, argv] = commands[mode];
+const env = cleanEnv(label);
+if (mode === "metadata") env.QMD_DIAGNOSTIC_MATRIX_RUNTIME = "local-node-after-first-focused-case";
+const sourceSha256 = Object.fromEntries(["scripts/phase5_e2e_runner.ts", "scripts/phase5_recovery_process.py", "test/audit-recovery-tree.test.ts", "test/helpers/recovery-bootstrap-diagnostics.mjs", "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs", ".github/workflows/ci.yml"]
+  .map(name => [name, createHash("sha256").update(fs.readFileSync(path.join(mirror,name))).digest("hex")]));
+if (mode === "root-types-before") {
+  const originalNm = path.join(root, "original", "node_modules");
+  fs.mkdirSync(originalNm, { recursive:true });
+  const input = JSON.parse(fs.readFileSync(path.join(root,"input.json"),"utf8"));
+  for (const {name, target} of input.dependencyAliases) { const dest=path.join(originalNm,name); fs.mkdirSync(path.dirname(dest),{recursive:true}); if (!fs.existsSync(dest)) fs.symlinkSync(target,dest); }
+}
+if (mode === "fast-on" || mode === "bun-fast-on" || mode === "actual-fallback") {
+  env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS = "1";
+  env.QMD_RECOVERY_BOOTSTRAP_DIR = path.join(root, "evidence", `${label}-artifacts`);
+}
+const started = performance.now();
+const result = spawnSync(executable, argv, { cwd:mirror, env, encoding:"utf8", timeout:90_000, maxBuffer:4*1024*1024 });
+fs.writeFileSync(path.join(root, "evidence", `${label}.stdout.log`), result.stdout ?? "", {flag:"wx"});
+fs.writeFileSync(path.join(root, "evidence", `${label}.stderr.log`), result.stderr ?? "", {flag:"wx"});
+const receipt = { mode, label, executable, argv, cwd:mirror, environment:env, sourceSha256, exitCode:result.status, signal:result.signal,
+  errorCode:result.error?.code ?? null, elapsedMs:performance.now()-started, outerCleanup:result.error?.code === "ETIMEDOUT" ? "spawnSync owned handle TERM on timeout" : "none" };
+fs.writeFileSync(path.join(root, "evidence", `${label}-command.json`), JSON.stringify(receipt,null,2)+"\n", {flag:"wx"});
+console.log(JSON.stringify(receipt));
+console.log(result.stdout ?? ""); console.error(result.stderr ?? "");
+process.exitCode = result.status ?? 1;

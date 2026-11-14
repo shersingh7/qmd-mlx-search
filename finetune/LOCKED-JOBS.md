@@ -86,6 +86,9 @@ The literal `CODE_CLOSURE` in the launcher is the only automatic upload list:
   preserving post-training evaluation and its relative `__file__` paths.
 - `train_unsloth.py` also includes `train.py` and its lock because its GGUF
   publication path imports the shared exporter from that module.
+- `convert_gguf.py`, `train.py`, and `train_unsloth.py` include the shared
+  `gguf_toolchain.py` prerequisite/export helper, with its exact bytes and hash in
+  the preview. Missing or unsafe helper files block preflight before SDK access.
 - `jobs/sft.py` and GRPO: the reviewed `jobs/eval_common.py`, avoiding the
   standalone helper's fallback download.
 
@@ -183,18 +186,56 @@ not transactionally locked against a separate owner's concurrent changes.
 Uploads remain in the private bucket after local staging cleanup; the launcher
 does not silently delete remote artifacts or cancel a job on a later error.
 
-The digest-pinned official Astral image uses the same uv version as the recorded
-lock/hash enforcement controls:
-`ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e`.
-Its multi-architecture manifest and content digest were verified read-only using
-the public GHCR registry API; see the retained
-[registry receipt](../docs/security/dependency-remediation/locked-binding-checkpoint/hf-jobs-image.json)
-and [Astral's image guidance](https://docs.astral.sh/uv/guides/integration/docker/).
-No image was pulled or cloud runtime exercised. The launcher is intentionally a
-bounded submission helper, not a replacement for all HF Jobs orchestration.
+### Runner-specific images and the separate native execution gate
+
+Both digest-pinned official Astral images retain uv **0.11.18** and Python 3.12:
+
+- `convert_gguf.py`, `train.py`, and `train_unsloth.py` default to
+  `ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e`.
+  The non-slim base retains the native build-tool layer; its registry config
+  records Git, GCC/G++, and make provisioning. This is metadata evidence, not
+  proof that those commands or the converter execute successfully.
+- The other twelve runners keep the lightweight default unchanged:
+  `ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e`.
+
+The public GHCR index, digest-addressed index, Linux amd64/arm64 manifests and
+config digests were checked read-only for both tags. See
+[Astral's image guidance](https://docs.astral.sh/uv/guides/integration/docker/)
+for the supported non-slim Python base. No image was pulled or executed locally:
+the bounded read-only Docker check found no usable engine. Container execution
+therefore remains a separate CI gate, not a mocked-SDK test result.
+
+`--image IMAGE` before the first `--` overrides either default **literally**.
+The launcher does not repair, normalize, or replace an empty/malformed explicit
+value with a default, nor validate whether a custom image can run the job.
+Defaults depend only on the runner's reviewed closure, not its opaque script
+arguments (including `--no-gguf`). The preview, SDK request, and image readback
+use the same selected value.
+
+For GGUF export, provision `git`, `cc`, `c++`, and `make` in the image. CMake,
+sentencepiece, and protobuf belong in the initially reviewed Python/script locks;
+the native image does not qualify or replace those locks. The pinned helper must
+not bootstrap apt/pip/uv or install mutable upstream requirements at runtime.
+Parent integration must supply the separately repaired helper and matching
+initial locks before claiming converter readiness; staging the helper's hash
+does not establish that its implementation is correct.
+
+On an ordinary Linux CI worker with Docker already provided, qualify the native
+image separately with the stdlib-only `tools/qualify_gguf_image.py` probe. Pull
+only in that explicitly authorized CI gate, bound the pull/run, then execute a
+fresh container with `--pull never --network none --read-only --cpus 2 --memory 1g
+--pids-limit 64 --cap-drop ALL --security-opt no-new-privileges`, an executable
+128 MiB temporary filesystem, and only the probe file mounted read-only. Run
+`python -I -B -S /probe.py`; it checks uv/Python versions, executes
+`git/cc/c++/make --version`, compiles C and C++ fixtures using make, and runs both
+CPU binaries. Remove only that gate's own container on timeout. A passing
+`--native-only` host invocation merely exercises the probe, not the image.
+
+The launcher is a bounded submission helper, not all HF Jobs orchestration.
 Cloud scheduling, credentials, storage permissions, GPU/CUDA compatibility,
-image execution, model downloads, training and publication remain **unqualified**
-by its offline mocked-SDK tests.
+model downloads, the full locked converter/training path and publication remain
+**unqualified** by offline tests or by the native-only image gate. A locked
+submission is not an end-to-end lock of every external tool a runner may invoke.
 
 ## Equivalent local locked commands
 

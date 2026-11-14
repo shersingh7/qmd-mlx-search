@@ -1,0 +1,23 @@
+import json,os,sys,time
+os.dup2(1,3)
+source='/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/old-red/snapshot/scripts/phase5_recovery_process.py'
+sys.path.insert(0,os.path.dirname(source))
+scope=dict(__name__='fresh_stale_E_repro')
+exec(compile(open(source,'rb').read(),source,'exec'),scope)
+original_read=os.read
+original_write=os.write
+held=True
+def record(stage):
+    with open('/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/old-red/probes/stale-e-confirm-s9309gty/stale-E-eof/stages.jsonl','a') as out: out.write(json.dumps(dict(stage=stage,pid=os.getpid(),time=time.monotonic()))+'\n')
+def read(fd,n):
+    data=original_read(fd,n)
+    if held and fd==0 and data==b'E':
+        record('E-read');time.sleep(1.300);record('E-resumed')
+    return data
+def write(fd,data):
+    written=original_write(fd,data)
+    if held and fd!=3 and data==b'E':
+        record('gate-opened');time.sleep(.050)
+    return written
+os.read=read;os.write=write
+scope['main']()

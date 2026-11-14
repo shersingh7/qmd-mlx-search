@@ -1,0 +1,117 @@
+"""Second maintained-reader readback of every new artifact, using actual fetched bytes."""
+from qual_common import *
+INPUT_ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh')
+from collections import Counter
+import gc
+q = Qualification('pinned')
+error = None
+try:
+    import numpy as np
+    installed = json.loads((ROOT / 'verify2-receipt.json').read_text())
+    assert installed['success'] and installed['environment_unchanged'] and installed['source_unchanged']
+    exports = {name: json.loads((ROOT / (name + '-receipt.json')).read_text()) for name in ('standalone', 'native')}
+    identities = []
+    for name, receipt in exports.items():
+        assert receipt['success'] and len(receipt['commands']) == 11
+        assert all(c['returncode'] == 0 for c in receipt['commands'])
+        identity = next(c['actual_pinned_gguf_identity'] for c in receipt['commands'] if 'actual_pinned_gguf_identity' in c)
+        directory = Path(identity['retained'])
+        assert directory == INPUT_ROOT / 'actual-pinned-reader' / name / 'gguf'
+        assert {str(p.relative_to(directory)): sha256(p) for p in directory.rglob('*') if p.is_file()} == identity['files_sha256']
+        identities.append(identity)
+    assert identities[0]['files_sha256'] == identities[1]['files_sha256']
+    for name in list(sys.modules):
+        if name == 'gguf' or name.startswith('gguf.'):
+            del sys.modules[name]
+    sys.path.insert(0, str(INPUT_ROOT / 'actual-pinned-reader/standalone'))
+    import gguf
+    import gguf.gguf_reader as reader_module
+    assert Path(gguf.__file__) == INPUT_ROOT / 'actual-pinned-reader/standalone/gguf/__init__.py'
+    assert sha256(reader_module.__file__) == 'd0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e'
+    q.receipt['actual_pinned_reader_identity'] = {'source_revision': SOURCE_REVISION, 'module_path': gguf.__file__,
+        'reader_path': reader_module.__file__, 'reader_sha256': sha256(reader_module.__file__),
+        'full_package_files_sha256': identities[0]['files_sha256'],
+        'both_fresh_export_checkout_packages_identical': True}
+    tokenizer_source = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer.json').read_text())
+    public_config = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
+    vocab = dict(tokenizer_source['model']['vocab'])
+    vocab.update({entry['content']: entry['id'] for entry in tokenizer_source['added_tokens']})
+    vocab.update({entry['content']: int(index) for index, entry in public_config['added_tokens_decoder'].items()})
+    assert set(vocab.values()) == set(range(248077))
+    tokens_expected = [''] * 248077
+    for token, index in vocab.items():
+        tokens_expected[index] = token
+    merges_expected = [' '.join(item) if isinstance(item, list) else item for item in tokenizer_source['model']['merges']]
+    parsed = []
+    q.receipt['parsed_artifacts'] = parsed
+    assert len(installed['parsed_artifacts']) == 7
+    for reference in installed['parsed_artifacts']:
+        path = Path(reference['path'])
+        assert path.is_relative_to(INPUT_ROOT) and path.stat().st_size == reference['bytes']
+        assert sha256(path) == reference['sha256']
+        reader = gguf.GGUFReader(path, mode='r')
+        mapping = reader.data._mmap
+        metadata = {}
+        arrays = {}
+        for key, field in reader.fields.items():
+            if field.types and field.types[0] == gguf.GGUFValueType.ARRAY:
+                value = field.contents()
+                arrays[key] = {'length': len(value), 'json_sha256': hashlib.sha256(json.dumps(value, ensure_ascii=False).encode()).hexdigest()}
+            elif field.types:
+                metadata[key] = field.contents()
+        assert metadata == reference['metadata_scalars']
+        assert arrays == reference['metadata_arrays']
+        assert metadata['general.architecture'] == 'qwen35'
+        assert metadata['tokenizer.chat_template'] == public_config['chat_template']
+        assert reader.fields['tokenizer.ggml.tokens'].contents() == tokens_expected
+        assert reader.fields['tokenizer.ggml.merges'].contents() == merges_expected
+        assert reader.fields['qwen35.attention.recurrent_layers'].contents() == [True, False]
+        assert reader.fields['qwen35.rope.dimension_sections'].contents() == [3, 3, 2, 0]
+        expected_bounds = {t['name']: t for t in reference['tensors']}
+        assert len(reader.tensors) == len(expected_bounds) == 25
+        ranges = []
+        types = Counter()
+        tensors = []
+        for tensor in reader.tensors:
+            start, end = int(tensor.data_offset), int(tensor.data_offset + tensor.n_bytes)
+            block, size = gguf.GGML_QUANT_SIZES[tensor.tensor_type]
+            assert all(n > 0 for n in tensor.shape)
+            assert int(np.prod(tensor.shape.astype(np.int64))) == tensor.n_elements
+            assert tensor.n_elements % block == 0 and tensor.n_bytes == tensor.n_elements // block * size
+            assert reader.data_offset <= start < end <= path.stat().st_size
+            assert (start - reader.data_offset) % reader.alignment == 0
+            assert tensor.data.nbytes == tensor.n_bytes
+            detail = {'name': tensor.name, 'shape': [int(n) for n in tensor.shape], 'type': tensor.tensor_type.name,
+                      'elements': int(tensor.n_elements), 'bytes': int(tensor.n_bytes), 'start': start, 'stop': end,
+                      'raw_tensor_sha256': hashlib.sha256(tensor.data).hexdigest()}
+            assert detail == expected_bounds[tensor.name]
+            if tensor.tensor_type.name in {'F16', 'F32'}:
+                assert np.isfinite(tensor.data).all()
+            ranges.append((start, end))
+            types[tensor.tensor_type.name] += 1
+            tensors.append(detail)
+        ranges.sort()
+        assert all(a[1] <= b[0] for a, b in zip(ranges, ranges[1:]))
+        assert dict(types) == reference['tensor_type_counts']
+        parsed.append({'path': str(path), 'entrypoint': reference['entrypoint'], 'bytes': path.stat().st_size,
+                       'sha256': reference['sha256'], 'architecture': metadata['general.architecture'],
+                       'file_type': gguf.LlamaFileType(metadata['general.file_type']).name,
+                       'tensor_count': len(tensors), 'tensor_type_counts': dict(types),
+                       'metadata_scalars_and_arrays_exactly_match_installed_reader': True,
+                       'stock_complete_vocabulary_merges_template_exact': True, 'full_tensor_bounds_valid': True,
+                       'all_tensor_descriptors_and_payload_hashes_match_installed_reader': True, 'tensors': tensors})
+        dump(ROOT / 'pinned-readback-progress.json', parsed)
+        # The upstream reader has no public close method; release local views then its read-only map.
+        del tensor, reader
+        mapping.close()
+        del mapping
+        gc.collect()
+    assert len(parsed) == 7 and len({item['path'] for item in parsed}) == 7
+    q.receipt['summary'] = [{k: item[k] for k in ('path', 'entrypoint', 'sha256', 'tensor_count', 'tensor_type_counts')} for item in parsed]
+except BaseException as exc:
+    error = exc
+    raise
+finally:
+    receipt = q.finish(error)
+    print(json.dumps({key: receipt.get(key) for key in ('success', 'environment_unchanged', 'source_unchanged',
+                     'actual_pinned_reader_identity', 'summary', 'error')}, indent=2))

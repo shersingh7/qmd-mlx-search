@@ -1,0 +1,86 @@
+{
+  "spec": "FAIL",
+  "quality": "NOT_RUN_SPEC_GATE",
+  "approval": "CHANGES_REQUIRED",
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "P2",
+      "location": ".github/workflows/gguf-native-image-qualification.yml:206-214",
+      "title": "Direct pattern-matching capture can rebind GGUF_IMAGE without being detected",
+      "scope": "The frozen current launcher is correctly selected; the defect is the claimed unambiguous binding guard for a concrete future syntactic rebind, not arbitrary Python runtime immutability.",
+      "evidence_cases": [
+        "ast-match-direct-capture",
+        "ast-match-mapping-capture"
+      ],
+      "observed": "Both expected-refusal fixtures exit 0 and qualify the original literal although a tiny isolated match-capture reproducer proves the inserted direct binding selects a different immutable image.",
+      "recommendation": "Account for direct pattern-capture binders (MatchAs, MatchStar and MatchMapping.rest as applicable) or explicitly restrict the supported source shape and fail closed. Do not import/execute the launcher or promise arbitrary runtime immutability."
+    },
+    {
+      "id": "S2",
+      "severity": "P2",
+      "location": ".github/workflows/gguf-native-image-qualification.yml:279-285",
+      "title": "Success receipt is emitted before a required receipt write can fail",
+      "evidence_cases": [
+        "receipt-write-failure"
+      ],
+      "observed": "A synthetic storage failure produces process exit 1 / IsADirectoryError, but the already-emitted final receipt says final_exit=0 and status=qualified-native-amd64-prerequisites. The job is red; the success receipt is false.",
+      "recommendation": "Resolve required receipt storage first, catch its errors while preserving a prior primary failure, and emit a final nonqualification receipt consistent with the actual exit."
+    },
+    {
+      "id": "S3",
+      "severity": "P2",
+      "location": ".github/workflows/gguf-native-image-qualification.yml:128-138",
+      "title": "Timeout handling stops after the group leader exits, leaving a TERM-resistant group member",
+      "evidence_cases": [
+        "timeout-group-descendant"
+      ],
+      "observed": "The owned synthetic Popen leader exits on TERM; wait returns and breaks before group KILL. A same-group descendant that ignores TERM survives controller return and writes a later owned fixture marker. Primary exit 124 and Docker absence receipt remain nonzero/truthful; host CLI group drainage is not established.",
+      "scope": "Concrete synthetic controller-lifetime counterexample, not evidence that actual Docker forks this child or that a real container leaked. No guessed PID/PGID was signaled by the test; the bounded fixture reaches its natural completion point.",
+      "recommendation": "Keep an owned lifetime anchor while terminating/draining the command group. Do not fix this with a delayed unanchored killpg after the leader has been reaped, because that can target a recycled group ID."
+    }
+  ],
+  "workflow_sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+  "patch_sha256": "dd03de5b3075b9a39b0bf2d4ff7cd03199ac34881dbb4d0cf009a0b6251d042c",
+  "manifest_sha256": "e84773ff3b1a44694df7fd55d2a1305486185a2f8ee8c41aed0bb0d17f2f1dfe",
+  "manifest_bound_unique_paths": 518,
+  "controller_body_sha256_no_final_newline": "b0cc257ab4ede6c2e6ea9e887e4a4e5747edea9ba43d5ed52a86f19590606df4",
+  "generated_controller_file_sha256_with_final_newline": "606e0ea2d8389f1cb57cc3f5360f411e7ed047c00cb2c83a797f5a0f93c51d98",
+  "syntax_and_actionlint_passed": true,
+  "shellcheck_pyflakes_run": false,
+  "synthetic_results": {
+    "fresh_supplied_suite": {
+      "cases": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "expected_nonzero": 66
+    },
+    "independent_heldouts": {
+      "cases": 34,
+      "passed": 30,
+      "failed": 4,
+      "fixture_errors": 0,
+      "skipped": 0,
+      "expected_nonzero": 27,
+      "actual_nonzero": 25
+    }
+  },
+  "native_image_execution_performed": false,
+  "real_docker_or_ci_execution": false,
+  "physical_test_host": {
+    "os": "Darwin",
+    "architecture": "arm64"
+  },
+  "all_original_delivery_paths_unchanged": true,
+  "all_external_inputs_unchanged_during_review": true,
+  "report": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/REPORT.md",
+  "evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence",
+  "independent_heldout_summary": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/summary.json",
+  "remaining_gates": [
+    "Repair/re-review workflow findings",
+    "Parent final accepted repaired-probe integration and source binding",
+    "Actual native Linux amd64 candidate CI/readback including Docker --rm/--cidfile behavior, digest/platform and compiler results",
+    "Combined build/tests and exact-head CI; no arm64/converter/training/GPU/cloud qualification"
+  ]
+}

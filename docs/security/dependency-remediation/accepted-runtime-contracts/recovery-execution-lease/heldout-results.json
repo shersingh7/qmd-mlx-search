@@ -1,0 +1,1361 @@
+[
+  {
+    "name": "valid-fragmented",
+    "guardFired": false,
+    "elapsedMs": 189.85637499999999,
+    "exitCode": 0,
+    "supervisorPid": 12481,
+    "supervisorAbsent": true,
+    "workers": [
+      12482
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12482
+    ],
+    "sentinelAlive": true,
+    "work": "actual-user-work",
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12481,
+        "sessionId": 12481
+      },
+      {
+        "type": "ready",
+        "pid": 12482,
+        "sessionId": 12481,
+        "processGroupId": 12482
+      },
+      {
+        "type": "exit",
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": false,
+        "processGroups": [
+          12482
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12482,
+        "owner": 12481,
+        "at": 0.107897083,
+        "allowed": true,
+        "remainingMs": 4967.478916,
+        "deadline": 5.075371041
+      }
+    ],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 5000,
+        "elapsedMs": 88.339583
+      }
+    ],
+    "sent": [
+      {
+        "hex": "53",
+        "elapsedMs": 88.376125
+      },
+      {
+        "hex": "35",
+        "elapsedMs": 106.41762500000002
+      },
+      {
+        "hex": "303030",
+        "elapsedMs": 118.424625
+      },
+      {
+        "hex": "0a",
+        "elapsedMs": 118.433166
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 120.310083
+      }
+    ],
+    "stderr": "",
+    "eventCount": 14,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "valid-canonical-containment",
+    "guardFired": false,
+    "elapsedMs": 182.847417,
+    "exitCode": 0,
+    "supervisorPid": 12484,
+    "supervisorAbsent": true,
+    "workers": [
+      12485
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12485
+    ],
+    "sentinelAlive": true,
+    "work": "actual-user-work",
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12484,
+        "sessionId": 12484
+      },
+      {
+        "type": "ready",
+        "pid": 12485,
+        "sessionId": 12484,
+        "processGroupId": 12485
+      },
+      {
+        "type": "exit",
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": true,
+        "sigkillUsed": false,
+        "processGroups": [
+          12485
+        ],
+        "timedOut": false,
+        "errors": []
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12485,
+        "owner": 12484,
+        "at": 0.083126666,
+        "allowed": true,
+        "remainingMs": 4991.346084,
+        "deadline": 5.074469
+      }
+    ],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 5000,
+        "elapsedMs": 87.47737499999997
+      }
+    ],
+    "sent": [
+      {
+        "hex": "53353030300a",
+        "elapsedMs": 87.48825
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 89.06358300000001
+      }
+    ],
+    "stderr": "",
+    "eventCount": 14,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "prepared-transport-charged",
+    "guardFired": false,
+    "elapsedMs": 694.405833,
+    "exitCode": 0,
+    "supervisorPid": 12487,
+    "supervisorAbsent": true,
+    "workers": [
+      12488
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12488
+    ],
+    "sentinelAlive": true,
+    "work": "actual-user-work",
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12487,
+        "sessionId": 12487
+      },
+      {
+        "type": "ready",
+        "pid": 12488,
+        "sessionId": 12487,
+        "processGroupId": 12488
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGTERM"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": false,
+        "processGroups": [
+          12488
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery worker timed out after 800ms (PID 12488)"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12488,
+        "owner": 12487,
+        "at": 0.27403975,
+        "allowed": true,
+        "remainingMs": 317.8238329999999,
+        "deadline": 0.591848666
+      }
+    ],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 517,
+        "elapsedMs": 282.030875
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533531370a",
+        "elapsedMs": 282.093083
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 286.16358299999996
+      }
+    ],
+    "stderr": "",
+    "eventCount": 12,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "fragmentation-does-not-refresh-lease",
+    "guardFired": false,
+    "elapsedMs": 639.7596249999997,
+    "exitCode": 0,
+    "supervisorPid": 12495,
+    "supervisorAbsent": true,
+    "workers": [
+      12496
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12496
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12495,
+        "sessionId": 12495
+      },
+      {
+        "type": "ready",
+        "pid": 12496,
+        "sessionId": 12495,
+        "processGroupId": 12496
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12496
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery worker timed out after 200ms (PID 12496)",
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12496,
+        "owner": 12495,
+        "at": 0.525943875,
+        "allowed": false,
+        "remainingMs": -241.26220800000004,
+        "deadline": 0.284622333
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12496,
+        "owner": 12495,
+        "at": 0.530213625,
+        "group": 12495,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12495,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12496,
+        "owner": 12495,
+        "at": 0.530948125,
+        "group": 12495,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12495,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 119.01191700000014
+      }
+    ],
+    "sent": [
+      {
+        "hex": "53",
+        "elapsedMs": 119.04004199999973
+      },
+      {
+        "hex": "32",
+        "elapsedMs": 176.07020899999992
+      },
+      {
+        "hex": "3030",
+        "elapsedMs": 230.0952919999999
+      },
+      {
+        "hex": "0a",
+        "elapsedMs": 284.26499999999976
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 290.968584
+      }
+    ],
+    "stderr": "",
+    "eventCount": 19,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "consumed-S-does-not-refresh-lease",
+    "guardFired": false,
+    "elapsedMs": 632.9475000000002,
+    "exitCode": 0,
+    "supervisorPid": 12499,
+    "supervisorAbsent": true,
+    "workers": [
+      12500
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12500
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12499,
+        "sessionId": 12499
+      },
+      {
+        "type": "ready",
+        "pid": 12500,
+        "sessionId": 12499,
+        "processGroupId": 12500
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGKILL"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12500
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery worker timed out after 200ms (PID 12500)",
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery supervisor interrupted by parent signal or closed proof channel",
+          "Invalid recovery control after execution admission"
+        ]
+      }
+    ],
+    "gates": [],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 119.0394170000002
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 119.06529200000016
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 563.4473330000001
+      }
+    ],
+    "stderr": "",
+    "eventCount": 10,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "delayed-fork-does-not-refresh-lease",
+    "guardFired": false,
+    "elapsedMs": 655.7232500000003,
+    "exitCode": 0,
+    "supervisorPid": 12502,
+    "supervisorAbsent": true,
+    "workers": [
+      12503
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12503
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12502,
+        "sessionId": 12502
+      },
+      {
+        "type": "ready",
+        "pid": 12503,
+        "sessionId": 12502,
+        "processGroupId": 12503
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGKILL"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12503
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery worker timed out after 200ms (PID 12503)",
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery supervisor interrupted by parent signal or closed proof channel",
+          "Invalid recovery control after execution admission"
+        ]
+      }
+    ],
+    "gates": [],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 120.5961249999996
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 120.61879200000014
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 576.7939169999999
+      }
+    ],
+    "stderr": "",
+    "eventCount": 11,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "canonical-containment-does-not-refresh-lease",
+    "guardFired": false,
+    "elapsedMs": 590.5092500000002,
+    "exitCode": 0,
+    "supervisorPid": 12509,
+    "supervisorAbsent": true,
+    "workers": [
+      12510
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12510
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12509,
+        "sessionId": 12509
+      },
+      {
+        "type": "ready",
+        "pid": 12510,
+        "sessionId": 12509,
+        "processGroupId": 12510
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": true,
+        "sigkillUsed": true,
+        "processGroups": [
+          12510
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery worker timed out after 200ms (PID 12510)",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12510,
+        "owner": 12509,
+        "at": 0.525710916,
+        "allowed": false,
+        "remainingMs": -250.2985,
+        "deadline": 0.27540554100000003
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12510,
+        "owner": 12509,
+        "at": 0.526739875,
+        "group": 12509,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12509,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12510,
+        "owner": 12509,
+        "at": 0.527014958,
+        "group": 12509,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12509,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 92.40962500000016
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 92.44850000000059
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 93.98637500000007
+      }
+    ],
+    "stderr": "",
+    "eventCount": 18,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "unexpired-final-gate-K",
+    "guardFired": false,
+    "elapsedMs": 145.2841669999998,
+    "exitCode": 0,
+    "supervisorPid": 12512,
+    "supervisorAbsent": true,
+    "workers": [
+      12513
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12513
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12512,
+        "sessionId": 12512
+      },
+      {
+        "type": "ready",
+        "pid": 12513,
+        "sessionId": 12512,
+        "processGroupId": 12513
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12513
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12513,
+        "owner": 12512,
+        "at": 0.093490666,
+        "allowed": false,
+        "remainingMs": 192.34591600000002,
+        "deadline": 0.285831916
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12513,
+        "owner": 12512,
+        "at": 0.093806666,
+        "group": 12512,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12512,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12513,
+        "owner": 12512,
+        "at": 0.093937083,
+        "group": 12512,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12512,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 102.37374999999993
+      },
+      {
+        "action": "queued-byte",
+        "dataHex": "4b",
+        "elapsedMs": 109.20829199999993
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 102.39370800000103
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 104.39595800000134
+      }
+    ],
+    "stderr": "",
+    "eventCount": 18,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "unexpired-final-gate-T",
+    "guardFired": false,
+    "elapsedMs": 170.97300000000004,
+    "exitCode": 0,
+    "supervisorPid": 12515,
+    "supervisorAbsent": true,
+    "workers": [
+      12516
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12516
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12515,
+        "sessionId": 12515
+      },
+      {
+        "type": "ready",
+        "pid": 12516,
+        "sessionId": 12515,
+        "processGroupId": 12516
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12516
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12516,
+        "owner": 12515,
+        "at": 0.098469708,
+        "allowed": false,
+        "remainingMs": 188.880416,
+        "deadline": 0.287347166
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12516,
+        "owner": 12515,
+        "at": 0.098741,
+        "group": 12515,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12515,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12516,
+        "owner": 12515,
+        "at": 0.098848166,
+        "group": 12515,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12515,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 123.32008300000119
+      },
+      {
+        "action": "queued-byte",
+        "dataHex": "54",
+        "elapsedMs": 133.67212500000036
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 123.33058300000133
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 125.1901670000013
+      }
+    ],
+    "stderr": "",
+    "eventCount": 18,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "unexpired-final-gate-X",
+    "guardFired": false,
+    "elapsedMs": 135.54629199999903,
+    "exitCode": 0,
+    "supervisorPid": 12519,
+    "supervisorAbsent": true,
+    "workers": [
+      12520
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12520
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12519,
+        "sessionId": 12519
+      },
+      {
+        "type": "ready",
+        "pid": 12520,
+        "sessionId": 12519,
+        "processGroupId": 12520
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12520
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12520,
+        "owner": 12519,
+        "at": 0.091420375,
+        "allowed": false,
+        "remainingMs": 194.332084,
+        "deadline": 0.285749625
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12520,
+        "owner": 12519,
+        "at": 0.09167925,
+        "group": 12519,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12519,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12520,
+        "owner": 12519,
+        "at": 0.091780458,
+        "group": 12519,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12519,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 120.40358399999995
+      },
+      {
+        "action": "queued-byte",
+        "dataHex": "58",
+        "elapsedMs": 125.4516670000001
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 120.41558399999985
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 122.08679199999928
+      }
+    ],
+    "stderr": "",
+    "eventCount": 18,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "queued-K-reader-handoff",
+    "guardFired": false,
+    "elapsedMs": 1630.1876249999996,
+    "exitCode": 0,
+    "supervisorPid": 12526,
+    "supervisorAbsent": true,
+    "workers": [
+      12527
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12527
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12526,
+        "sessionId": 12526
+      },
+      {
+        "type": "ready",
+        "pid": 12527,
+        "sessionId": 12526,
+        "processGroupId": 12527
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12527
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12527,
+        "owner": 12526,
+        "at": 0.269378791,
+        "allowed": false,
+        "remainingMs": 14.668375000000067,
+        "deadline": 0.28395800000000004
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12527,
+        "owner": 12526,
+        "at": 0.272011125,
+        "group": 12526,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12526,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12527,
+        "owner": 12526,
+        "at": 0.272555583,
+        "group": 12526,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12526,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 111.32166700000035
+      },
+      {
+        "action": "queued-byte",
+        "dataHex": "4b",
+        "elapsedMs": 119.92449999999977
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 111.33104199999977
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 112.90554200000003
+      }
+    ],
+    "stderr": "",
+    "eventCount": 17,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "child-gate-real-EBADF",
+    "guardFired": false,
+    "elapsedMs": 155.9175830000008,
+    "exitCode": 0,
+    "supervisorPid": 12529,
+    "supervisorAbsent": true,
+    "workers": [
+      12531
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12531
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12529,
+        "sessionId": 12529
+      },
+      {
+        "type": "ready",
+        "pid": 12531,
+        "sessionId": 12529,
+        "processGroupId": 12531
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12531
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "kind": "child-gate-result",
+        "pid": 12531,
+        "owner": 12529,
+        "at": 0.087689708,
+        "allowed": false,
+        "remainingMs": 197.714292,
+        "deadline": 0.28539970800000003
+      }
+    ],
+    "groupSignals": [
+      {
+        "kind": "group-signal",
+        "pid": 12531,
+        "owner": 12529,
+        "at": 0.087943041,
+        "group": 12529,
+        "signal": 15,
+        "pinned": true,
+        "currentSession": 12529,
+        "termBlocked": true
+      },
+      {
+        "kind": "group-signal",
+        "pid": 12531,
+        "owner": 12529,
+        "at": 0.088046333,
+        "group": 12529,
+        "signal": 19,
+        "pinned": true,
+        "currentSession": 12529,
+        "termBlocked": true
+      }
+    ],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 114.05637500000054
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 114.06616700000072
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 115.65187500000107
+      }
+    ],
+    "stderr": "",
+    "eventCount": 17,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "supervisor-control-real-EBADF",
+    "guardFired": false,
+    "elapsedMs": 162.22883300000035,
+    "exitCode": 0,
+    "supervisorPid": 12533,
+    "supervisorAbsent": true,
+    "workers": [
+      12534
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12534
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12533,
+        "sessionId": 12533
+      },
+      {
+        "type": "ready",
+        "pid": 12534,
+        "sessionId": 12533,
+        "processGroupId": 12534
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGKILL"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12534
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery pre-execution control channel failed: [Errno 9] Bad file descriptor",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery runner control channel closed before teardown",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 109.74337500000075
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 109.75266599999856
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 111.63462500000065
+      }
+    ],
+    "stderr": "",
+    "eventCount": 12,
+    "passed": true,
+    "fixtureKills": []
+  },
+  {
+    "name": "ready-proof-real-EBADF",
+    "passed": false,
+    "error": "Traceback (most recent call last):\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/run_heldouts.py\", line 135, in <module>\n    assert set(forks) <= set(reaps), record\nAssertionError: {'name': 'ready-proof-real-EBADF', 'guardFired': False, 'elapsedMs': 122.23895800000051, 'exitCode': 1, 'supervisorPid': 12540, 'supervisorAbsent': True, 'workers': [12541], 'workersAbsent': True, 'reapedWorkers': [], 'sentinelAlive': True, 'work': None, 'messages': [{'type': 'prepared', 'supervisorPid': 12540, 'sessionId': 12540}], 'gates': [], 'groupSignals': [{'kind': 'group-signal', 'pid': 12541, 'owner': 12540, 'at': 0.08777775, 'group': 12540, 'signal': 15, 'pinned': True, 'currentSession': 12540, 'termBlocked': True}, {'kind': 'group-signal', 'pid': 12541, 'owner': 12540, 'at': 0.087888875, 'group': 12540, 'signal': 19, 'pinned': True, 'currentSession': 12540, 'termBlocked': True}], 'actions': [{'action': 'budget-calculated-after-prepared', 'remainingMs': 200, 'elapsedMs': 116.85645799999733}], 'sent': [{'hex': '533230300a', 'elapsedMs': 116.86641600000058}], 'stderr': 'Traceback (most recent call last):\\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldout_wrapper.py\", line 171, in <module>\\n    scope[\\'main\\']()\\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py\", line 484, in main\\n    ready()\\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py\", line 298, in ready\\n    send({\"type\": \"ready\", \"pid\": worker, \"sessionId\": session_id, \"processGroupId\": worker})\\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldout_wrapper.py\", line 42, in send\\n    os.close(3)\\nOSError: [Errno 9] Bad file descriptor\\n', 'eventCount': 12}\n",
+    "guardFired": false,
+    "fixtureKills": []
+  },
+  {
+    "name": "double-TERM-at-exception-transfer",
+    "guardFired": false,
+    "elapsedMs": 176.71658400000112,
+    "exitCode": 0,
+    "supervisorPid": 12543,
+    "supervisorAbsent": true,
+    "workers": [
+      12544
+    ],
+    "workersAbsent": true,
+    "reapedWorkers": [
+      12544
+    ],
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12543,
+        "sessionId": 12543
+      },
+      {
+        "type": "ready",
+        "pid": 12544,
+        "sessionId": 12543,
+        "processGroupId": 12544
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGKILL"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12544
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery supervisor interrupted by parent signal or closed proof channel"
+        ]
+      }
+    ],
+    "gates": [],
+    "groupSignals": [],
+    "actions": [
+      {
+        "action": "budget-calculated-after-prepared",
+        "remainingMs": 200,
+        "elapsedMs": 120.28920900000273
+      },
+      {
+        "action": "actual-parent-TERM",
+        "elapsedMs": 141.1329590000001
+      }
+    ],
+    "sent": [
+      {
+        "hex": "533230300a",
+        "elapsedMs": 120.30129200000061
+      },
+      {
+        "hex": "45",
+        "elapsedMs": 123.08504200000314
+      }
+    ],
+    "stderr": "",
+    "eventCount": 14,
+    "passed": true,
+    "fixtureKills": []
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "graph": "finetune/uv.lock",
+  "argv": [
+    "/Users/shersingh/.local/bin/uv",
+    "--no-config",
+    "--cache-dir",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/cache/uv",
+    "--offline",
+    "lock",
+    "--check",
+    "--no-build",
+    "--python",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+    "--project",
+    "finetune"
+  ],
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "Using CPython 3.12.13 interpreter at: /Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python\nResolved 104 packages in 26ms\n",
+  "lockSha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+  "lockUnchanged": true,
+  "reason": "Original cleared PATH discovery did not select the existing venv interpreter; explicit documented --python selects the already installed3.12.13, no install or lock change"
+}

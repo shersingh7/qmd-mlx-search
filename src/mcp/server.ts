@@ -1263,7 +1263,7 @@ export async function startMcpHttpServer(port: number, options: HttpServerOption
       for (const [key, value] of Object.entries(nodeReq.headers)) {
         if (typeof value === "string") headers.set(key, key === "host" ? value.toLowerCase() : value);
       }
-      const request = new Request(requestUrl, {
+      const request = new Request(requestUrl.href, {
         method: nodeReq.method, headers, signal, ...(rawBody !== undefined ? { body: rawBody } : {}),
       });
       const responseTask = session.transport.handleRequest(request, { parsedBody: body });

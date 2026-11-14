@@ -43,7 +43,7 @@ RUNNERS = [
 ]
 SCRIPT_PROOFS = {(VERSION, runner + '.lock', '1') for runner in RUNNERS
                  if runner != 'finetune/dataset/prepare.py'}
-BASE_PROOFS = SCRIPT_PROOFS | {(VERSION, 'finetune/uv.lock', '1')}
+BASE_PROOFS = SCRIPT_PROOFS | {(VERSION, 'finetune/uv.lock', '2')}
 
 
 def synthetic_wheel(*, name='accelerate', version=VERSION, extra_headers='',
@@ -124,6 +124,7 @@ class SyntheticGraph:
     def write_project(self, *, dependency=None, constraint=None, source=None):
         self.write('finetune/pyproject.toml',
                    '[project]\nname = "synthetic-project"\nversion = "0.0.0"\n'
+                   'requires-python = ">=3.11"\n'
                    f'dependencies = [{json.dumps(dependency or f"accelerate=={VERSION}")}]\n'
                    '[tool.uv]\n'
                    f'constraint-dependencies = [{json.dumps(constraint or f"accelerate=={VERSION}")}]\n'
@@ -138,9 +139,29 @@ class SyntheticGraph:
                 f'{json.dumps(self.wheel.name)}, hash = "sha256:{digest or self.patch["sha256"]}"' + ' }]\n')
 
     def write_lock(self, extra=''):
+        # The synthetic project has a real root record too. These fixtures are
+        # graph-complete, not just bags containing a reviewed-looking wheel.
+        root = ('[[package]]\nname = "synthetic-project"\nversion = "0.0.0"\n'
+                'source = { virtual = "." }\n'
+                'dependencies = [{ name = "accelerate" }]\n'
+                '[package.metadata]\nrequires-dist = [{ name = "accelerate", path = '
+                + json.dumps(LOCAL_WHEEL) + ' }]\n')
+        accelerate = self.lock_entry()
+        branches = ''
+        if extra.startswith('\n[[package]]\nname = "accelerate"'):
+            # A second platform instance is meaningful only with disjoint
+            # marker domains; indistinguishable duplicates are ambiguous.
+            branches = ('resolution-markers = ["sys_platform == \'win32\'", '
+                        '"sys_platform != \'win32\'"]\n')
+            accelerate = accelerate.replace('wheels = [',
+                'resolution-markers = ["sys_platform != \'win32\'"]\nwheels = [', 1)
+            extra = extra.replace('wheels = [',
+                'resolution-markers = ["sys_platform == \'win32\'"]\nwheels = [', 1)
         self.write('finetune/uv.lock',
-                   'version = 1\n[[package]]\nname = "pydantic"\nversion = "2.0.0"\n'
-                   + self.lock_entry() + extra)
+                   'version = 1\nrevision = 3\nrequires-python = ">=3.11"\n' + branches
+                   + '[[package]]\nname = "pydantic"\nversion = "2.0.0"\n'
+                   'source = { registry = "https://pypi.org/simple" }\n'
+                   + root + accelerate + extra)
 
     def write_runner(self, path, *, direct=True, dependency=None, constraint=None, source=None):
         requirements = ([dependency or f'accelerate=={VERSION}'] if direct else ['pydantic>=2'])
@@ -160,7 +181,8 @@ class SyntheticGraph:
                 f'requirements = [{requirement}]\n'
                 'constraints = [{ name = "accelerate", url = '
                 + json.dumps(self.installer_url) + ' }]\n'
-                '[[package]]\nname = "pydantic"\nversion = "2.0.0"\n')
+                '[[package]]\nname = "pydantic"\nversion = "2.0.0"\n'
+                'source = { registry = "https://pypi.org/simple" }\n')
         if transitive:
             text += 'dependencies = [{ name = "accelerate" }]\n'
         if direct or transitive:
@@ -214,7 +236,7 @@ def test_valid_source_graph_grants_only_exact_uv_record_keys(graph):
 def test_all_platform_instances_must_match_and_get_distinct_proofs(graph):
     graph.write_lock(graph.lock_entry())
     proofs, receipt = graph.verify()
-    assert proofs == BASE_PROOFS | {(VERSION, 'finetune/uv.lock', '2')}
+    assert proofs == BASE_PROOFS | {(VERSION, 'finetune/uv.lock', '3')}
     assert receipt['resolved_instances'] == 5
 
 
@@ -921,6 +943,331 @@ def test_real_uv_supported_source_and_locked_hash_enforcement(tmp_path):
                            'stale_metadata_exit_code': stale.returncode, 'stale_metadata_stderr': stale.stderr,
                            'unsupported_fragment_exit_code': fragment.returncode,
                            'unsupported_fragment_stderr': fragment.stderr}, receipt, indent=2)
+        finally:
+            server.shutdown()
+            thread.join(timeout=3)
+            assert not thread.is_alive()
+
+
+def _package_blocks(text):
+    import re
+    return list(re.finditer(r'(?m)^\[\[package\]\]\n.*?(?=^\[\[package\]\]\n|\Z)', text, re.S))
+
+
+def _replace_named_package(text, name, transform):
+    matches = [match for match in _package_blocks(text)
+               if tomllib.loads('version = 1\n' + match.group())['package'][0]['name'] == name]
+    assert len(matches) == 1
+    match = matches[0]
+    return text[:match.start()] + transform(match.group()) + text[match.end():]
+
+
+def _graph_contract_fixture(graph, location, state):
+    """Change only SYNTHETIC declared requirements and their graph records.
+
+    Model fixtures retain Accelerate and its reviewed-source assertions. The
+    data fixture deliberately never gains Accelerate or Torch. Every negative
+    leaves current input metadata equal to the stored manifest.
+    """
+    root = location == 'root'
+    runner = RUNNERS[1] if location == 'data' else RUNNERS[-1]
+    relative = 'finetune/uv.lock' if root else runner + '.lock'
+    path = graph.root / relative
+    text = path.read_text()
+    if root:
+        project = graph.root / 'finetune/pyproject.toml'
+        project.write_text(project.read_text().replace('\ndependencies = [',
+                           '\ndependencies = ["pydantic>=2", ', 1))
+        text = text.replace('dependencies = [{ name = "accelerate" }]',
+                            'dependencies = [{ name = "pydantic" }, { name = "accelerate" }]')
+        text = text.replace('requires-dist = [', 'requires-dist = [{ name = "pydantic", specifier = ">=2" }, ', 1)
+    elif location == 'model':
+        script = graph.root / runner
+        script.write_text(script.read_text().replace('# dependencies = [',
+                          '# dependencies = ["pydantic>=2", ', 1))
+        text = text.replace('requirements = [', 'requirements = [{ name = "pydantic", specifier = ">=2" }, ', 1)
+    registry = 'source = { registry = "https://pypi.org/simple" }\n'
+    child = ('\n[[package]]\nname = "synthetic-child"\nversion = "2.0.0"\n' + registry)
+    if state == 'missing_direct':
+        text = _replace_named_package(text, 'pydantic', lambda _: '')
+        if location == 'data':
+            # Preserve a nonempty graph so refusal proves declaration binding,
+            # not merely the older empty-package-list syntax check.
+            text += child
+    elif state == 'missing_transitive':
+        text = _replace_named_package(text, 'pydantic',
+            lambda block: block + 'dependencies = [{ name = "synthetic-child" }]\n')
+    elif state in {'wrong_version', 'wrong_source', 'duplicate', 'malformed_edge', 'unsupported_source'}:
+        if state == 'wrong_version':
+            transform = lambda block: block.replace('version = "2.0.0"', 'version = "1.0.0"')
+        elif state == 'wrong_source':
+            transform = lambda block: block.replace(registry, 'source = { url = "https://example.invalid/unbound.whl" }\n')
+        elif state == 'duplicate':
+            transform = lambda block: block + '\n' + block
+        elif state == 'malformed_edge':
+            transform = lambda block: block + 'dependencies = [42]\n'
+        else:
+            transform = lambda block: block.replace(registry, 'source = { git = "https://example.invalid/unproven" }\n')
+        text = _replace_named_package(text, 'pydantic', transform)
+    elif state in {'wrong_edge_version', 'wrong_edge_source'}:
+        edge = ('{ name = "synthetic-child", version = "1.0.0", '
+                'source = { registry = "https://pypi.org/simple" } }' if state == 'wrong_edge_version'
+                else '{ name = "synthetic-child", version = "2.0.0", '
+                'source = { registry = "https://other.invalid/simple" } }')
+        text = _replace_named_package(text, 'pydantic', lambda block: block + 'dependencies = [' + edge + ']\n') + child
+    elif state in {'platform_complete', 'missing_windows', 'python_complete', 'missing_old_python',
+                   'missing_future_python', 'missing_micro_interval', 'missing_resolution_branch'}:
+        platform = state in {'platform_complete', 'missing_windows', 'missing_resolution_branch'}
+        low = "sys_platform == 'win32'" if platform else "python_full_version < '3.12'"
+        high = "sys_platform != 'win32'" if platform else "python_full_version >= '3.12'"
+        text = text.replace('requires-python = ">=3.11"\n',
+            'requires-python = ">=3.11"\nresolution-markers = ' + json.dumps([low, high]) + '\n', 1)
+        def split(block):
+            first = block + 'resolution-markers = ' + json.dumps([low]) + '\n'
+            second = block.replace('version = "2.0.0"', 'version = "2.1.0"')
+            if state == 'missing_micro_interval':
+                # A high, non-host micro-version interval cannot be sampled
+                # away by testing a fixed list of popular interpreter values.
+                marker = high + " and (python_full_version < '3.98.123' or python_full_version >= '3.98.124')"
+            else:
+                marker = high
+            second += 'resolution-markers = ' + json.dumps([marker]) + '\n'
+            if state in {'missing_windows', 'missing_old_python'}:
+                return second
+            if state == 'missing_future_python':
+                return first
+            return first + '\n' + second
+        text = _replace_named_package(text, 'pydantic', split)
+        if state == 'missing_resolution_branch':
+            text = text.replace('resolution-markers = ' + json.dumps([low, high]),
+                                'resolution-markers = ' + json.dumps([high]), 1)
+    elif state in {'extra_complete', 'missing_extra_dependency'}:
+        script_or_project = graph.root / ('finetune/pyproject.toml' if root else runner)
+        script_or_project.write_text(script_or_project.read_text().replace('pydantic>=2', 'pydantic[feature]>=2'))
+        text = text.replace('{ name = "pydantic", specifier = ">=2" }',
+                            '{ name = "pydantic", extras = ["feature"], specifier = ">=2" }')
+        if root:
+            text = text.replace('{ name = "pydantic" }', '{ name = "pydantic", extra = ["feature"] }')
+        text = _replace_named_package(text, 'pydantic', lambda block: block
+            + '[package.optional-dependencies]\nfeature = [{ name = "synthetic-child" }]\n')
+        if state == 'extra_complete':
+            text += child
+    elif state == 'unsupported_marker':
+        text = _replace_named_package(text, 'pydantic',
+            lambda block: block + 'dependencies = [{ name = "synthetic-child", marker = "os_name in \'posix\'" }]\n')
+    elif state == 'missing_project_record':
+        assert root
+        text = _replace_named_package(text, 'synthetic-project', lambda _: '')
+    else:
+        assert state == 'complete'
+    path.write_text(text)
+    return relative
+
+
+def _run_contract_audit(graph, *, extra_alerts=()):
+    graph.write('package.json', '{"dependencies":{"example":"2.0.0"}}')
+    graph.write('pnpm-lock.yaml', "lockfileVersion: '9.0'\npackages:\n  example@2.0.0: {}\n")
+    graph.write('bun.lock', '{"lockfileVersion":1,"packages":{"example":["example@2.0.0","",{},"synthetic"]}}')
+    graph.write('scripts/mlx_server_constraints.txt', 'requests==2.34.2\n')
+    graph.write('scripts/security_audit_requirements.txt', '-c mlx_server_constraints.txt\njson5==0.17.3\n')
+    graph.write('synthetic-alerts.json', json.dumps([{
+        'number': 1,
+        'dependency': {'package': {'ecosystem': 'pip', 'name': 'accelerate'}, 'manifest_path': 'finetune/uv.lock'},
+        'security_vulnerability': {'severity': 'critical', 'vulnerable_version_range': '<=1.14.0', 'first_patched_version': None},
+        'security_advisory': {'ghsa_id': 'GHSA-4j2p-28q2-5m79'},
+    }, *extra_alerts]))
+    report_path = graph.root / 'synthetic-graph-contract-report.json'
+    result = subprocess.run([sys.executable, str(ROOT / 'scripts/check_dependency_security.py'),
+        '--repo', str(graph.root), '--alerts', str(graph.root / 'synthetic-alerts.json'),
+        '--output', str(report_path)], cwd=graph.root.parent, capture_output=True, text=True, timeout=20,
+        env={**os.environ, 'HOME': str(graph.root.parent), 'XDG_CACHE_HOME': str(graph.root.parent / 'cache'),
+             'PYTHONDONTWRITEBYTECODE': '1', 'UV_PYTHON_DOWNLOADS': 'never',
+             'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1'})
+    return result, json.loads(report_path.read_text())
+
+
+@pytest.mark.parametrize('location', ['root', 'data', 'model'])
+@pytest.mark.parametrize('state', [
+    'missing_direct', 'missing_transitive', 'wrong_version', 'wrong_source',
+    'wrong_edge_version', 'wrong_edge_source', 'duplicate', 'malformed_edge',
+    'missing_windows', 'missing_old_python', 'missing_future_python',
+    'missing_micro_interval', 'missing_resolution_branch', 'missing_extra_dependency',
+    'unsupported_marker', 'unsupported_source',
+])
+def test_actual_cli_refuses_incomplete_or_incompatible_requirement_graphs(graph, location, state):
+    _graph_contract_fixture(graph, location, state)
+    result, report = _run_contract_audit(graph)
+    assert result.returncode == 1, (location, state, result.stdout, result.stderr, report)
+    assert report['passed'] is False
+    assert report.get('source_binding', {}).get('resolved_instances', 0) == 0
+
+
+@pytest.mark.parametrize('location', ['root', 'data', 'model'])
+@pytest.mark.parametrize('state', ['complete', 'platform_complete', 'python_complete', 'extra_complete'])
+def test_actual_cli_accepts_complete_universal_requirement_graphs(graph, location, state):
+    relative = _graph_contract_fixture(graph, location, state)
+    result, report = _run_contract_audit(graph)
+    assert result.returncode == 0, (result.stdout, result.stderr, report)
+    assert report['passed'] is True
+    assert report['source_binding']['resolved_instances'] == 4
+    if location == 'data':
+        names = {package['name'] for package in tomllib.loads((graph.root / relative).read_text())['package']}
+        assert not names & {'accelerate', 'torch'}
+
+
+@pytest.mark.parametrize('location', ['root', 'data', 'model'])
+@pytest.mark.parametrize('marker,record_domain,accepted', [
+    ('"3.*" != python_version', 'python_version != "3.*"', False),
+    ('"3.11" <= python_version', 'python_version >= "3.11"', True),
+    ('python_version == "3.*"', 'python_version == "3.*"', True),
+])
+def test_actual_cli_preserves_python_marker_operand_direction(graph, location, marker, record_domain, accepted):
+    relative = _graph_contract_fixture(graph, location, 'complete')
+    root = location == 'root'
+    runner = RUNNERS[1] if location == 'data' else RUNNERS[-1]
+    declaration = graph.root / ('finetune/pyproject.toml' if root else runner)
+    source = declaration.read_text()
+    original = json.dumps('pydantic>=2')
+    assert source.count(original) == 1
+    declaration.write_text(source.replace(original, json.dumps('pydantic>=2; ' + marker)))
+
+    lock = graph.root / relative
+    text = lock.read_text()
+    requirement = '{ name = "pydantic", specifier = ">=2" }'
+    assert text.count(requirement) == 1
+    text = text.replace(requirement,
+        '{ name = "pydantic", specifier = ">=2", marker = ' + json.dumps(marker) + ' }')
+    if root:
+        edge = '{ name = "pydantic" }'
+        assert text.count(edge) == 1
+        text = text.replace(edge, '{ name = "pydantic", marker = ' + json.dumps(marker) + ' }')
+    text = _replace_named_package(text, 'pydantic', lambda block:
+        block + 'resolution-markers = ' + json.dumps([record_domain]) + '\n')
+    lock.write_text(text)
+    if not root:
+        # The actual manifest/current-header check must pass before testing the
+        # graph proof; stale metadata is not a substitute for marker refusal.
+        binding._script_lock_metadata(tomllib.loads(text),
+            binding._script_metadata(declaration.read_text()), graph.patch)
+
+    result, report = _run_contract_audit(graph)
+    assert result.returncode == (0 if accepted else 1), (result.stdout, result.stderr, report)
+    assert report['passed'] is accepted
+    assert report.get('source_binding', {}).get('resolved_instances', 0) == (4 if accepted else 0)
+
+
+def test_actual_cli_requires_the_project_root_not_just_a_reviewed_wheel(graph):
+    _graph_contract_fixture(graph, 'root', 'missing_project_record')
+    result, report = _run_contract_audit(graph)
+    assert result.returncode == 1, report
+    assert report['passed'] is False
+
+
+@pytest.mark.parametrize('location', ['root', 'data', 'model'])
+def test_actual_cli_still_assesses_every_inactive_orphan_record(graph, location):
+    relative = 'finetune/uv.lock' if location == 'root' else (
+        RUNNERS[1] if location == 'data' else RUNNERS[-1]) + '.lock'
+    path = graph.root / relative
+    path.write_text(path.read_text() + '\n[[package]]\nname = "synthetic-orphan-vuln"\n'
+        'version = "0.1.0"\nsource = { registry = "https://pypi.org/simple" }\n'
+        'resolution-markers = ["python_full_version < \'3.10\' and sys_platform == \'win32\'"]\n')
+    result, report = _run_contract_audit(graph, extra_alerts=[{
+        'number': 2,
+        'dependency': {'package': {'ecosystem': 'pip', 'name': 'synthetic-orphan-vuln'}, 'manifest_path': relative},
+        'security_vulnerability': {'severity': 'critical', 'vulnerable_version_range': '<1', 'first_patched_version': None},
+        'security_advisory': {'ghsa_id': 'GHSA-synthetic-orphan'},
+    }])
+    assert result.returncode == 1 and report['passed'] is False
+    assert report['affected_alerts'] == 1
+    assert report['source_binding']['resolved_instances'] == 4
+    orphan = next(row for row in report['alerts'] if row['number'] == 2)
+    assert orphan['status'] == 'vulnerable'
+    assert [(row['version'], row['source']) for row in orphan['vulnerable_instances']] == [('0.1.0', relative)]
+
+
+def test_real_uv_missing_manifest_package_is_rejected_before_locked_execution(tmp_path):
+    """Model-free two-wheel control: uv --check is not graph binding evidence."""
+    import functools
+    import http.server
+    import shutil
+    import socketserver
+    import threading
+
+    uv = shutil.which('uv')
+    assert uv, 'Real uv is required, not a skipped graph-completeness proof'
+    names = ['qmd_synthetic_graph_primary', 'qmd_synthetic_graph_secondary']
+    for name in names:
+        wheel = tmp_path / f'{name}-0.0.0-py3-none-any.whl'
+        dist = f'{name}-0.0.0.dist-info'
+        with zipfile.ZipFile(wheel, 'w') as archive:
+            archive.writestr(name + '.py', '__version__ = "0.0.0"\n')
+            archive.writestr(dist + '/METADATA', f'Metadata-Version: 2.4\nName: {name}\nVersion: 0.0.0\n\nSYNTHETIC MODEL-FREE TEST ONLY\n')
+            archive.writestr(dist + '/WHEEL', 'Wheel-Version: 1.0\nGenerator: synthetic-test\nRoot-Is-Purelib: true\nTag: py3-none-any\n')
+            archive.writestr(dist + '/RECORD', ''.join(entry + ',,\n' for entry in [
+                name + '.py', dist + '/METADATA', dist + '/WHEEL', dist + '/RECORD']))
+    class NumericServer(http.server.HTTPServer):
+        def server_bind(self):
+            socketserver.TCPServer.server_bind(self)
+            self.server_name = str(self.server_address[0])
+            self.server_port = self.server_address[1]
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, format, *args):
+            pass
+    home = tmp_path / 'home'
+    home.mkdir()
+    env = {'PATH': os.environ.get('PATH', ''), 'HOME': str(home), 'TMPDIR': str(tmp_path),
+           'UV_CACHE_DIR': str(tmp_path / 'resolve-cache'), 'UV_PYTHON_DOWNLOADS': 'never',
+           'PYTHONDONTWRITEBYTECODE': '1', 'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1'}
+    with NumericServer(('127.0.0.1', 0), functools.partial(Handler, directory=str(tmp_path))) as server:
+        thread = threading.Thread(target=lambda: server.serve_forever(poll_interval=0.01), daemon=True)
+        thread.start()
+        try:
+            script = tmp_path / 'two-wheel-probe.py'
+            body = ('requires-python = ">=3.11"\n'
+                    'dependencies = ' + json.dumps([name + '==0.0.0' for name in names]) + '\n[tool.uv.sources]\n')
+            for name in names:
+                url = f'http://127.0.0.1:{server.server_port}/{name}-0.0.0-py3-none-any.whl'
+                body += name + ' = { url = ' + json.dumps(url) + ' }\n'
+            source = '# /// script\n' + ''.join('# ' + line + '\n' for line in body.splitlines()) + '# ///\n'
+            source += '\n'.join('import ' + name for name in names) + '\nprint("SYNTHETIC_COMPLETE_GRAPH_RAN")\n'
+            script.write_text(source)
+            metadata = binding._script_metadata(source)
+            lock_command = [uv, 'lock', '--script', str(script), '--python', sys.executable,
+                            '--no-build', '--no-index', '--no-config']
+            resolved = subprocess.run(lock_command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=45)
+            assert resolved.returncode == 0, resolved.stderr
+            lock = Path(str(script) + '.lock')
+            good = lock.read_text()
+            binding._graph.validate_lock_graph(tomllib.loads(good), metadata)
+            runtime = [uv, 'run', '--locked', '--python', sys.executable, '--no-build', '--no-index', '--no-config', str(script)]
+            ran = subprocess.run(runtime, cwd=tmp_path, env={**env, 'UV_CACHE_DIR': str(tmp_path / 'good-cache')},
+                                 capture_output=True, text=True, timeout=45)
+            assert ran.returncode == 0 and ran.stdout.strip() == 'SYNTHETIC_COMPLETE_GRAPH_RAN', ran.stderr
+            damaged = _replace_named_package(good, names[0].replace('_', '-'), lambda _: '')
+            before = tomllib.loads(good)
+            after = tomllib.loads(damaged)
+            assert after['manifest'] == before['manifest']
+            assert len(after['package']) == 1 and len(before['package']) == 2
+            lock.write_text(damaged)
+            checked = subprocess.run([*lock_command, '--check'], cwd=tmp_path, env=env,
+                                     capture_output=True, text=True, timeout=45)
+            assert lock.read_text() == damaged
+            # uv 0.11.18 actually returns 0 here. A future uv fixing its own
+            # check must not make our independent refusal contract obsolete.
+            with pytest.raises(ValueError, match='Missing package') as error:
+                binding._graph.validate_lock_graph(after, metadata)
+            refused = subprocess.run(runtime, cwd=tmp_path,
+                env={**env, 'UV_CACHE_DIR': str(tmp_path / 'bad-cache')},
+                capture_output=True, text=True, timeout=45)
+            assert refused.returncode != 0 and 'Could not find root package' in refused.stderr, refused.stderr
+            assert 'SYNTHETIC_COMPLETE_GRAPH_RAN' not in refused.stdout
+            version = subprocess.run([uv, '--version'], env=env, capture_output=True, text=True, timeout=10)
+            with (tmp_path / 'uv-missing-graph-receipt.json').open('x') as receipt:
+                json.dump({'fixture': 'TWO SYNTHETIC MODEL-FREE WHEELS ONLY', 'uv': version.stdout.strip(),
+                    'resolve_exit_code': resolved.returncode, 'good_runtime_exit_code': ran.returncode,
+                    'incomplete_check_exit_code': checked.returncode, 'incomplete_check_stderr': checked.stderr,
+                    'static_guard_error': str(error.value), 'incomplete_runtime_exit_code': refused.returncode,
+                    'incomplete_runtime_stderr': refused.stderr}, receipt, indent=2)
         finally:
             server.shutdown()
             thread.join(timeout=3)

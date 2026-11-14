@@ -1,0 +1,216 @@
+{
+  "actual_cloud_execution": false,
+  "actual_image_execution": false,
+  "before_after": {
+    "delivery": 6,
+    "frozen_fixture": 42,
+    "live_three_originals": 3,
+    "own_fixture": 42
+  },
+  "evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence",
+  "finding": {
+    "file": "finetune/tools/qualify_gguf_image.py",
+    "id": "R1",
+    "lines": [
+      45,
+      50,
+      51
+    ],
+    "positive_contract_receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/probe-positive-contract.xml",
+    "severity": "P1",
+    "summary": "Whole-banner equality rejects required uv 0.11.18 with its always-present upstream target suffix"
+  },
+  "frozen_suite": {
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "tests": 149
+  },
+  "heldouts": {
+    "cli_audits": 24,
+    "passed": 85
+  },
+  "mutation_controls": 7,
+  "parent_gate_closed": false,
+  "passing_spec_scope": "launcher closure/image selection and preserved accepted contracts",
+  "probe_contract": {
+    "errors": 0,
+    "failures": 2,
+    "skipped": 0,
+    "tests": 4
+  },
+  "quality": "DEFERRED: important native qualifier contract fails",
+  "report": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/REPORT.md",
+  "report_sha256": "13e2392db6a56a635f3cbb770016396a3881a3e36ef3d90263a20277aa9dc455",
+  "source_bindings": {
+    "docs/security/dependency-remediation/patched-dependencies.json": {
+      "sha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "size": 1201
+    },
+    "finetune/LOCKED-JOBS.md": {
+      "sha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "size": 14357
+    },
+    "finetune/convert_gguf.py": {
+      "sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "size": 7402
+    },
+    "finetune/convert_gguf.py.lock": {
+      "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "size": 336994
+    },
+    "finetune/convert_onnx.py": {
+      "sha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "size": 19643
+    },
+    "finetune/convert_onnx.py.lock": {
+      "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "size": 316024
+    },
+    "finetune/dataset/analyze_data.py": {
+      "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "size": 9063
+    },
+    "finetune/dataset/analyze_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/dataset/prepare_data.py": {
+      "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "size": 6501
+    },
+    "finetune/dataset/prepare_data.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "finetune/dataset/prepare_data_lfm2.py": {
+      "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "size": 3382
+    },
+    "finetune/dataset/prepare_data_lfm2.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "size": 219553
+    },
+    "finetune/dataset/schema.py": {
+      "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "size": 7405
+    },
+    "finetune/dataset/score_data.py": {
+      "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "size": 3670
+    },
+    "finetune/dataset/score_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/dataset/validate_schema.py": {
+      "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "size": 3297
+    },
+    "finetune/dataset/validate_schema.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "size": 46218
+    },
+    "finetune/eval.py": {
+      "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "size": 11652
+    },
+    "finetune/eval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "finetune/eval_retrieval.py": {
+      "sha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "size": 24556
+    },
+    "finetune/eval_retrieval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "size": 271807
+    },
+    "finetune/evals/queries.txt": {
+      "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "size": 2280
+    },
+    "finetune/experiments/grpo/grpo.py": {
+      "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "size": 6165
+    },
+    "finetune/experiments/grpo/grpo.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py": {
+      "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "size": 4027
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/gguf_toolchain.py": {
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "size": 10991
+    },
+    "finetune/jobs/eval.py": {
+      "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "size": 18901
+    },
+    "finetune/jobs/eval.py.lock": {
+      "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "size": 271867
+    },
+    "finetune/jobs/eval_common.py": {
+      "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "size": 13332
+    },
+    "finetune/jobs/sft.py": {
+      "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "size": 4842
+    },
+    "finetune/jobs/sft.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "size": 375142
+    },
+    "finetune/pyproject.toml": {
+      "sha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "size": 1828
+    },
+    "finetune/reward.py": {
+      "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "size": 28276
+    },
+    "finetune/tests/test_locked_job_submission.py": {
+      "sha256": "3bd023524ce03e38e55d4055862b27e90249642e132ecaa98f9c5ae3564db1e1",
+      "size": 39234
+    },
+    "finetune/tools/qualify_gguf_image.py": {
+      "sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+      "size": 3968
+    },
+    "finetune/tools/submit_locked_job.py": {
+      "sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "size": 24023
+    },
+    "finetune/train.py": {
+      "sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "size": 21309
+    },
+    "finetune/train.py.lock": {
+      "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "size": 604247
+    },
+    "finetune/train_unsloth.py": {
+      "sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "size": 9215
+    },
+    "finetune/train_unsloth.py.lock": {
+      "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "size": 603500
+    },
+    "finetune/uv.lock": {
+      "sha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "size": 651263
+    }
+  },
+  "spec": "FAIL"
+}

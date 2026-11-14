@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = "docs/security/dependency-remediation/patched-dependencies.json"
 # Explicit reviewed runtime closure, NOT a glob or a recursive checkout upload.
 CODE_CLOSURE = {
-    "finetune/convert_gguf.py": (),
+    "finetune/convert_gguf.py": ("finetune/gguf_toolchain.py",),
     "finetune/convert_onnx.py": (),
     "finetune/dataset/analyze_data.py": ("finetune/dataset/schema.py",),
     "finetune/dataset/prepare_data.py": ("finetune/dataset/schema.py",),
@@ -37,13 +37,17 @@ CODE_CLOSURE = {
     "finetune/experiments/lfm2/sft_lfm2.py": (),
     "finetune/jobs/eval.py": (),
     "finetune/jobs/sft.py": ("finetune/jobs/eval_common.py",),
-    "finetune/train.py": ("finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt"),
-    "finetune/train_unsloth.py": ("finetune/train.py", "finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt"),
+    "finetune/train.py": ("finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt", "finetune/gguf_toolchain.py"),
+    "finetune/train_unsloth.py": ("finetune/train.py", "finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt", "finetune/gguf_toolchain.py"),
 }
 # Registry-verified multi-architecture digest; uv matches the lock controls.
 # Registry metadata was read, but this image has not been pulled or executed.
 DEFAULT_IMAGE = ("ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:"
                  "9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e")
+# Non-slim Python base retains native build prerequisites for GGUF exports.
+# Registry/config metadata is verified; native execution is a separate CI gate.
+GGUF_IMAGE = ("ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:"
+              "c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e")
 MOUNT = "/qmd-code"
 # Fixed shell text only. Script args are passed as "$@", never interpolated.
 # A writable copy preserves relative inputs/outputs and __file__ helper paths.
@@ -196,7 +200,9 @@ def safe_relative(value: str) -> PurePosixPath:
 def check_env_name(name: str) -> None:
     if (not ENV_NAME.fullmatch(name) or name.startswith(("UV_", "PYTHON", "LD_"))
             or name in {"PATH", "VIRTUAL_ENV", "BASH_ENV", "ENV"}):
-        raise ValueError(f"Unsupported environment name: {name}")
+        # A malformed --secret-env argument can contain an inline credential.
+        # Refuse the literal without reflecting it into terminal/session logs.
+        raise ValueError("Unsupported environment name; supply a variable name, not an inline value")
 
 
 def remote_volumes(args) -> list[dict]:
@@ -274,9 +280,12 @@ def prepare(args) -> tuple[dict, dict[str, bytes]]:
         check_env_name(name)
         if name in env or args.secret_env.count(name) > 1:
             raise ValueError("Duplicate environment/secret name")
+    image = args.image
+    if image is None:
+        image = GGUF_IMAGE if "finetune/gguf_toolchain.py" in CODE_CLOSURE[args.runner] else DEFAULT_IMAGE
     manifest = {
         "mode": "dry-run", "namespace": args.namespace, "flavor": args.flavor,
-        "timeout": args.timeout, "attempts": 1, "image": DEFAULT_IMAGE,
+        "timeout": args.timeout, "attempts": 1, "image": image,
         "resource_group_id": args.resource_group_id,
         "command": ["sh", "-c", BOOTSTRAP, "qmd-locked-job", MOUNT, "uv", "run", "--locked", "--no-project", "--script",
                     args.runner.removeprefix("finetune/"), *args.script_args],
@@ -361,6 +370,7 @@ def parse_args(argv=None):
     parser.add_argument("--namespace", required=True, help="Explicit HF user/organization namespace")
     parser.add_argument("--flavor", required=True, help="Explicit HF hardware flavor; may incur charges")
     parser.add_argument("--timeout", required=True, help="Explicit job deadline, e.g. 30m")
+    parser.add_argument("--image", default=None, help="Explicit image override, preserved literally; otherwise selected by runner")
     parser.add_argument("--submit", action="store_true", help="OPT IN to private uploads and a paid remote job")
     parser.add_argument("--input", action="append", default=[], metavar="LOCAL=REMOTE", help="One explicit absolute input file; no directories/globs")
     parser.add_argument("--allow-input-upload", action="store_true", help="Consent to uploading every --input file")

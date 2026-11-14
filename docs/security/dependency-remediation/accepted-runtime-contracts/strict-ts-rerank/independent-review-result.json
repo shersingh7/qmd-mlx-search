@@ -1,0 +1,798 @@
+{
+  "spec": "PASS (frozen combined proposal and exercised runtimes only; NOT live integration or release acceptance)",
+  "quality": "APPROVE_WITH_MINOR_FINDING",
+  "findings": [
+    {
+      "id": "Q1",
+      "severity": "minor/P3",
+      "file": "src/bench-rerank.ts",
+      "lines": "353-355",
+      "title": "Legacy fallback is not symlink-aware on Node",
+      "evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/node-heldout-Xgl3du/observations.json",
+      "detail": "With only import.meta.main forced undefined on the current Node host, direct entry runs but symlink entry exits zero without launching. The actual guard uses a lexical argv URL versus Node real module URL. Native current Node/Bun entrypoint tests pass. No older Node binary was run. Normalize fallback entry identity or document this narrow legacy limitation."
+    }
+  ],
+  "limits": [
+    "The old recovery prefix in O/F is NOT the newer live recovery protocol. Parent must rebase only approved type deltas outside executeRecoveryWorker/interface and rerun integrated checks. No old file may be copied wholesale into live.",
+    "Broader Bun six-file run has 59 passes, 9 CI skips and one phase5 import failure at src/mcp/server.ts:42 (z.object undefined). Exact same standalone failure reproduced on unpatched snapshot. Baseline-level isolated Bun/Vitest limitation, not a passing run and not attributed to this delta.",
+    "No canonical package/full-suite/metadata install or Nix integration run here; parent owns those gates.",
+    "All lifecycle/ranking backend probes are synthetic. No native models, GPU/inference/training, network/install, speed/memory qualification, credentials, private knowledge or live indices accessed.",
+    "Initial own heldout harness inserted an import-meta override before a retained shebang, causing a SyntaxError; corrected own harness only. A subsequent Bun characterization initially used a Node-specific symlink expectation; corrected runtime characterization only. All failed runners/logs retained, no product assertions relaxed.",
+    "Original disclosed shared Vite cache mutation by F remains disclosed and was not reverted. Its bytes+mtime were stable throughout this review."
+  ],
+  "rootConfig": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "oldRootCount": 146,
+    "proposedRootCount": 147,
+    "removed": [],
+    "added": [
+      "test/bench-rerank-lifecycle.test.ts"
+    ]
+  },
+  "integrity": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/integrity-final.json",
+  "results": {
+    "node-focused": {
+      "fileCount": 5,
+      "tests": 155,
+      "passed": 124,
+      "skipped": 31,
+      "failedAssertions": 0,
+      "failedFiles": 0,
+      "success": true,
+      "files": [
+        {
+          "file": "test/audit-llm-cleanup-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 21
+          },
+          "message": ""
+        },
+        {
+          "file": "test/audit-llm-deadline-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          },
+          "message": ""
+        },
+        {
+          "file": "test/audit-llm-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 27
+          },
+          "message": ""
+        },
+        {
+          "file": "test/bench-rerank-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 34
+          },
+          "message": ""
+        },
+        {
+          "file": "test/llm.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 20,
+            "skipped": 31
+          },
+          "message": ""
+        }
+      ]
+    },
+    "bun-focused": {
+      "fileCount": 5,
+      "tests": 155,
+      "passed": 124,
+      "skipped": 31,
+      "failedAssertions": 0,
+      "failedFiles": 0,
+      "success": true,
+      "files": [
+        {
+          "file": "test/audit-llm-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 27
+          },
+          "message": ""
+        },
+        {
+          "file": "test/audit-llm-cleanup-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 21
+          },
+          "message": ""
+        },
+        {
+          "file": "test/bench-rerank-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 34
+          },
+          "message": ""
+        },
+        {
+          "file": "test/llm.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 20,
+            "skipped": 31
+          },
+          "message": ""
+        },
+        {
+          "file": "test/audit-llm-deadline-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          },
+          "message": ""
+        }
+      ]
+    },
+    "node-original": {
+      "fileCount": 6,
+      "tests": 86,
+      "passed": 77,
+      "skipped": 9,
+      "failedAssertions": 0,
+      "failedFiles": 0,
+      "success": true,
+      "files": [
+        {
+          "file": "test/eval-bm25.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4
+          },
+          "message": ""
+        },
+        {
+          "file": "test/eval.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4,
+            "skipped": 9
+          },
+          "message": ""
+        },
+        {
+          "file": "test/multi-collection-filter.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 14
+          },
+          "message": ""
+        },
+        {
+          "file": "test/phase5-recovery.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 18
+          },
+          "message": ""
+        },
+        {
+          "file": "test/rrf-trace.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 2
+          },
+          "message": ""
+        },
+        {
+          "file": "test/store.helpers.unit.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 35
+          },
+          "message": ""
+        }
+      ]
+    },
+    "bun-original": {
+      "fileCount": 6,
+      "tests": 68,
+      "passed": 59,
+      "skipped": 9,
+      "failedAssertions": 0,
+      "failedFiles": 1,
+      "success": false,
+      "files": [
+        {
+          "file": "test/multi-collection-filter.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 14
+          },
+          "message": ""
+        },
+        {
+          "file": "test/phase5-recovery.test.ts",
+          "status": "failed",
+          "counts": {},
+          "message": "undefined is not an object (evaluating 'z.object')"
+        },
+        {
+          "file": "test/store.helpers.unit.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 35
+          },
+          "message": ""
+        },
+        {
+          "file": "test/eval-bm25.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4
+          },
+          "message": ""
+        },
+        {
+          "file": "test/eval.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4,
+            "skipped": 9
+          },
+          "message": ""
+        },
+        {
+          "file": "test/rrf-trace.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 2
+          },
+          "message": ""
+        }
+      ]
+    },
+    "node-exact-old": {
+      "exitCode": 1,
+      "cases": 3,
+      "passed": 0,
+      "expectedRed": true,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/exact-body-xTdYoA",
+      "details": [
+        {
+          "mode": "disposal-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "disposal-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            0
+          ]
+        },
+        {
+          "mode": "ranking-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "ranking-refusal",
+          "activeAtReturn": 1,
+          "disposalAttemptsAtReturn": [
+            0,
+            0
+          ]
+        },
+        {
+          "mode": "warmup-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "warmup-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "node-exact-proposed": {
+      "exitCode": 0,
+      "cases": 3,
+      "passed": 3,
+      "expectedRed": false,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/exact-body-69kGYH",
+      "details": [
+        {
+          "mode": "disposal-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "Ranking context cleanup failed; benchmark cannot continue",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        },
+        {
+          "mode": "ranking-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "ranking-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        },
+        {
+          "mode": "warmup-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "warmup-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    "bun-exact-old": {
+      "exitCode": 1,
+      "cases": 3,
+      "passed": 0,
+      "expectedRed": true,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/exact-body-w0YChE",
+      "details": [
+        {
+          "mode": "disposal-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "disposal-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            0
+          ]
+        },
+        {
+          "mode": "ranking-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "ranking-refusal",
+          "activeAtReturn": 1,
+          "disposalAttemptsAtReturn": [
+            0,
+            0
+          ]
+        },
+        {
+          "mode": "warmup-refusal",
+          "sourceHash": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "warmup-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "bun-exact-proposed": {
+      "exitCode": 0,
+      "cases": 3,
+      "passed": 3,
+      "expectedRed": false,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/exact-body-E3iEIW",
+      "details": [
+        {
+          "mode": "disposal-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "Ranking context cleanup failed; benchmark cannot continue",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        },
+        {
+          "mode": "ranking-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "ranking-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        },
+        {
+          "mode": "warmup-refusal",
+          "sourceHash": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+          "syntheticLifecycleOnly": true,
+          "nativeModelOrGpuRuns": 0,
+          "caught": "warmup-refusal",
+          "activeAtReturn": 0,
+          "disposalAttemptsAtReturn": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    "node-independent-heldouts-settled": {
+      "exitCode": 0,
+      "cases": 4,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/node-heldout-Xgl3du",
+      "details": [
+        {
+          "name": "parallel-arbitrary-values",
+          "leafErrors": [
+            "[undefined]",
+            "secondary-refusal",
+            "dispose-sync",
+            "dispose-async"
+          ],
+          "events": [
+            "rank-start:0",
+            "rank-start:1",
+            "rank-start:2",
+            "rank-end:1",
+            "rank-end:2",
+            "dispose:0",
+            "dispose:1",
+            "dispose:2"
+          ],
+          "activeAtReturn": 0
+        },
+        {
+          "name": "async-cleanup-parent-order",
+          "events": [
+            "child-start",
+            "child-reject",
+            "model",
+            "llama"
+          ],
+          "allErrors": [
+            "child-cleanup-fault",
+            "model-cleanup-fault",
+            "llama-cleanup-fault"
+          ],
+          "summaryPublished": false
+        },
+        {
+          "name": "cli-nested-cleanup",
+          "status": 1,
+          "events": [
+            "llama-acquire",
+            "resolve",
+            "model-acquire",
+            {
+              "options": {
+                "contextSize": 2048,
+                "threads": 4
+              }
+            },
+            "context-release:0",
+            "model-release",
+            "llama-release"
+          ]
+        },
+        {
+          "name": "forced-legacy-branch",
+          "currentRuntimeOnly": true,
+          "nativeOlderNodeNotRun": true,
+          "direct": {
+            "status": 0,
+            "launched": true
+          },
+          "symlink": {
+            "status": 0,
+            "launched": false
+          },
+          "note": "Node fallback compares lexical argv URL to real module URL; Bun currently preserves a matching entry identity"
+        }
+      ]
+    },
+    "node-public-llm-heldout": {
+      "execPath": "/Users/shersingh/.hermes/node/bin/node",
+      "node": "22.22.3",
+      "bun": null,
+      "case": "concurrent actual ensureRerankContexts cold callers share bounded retry/options/pool and exact cleanup",
+      "calls": 5,
+      "created": 4,
+      "callers": 5,
+      "events": [
+        "released:0",
+        "released:1",
+        "released:2",
+        "released:3"
+      ],
+      "options": [
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        }
+      ],
+      "nativeModelRuns": 0,
+      "syntheticBoundaryOnly": true
+    },
+    "bun-independent-heldouts-settled": {
+      "exitCode": 0,
+      "cases": 4,
+      "observations": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-heldout-E5ZrnZ",
+      "details": [
+        {
+          "name": "parallel-arbitrary-values",
+          "leafErrors": [
+            "[undefined]",
+            "secondary-refusal",
+            "dispose-sync",
+            "dispose-async"
+          ],
+          "events": [
+            "rank-start:0",
+            "rank-start:1",
+            "rank-start:2",
+            "rank-end:1",
+            "rank-end:2",
+            "dispose:0",
+            "dispose:1",
+            "dispose:2"
+          ],
+          "activeAtReturn": 0
+        },
+        {
+          "name": "async-cleanup-parent-order",
+          "events": [
+            "child-start",
+            "child-reject",
+            "model",
+            "llama"
+          ],
+          "allErrors": [
+            "child-cleanup-fault",
+            "model-cleanup-fault",
+            "llama-cleanup-fault"
+          ],
+          "summaryPublished": false
+        },
+        {
+          "name": "cli-nested-cleanup",
+          "status": 1,
+          "events": [
+            "llama-acquire",
+            "resolve",
+            "model-acquire",
+            {
+              "options": {
+                "contextSize": 2048,
+                "threads": 4
+              }
+            },
+            "context-release:0",
+            "model-release",
+            "llama-release"
+          ]
+        },
+        {
+          "name": "forced-legacy-branch",
+          "currentRuntimeOnly": true,
+          "nativeOlderNodeNotRun": true,
+          "direct": {
+            "status": 0,
+            "launched": true
+          },
+          "symlink": {
+            "status": 0,
+            "launched": true
+          },
+          "note": "Node fallback compares lexical argv URL to real module URL; Bun currently preserves a matching entry identity"
+        }
+      ]
+    },
+    "bun-public-llm-heldout": {
+      "execPath": "/Users/shersingh/.bun/bin/bun",
+      "node": "24.3.0",
+      "bun": "1.3.8",
+      "case": "concurrent actual ensureRerankContexts cold callers share bounded retry/options/pool and exact cleanup",
+      "calls": 5,
+      "created": 4,
+      "callers": 5,
+      "events": [
+        "released:0",
+        "released:1",
+        "released:2",
+        "released:3"
+      ],
+      "options": [
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        },
+        {
+          "contextSize": 4096,
+          "createSignal": {
+            "aborted": true
+          },
+          "threads": 3
+        }
+      ],
+      "nativeModelRuns": 0,
+      "syntheticBoundaryOnly": true
+    }
+  },
+  "integrationPaths": [
+    "scripts/phase5_e2e_runner.ts",
+    "src/bench-rerank.ts",
+    "src/llm.ts",
+    "src/llm/mlx-identity.ts",
+    "src/mcp/server.ts",
+    "src/test-preload.ts",
+    "test/bench-rerank-lifecycle.test.ts",
+    "test/cli.test.ts",
+    "test/eval-bm25.test.ts",
+    "test/eval.test.ts",
+    "test/fixtures/public_eval_dataset.ts",
+    "test/llm.test.ts",
+    "test/multi-collection-filter.test.ts",
+    "test/phase5-recovery.test.ts",
+    "test/rrf-trace.test.ts",
+    "test/store.helpers.unit.test.ts"
+  ],
+  "artifacts": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source.patch": "e7b8d38aa36df031a3d28b4ba4044d5a6e16607b7f1ddfe3fa515f7fbe4fa620",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/metadata-intents.patch": "de5d3b9b9c591b0b249ceb8fb70890298b1debb15f679aee6f5392d6d2c035ad",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror-only-import-relocation.patch": "0c6801fd52e297633d46acbe71ee3703bb3ab00b02291f1d8c05f9c412dd45de",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/complete-mirror.patch": "0a9909a63cd6751050f6e856abb5ade367e0e09ea47f524f15bf751ddbb8e196",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source-manifest.json": "d40e5ec1145869933609286ab1881da23d887b1032b0c36b668c80ddd9592846",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/delivery-manifest.json": "2cefd3de50afe0aedc4ab37937f4eefc902f6fb8a70b2cccfb14a2d9c84b458e",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/parent-benchmark-lifecycle.test.mjs": "055073c2b89162b97bdae97f66217fc5b3e911acebf37d59761be80381865bbe",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/supported-api.json": "29d82d4130e2b29f99329b8e8dd7f66b144e23dac7b9e1ee7ec3d4d30c60a47e",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/rerank-lifecycle-supplement.patch": "531b457942ab2c4d3e17780a69251a9b4b8d23b2287f436f76c05b3981eed4cc",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/evidence/supplement-manifest.json": "39a838f2070b09e0703002cef073212394032dba3203b26f34e2bc640b13eb57",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/evidence/contract-policy-proof.json": "203fe14384a36d8c8be3591553ca4edc4e81c47910349928ff415bd48fc7e4a1",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/exact-body-lifecycle.test.mjs": "db28f2ae1e716f5579e871ca99e63e6aed910daf1a3f41cbd0540f57dbfdf811"
+  },
+  "actualHosts": {
+    "node": {
+      "executable": "/Users/shersingh/.hermes/node/bin/node",
+      "versions": {
+        "node": "22.22.3",
+        "acorn": "8.16.0",
+        "ada": "2.9.2",
+        "amaro": "1.1.8",
+        "ares": "1.34.6",
+        "brotli": "1.1.0",
+        "cjs_module_lexer": "2.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.3.1",
+        "modules": "127",
+        "napi": "10",
+        "nbytes": "0.1.3",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.64.0",
+        "openssl": "3.5.6",
+        "simdjson": "4.5.0",
+        "simdutf": "6.4.2",
+        "sqlite": "3.51.3",
+        "tz": "2026a",
+        "undici": "6.24.1",
+        "unicode": "17.0",
+        "uv": "1.51.0",
+        "uvwasi": "0.0.23",
+        "v8": "12.4.254.21-node.56",
+        "zlib": "1.3.1-e00f703",
+        "zstd": "1.5.7"
+      },
+      "sourceSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+      "exactExecutableBodiesVerified": true,
+      "syntheticResourcesOnly": true,
+      "nativeModelOrGpuRuns": 0
+    },
+    "bun": {
+      "executable": "/Users/shersingh/.bun/bin/bun",
+      "versions": {
+        "node": "24.3.0",
+        "bun": "1.3.8",
+        "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+        "openssl": "1.1.0",
+        "llhttp": "9.3.0",
+        "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+        "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+        "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+        "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+        "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+        "zig": "0.14.1",
+        "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+        "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+        "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+        "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+        "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+        "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+        "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+        "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+        "v8": "13.6.233.10-node.18",
+        "uv": "1.48.0",
+        "napi": "10",
+        "icu": "74.2",
+        "unicode": "15.1",
+        "modules": "137"
+      },
+      "sourceSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+      "exactExecutableBodiesVerified": true,
+      "syntheticResourcesOnly": true,
+      "nativeModelOrGpuRuns": 0
+    }
+  }
+}

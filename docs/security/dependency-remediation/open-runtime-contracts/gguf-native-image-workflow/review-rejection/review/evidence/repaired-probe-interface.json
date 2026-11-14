@@ -1,0 +1,18 @@
+{
+  "sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+  "path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py",
+  "inspection": "text/AST only; never imported or executed",
+  "receipt_keys": [
+    "status",
+    "scope",
+    "native_only",
+    "platform",
+    "python",
+    "versions",
+    "outputs",
+    "probe_sha256",
+    "locked_python_converter_training_gpu_cloud_qualified"
+  ],
+  "full_mode_default": true,
+  "workflow_passes_no_probe_cli_options": true
+}

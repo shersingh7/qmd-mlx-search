@@ -102,10 +102,68 @@ def _model_sources(model_path: str) -> tuple[str, dict | None, str]:
     return base_model, adapter, model_path if has_tokenizer else base_model
 
 
+def _load_adapter(model, model_path: str):
+    """Separate explicitly saved raw layers before PEFT copies either tensor."""
+    import torch
+    from peft import PeftModel
+
+    separated_head = []
+
+    def separate_raw_layers(module, state_dict, prefix, *unused):
+        # PEFT has already installed/remapped modules_to_save wrappers here.
+        # Its active copies are independent, but save_embedding_layers can also
+        # include raw original_module backups still sharing the base Parameter.
+        inputs = module.get_input_embeddings()
+        outputs = module.get_output_embeddings()
+        if inputs is None or outputs is None:
+            return
+        inputs = getattr(inputs, "original_module", inputs)
+        outputs = getattr(outputs, "original_module", outputs)
+        # LoRA can itself wrap an embedding/head. The raw saved weight belongs
+        # to its base layer, not to the wrapper's read-only weight property.
+        inputs = inputs.get_base_layer() if hasattr(inputs, "get_base_layer") else inputs
+        outputs = outputs.get_base_layer() if hasattr(outputs, "get_base_layer") else outputs
+        weight = getattr(outputs, "weight", None)
+        if weight is None or weight is not getattr(inputs, "weight", None):
+            return
+        raw_keys = (
+            prefix + name + ".weight"
+            for name, layer in module.named_modules(remove_duplicate=False)
+            if layer is inputs or layer is outputs
+        )
+        if not any(key in state_dict for key in raw_keys):
+            return
+        # Even a single saved layer must not overwrite the unsaved counterpart.
+        # No tensor comparison or second adapter read is needed, and ordinary
+        # LoRA never pays for an embedding-sized clone.
+        outputs.weight = torch.nn.Parameter(weight.detach().clone(), requires_grad=weight.requires_grad)
+        separated_head.append((outputs, weight))
+
+    hook = None
+    # PEFT also supports modules without Transformers embedding accessors.
+    get_inputs = getattr(model, "get_input_embeddings", None)
+    get_outputs = getattr(model, "get_output_embeddings", None)
+    if callable(get_inputs) and callable(get_outputs):
+        inputs, outputs = get_inputs(), get_outputs()
+        weight = getattr(outputs, "weight", None)
+        if weight is not None and weight is getattr(inputs, "weight", None):
+            hook = model.register_load_state_dict_pre_hook(separate_raw_layers)
+    try:
+        return PeftModel.from_pretrained(model, model_path)
+    except BaseException:
+        # PEFT may modify its input in place before failing. Restore any tying
+        # changed by this helper; other PEFT weight changes are not transactional.
+        for outputs, weight in separated_head:
+            outputs.weight = weight
+        raise
+    finally:
+        if hook is not None:
+            hook.remove()
+
+
 def load_model(model_path: str):
     """Load the exact local/Hub full model, or its declared PEFT base + adapter."""
     import torch
-    from peft import PeftModel
     from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
     base_model, adapter, tokenizer_source = _model_sources(model_path)
@@ -115,8 +173,8 @@ def load_model(model_path: str):
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
 
-    # Preserve the base's declared tying while loading its checkpoint. PEFT
-    # restores any independently saved adapter embeddings/output head itself.
+    # Preserve tying while loading: tied checkpoints can omit the output head.
+    # Only separate layers later if the adapter actually supplies raw weights.
     config = AutoConfig.from_pretrained(base_model)
     use_cuda = torch.cuda.is_available()
     model = AutoModelForCausalLM.from_pretrained(
@@ -132,7 +190,7 @@ def load_model(model_path: str):
     # Load an explicitly identified adapter, whether local or on the Hub.
     if adapter is not None:
         print(f"Loading adapter: {model_path}", file=sys.stderr)
-        model = PeftModel.from_pretrained(model, model_path)
+        model = _load_adapter(model, model_path)
 
     model.eval()
     return model, tokenizer

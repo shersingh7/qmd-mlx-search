@@ -1,0 +1,40 @@
+[
+  {
+    "log": "build-node-baseline-compiler-reads-59980.jsonl",
+    "reads": 2,
+    "denied": []
+  },
+  {
+    "log": "build-node-baseline-compiler-reads-59981.jsonl",
+    "reads": 573,
+    "denied": []
+  },
+  {
+    "log": "build-node-checkpoint-compiler-reads-59829.jsonl",
+    "reads": 2,
+    "denied": []
+  },
+  {
+    "log": "build-node-checkpoint-compiler-reads-59830.jsonl",
+    "reads": 573,
+    "denied": []
+  },
+  {
+    "log": "types-node-checkpoint-compiler-reads-59424.jsonl",
+    "reads": 788,
+    "denied": [
+      {
+        "operation": "readFileSync",
+        "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+        "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+        "allowed": false
+      },
+      {
+        "operation": "readFileSync",
+        "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+        "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+        "allowed": false
+      }
+    ]
+  }
+]

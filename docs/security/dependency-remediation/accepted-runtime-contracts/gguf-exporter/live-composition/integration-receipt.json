@@ -1,0 +1,21 @@
+{
+  "changedPaths": [
+    "finetune/LOCKED-JOBS.md",
+    "finetune/convert_gguf.py",
+    "finetune/gguf_toolchain.py",
+    "finetune/tests/test_finetune_correctness.py",
+    "finetune/tests/test_gguf_structure.py",
+    "finetune/tests/test_gguf_toolchain.py",
+    "finetune/tests/test_locked_job_submission.py",
+    "finetune/tools/submit_locked_job.py",
+    "finetune/train.py",
+    "finetune/train_unsloth.py"
+  ],
+  "actualChanges": 10,
+  "unchangedBaselinePaths": 248,
+  "runnerHeadersPreserved": true,
+  "numericalPeftTestAstPreserved": true,
+  "allPostimagesMatchIndependentAcceptance": true,
+  "linuxImageExecuted": false,
+  "fullReleaseAccepted": false
+}

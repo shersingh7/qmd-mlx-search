@@ -1,0 +1,10 @@
+
+../probes/independent-heldouts.test.mjs:
+(pass) independent: arbitrary parallel refusal values, delayed siblings and every rejecting disposal remain visible [1.48ms]
+(pass) independent: parent releases wait for asynchronous child release refusal then retain all nested faults [1.96ms]
+(pass) independent: real complete CLI keeps every cleanup fault and nonzero status [25.50ms]
+(pass) independent: legacy fallback direct-entry control and symlink characterization (forced missing native main only) [39.83ms]
+
+ 4 pass
+ 0 fail
+Ran 4 tests across 1 file. [429.00ms]

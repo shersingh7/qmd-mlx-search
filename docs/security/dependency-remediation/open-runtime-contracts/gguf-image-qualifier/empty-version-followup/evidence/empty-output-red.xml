@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="27" skipped="0" tests="27" time="8.257" timestamp="2026-11-13T23:43:34.431089-05:00" hostname="AI-MacBook-Pro.local"><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-False-git]" time="0.191"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-False-cc]" time="0.178"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-False-c++]" time="0.304"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-False-make]" time="0.379"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-False-uv]" time="0.502"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-True-git]" time="0.127"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-True-cc]" time="0.195"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-True-c++]" time="0.292"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[empty-True-make]" time="0.406"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-False-git]" time="0.145"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-False-cc]" time="0.210"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-False-c++]" time="0.360"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-False-make]" time="0.426"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-False-uv]" time="0.510"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-True-git]" time="0.139"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-True-cc]" time="0.206"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-True-c++]" time="0.316"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[newline-True-make]" time="0.423"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-False-git]" time="0.143"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-False-cc]" time="0.215"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-False-c++]" time="0.303"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-False-make]" time="0.427"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-False-uv]" time="0.501"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-True-git]" time="0.141"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-True-cc]" time="0.195"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-True-c++]" time="0.318"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase><testcase classname="finetune.tests.test_qualify_empty_version" name="test_blank_version_is_clean_refusal_before_build[whitespace-True-make]" time="0.417"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 92, in &lt;module&gt;&#10;      raise SystemExit(main())&#10;                       ^^^^^^&#10;    File &quot;/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py&quot;, line 83, in main&#10;      receipt = qualify(native_only=args.native_only)&#10;[+8 more lines; full report in element text]">E   AssertionError: Traceback (most recent call last):
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 92, in &lt;module&gt;
+          raise SystemExit(main())
+                           ^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 83, in main
+          receipt = qualify(native_only=args.native_only)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py", line 54, in qualify
+          versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+      IndexError: list index out of range
+      
+    assert 1 == 2
+     +  where 1 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n').returncode</failure></testcase></testsuite></testsuites>

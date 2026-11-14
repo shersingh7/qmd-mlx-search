@@ -1,0 +1,51 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+import { stripVTControlCharacters } from 'node:util';
+import { createHash } from 'node:crypto';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const evidence=path.join(root,'evidence');
+const read=p=>fs.readFileSync(path.join(evidence,p),'utf8');const json=p=>JSON.parse(read(p));
+const records=p=>stripVTControlCharacters(read(p)).split('\n').filter(l=>l.startsWith('{')).map(l=>JSON.parse(l));
+function oneArtifact(label){const dir=path.join(evidence,label+'-artifacts');const files=fs.readdirSync(dir).filter(x=>x.startsWith('fast-timeout-')&&x.endsWith('.json'));assert.equal(files.length,1,label);const file=path.join(dir,files[0]);return {file,report:JSON.parse(fs.readFileSync(file,'utf8'))};}
+function checkFast(label){
+ const j=json(label+'.vitest.json');const tests=j.testResults.flatMap(f=>f.assertionResults);const passed=tests.filter(t=>t.status==='passed').length;const filtered=tests.filter(t=>t.status==='pending').length;const failed=tests.filter(t=>t.status==='failed').length;
+ assert.equal(passed,1);assert.equal(filtered,7);assert.equal(failed,0);assert.equal(j.success,true);
+ const rs=records(label+'.stdout.log');const before=rs.find(r=>r.evidence==='recovery-fast-timeout-before-finally');const after=rs.find(r=>r.evidence==='recovery-fast-timeout-finally');
+ assert.ok(before.elapsedMs>=200&&before.elapsedMs<1500);assert.equal(before.guardFired,false);assert.equal(before.supervisorAbsent,true);assert.equal(before.sentinelAlive,true);
+ assert.equal(before.result.timedOut,true);assert.equal(before.result.launch.supervisorReaped,true);assert.ok(['started','not-started'].includes(before.result.launch.state));
+ assert.equal(before.result.cleanup.pipesClosed,true);assert.equal(before.result.cleanup.forcedPipeClose,false);assert.equal(before.result.cleanup.containmentVerified,false);
+ assert.deepEqual(after.finallyKilled,[]);assert.equal(after.scratchRemoved,true);assert.equal(after.guardFired,false);
+ return{label,passed,failed,filtered,elapsedMs:before.elapsedMs,before,after};
+}
+const on=checkFast('first-fast-on'),off=checkFast('compare-fast-off');const observed=oneArtifact('first-fast-on');const report=observed.report;
+assert.equal(report.status,'observed-node-supervisor');assert.equal(report.runtime.node,'22.22.3');assert.equal(report.runtime.bun,null);assert.equal(report.ownerPid,on.before.result.launch.supervisorPid);assert.equal(report.receipt.launch.supervisorPid,report.ownerPid);assert.equal(report.eventLimit,32);assert.ok(report.events.length<=32);
+assert.deepEqual(report.restoration,{channelUnsubscribed:true,listenersRemoved:true});assert.equal(report.causality,'not-established-by-runtime-events');assert.equal(report.receipt.preForcedClosure,null);
+for(const name of ['stdout','stderr','control'])for(const ending of ['end','close'])assert.ok(report.events.some(e=>e.event===name+'.'+ending));
+assert.ok(report.events.some(e=>e.event==='owner.exit'));assert.ok(report.events.some(e=>e.event==='owner.close'));assert.equal(report.finalState.closeCounter.needed,4);assert.equal(report.finalState.closeCounter.got,4);
+assert.equal(fs.existsSync(path.join(evidence,'compare-fast-off-artifacts')),false);
+const native=oneArtifact('native-bun-control');assert.equal(native.report.status,'native-bun-owner-diagnostics-not-implemented');assert.equal(native.report.nativeBunOwnerDiagnostics,'not-implemented');assert.equal('ownerPid' in native.report,false);assert.equal('events' in native.report,false);
+const ntext=read('native-bun-control.stderr.log');assert.match(ntext,/1 pass/);assert.match(ntext,/7 filtered out/);assert.match(ntext,/0 fail/);
+const nr=records('native-bun-control.stdout.log');const nativeHost=nr.find(r=>r.evidence==='recovery-tree-native-runtime');assert.equal(nativeHost.bun,'1.3.8');
+const nativeBefore=nr.find(r=>r.evidence==='recovery-fast-timeout-before-finally');assert.ok(nativeBefore.elapsedMs>=200&&nativeBefore.elapsedMs<1500);assert.equal(nativeBefore.sentinelAlive,true);assert.equal(nativeBefore.guardFired,false);
+const fallbackRs=records('actual-fallback-control.stdout.log');const actual=fallbackRs.find(r=>r.evidence==='separate-after-first-actual-production-fallback-control');const fallback=oneArtifact('actual-fallback-control');
+assert.equal(fallback.report.ownerPid,actual.launch.supervisorPid);assert.equal(fallback.report.status,'observed-node-supervisor');assert.deepEqual(fallback.report.receipt.preForcedClosure.transportFailure,actual.transportFailure);assert.equal(fallback.report.receipt.preForcedClosure.tMs,null);
+assert.equal(fallback.report.receipt.cleanup.pipesClosed,false);assert.equal(fallback.report.receipt.cleanup.forcedPipeClose,true);assert.equal(fallback.report.receipt.cleanup.containmentVerified,false);assert.equal(fallback.report.finalState.closeCounter.needed,4);assert.equal(fallback.report.finalState.closeCounter.got,2);
+assert.deepEqual(fallbackRs.find(r=>r.evidence==='separate-after-first-actual-production-fallback-finally'),{evidence:'separate-after-first-actual-production-fallback-finally',cooperativeWriterReleased:true,noNumericalPidSignals:true,fixtureRemoved:true});
+function tap(label,want){const text=read(label+'.stdout.log');assert.match(text,new RegExp('\\n# tests '+want+'\\n'));assert.match(text,new RegExp('\\n# pass '+want+'\\n'));assert.match(text,/\n# fail 0\n/);assert.match(text,/\n# skipped 0\n/);return {label,executed:want,passed:want,failed:0,skipped:0};}
+const selftests=tap('provided-selftests',8),heldouts=tap('independent-heldouts-final',6);
+const envChecks=[];
+for(const label of ['first-fast-on','compare-fast-off','provided-selftests','native-bun-control','actual-fallback-control','independent-static','independent-heldouts-final','independent-static-metadata']){
+ const r=json(label+'-command.json');assert.equal(r.exitCode,0);assert.equal(r.signal,null);assert.equal(r.outerCleanup,'none');assert.equal(r.environment.CI,'1');assert.equal(r.environment.REQUIRE_BUN,'1');assert.equal(r.environment.QMD_LLAMA_GPU,'false');
+ for(const flag of ['HF_HUB_OFFLINE','TRANSFORMERS_OFFLINE','HF_DATASETS_OFFLINE','UV_OFFLINE'])assert.equal(r.environment[flag],'1');
+ for(const forbidden of ['NODE_OPTIONS','PYTHONPATH','OPENAI_API_KEY','ANTHROPIC_API_KEY','GITHUB_TOKEN','HF_TOKEN'])assert.equal(forbidden in r.environment,false);
+ for(const key of ['HOME','HERMES_HOME','HERMES_DIR','HERMES_KNOWLEDGE_DIR','KNOWLEDGE_DIR','XDG_CACHE_HOME','XDG_CONFIG_HOME','XDG_DATA_HOME','HF_HOME','HF_HUB_CACHE','TRANSFORMERS_CACHE','TMPDIR','TMP','TEMP','BUN_INSTALL_CACHE_DIR','npm_config_cache'])assert.ok(r.environment[key].startsWith(root+'/'));
+ envChecks.push({label,exitCode:r.exitCode,outerCleanup:r.outerCleanup,sourceCount:Object.keys(r.sourceSha256).length});
+}
+const md=json('independent-static-metadata-artifacts/runner-metadata.json');assert.equal(md.execution,'local-metadata-command-not-CI-proof');assert.equal(md.freshHomeIsNotColdOS,true);assert.equal(md.git.actualCheckout,null);assert.equal(md.systemPython.firstSelectedInterpreterVersion,'not-observed');assert.match(md.systemPython.versionQuery,/not-run/);
+const manifest=json('provided-source-hash-manifest.json');for(const [name,got] of Object.entries(md.sourceSha256))assert.equal(got,manifest.sourceSha256[name]);
+const retention=json('original-ci-retention.json');assert.equal(retention.negativeNodeFastReceipt.record.elapsedMs,1007);assert.equal(retention.negativeNodeFastReceipt.record.result.launch.state,'unconfirmed');assert.equal(retention.negativeNodeFastReceipt.record.guardFired,false);
+const ci=stripVTControlCharacters(read('original-ci/132155679910.log'));assert.ok(ci.includes("expected 'unconfirmed' to be 'started'"));
+for(const [name,want] of Object.entries(manifest.sourceSha256)){const p=path.join(root,'mirror',name);assert.equal(createHash('sha256').update(fs.readFileSync(p)).digest('hex'),want);}
+const summary={status:'SPEC_EVIDENCE_READBACK_PASS',root,patchSha256:manifest.patchSha256,sourceManifestSha256:createHash('sha256').update(read('provided-source-hash-manifest.json')).digest('hex'),on:{...on,before:undefined,after:undefined,ownerPid:report.ownerPid,closeCounter:report.finalState.closeCounter,artifact:observed.file},off:{...off,before:undefined,after:undefined},selftests,heldouts,native:{runtime:nativeHost.bun,passed:1,failed:0,filtered:7,elapsedMs:nativeBefore.elapsedMs,artifact:native.file,status:native.report.status},fallback:{elapsedMs:actual.elapsedMs,ownerPid:fallback.report.ownerPid,closeCounter:fallback.report.finalState.closeCounter,artifact:fallback.file,truthfulFailedTransport:true,preDestroySnapshotExact:true,timestamp:null,notCIOrColdProof:true},envChecks,metadata:{host:md.host,runtime:md.runtime,checkout:md.git,selectedPython:md.systemPython},retainedCi:{run:'43503677544',nodeJob:'132155679910',bunJob:'132155679594',head:'dcf98c159b671b4d08c3759215c4371502f49fc0',actualCheckout:'99d061d2d373f8affd62210f74bf0b6d5ce0c898',elapsedMs:1007,failedContract:'unconfirmed ownership, not elapsed bound',cause:'UNPROVEN'},qualification:'No full suite/build/CI execution; fresh HOME is not cold OS; no global-first claim; native tracing unsupported; C1 retained'};
+fs.writeFileSync(path.join(evidence,'spec-readback.json'),JSON.stringify(summary,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(summary));

@@ -156,6 +156,9 @@ def main():
         parser.error("--device cuda requires an available CUDA device")
     if not use_cpu and not is_bitsandbytes_available():
         parser.error("CUDA adamw_8bit requires bitsandbytes. Install the project Linux dependencies (or the standalone runner dependencies) before loading a model; use --device cpu only for intentional CPU runs.")
+    if not args.no_gguf:
+        from gguf_toolchain import check_prerequisites
+        check_prerequisites()
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token

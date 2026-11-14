@@ -2,7 +2,7 @@
 
 Models/tokenizers are tiny locally created fixtures; no training or downloads.
 All external commands, training and Hub writes below are explicit fakes. The
-GGUF-prefixed bytes are process-routing fixtures, never usable model weights.
+GGUF writer zero-block fixtures prove structure/routing, not usable model weights.
 """
 from __future__ import annotations
 
@@ -14,13 +14,14 @@ import sys
 from types import SimpleNamespace as NS
 
 import pytest
+from test_gguf_structure import fake_gguf_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 QUANTS = ("q4_k_m", "q6_k", "q8_0")
-FAKE_GGUF = b"GGUF\x00EXPLICIT FAKE successful conversion; not model weights"
+FAKE_GGUF = fake_gguf_bytes()
 FAKE_PARTIAL = b"GGUF\x00EXPLICIT FAKE partial output from a FAILED process"
 FAKE_STALE = b"GGUF\x00EXPLICIT FAKE previous export; must survive failed export"
-STAGES = ("clone", "requirements", "configure", "build", "converter", *QUANTS)
+STAGES = ("init", "fetch", "checkout", "revision", "probe", "configure", "build", "converter", *QUANTS)
 
 
 def load_module(name):
@@ -97,47 +98,55 @@ def fake_native_export(tmp_path, monkeypatch, *, failed_stage=None, partial=Fals
     import transformers as tf
     import trl
 
+    import gguf_toolchain as tools
     events = []
-    llama = tmp_path / "EXPLICIT-FAKE-llama.cpp"
-    quantize = llama / "build/bin/llama-quantize"
-    log_out = tmp_path / "EXPLICIT-FAKE-converter.stdout"
-    log_err = tmp_path / "EXPLICIT-FAKE-converter.stderr"
+    llama = quantize = None
     original_upload = inspect.signature(hub.HfApi.upload_file)
-
-    def mapped_path(*parts):
-        path = Path(*parts)
-        return {
-            "/tmp/llama.cpp": llama,
-            "/tmp/qmd-gguf-convert.log": log_out,
-            "/tmp/qmd-gguf-convert.err": log_err,
-        }.get(str(path), path)
+    monkeypatch.setattr(tools, "check_prerequisites", lambda **kwargs: {
+        "git": "git", "cmake": "cmake", "cc": "cc", "c++": "c++", "make": "make",
+    })
 
     def process(argv, **kwargs):
+        nonlocal llama, quantize
         argv = list(map(str, argv))
         artifact = None
+        stdout = ""
         if argv[0] == "git":
-            assert argv == ["git", "clone", "--depth", "1", "https://github.com/ggerganov/llama.cpp.git", str(llama)]
-            stage = "clone"
-            # A failed clone may still leave a directory; status is authoritative.
-            llama.mkdir()
-        elif argv[:4] == [sys.executable, "-m", "pip", "install"]:
-            assert argv[4:] == ["-q", "-r", str(llama / "requirements.txt")]
-            stage = "requirements"
+            if "init" in argv:
+                stage = "init"
+                llama = Path(argv[-1])
+                assert llama.is_dir() and llama.parent.name == "tools"
+            elif "fetch" in argv:
+                stage = "fetch"
+                assert argv[-4:] == ["--depth", "1", tools.SOURCE_URL, tools.SOURCE_REVISION]
+            elif "checkout" in argv:
+                stage = "checkout"
+                assert argv[-2:] == ["--detach", tools.SOURCE_REVISION]
+                (llama / "convert_hf_to_gguf.py").write_text("EXPLICIT FAKE; never executed")
+            else:
+                assert argv[-2:] == ["rev-parse", "HEAD"]
+                stage = "revision"
+                stdout = tools.SOURCE_REVISION + "\n"
         elif argv[:2] == ["cmake", "-B"]:
-            assert argv == ["cmake", "-B", str(llama / "build"), "-S", str(llama), "-DGGML_CUDA=OFF"]
             stage = "configure"
+            assert "-DGGML_CUDA=OFF" in argv and "-DGGML_METAL=OFF" in argv
+            quantize = Path(argv[2]) / "bin/llama-quantize"
         elif argv[:2] == ["cmake", "--build"]:
-            assert argv == ["cmake", "--build", str(llama / "build"), "--target", "llama-quantize", "-j", "4"]
+            assert argv[-4:] == ["--target", "llama-quantize", "-j", "2"]
             stage = "build"
             quantize.parent.mkdir(parents=True, exist_ok=True)
             quantize.write_text("EXPLICIT FAKE executable placeholder; NEVER EXECUTED")
-        elif len(argv) > 1 and argv[1] == str(llama / "convert_hf_to_gguf.py"):
-            assert argv[0] == sys.executable
-            assert Path(argv[2]).name == "merged" and Path(argv[2]).is_dir()
-            assert kwargs["stdout"].name == str(log_out) and kwargs["stderr"].name == str(log_err)
-            stage = "converter"
-            artifact = Path(argv[argv.index("--outfile") + 1])
-        elif argv[0] == str(quantize):
+        elif llama is not None and len(argv) > 2 and argv[2] == str(llama / "convert_hf_to_gguf.py"):
+            assert argv[:2] == [sys.executable, "-s"]
+            if argv[-1] == "--help":
+                stage = "probe"
+            else:
+                assert Path(argv[3]).name == "merged" and Path(argv[3]).is_dir()
+                assert Path(kwargs["stdout"].name).name == "converter.stdout"
+                assert Path(kwargs["stderr"].name).name == "converter.stderr"
+                stage = "converter"
+                artifact = Path(argv[argv.index("--outfile") + 1])
+        elif quantize is not None and argv[0] == str(quantize):
             assert argv[-1].lower() in QUANTS and Path(argv[1]).read_bytes() == FAKE_GGUF
             stage = argv[-1].lower()
             artifact = Path(argv[2])
@@ -150,12 +159,12 @@ def fake_native_export(tmp_path, monkeypatch, *, failed_stage=None, partial=Fals
         rc = 17 if stage == failed_stage else 0
         events.append(("FAKE process", stage, rc, argv))
         if artifact is not None and (not rc or partial):
-            artifact.write_bytes(FAKE_PARTIAL if rc else FAKE_GGUF)
+            artifact.write_bytes(FAKE_PARTIAL if rc else fake_gguf_bytes("f16" if stage == "converter" else stage))
         if stage == failed_stage and process_error is not None:
             raise process_error
         # Explicit returncode checks must work even with a process fake that
         # does not implement subprocess.run(check=True) on the caller's behalf.
-        return NS(returncode=rc)
+        return NS(returncode=rc, stdout=stdout, stderr="EXPLICIT FAKE process failure" if rc else "")
 
     def save(where, **kwargs):
         events.append(("FAKE model/tokenizer save", str(where)))
@@ -188,11 +197,11 @@ def fake_native_export(tmp_path, monkeypatch, *, failed_stage=None, partial=Fals
         def upload_file(self, **kwargs):
             original_upload.bind(self, **kwargs)
             assert kwargs["repo_type"] == "model" and kwargs["repo_id"] == "fixture/NEVER-WRITTEN"
-            assert Path(kwargs["path_or_fileobj"]).read_bytes() == FAKE_GGUF
+            quant = Path(kwargs["path_in_repo"]).stem.rsplit("-", 1)[1]
+            assert Path(kwargs["path_or_fileobj"]).read_bytes() == fake_gguf_bytes(quant)
             events.append(("FAKE GGUF upload", kwargs["path_in_repo"]))
             return NS(oid="EXPLICIT-FAKE-no-remote-commit")
 
-    monkeypatch.setattr(train, "Path", mapped_path)
     monkeypatch.setattr(subprocess, "run", process)
     monkeypatch.setattr(tf.AutoModelForCausalLM, "from_pretrained", lambda *a, **k: model)
     monkeypatch.setattr(tf.AutoTokenizer, "from_pretrained", lambda *a, **k: tokenizer)
@@ -213,8 +222,8 @@ def run_native(tmp_path, monkeypatch, extra=()):
 
 
 @pytest.mark.parametrize("stage,partial", [
-    *((stage, False) for stage in STAGES[:4]),
-    *((stage, partial) for stage in STAGES[4:] for partial in (False, True)),
+    *((stage, False) for stage in STAGES[:7]),
+    *((stage, partial) for stage in STAGES[7:] for partial in (False, True)),
 ])
 def test_failed_export_process_never_moves_uploads_evaluates_or_reports_done(
     tmp_path, monkeypatch, capsys, stage, partial
@@ -259,7 +268,7 @@ def test_successful_real_exporter_flow_keeps_fresh_all_quantizations(tmp_path, m
         (destination / f"adapter-{quant}.gguf").write_bytes(FAKE_STALE)
     run_native(tmp_path, monkeypatch, ["--push-hub", "fixture/NEVER-WRITTEN"] if push else [])
     assert [event[1] for event in events if event[0] == "FAKE process"] == list(STAGES)
-    assert all((destination / f"adapter-{quant}.gguf").read_bytes() == FAKE_GGUF for quant in QUANTS)
+    assert all((destination / f"adapter-{quant}.gguf").read_bytes() == fake_gguf_bytes(quant) for quant in QUANTS)
     assert not (destination / "adapter-f16.gguf").exists()
     uploads = [event[1] for event in events if event[0] == "FAKE GGUF upload"]
     assert uploads == ([f"adapter-{quant}.gguf" for quant in QUANTS] if push else [])

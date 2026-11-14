@@ -1,0 +1,14 @@
+{
+  "image_update": {
+    "HarmlessExtra": {
+      "synthetic": true
+    }
+  },
+  "probe_update": {
+    "HarmlessExtra": [
+      1,
+      2
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/control-extra-readback-fields/workspace"
+}

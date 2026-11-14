@@ -12,6 +12,8 @@ A version must be a canonical stable three-component PEP 440 local version.
 Project sources use the wheel path relative to finetune; script sources use the
 exact commit-pinned publication URL without the policy's identity fragment.
 Every script has a checked-in .py.lock with matching metadata and wheel hashes;
+the adjacent static uv graph contract also proves requirement/edge coverage
+through every admitted universal marker branch (not just the current host).
 uv run --locked enforces those hashes, not URL fragments. This module never
 resolves dependencies, imports applications, runs wheel code,
 installs anything, accesses the network, or writes an approval policy.
@@ -26,6 +28,7 @@ from __future__ import annotations
 from email import policy as email_policy
 from email.parser import BytesParser
 from hashlib import sha256
+import importlib.util
 import io
 import json
 import os
@@ -40,6 +43,16 @@ import zipfile
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.version import InvalidVersion, Version
+
+# Resolve our exact adjacent helper, not an ambient package or a mutable
+# sys.path entry. Both the public CLI and read-only spec imports use this path.
+_graph_spec = importlib.util.spec_from_file_location(
+    '_qmd_uv_lock_graph', Path(__file__).with_name('uv_lock_graph.py')
+)
+if _graph_spec is None or _graph_spec.loader is None:
+    raise ImportError('The required uv graph verifier is unavailable')
+_graph = importlib.util.module_from_spec(_graph_spec)
+_graph_spec.loader.exec_module(_graph)
 
 POLICY_PATH = 'docs/security/dependency-remediation/patched-dependencies.json'
 UV_LOCK_PATH = 'finetune/uv.lock'
@@ -437,6 +450,8 @@ def _script_lock_metadata(document: dict, metadata: dict, patch: dict) -> None:
     because uv normalizes names and specifier ordering in its manifest. Unknown
     standalone resolver/source forms fail closed rather than approximating uv.
     CI must additionally run real `uv lock --script ... --check --no-build`.
+    Neither metadata equality nor uv --check proves graph completeness: the
+    independent static graph contract below must pass before any patch proof.
     """
     if (type(document.get('revision')) is not int or document['revision'] != 3
             or not isinstance(metadata.get('requires-python'), str)
@@ -550,9 +565,12 @@ def verify_accelerate_binding(root: Path, records: list) -> tuple[set[tuple[str,
                 return set(), receipt
             patch = _patch_policy(raw_policy)
             _wheel_binding(reader.read(patch['wheel_path'], MAX_WHEEL_BYTES), patch)
-            _uv_binding(_toml(reader.read('finetune/pyproject.toml', MAX_TEXT_BYTES)), patch, project=True)
+            project = _toml(reader.read('finetune/pyproject.toml', MAX_TEXT_BYTES))
+            _uv_binding(project, patch, project=True)
+            project_lock = _toml(reader.read(UV_LOCK_PATH, MAX_LOCK_BYTES))
+            _graph.validate_lock_graph(project_lock, project, project=True)
             packages = {(UV_LOCK_PATH, locator): package for locator, package in
-                        _lock_bindings(_toml(reader.read(UV_LOCK_PATH, MAX_LOCK_BYTES)), patch).items()}
+                        _lock_bindings(project_lock, patch).items()}
             runners = {}
             for path in reader.python_files():
                 text = reader.read(path, MAX_TEXT_BYTES).decode('utf-8')
@@ -568,6 +586,7 @@ def verify_accelerate_binding(root: Path, records: list) -> tuple[set[tuple[str,
                 raw_lock = reader.read(lock_path, MAX_LOCK_BYTES)
                 lock = _toml(raw_lock)
                 _script_lock_metadata(lock, metadata, patch)
+                _graph.validate_lock_graph(lock, metadata)
                 direct = any(_name(Requirement(text).name) == 'accelerate' for text in metadata['dependencies'])
                 packages.update({(lock_path, locator): package for locator, package in
                                  _lock_bindings(lock, patch, script=True, required=direct).items()})

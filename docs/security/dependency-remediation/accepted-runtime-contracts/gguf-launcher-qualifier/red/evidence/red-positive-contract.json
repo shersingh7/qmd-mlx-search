@@ -1,0 +1,50 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-m",
+    "pytest",
+    "-c",
+    "/dev/null",
+    "-p",
+    "no:cacheprovider",
+    "--rootdir=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo",
+    "--confcutdir=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo/finetune/tests",
+    "--basetemp=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/pytest-tmp/red-positive-contract",
+    "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/evidence/red-positive-contract.xml",
+    "-q",
+    "--tb=short",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/test_probe_contract.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo",
+  "junit": {
+    "case_names": [
+      "test_uv_release_contract[bare-control-uv 0.11.18-0]",
+      "test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0]",
+      "test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0]",
+      "test_uv_release_contract[wrong-release-control-uv 0.11.17 (x86_64-unknown-linux-musl)-2]"
+    ],
+    "errors": 0,
+    "failure_cases": [
+      {
+        "message": "AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nassert 2 == 0\n +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode",
+        "name": "test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0]",
+        "text": "../test_probe_contract.py:34: in test_uv_release_contract\n    assert result.returncode == expected, receipt\nE   AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nE   assert 2 == 0\nE    +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode"
+      },
+      {
+        "message": "AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nassert 2 == 0\n +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode",
+        "name": "test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0]",
+        "text": "../test_probe_contract.py:34: in test_uv_release_contract\n    assert result.returncode == expected, receipt\nE   AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nE   assert 2 == 0\nE    +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode"
+      }
+    ],
+    "failures": 2,
+    "skipped": 0,
+    "tests": 4
+  },
+  "name": "red-positive-contract",
+  "returncode": 1,
+  "seconds": 1.348724209005013,
+  "stderr": "",
+  "stdout": ".FF.                                                                     [100%]\n=================================== FAILURES ===================================\n_ test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0] _\n../test_probe_contract.py:34: in test_uv_release_contract\n    assert result.returncode == expected, receipt\nE   AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nE   assert 2 == 0\nE    +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode\n_ test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0] _\n../test_probe_contract.py:34: in test_uv_release_contract\n    assert result.returncode == expected, receipt\nE   AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nE   assert 2 == 0\nE    +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode\n=========================== short test summary info ============================\nFAILED ::test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0] - AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nassert 2 == 0\n +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode\nFAILED ::test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0] - AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}\nassert 2 == 0\n +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\\n').returncode\n2 failed, 2 passed in 1.23s\n"
+}

@@ -1,0 +1,273 @@
+{
+  "baselineCommit": "346d905666ccafca1ddea76d5f994df8d574f4b0",
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w",
+  "integrationSourceFileCount": 14,
+  "mirrorOnlyRelocationFileCount": 3,
+  "metadataIntentFileCount": 3,
+  "totalMirrorChangedFileCount": 20,
+  "patchAppliesToFrozenSnapshotAndReconstructsEveryFinalByte": true,
+  "noNewSuppressionOrAnyShim": true,
+  "compilerConfigurationsByteIdentical": true,
+  "files": [
+    {
+      "file": "bun.lock",
+      "group": "metadata-intent",
+      "commitBaselineSha256": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719",
+      "snapshotSha256": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719",
+      "patchedSha256": "c1dca7fd35ac82ef213872fc997d023218028d51b9fffb92b0e12b0ac070d329",
+      "currentLiveSha256": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+      "group": "mirror-only-relocation",
+      "commitBaselineSha256": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+      "snapshotSha256": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+      "patchedSha256": "cef6937244820690b8f9e72e99af0bdfe8276584b7ab28175817dbeb9c6b272b",
+      "currentLiveSha256": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+      "liveStillMatchesSnapshot": true,
+      "archivedManifestEntry": {
+        "file": "mcp-positive-contract-and-admission-review.mjs",
+        "sha256": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+        "bytes": 12173
+      },
+      "archivedManifestMatchesOriginal": true
+    },
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+      "group": "mirror-only-relocation",
+      "commitBaselineSha256": "60ce7419d0de829721028ecb3f57709722944aaa8dccfd3cd48c0b237b47c742",
+      "snapshotSha256": "60ce7419d0de829721028ecb3f57709722944aaa8dccfd3cd48c0b237b47c742",
+      "patchedSha256": "c33cde40a45a09ece840bbeb1e43bba2b560d00cfc45c55b0ad0e0a79ee4be2e",
+      "currentLiveSha256": "60ce7419d0de829721028ecb3f57709722944aaa8dccfd3cd48c0b237b47c742",
+      "liveStillMatchesSnapshot": true,
+      "archivedManifestEntry": {
+        "file": "mcp-postrepair-http-admission-proof.mjs",
+        "sha256": "60ce7419d0de829721028ecb3f57709722944aaa8dccfd3cd48c0b237b47c742",
+        "bytes": 29554
+      },
+      "archivedManifestMatchesOriginal": true
+    },
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs",
+      "group": "mirror-only-relocation",
+      "commitBaselineSha256": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997",
+      "snapshotSha256": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997",
+      "patchedSha256": "efd391ed7fde7d1af18f5e36d0421d72a99774c4335120d32f66cf3b209434c4",
+      "currentLiveSha256": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997",
+      "liveStillMatchesSnapshot": true,
+      "archivedManifestEntry": {
+        "file": "quality-mcp-heldout-cancel.mjs",
+        "sha256": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997",
+        "bytes": 4760
+      },
+      "archivedManifestMatchesOriginal": true
+    },
+    {
+      "file": "package.json",
+      "group": "metadata-intent",
+      "commitBaselineSha256": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+      "snapshotSha256": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+      "patchedSha256": "7607a98a802ec455328ce0452fb2e43fb6c955e774d30e17cc49befac5e7ef1a",
+      "currentLiveSha256": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "group": "metadata-intent",
+      "commitBaselineSha256": "fe935e0afa6f90131e21b1ad295d4cc9acbdfd8c68cde6a46ba1acd07dc0c42a",
+      "snapshotSha256": "fe935e0afa6f90131e21b1ad295d4cc9acbdfd8c68cde6a46ba1acd07dc0c42a",
+      "patchedSha256": "c8dc5bf3011bef4a9417f49dbb37f47fa8aaa45dad97ba13366709554f2e308e",
+      "currentLiveSha256": "fe935e0afa6f90131e21b1ad295d4cc9acbdfd8c68cde6a46ba1acd07dc0c42a",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "scripts/phase5_e2e_runner.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "cd3f0961648c025faeb87ecdbca10ffa612eb9539b6373732e5b13a7c589f9f5",
+      "snapshotSha256": "4f4e539cd7cc18a06bb151dd2e5d9d1009dd58325919da5d66b2e5e0dc691660",
+      "patchedSha256": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a",
+      "currentLiveSha256": "4f4e539cd7cc18a06bb151dd2e5d9d1009dd58325919da5d66b2e5e0dc691660",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "src/bench-rerank.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "50a6ffd5abe5a6b1d032bf7a5fa1f7b43584680fc9ed002145ad0f498eb1e3a5",
+      "snapshotSha256": "50a6ffd5abe5a6b1d032bf7a5fa1f7b43584680fc9ed002145ad0f498eb1e3a5",
+      "patchedSha256": "df078c5ac05f4601da23cbfaa2cd582bdff0dd1f84761573fd4fa2d0cbbede43",
+      "currentLiveSha256": "50a6ffd5abe5a6b1d032bf7a5fa1f7b43584680fc9ed002145ad0f498eb1e3a5",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "src/llm/mlx-identity.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "ae0141d83f927fe88b3b9d5525aa3976ec7f49f7ae7ebd919fea830743fc0261",
+      "snapshotSha256": "ae0141d83f927fe88b3b9d5525aa3976ec7f49f7ae7ebd919fea830743fc0261",
+      "patchedSha256": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa",
+      "currentLiveSha256": "ae0141d83f927fe88b3b9d5525aa3976ec7f49f7ae7ebd919fea830743fc0261",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "src/mcp/server.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+      "snapshotSha256": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+      "patchedSha256": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+      "currentLiveSha256": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "src/test-preload.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "52f113b57d8f992eb103ffe11ada08d91c53047c97909dcc652af5c2434415a6",
+      "snapshotSha256": "52f113b57d8f992eb103ffe11ada08d91c53047c97909dcc652af5c2434415a6",
+      "patchedSha256": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6",
+      "currentLiveSha256": "52f113b57d8f992eb103ffe11ada08d91c53047c97909dcc652af5c2434415a6",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/cli.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "5e6e6827c60a433078ded86979ee04d8fea1900303c098d174860b51505c75d5",
+      "snapshotSha256": "5e6e6827c60a433078ded86979ee04d8fea1900303c098d174860b51505c75d5",
+      "patchedSha256": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e",
+      "currentLiveSha256": "5e6e6827c60a433078ded86979ee04d8fea1900303c098d174860b51505c75d5",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/eval-bm25.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "769d6d989feac349bfba01772b8130248e716f413955af12231a8b65b7436800",
+      "snapshotSha256": "769d6d989feac349bfba01772b8130248e716f413955af12231a8b65b7436800",
+      "patchedSha256": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697",
+      "currentLiveSha256": "769d6d989feac349bfba01772b8130248e716f413955af12231a8b65b7436800",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/eval.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "bbf9be5ef777c7655038a49006d7f91faac212959628b116795c22566d2b2e9f",
+      "snapshotSha256": "bbf9be5ef777c7655038a49006d7f91faac212959628b116795c22566d2b2e9f",
+      "patchedSha256": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d",
+      "currentLiveSha256": "bbf9be5ef777c7655038a49006d7f91faac212959628b116795c22566d2b2e9f",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/fixtures/public_eval_dataset.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "4b36e1fbe2fccdcebc0bd1155ba59598713445753a981679c85991bc6229d909",
+      "snapshotSha256": "4b36e1fbe2fccdcebc0bd1155ba59598713445753a981679c85991bc6229d909",
+      "patchedSha256": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29",
+      "currentLiveSha256": "4b36e1fbe2fccdcebc0bd1155ba59598713445753a981679c85991bc6229d909",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/llm.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "1ac044729ade19fec18f092b9bb6bf96f081e831b8e045adf6404e5d8204e991",
+      "snapshotSha256": "1ac044729ade19fec18f092b9bb6bf96f081e831b8e045adf6404e5d8204e991",
+      "patchedSha256": "3ad4c219f3126c9ca4d031a27d83c7d8a32277a08bd33cf07270358212ecf8da",
+      "currentLiveSha256": "1ac044729ade19fec18f092b9bb6bf96f081e831b8e045adf6404e5d8204e991",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/multi-collection-filter.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "bd9524677e7d669ec552eeca3cbd537f5abdbfc31a764a2946088b584fbe074d",
+      "snapshotSha256": "bd9524677e7d669ec552eeca3cbd537f5abdbfc31a764a2946088b584fbe074d",
+      "patchedSha256": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b",
+      "currentLiveSha256": "bd9524677e7d669ec552eeca3cbd537f5abdbfc31a764a2946088b584fbe074d",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/phase5-recovery.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "snapshotSha256": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "patchedSha256": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c",
+      "currentLiveSha256": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/rrf-trace.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "02b55e8776d157cc3c09f6e0fd5a0d07831f19c00725f700fb3fe80edb83e84b",
+      "snapshotSha256": "02b55e8776d157cc3c09f6e0fd5a0d07831f19c00725f700fb3fe80edb83e84b",
+      "patchedSha256": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c",
+      "currentLiveSha256": "02b55e8776d157cc3c09f6e0fd5a0d07831f19c00725f700fb3fe80edb83e84b",
+      "liveStillMatchesSnapshot": true
+    },
+    {
+      "file": "test/store.helpers.unit.test.ts",
+      "group": "integration-source",
+      "commitBaselineSha256": "b4a53ea834be92cb2413592c293fab290c1ec6b683c4c9098ebb568d55c390de",
+      "snapshotSha256": "b4a53ea834be92cb2413592c293fab290c1ec6b683c4c9098ebb568d55c390de",
+      "patchedSha256": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253",
+      "currentLiveSha256": "b4a53ea834be92cb2413592c293fab290c1ec6b683c4c9098ebb568d55c390de",
+      "liveStillMatchesSnapshot": true
+    }
+  ],
+  "patches": {
+    "source.patch": {
+      "sha256": "e7b8d38aa36df031a3d28b4ba4044d5a6e16607b7f1ddfe3fa515f7fbe4fa620",
+      "files": [
+        "scripts/phase5_e2e_runner.ts",
+        "src/bench-rerank.ts",
+        "src/llm/mlx-identity.ts",
+        "src/mcp/server.ts",
+        "src/test-preload.ts",
+        "test/cli.test.ts",
+        "test/eval-bm25.test.ts",
+        "test/eval.test.ts",
+        "test/fixtures/public_eval_dataset.ts",
+        "test/llm.test.ts",
+        "test/multi-collection-filter.test.ts",
+        "test/phase5-recovery.test.ts",
+        "test/rrf-trace.test.ts",
+        "test/store.helpers.unit.test.ts"
+      ]
+    },
+    "metadata-intents.patch": {
+      "sha256": "de5d3b9b9c591b0b249ceb8fb70890298b1debb15f679aee6f5392d6d2c035ad",
+      "files": [
+        "bun.lock",
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    "mirror-only-import-relocation.patch": {
+      "sha256": "0c6801fd52e297633d46acbe71ee3703bb3ab00b02291f1d8c05f9c412dd45de",
+      "files": [
+        "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+        "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+        "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs"
+      ]
+    },
+    "complete-mirror.patch": {
+      "sha256": "0a9909a63cd6751050f6e856abb5ade367e0e09ea47f524f15bf751ddbb8e196",
+      "files": [
+        "bun.lock",
+        "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+        "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+        "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/phase5_e2e_runner.ts",
+        "src/bench-rerank.ts",
+        "src/llm/mlx-identity.ts",
+        "src/mcp/server.ts",
+        "src/test-preload.ts",
+        "test/cli.test.ts",
+        "test/eval-bm25.test.ts",
+        "test/eval.test.ts",
+        "test/fixtures/public_eval_dataset.ts",
+        "test/llm.test.ts",
+        "test/multi-collection-filter.test.ts",
+        "test/phase5-recovery.test.ts",
+        "test/rrf-trace.test.ts",
+        "test/store.helpers.unit.test.ts"
+      ]
+    }
+  }
+}

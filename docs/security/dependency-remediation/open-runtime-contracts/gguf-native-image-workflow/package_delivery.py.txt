@@ -1,0 +1,100 @@
+"""Package the one-file proposal, replay its patch, bind evidence and prove inputs unchanged."""
+from pathlib import Path
+import ast
+import difflib
+import hashlib
+import json
+import os
+import subprocess
+
+ROOT = Path(__file__).parent
+EVIDENCE = ROOT / 'evidence'
+DELIVERY = ROOT / 'delivery'
+TARGET = '.github/workflows/gguf-native-image-qualification.yml'
+WORKFLOW = ROOT / 'mirror' / TARGET
+SHA = lambda raw: hashlib.sha256(raw).hexdigest()
+intake = json.loads((EVIDENCE / 'intake.json').read_text())
+proof = []
+for before in intake['inputs']:
+    raw = Path(before['path']).read_bytes()
+    after = SHA(raw)
+    record = dict(before, after_sha256=after, unchanged=(after == before['sha256'] and len(raw) == before['bytes']))
+    proof.append(record)
+assert all(item['unchanged'] for item in proof), 'frozen/shared input changed; inspect instead of hiding it'
+for path, expected in [('finetune/tools/submit_locked_job.py', 'f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b'),
+                       ('finetune/tools/qualify_gguf_image.py', '6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf')]:
+    actual = SHA((ROOT / 'mirror' / path).read_bytes())
+    assert actual == expected
+    proof.append({'path': str(ROOT / 'mirror' / path), 'sha256': expected, 'after_sha256': actual, 'unchanged': True})
+(EVIDENCE / 'unchanged-inputs.json').write_text(json.dumps({'all_unchanged': True, 'count': len(proof), 'files': proof,
+    'parent_mutable_repair': 'Not read, copied, executed or modified; explicit handoff still required.'}, indent=2) + '\n')
+raw = WORKFLOW.read_bytes()
+patch_text = 'diff --git a/' + TARGET + ' b/' + TARGET + '\nnew file mode 100644\n'
+patch_text += ''.join(difflib.unified_diff([], raw.decode().splitlines(keepends=True), fromfile='/dev/null', tofile='b/' + TARGET))
+patch_path = DELIVERY / 'proposal.patch'
+patch_path.write_text(patch_text)
+replay = ROOT / 'patch-replay'
+replay.mkdir()
+env = dict(os.environ, GIT_CONFIG_GLOBAL='/dev/null', GIT_CONFIG_NOSYSTEM='1', GIT_TERMINAL_PROMPT='0', GIT_OPTIONAL_LOCKS='0')
+replay_results = []
+for args in (['git', 'apply', '--check', str(patch_path)], ['git', 'apply', str(patch_path)]):
+    result = subprocess.run(args, cwd=replay, env=env, capture_output=True, text=True, timeout=20)
+    replay_results.append({'command': args, 'exit_code': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr})
+    assert result.returncode == 0
+assert SHA((replay / TARGET).read_bytes()) == SHA(raw)
+(EVIDENCE / 'patch-replay.json').write_text(json.dumps({'results': replay_results, 'replayed_sha256': SHA(raw), 'matches': True}, indent=2) + '\n')
+checks = json.loads((EVIDENCE / 'final-checks.json').read_text())
+controls = json.loads((EVIDENCE / 'synthetic-final-v2/summary.json').read_text())
+assert checks['workflow_sha256'] == controls['workflow_sha256'] == SHA(raw)
+assert controls['cases'] == controls['passed'] and controls['failed'] == controls['skipped'] == 0
+assert len(controls['results']) == controls['cases']
+items = ['PLAN.md', 'REPORT.md', 'intake.py', 'package_delivery.py', 'mirror/' + TARGET, 'delivery/proposal.patch',
+         'evidence/validation-red.json', 'evidence/validation-final.json', 'evidence/final-checks.json',
+         'evidence/generated-step.bash', 'evidence/generated-controller.py',
+         'evidence/validate_workflow.py', 'evidence/control_flow_tests.py', 'evidence/fake_cli.py',
+         'evidence/fixture_adapter.py', 'evidence/run_final_checks.py',
+         'evidence/control-flow-final.stdout.log', 'evidence/control-flow-final.stderr.log',
+         'evidence/validation-final.stdout.log', 'evidence/validation-final.stderr.log',
+         'evidence/synthetic-final-v2/summary.json', 'evidence/synthetic-final-v2/results.jsonl',
+         'evidence/intake.json', 'evidence/unchanged-inputs.json', 'evidence/patch-replay.json']
+# Bind every final fixture config/argv/raw log/receipt, without following fixture symlinks/FIFOs.
+for case in sorted((EVIDENCE / 'synthetic-final-v2').iterdir()):
+    if case.is_dir():
+        for name in ('config.json', 'calls.jsonl', 'state.json', 'stdout.log', 'stderr.log', 'step-test-adapter.bash'):
+            path = case / name
+            if path.is_file():
+                items.append(str(path.relative_to(ROOT)))
+        for path in sorted((case / 'runner temp').glob('*/receipt.json')):
+            items.append(str(path.relative_to(ROOT)))
+files = []
+for item in items:
+    value = (ROOT / item).read_bytes()
+    files.append({'path': item, 'sha256': SHA(value), 'bytes': len(value)})
+launcher = (ROOT / 'mirror/finetune/tools/submit_locked_job.py').read_bytes()
+image = next(node.value.value for node in ast.parse(launcher).body if isinstance(node, ast.Assign)
+             and any(isinstance(target, ast.Name) and target.id == 'GGUF_IMAGE' for target in node.targets))
+manifest = {
+    'status': 'PROPOSAL ONLY; no publication, CI trigger, real Docker/image/native execution',
+    'root': str(ROOT), 'proposed_files': [{'target': TARGET, 'path': str(WORKFLOW), 'sha256': SHA(raw),
+                                        'bytes': len(raw), 'lines': len(raw.splitlines())}],
+    'new_file_patch': {'path': str(patch_path), 'sha256': SHA(patch_path.read_bytes()), 'replayed': True},
+    'original_recipe_sha256': '2c145115e53c2948249ee36d2593c7e9419bdaacbd7fe8555f2da01f323cb23e',
+    'launcher_sha256': SHA(launcher), 'selected_image_literal': image,
+    'probe_interface_sha256': SHA((ROOT / 'mirror/finetune/tools/qualify_gguf_image.py').read_bytes()),
+    'probe_handoff': 'Original obsolete probe is data-only. Parent must independently accept and bind the repaired qualifier before real CI; no banner-check bypass in workflow.',
+    'actual_local_checks': {'bash_n_exit': 0, 'inline_python_compile': True, 'actionlint_version': '1.7.12',
+                            'actionlint_exit': 0, 'shellcheck_pyflakes': 'Not run; optional integrations explicitly disabled.',
+                            'patch_apply_check_exit': 0, 'patch_apply_exit': 0,
+                            'synthetic_control_flow_cases': controls['cases'], 'passed': controls['passed'], 'failed': 0, 'skipped': 0},
+    'fixture_boundary': controls['scope'], 'physical_test_host': controls['physical_test_host'],
+    'image_execution': False, 'native_c_cpp_execution': False, 'real_docker_invocation': False,
+    'unchanged_input_count': len(proof),
+    'remaining_gates': ['Parent independent workflow review and repaired-probe source handoff',
+                        'Parent-only publish exact candidate and execute this pre-merge workflow',
+                        'Read back actual candidate SHA, probe/launcher hashes, exact selected digest, host/daemon/image amd64, probe outputs/exits and cleanup receipt from that real CI run',
+                        'No arm64/converter/model/locked graph/training/GPU/cloud acceptance inferred'],
+    'files': files,
+}
+(DELIVERY / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+print(json.dumps({key: manifest[key] for key in ('status', 'proposed_files', 'new_file_patch', 'actual_local_checks', 'unchanged_input_count')}, indent=2))
+print('manifest_sha256=' + SHA((DELIVERY / 'manifest.json').read_bytes()))

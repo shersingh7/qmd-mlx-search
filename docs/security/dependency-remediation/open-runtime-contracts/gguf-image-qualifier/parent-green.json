@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-m",
+    "pytest",
+    "-c",
+    "/dev/null",
+    "-p",
+    "no:cacheprovider",
+    "--rootdir=/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p",
+    "--confcutdir=/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p",
+    "--basetemp=/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/pytest-tmp/green",
+    "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/parent-green.xml",
+    "-q",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract_green.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p",
+  "name": "parent-green",
+  "returncode": 0,
+  "seconds": 2.1944318340392783,
+  "stderr": "",
+  "stdout": "....                                                                     [100%]\n4 passed in 2.08s\n"
+}

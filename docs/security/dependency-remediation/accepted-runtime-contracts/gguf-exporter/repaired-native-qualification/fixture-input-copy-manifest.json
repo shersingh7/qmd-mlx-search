@@ -1,0 +1,209 @@
+{
+  "files": [
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/chat_template.jinja",
+      "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/chat_template.jinja"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/config.json",
+      "sha256": "fd6c4a4c33eb26c2aaaa834dd254bf5879d300851ddb64b423cd7b79b51f438c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/generation_config.json",
+      "sha256": "1418c1374e32e2a74dc23a9c35d10104a3863820b5a327c855b52b67f583d3a1",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/generation_config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/model.safetensors",
+      "sha256": "569cd85c3573026c60f0ceefcb70bfc18c3f241d8e143ec1149d68b53ad0a8d4",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/model.safetensors"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/tokenizer.json",
+      "sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/tokenizer.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/tokenizer_config.json",
+      "sha256": "7edc959a113834371eebfa2605ad52919fb8a6a8de5fb877ad69c45648c2ca5a",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5/tokenizer_config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-sft-adapter/README.md",
+      "sha256": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-sft-adapter/README.md"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-sft-adapter/adapter_config.json",
+      "sha256": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-sft-adapter/adapter_config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-sft-adapter/adapter_model.safetensors",
+      "sha256": "059fab6dd24390d13c1453c20a29e1bcfe8fb7868a82901e48f64bcadeccc351",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-sft-adapter/adapter_model.safetensors"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-grpo-adapter/README.md",
+      "sha256": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-grpo-adapter/README.md"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-grpo-adapter/adapter_config.json",
+      "sha256": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-grpo-adapter/adapter_config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-grpo-adapter/adapter_model.safetensors",
+      "sha256": "4e0d5fea5b4fd20311a24ce3076a322153a3a7be124deb1d3fea4fb410448a45",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-grpo-adapter/adapter_model.safetensors"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/public-tokenizer/tokenizer.json",
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/public-tokenizer/tokenizer.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/public-tokenizer/tokenizer_config.json",
+      "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/public-tokenizer/tokenizer_config.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/public-tokenizer/vocab.json",
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/public-tokenizer/vocab.json"
+    },
+    {
+      "destination": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/public-tokenizer/merges.txt",
+      "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/public-tokenizer/merges.txt"
+    }
+  ],
+  "old_fixture_provenance": {
+    "adapters": [
+      {
+        "delta_max_abs": 0.023395108059048653,
+        "delta_nonzero": 32768,
+        "files": {
+          "README.md": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+          "adapter_config.json": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+          "adapter_model.safetensors": "059fab6dd24390d13c1453c20a29e1bcfe8fb7868a82901e48f64bcadeccc351"
+        },
+        "label": "sft",
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-sft-adapter",
+        "seed": 15485863
+      },
+      {
+        "delta_max_abs": 0.026022477075457573,
+        "delta_nonzero": 32768,
+        "files": {
+          "README.md": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+          "adapter_config.json": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+          "adapter_model.safetensors": "4e0d5fea5b4fd20311a24ce3076a322153a3a7be124deb1d3fea4fb410448a45"
+        },
+        "label": "grpo",
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-TRAINED-grpo-adapter",
+        "seed": 32452843
+      }
+    ],
+    "all_ids_covered": true,
+    "config": {
+      "_name_or_path": "",
+      "architectures": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "attention_bias": false,
+      "attention_dropout": 0.0,
+      "bos_token_id": null,
+      "chunk_size_feed_forward": 0,
+      "dtype": "bfloat16",
+      "eos_token_id": 248046,
+      "head_dim": 64,
+      "hidden_act": "silu",
+      "hidden_size": 256,
+      "id2label": {
+        "0": "LABEL_0",
+        "1": "LABEL_1"
+      },
+      "initializer_range": 0.02,
+      "intermediate_size": 512,
+      "is_encoder_decoder": false,
+      "label2id": {
+        "LABEL_0": 0,
+        "LABEL_1": 1
+      },
+      "layer_types": [
+        "linear_attention",
+        "full_attention"
+      ],
+      "linear_conv_kernel_dim": 4,
+      "linear_key_head_dim": 64,
+      "linear_num_key_heads": 2,
+      "linear_num_value_heads": 4,
+      "linear_value_head_dim": 64,
+      "max_position_embeddings": 128,
+      "model_type": "qwen3_5_text",
+      "num_attention_heads": 4,
+      "num_hidden_layers": 2,
+      "num_key_value_heads": 2,
+      "output_attentions": false,
+      "output_hidden_states": false,
+      "pad_token_id": 248044,
+      "problem_type": null,
+      "return_dict": true,
+      "rms_norm_eps": 1e-06,
+      "rope_parameters": {
+        "mrope_section": [
+          3,
+          3,
+          2
+        ],
+        "partial_rotary_factor": 0.25,
+        "rope_theta": 10000.0,
+        "rope_type": "default"
+      },
+      "tie_word_embeddings": true,
+      "transformers_version": "5.22.2",
+      "use_cache": true,
+      "vocab_size": 248077
+    },
+    "files": {
+      "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "config.json": "fd6c4a4c33eb26c2aaaa834dd254bf5879d300851ddb64b423cd7b79b51f438c",
+      "generation_config.json": "1418c1374e32e2a74dc23a9c35d10104a3863820b5a327c855b52b67f583d3a1",
+      "model.safetensors": "569cd85c3573026c60f0ceefcb70bfc18c3f241d8e143ec1149d68b53ad0a8d4",
+      "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "tokenizer_config.json": "7edc959a113834371eebfa2605ad52919fb8a6a8de5fb877ad69c45648c2ca5a"
+    },
+    "max_id": 248076,
+    "no_optimizer_or_training": true,
+    "not_pretrained": true,
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/RANDOM-NOT-PRETRAINED-Qwen3.5",
+    "random_seed": 982451653,
+    "special_ids": [
+      248046,
+      248044,
+      248070,
+      248071,
+      248076,
+      248056,
+      248057,
+      248053,
+      248054,
+      248045,
+      248047,
+      248048,
+      248049,
+      248050,
+      248051,
+      248052,
+      248055
+    ],
+    "stock_save_reload_equal": true,
+    "tokenizer_type": "transformers.models.qwen2.tokenization_qwen2.Qwen2Tokenizer",
+    "vocab_size": 248077
+  },
+  "old_manifest_sha256": "d909c6414b617b37aa28000fbb80650702c55a6948c5bdabb1e1d5284ec0c813"
+}

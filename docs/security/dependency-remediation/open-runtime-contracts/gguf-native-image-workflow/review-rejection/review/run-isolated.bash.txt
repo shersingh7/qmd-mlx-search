@@ -1,0 +1,11 @@
+#!/bin/bash
+# Only owned offline Python review fixtures; no inherited caches or credentials.
+set -euo pipefail
+root=/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e
+exec /usr/bin/env -i \
+  PATH=/usr/bin:/bin HOME="$root/home" HERMES_HOME="$root/hermes" HERMES_DIR="$root/hermes" \
+  HERMES_KNOWLEDGE_DIR="$root/knowledge" KNOWLEDGE_DIR="$root/knowledge" \
+  XDG_CACHE_HOME="$root/cache" XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
+  TMPDIR="$root/tmp" HF_HOME="$root/hf" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  QMD_LLAMA_GPU=false CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 \
+  /Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python -I -B -S "$@"

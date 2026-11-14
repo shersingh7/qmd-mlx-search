@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+·······················xx·xx················
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 40 passed (44)
+   Start at  21:15:41
+   Duration  1.74s (transform 62ms, setup 11ms, import 239ms, tests 1.41s, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/node-baseline-guard-results.json

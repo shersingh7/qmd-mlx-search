@@ -1,0 +1,230 @@
+{
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p",
+  "baseline_manifest_sha256": "781e0c08b433e156667f9af1a0554834277bc34f167e1e6d36dd9a7102d4e35f",
+  "baseline_source_count": 248,
+  "accepted_index_sha256": {
+    "report-index.json": "949e00889d5c073c9d61bdb69ee01dfde307dffc6bc8c39f2f8046dd82fba9dd",
+    "ad-hoc-index.json": "0be4d0e885982e4e1e45cb8249c9bfa5675d2707bf45dd10d91b628170095a57",
+    "source-binding.json": "a9e7f66a5b4677ec59e637c5a6081c80442463d717ac1c923cd0f32ae9e2bf1e"
+  },
+  "accepted19_sha256": {
+    "scripts/phase5_e2e_runner.ts": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a",
+    "src/bench-rerank.ts": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+    "src/llm.ts": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d",
+    "src/llm/mlx-identity.ts": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa",
+    "src/mcp/server.ts": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+    "src/test-preload.ts": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6",
+    "test/bench-rerank-entrypoint.test.ts": "aa4c8ee3cfcd48afc87488afb4abc31e4375a8a38c5161784c8628ea789042b7",
+    "test/bench-rerank-lifecycle.test.ts": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520",
+    "test/cli.test.ts": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e",
+    "test/eval-bm25.test.ts": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697",
+    "test/eval.test.ts": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d",
+    "test/fixtures/public_eval_dataset.ts": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29",
+    "test/llm.test.ts": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5",
+    "test/multi-collection-filter.test.ts": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b",
+    "test/phase5-recovery.test.ts": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c",
+    "test/rrf-trace.test.ts": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c",
+    "test/store.helpers.unit.test.ts": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253",
+    "test/zod-import.test.ts": "f890cb6d81bda481c0c823436a922dca50bf5fda6a6d4c91acc6bd5bbba835d1",
+    "vitest.config.ts": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67"
+  },
+  "different_paths": [
+    {
+      "path": "scripts/phase5_e2e_runner.ts",
+      "baseline_sha256": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+      "accepted_sha256": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a"
+    },
+    {
+      "path": "src/bench-rerank.ts",
+      "baseline_sha256": "50a6ffd5abe5a6b1d032bf7a5fa1f7b43584680fc9ed002145ad0f498eb1e3a5",
+      "accepted_sha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade"
+    },
+    {
+      "path": "src/llm.ts",
+      "baseline_sha256": "d103fd98fbe43635856711abe3d18496fe140a7539100107ecb9f6aed0d3fa50",
+      "accepted_sha256": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d"
+    },
+    {
+      "path": "src/llm/mlx-identity.ts",
+      "baseline_sha256": "ae0141d83f927fe88b3b9d5525aa3976ec7f49f7ae7ebd919fea830743fc0261",
+      "accepted_sha256": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa"
+    },
+    {
+      "path": "src/mcp/server.ts",
+      "baseline_sha256": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+      "accepted_sha256": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930"
+    },
+    {
+      "path": "src/test-preload.ts",
+      "baseline_sha256": "52f113b57d8f992eb103ffe11ada08d91c53047c97909dcc652af5c2434415a6",
+      "accepted_sha256": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6"
+    },
+    {
+      "path": "test/bench-rerank-entrypoint.test.ts",
+      "baseline_sha256": null,
+      "accepted_sha256": "aa4c8ee3cfcd48afc87488afb4abc31e4375a8a38c5161784c8628ea789042b7"
+    },
+    {
+      "path": "test/bench-rerank-lifecycle.test.ts",
+      "baseline_sha256": null,
+      "accepted_sha256": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520"
+    },
+    {
+      "path": "test/cli.test.ts",
+      "baseline_sha256": "5e6e6827c60a433078ded86979ee04d8fea1900303c098d174860b51505c75d5",
+      "accepted_sha256": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e"
+    },
+    {
+      "path": "test/eval-bm25.test.ts",
+      "baseline_sha256": "769d6d989feac349bfba01772b8130248e716f413955af12231a8b65b7436800",
+      "accepted_sha256": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697"
+    },
+    {
+      "path": "test/eval.test.ts",
+      "baseline_sha256": "bbf9be5ef777c7655038a49006d7f91faac212959628b116795c22566d2b2e9f",
+      "accepted_sha256": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d"
+    },
+    {
+      "path": "test/fixtures/public_eval_dataset.ts",
+      "baseline_sha256": "4b36e1fbe2fccdcebc0bd1155ba59598713445753a981679c85991bc6229d909",
+      "accepted_sha256": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29"
+    },
+    {
+      "path": "test/llm.test.ts",
+      "baseline_sha256": "1ac044729ade19fec18f092b9bb6bf96f081e831b8e045adf6404e5d8204e991",
+      "accepted_sha256": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5"
+    },
+    {
+      "path": "test/multi-collection-filter.test.ts",
+      "baseline_sha256": "bd9524677e7d669ec552eeca3cbd537f5abdbfc31a764a2946088b584fbe074d",
+      "accepted_sha256": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b"
+    },
+    {
+      "path": "test/phase5-recovery.test.ts",
+      "baseline_sha256": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "accepted_sha256": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c"
+    },
+    {
+      "path": "test/rrf-trace.test.ts",
+      "baseline_sha256": "02b55e8776d157cc3c09f6e0fd5a0d07831f19c00725f700fb3fe80edb83e84b",
+      "accepted_sha256": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c"
+    },
+    {
+      "path": "test/store.helpers.unit.test.ts",
+      "baseline_sha256": "b4a53ea834be92cb2413592c293fab290c1ec6b683c4c9098ebb568d55c390de",
+      "accepted_sha256": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253"
+    },
+    {
+      "path": "test/zod-import.test.ts",
+      "baseline_sha256": null,
+      "accepted_sha256": "f890cb6d81bda481c0c823436a922dca50bf5fda6a6d4c91acc6bd5bbba835d1"
+    },
+    {
+      "path": "vitest.config.ts",
+      "baseline_sha256": "e09891084b37bb3b71520848b01830c0f31a7dbcc6935736b79fdadfe7a69cf6",
+      "accepted_sha256": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67"
+    }
+  ],
+  "different_count": 19,
+  "lease_baseline_checks": {
+    "test/audit-recovery-startup.test.ts": {
+      "lease_accepted": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6",
+      "baseline": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6",
+      "later_observer": false
+    },
+    "test/audit-recovery-transition.test.ts": {
+      "lease_accepted": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c",
+      "baseline": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c",
+      "later_observer": false
+    },
+    "test/audit-recovery-tree.test.ts": {
+      "lease_accepted": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "baseline": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+      "later_observer": true
+    },
+    "test/audit-native-bun-recovery.test.ts": {
+      "lease_accepted": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198",
+      "baseline": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198",
+      "later_observer": false
+    },
+    "test/audit-recovery.test.ts": {
+      "lease_accepted": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696",
+      "baseline": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696",
+      "later_observer": false
+    },
+    "test/phase5-recovery.test.ts": {
+      "lease_accepted": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "baseline": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+      "later_observer": false
+    },
+    "test/audit-recovery-execution-admission.test.ts": {
+      "lease_accepted": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010",
+      "baseline": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010",
+      "later_observer": false
+    },
+    "scripts/phase5_e2e_runner.ts": {
+      "lease_accepted": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+      "baseline": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+      "later_observer": false
+    },
+    "scripts/phase5_recovery_process.py": {
+      "lease_accepted": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+      "baseline": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+      "later_observer": false
+    },
+    "test/fixtures/bun_recovery_ownership.ts": {
+      "lease_accepted": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb",
+      "baseline": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb",
+      "later_observer": false
+    },
+    "scripts/qmd_mlx/process_anchor.py": {
+      "lease_accepted": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+      "baseline": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+      "later_observer": false
+    },
+    "scripts/qmd_mlx/__init__.py": {
+      "lease_accepted": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1",
+      "baseline": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1",
+      "later_observer": false
+    }
+  },
+  "environment": {
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/home",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/hermes",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/hermes",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/knowledge",
+    "KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/knowledge",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/xdg/config",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/xdg/cache",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/xdg/data",
+    "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/xdg/state",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/hf",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/tmp",
+    "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/tmp",
+    "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/tmp",
+    "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/bun",
+    "BUN_RUNTIME_TRANSPILER_CACHE_PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/bun",
+    "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/npm",
+    "PNPM_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/pnpm",
+    "UV_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/uv",
+    "PYTHONPYCACHEPREFIX": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/cache/python",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "UV_OFFLINE": "1",
+    "npm_config_offline": "true",
+    "CI": "1",
+    "REQUIRE_BUN": "1",
+    "QMD_LLAMA_GPU": "false",
+    "PATH": "/usr/bin:/bin",
+    "LANG": "en_US.UTF-8",
+    "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52",
+    "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    "CPATH": "/usr/local/include",
+    "LIBRARY_PATH": "/usr/local/lib",
+    "MANPATH": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/share/man:/Library/Developer/CommandLineTools/usr/share/man:/Library/Developer/CommandLineTools/Toolchains/XcodeDefault.xctoolchain/usr/share/man:"
+  },
+  "package_alias_count": 274,
+  "cache_layout_ready_before_any_test": true
+}

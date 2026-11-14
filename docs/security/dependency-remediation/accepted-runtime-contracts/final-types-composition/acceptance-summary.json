@@ -1,0 +1,24 @@
+{
+  "status": "SPEC_PASS_QUALITY_PASS_SOURCE_BOUND_NOT_YET_INTEGRATED",
+  "delegation": "deleg_01f17941",
+  "reviewArtifactsVerified": 161,
+  "reviewIndexSha256": "4c7d999642ed6cf4928e86aa274cd435a87c6acf494d18cbb3089d263f1093a4",
+  "combinedPatchSha256": "f2db636f1c6b113f15b44fe28742764dc5c7a3accb67fca9f5119cbe54469f1c",
+  "candidateManifestSha256": "cada46c60b45ccd367282c06c6daecc58f233ff2c831c96c53318b597e29d3b0",
+  "changedPaths": 22,
+  "sourcePostimages": 298,
+  "bundle": {
+    "path": "review-evidence.tar.gz",
+    "sha256": "fe780c5c33851c4c682b86fb6dd40f17672718d6a06a777df5bedb8043cde3c7",
+    "bytes": 1693704,
+    "regularEntriesReadbackVerified": 162
+  },
+  "qualifications": [
+    "Q1: Guarded compiler refusals prevent whole-root acceptance; actual integrated-checkout gate belongs to parent.",
+    "Q2: C1 paused sole cleanup owner remains qualified; no universal complete-cleanup certification.",
+    "Q3: T3 detailed provenance/graph acceptance belongs to its separate parallel reviewer; only exact metadata composition is approved here.",
+    "No live integration, publication, fresh online security/install/native-image/Nix/CI or native model/GPU qualification."
+  ],
+  "wholeRootAccepted": false,
+  "T3SeparatelyAcceptedArchive": "docs/security/dependency-remediation/accepted-runtime-contracts/development-declarations/acceptance-summary.json"
+}

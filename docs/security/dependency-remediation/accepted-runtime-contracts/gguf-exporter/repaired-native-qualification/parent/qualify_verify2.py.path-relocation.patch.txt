@@ -1,0 +1,58 @@
+--- original/qualify_verify2.py
++++ parent-path-adapter/qualify_verify2.py
+@@ -1,5 +1,6 @@
+ """Read back every real GGUF: provenance, metadata, vocabulary, tensor bounds."""
+ from qual_common import *
++INPUT_ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh')
+ from collections import Counter
+ import gc
+ q = Qualification('verify2')
+@@ -14,10 +15,10 @@
+     assert len(receipts['standalone']['actual_merges']) == 2
+     assert receipts['native']['actual_checkpoint_materializations']
+     assert {x['device'] for x in receipts['native']['actual_checkpoint_materializations']} == {'cpu'}
+-    tokenizer_source = json.loads((ROOT / 'public-tokenizer/tokenizer.json').read_text())
++    tokenizer_source = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer.json').read_text())
+     vocab = dict(tokenizer_source['model']['vocab'])
+     vocab.update({entry['content']: entry['id'] for entry in tokenizer_source['added_tokens']})
+-    public_config = json.loads((ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
++    public_config = json.loads((INPUT_ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
+     vocab.update({entry['content']: int(index) for index, entry in public_config['added_tokens_decoder'].items()})
+     q.receipt['verifier_oracle_provenance'] = 'Retains complete v2 stock mapping including seven config-only tokens; adds all-tensor F16 numeric, merge-array and template assertions; no product/model/tokenizer changes.'
+     expected_merges = [' '.join(item) if isinstance(item, list) else item for item in tokenizer_source['model']['merges']]
+@@ -26,8 +27,8 @@
+     expected_tokens = [''] * vocab_size
+     for token, index in vocab.items():
+         expected_tokens[index] = token
+-    provenance = json.loads((ROOT / 'tokenizer-provenance.json').read_text())
+-    assert all(sha256(ROOT / 'public-tokenizer' / entry['file']) == entry['sha256'] for entry in provenance['assets'])
++    provenance = json.loads((INPUT_ROOT / 'tokenizer-provenance.json').read_text())
++    assert all(sha256(INPUT_ROOT / 'public-tokenizer' / entry['file']) == entry['sha256'] for entry in provenance['assets'])
+     artifacts = [dict(entry, entrypoint=name) for name in ('standalone', 'native') for entry in receipts[name]['artifacts']]
+     assert len(artifacts) == 7 and len({entry['path'] for entry in artifacts}) == 7
+     parsed = []
+@@ -35,7 +36,7 @@
+     expected_types = {'f16': 'MOSTLY_F16', 'q4_k_m': 'MOSTLY_Q4_K_M', 'q6_k': 'MOSTLY_Q6_K', 'q8_0': 'MOSTLY_Q8_0'}
+     for entry in artifacts:
+         path = Path(entry['path'])
+-        assert path.is_relative_to(ROOT)
++        assert path.is_relative_to(INPUT_ROOT)
+         assert sha256(path) == entry['sha256'] and path.stat().st_size == entry['bytes']
+         reader = gguf.GGUFReader(path)
+         fields = reader.fields
+@@ -121,13 +122,13 @@
+     # adapted value-projection values, not just the model's in-memory post-merge state.
+     torch = q.initialize_ml()
+     from safetensors import safe_open
+-    fixture = ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
++    fixture = INPUT_ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
+     with safe_open(fixture / 'model.safetensors', framework='pt', device='cpu') as handle:
+         expected = handle.get_tensor('model.layers.1.self_attn.v_proj.weight').clone()
+     base = expected.clone()
+     merge_records = []
+     for label in ('sft', 'grpo'):
+-        with safe_open(ROOT / ('RANDOM-NOT-TRAINED-' + label + '-adapter/adapter_model.safetensors'), framework='pt', device='cpu') as handle:
++        with safe_open(INPUT_ROOT / ('RANDOM-NOT-TRAINED-' + label + '-adapter/adapter_model.safetensors'), framework='pt', device='cpu') as handle:
+             keys = list(handle.keys())
+             a = handle.get_tensor(next(key for key in keys if '.lora_A.' in key))
+             b = handle.get_tensor(next(key for key in keys if '.lora_B.' in key))

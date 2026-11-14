@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+x
+
+ Test Files  2 failed (2)
+      Tests  1 failed (1)
+   Start at  21:15:45
+   Duration  424ms (transform 205ms, setup 25ms, import 42ms, tests 6ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/bun-baseline-zod-phase5-results.json

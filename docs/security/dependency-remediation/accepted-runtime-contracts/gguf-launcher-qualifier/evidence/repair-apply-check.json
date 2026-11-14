@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "--check",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repair.patch"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repo",
+  "name": "repair-apply-check",
+  "returncode": 0,
+  "seconds": 0.01070770900696516,
+  "stderr": "",
+  "stdout": ""
+}

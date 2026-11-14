@@ -10,7 +10,7 @@ const bunVersion = (process.versions as Record<string, string>).bun;
 assert.ok(bunVersion, "This regression must execute in native Bun, not a Node-hosted runner");
 const bun = (globalThis as unknown as { Bun: { gc(full: boolean): void } }).Bun;
 const scenario = process.argv[2];
-assert.ok(scenario === "sequential-gc" || scenario === "fd-reuse", "Unknown native recovery scenario");
+assert.ok(["sequential-gc", "fd-reuse", "signal-term", "signal-int"].includes(scenario!), "Unknown native recovery scenario");
 console.log(JSON.stringify({ evidence: "native-recovery-runtime", scenario, bun: bunVersion, executable: process.execPath }));
 
 function alive(pid: number): boolean {
@@ -43,7 +43,7 @@ function pipes(): number[] {
 
 type Identity = { pid: number; pgid: number; sid: number };
 async function call(root: string, sentinel: ChildProcess, index: number, timeoutMs: number, timeout: boolean,
-  forceGC: boolean, priorFDs: Set<number>, fdSentinel: number): Promise<void> {
+  forceGC: boolean, priorFDs: Set<number>, fdSentinel: number, parentSignal?: "SIGTERM" | "SIGINT"): Promise<void> {
   const stateRoot = path.join(root, String(index));
   const readyPath = path.join(root, `ready-${index}.json`);
   const releasePath = path.join(root, `release-${index}`);
@@ -56,7 +56,7 @@ signal.signal(signal.SIGTERM, signal.SIG_IGN)
 with open(${JSON.stringify(readyPath + ".tmp")}, 'w') as record:
     json.dump(dict(pid=os.getpid(), pgid=os.getpgrp(), sid=os.getsid(0)), record)
 os.replace(${JSON.stringify(readyPath + ".tmp")}, ${JSON.stringify(readyPath)})
-${timeout ? "time.sleep(60)" : `while not os.path.exists(${JSON.stringify(releasePath)}):
+${timeout || parentSignal ? "time.sleep(60)" : `while not os.path.exists(${JSON.stringify(releasePath)}):
     time.sleep(0.002)
 print(${JSON.stringify(marker)}, flush=True)
 with open(${JSON.stringify(outputJson)}, 'w') as report:
@@ -77,6 +77,16 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
     .then(result => { settled = result; return result; });
   try {
     const observeThenRun = async () => {
+      if (parentSignal) {
+        while (!existsSync(readyPath) && !settled) await new Promise(resolve => setTimeout(resolve, 5));
+        assert.ok(existsSync(readyPath), `Worker must be ready before OS signal: ${JSON.stringify(settled)}`);
+        identity = JSON.parse(readFileSync(readyPath, "utf8")) as Identity;
+        assert.equal(alive(identity.pid), true);
+        assert.equal(alive(sentinel.pid!), true);
+        // A real OS delivery to this disposable native Bun host, not an
+        // EventEmitter simulation. The helper installed its process handler.
+        process.kill(process.pid, parentSignal);
+      }
       if (forceGC) {
         while (!existsSync(readyPath) && !settled) await new Promise(resolve => setTimeout(resolve, 5));
         assert.ok(existsSync(readyPath), `Worker must be ready before active-call GC: ${JSON.stringify(settled)}`);
@@ -101,7 +111,7 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
         gcDuringActive = !settled && alive(identity.pid);
         assert.equal(gcDuringActive, true, "GC must occur while this worker and its proof channel are active");
       }
-      if (!timeout) writeFileSync(releasePath, "release\n");
+      if (!timeout && !parentSignal) writeFileSync(releasePath, "release\n");
       return await helper;
     };
     const result = await Promise.race([observeThenRun(), new Promise<never>((_resolve, reject) => {
@@ -116,6 +126,7 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       sentinelPid: sentinel.pid, sentinelAlive: alive(sentinel.pid!), descriptorSentinelOpen: fstatSync(fdSentinel).isFile(), guardFired, result }));
     assert.equal(guardFired, false);
     assert.ok(elapsedMs < (timeoutMs === 200 ? 1_500 : timeoutMs + 500));
+    if (parentSignal) assert.ok(elapsedMs < 1_500, "OS-signal teardown must retain the short bound");
     assert.ok(result.launch.supervisorPid !== undefined);
     assert.equal(result.launch.supervisorReaped, true);
     await waitAbsent(result.launch.supervisorPid!);
@@ -125,7 +136,8 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
       // descriptor-reuse calls retain every original started-worker assertion.
       assert.equal(timeoutMs, 200);
       assert.equal(forceGC, false);
-      assert.equal(result.launch.admissionGranted, false);
+      if (result.launch.admissionGranted) assert.equal(result.launch.noStartProof, "supervisor-acknowledgement");
+      else assert.equal(result.launch.noStartProof, undefined);
       assert.equal(result.pid, undefined);
       assert.equal(identity, undefined);
       assert.deepEqual(result.cleanup.processGroups, []);
@@ -163,6 +175,12 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
         assert.equal(result.cleanup.sigkillUsed, true);
       } else if (!noStart) assert.ok(result.signal === "SIGTERM" || result.signal === "SIGKILL");
       assert.match(result.error!, new RegExp(`timed out after ${timeoutMs}ms`));
+    } else if (parentSignal) {
+      assert.match(result.error!, new RegExp(`interrupted by parent ${parentSignal}`));
+      assert.equal(result.exitCode, null);
+      assert.equal(result.signal, "SIGKILL");
+      assert.equal(result.cleanup.sigkillUsed, true);
+      assert.equal(result.report, undefined);
     } else {
       assert.equal(result.exitCode, 0);
       assert.equal(result.signal, null);
@@ -198,10 +216,15 @@ const sentinel = spawn("/usr/bin/python3", ["-S", "-c", "import time; time.sleep
 const fdSentinel = openSync(path.join(root, "descriptor-sentinel"), "a+");
 try {
   const priorFDs = new Set<number>();
-  await call(root, sentinel, 0, 200, true, false, priorFDs, fdSentinel);
-  if (scenario === "sequential-gc") await call(root, sentinel, 1, 5_000, true, true, priorFDs, fdSentinel);
-  else for (let index = 1; index <= 8; index++) await call(root, sentinel, index, 5_000, false, true, priorFDs, fdSentinel);
-  console.log(JSON.stringify({ evidence: "native-recovery-passed", scenario, calls: scenario === "sequential-gc" ? 2 : 9 }));
+  if (scenario === "signal-term" || scenario === "signal-int") {
+    await call(root, sentinel, 0, 5_000, false, false, priorFDs, fdSentinel, scenario === "signal-term" ? "SIGTERM" : "SIGINT");
+  } else {
+    await call(root, sentinel, 0, 200, true, false, priorFDs, fdSentinel);
+    if (scenario === "sequential-gc") await call(root, sentinel, 1, 5_000, true, true, priorFDs, fdSentinel);
+    else for (let index = 1; index <= 8; index++) await call(root, sentinel, index, 5_000, false, true, priorFDs, fdSentinel);
+  }
+  console.log(JSON.stringify({ evidence: "native-recovery-passed", scenario,
+    calls: scenario === "sequential-gc" ? 2 : scenario === "fd-reuse" ? 9 : 1 }));
 } finally {
   closeSync(fdSentinel);
   await stopSentinel(sentinel);

@@ -1,0 +1,82 @@
+{
+  "name": "prepared-transport-charged",
+  "guardFired": false,
+  "elapsedMs": 707.8325419999999,
+  "exitCode": 0,
+  "supervisorPid": 38088,
+  "supervisorAbsent": true,
+  "workers": [
+    38090
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38090
+  ],
+  "sentinelAlive": true,
+  "work": "actual-user-work",
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38088,
+      "sessionId": 38088
+    },
+    {
+      "type": "ready",
+      "pid": 38090,
+      "sessionId": 38088,
+      "processGroupId": 38090
+    },
+    {
+      "type": "exit",
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": false,
+      "processGroups": [
+        38090
+      ],
+      "timedOut": true,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery worker timed out after 800ms (PID 38090)"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 38090,
+      "owner": 38088,
+      "at": 0.238236916,
+      "allowed": true,
+      "remainingMs": 388.719584,
+      "deadline": 0.62693575
+    }
+  ],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 553,
+      "elapsedMs": 246.501125
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533535330a",
+      "elapsedMs": 246.53058399999995
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 250.88337499999992
+    }
+  ],
+  "stderr": "",
+  "eventCount": 12
+}

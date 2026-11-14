@@ -70,127 +70,26 @@ from transformers import TrainerCallback
 
 
 def export_gguf(model, tokenizer, output_dir: str, model_name: str):
-    """Export model to GGUF at Q4_K_M, Q6_K, Q8_0 quantizations."""
-    import shutil
+    """Export a complete Q4_K_M/Q6_K/Q8_0 set without installing dependencies."""
     import tempfile
-
-    def run_checked(command, stage, **kwargs):
-        result = subprocess.run(command, **kwargs)
-        if result.returncode != 0:
-            raise RuntimeError(f"GGUF export failed: {stage} exited with status {result.returncode}")
+    from gguf_toolchain import convert_model, prepare_toolchain
 
     output_path = Path(output_dir)
-    gguf_dir = output_path / "gguf"
-    gguf_dir.mkdir(exist_ok=True)
-
-    # Save merged model to temp dir
-    print("Saving merged model for GGUF conversion...")
-    with tempfile.TemporaryDirectory() as tmp:
-        merged_path = Path(tmp) / "merged"
+    output_path.mkdir(parents=True, exist_ok=True)
+    # Both tools and artifacts are fresh, private to this call, and cleaned on
+    # failure. Never replace previous exports until every process succeeded.
+    with tempfile.TemporaryDirectory(prefix=".gguf-convert-", dir=output_path) as tmp:
+        work = Path(tmp)
+        tools = prepare_toolchain(work / "tools")
+        merged_path = work / "merged"
+        print("Saving merged model for GGUF conversion...")
         model.save_pretrained(merged_path, safe_serialization=True)
         tokenizer.save_pretrained(merged_path)
-
-        # Setup llama.cpp
-        llama_cpp = Path("/tmp/llama.cpp")
-        if not llama_cpp.exists():
-            print("Cloning llama.cpp...")
-            run_checked(
-                [
-                    "git",
-                    "clone",
-                    "--depth",
-                    "1",
-                    "https://github.com/ggerganov/llama.cpp.git",
-                    str(llama_cpp),
-                ],
-                "llama.cpp clone",
-                capture_output=True,
-            )
-            run_checked(
-                [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "install",
-                    "-q",
-                    "-r",
-                    str(llama_cpp / "requirements.txt"),
-                ],
-                "converter requirements installation",
-                capture_output=True,
-            )
-
-        # Build quantize tool if needed
-        quantize_bin = llama_cpp / "build" / "bin" / "llama-quantize"
-        if not quantize_bin.exists():
-            print("Building llama-quantize...")
-            build_dir = llama_cpp / "build"
-            build_dir.mkdir(exist_ok=True)
-            run_checked(
-                [
-                    "cmake",
-                    "-B",
-                    str(build_dir),
-                    "-S",
-                    str(llama_cpp),
-                    "-DGGML_CUDA=OFF",
-                ],
-                "llama-quantize CMake configuration",
-                capture_output=True,
-            )
-            run_checked(
-                [
-                    "cmake",
-                    "--build",
-                    str(build_dir),
-                    "--target",
-                    "llama-quantize",
-                    "-j",
-                    "4",
-                ],
-                "llama-quantize build",
-                capture_output=True,
-            )
-
-        # Convert to FP16 first
-        fp16_file = gguf_dir / f"{model_name}-f16.gguf"
-        print(f"Converting to FP16: {fp16_file}")
-        log_out = Path("/tmp/qmd-gguf-convert.log")
-        log_err = Path("/tmp/qmd-gguf-convert.err")
-        with log_out.open("w") as out_f, log_err.open("w") as err_f:
-            run_checked(
-                [
-                    sys.executable,
-                    str(llama_cpp / "convert_hf_to_gguf.py"),
-                    str(merged_path),
-                    "--outfile",
-                    str(fp16_file),
-                    "--outtype",
-                    "f16",
-                ],
-                f"HF-to-GGUF conversion (stdout: {log_out}; stderr: {log_err})",
-                stdout=out_f,
-                stderr=err_f,
-                text=True,
-            )
-
-        # Quantize to 4, 6, 8 bit
-        for quant_type in ["Q4_K_M", "Q6_K", "Q8_0"]:
-            out_file = gguf_dir / f"{model_name}-{quant_type.lower()}.gguf"
-            print(f"Quantizing {quant_type}: {out_file}")
-            run_checked(
-                [str(quantize_bin), str(fp16_file), str(out_file), quant_type],
-                f"{quant_type} quantization",
-                capture_output=True,
-            )
-            if out_file.exists():
-                size_mb = out_file.stat().st_size / (1024 * 1024)
-                print(f"  {quant_type}: {size_mb:.1f} MB")
-
-        # Remove FP16 to save space
-        if fp16_file.exists():
-            fp16_file.unlink()
-
+        files = convert_model(tools, merged_path, model_name)
+        gguf_dir = output_path / "gguf"
+        gguf_dir.mkdir(exist_ok=True)
+        for path in files:
+            path.replace(gguf_dir / path.name)
     print(f"GGUF files saved to: {gguf_dir}")
 
 
@@ -284,6 +183,10 @@ def cmd_sft(args):
         print("SFT Training Configuration:")
         print(yaml.dump(cfg, default_flow_style=False))
         return
+
+    # Validate the locked Python/native prerequisites before any data/model work.
+    from gguf_toolchain import check_prerequisites
+    check_prerequisites()
 
     import torch
     from datasets import load_dataset

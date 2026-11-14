@@ -1,0 +1,87 @@
+"""Diagnostic: pause the sole post-startup cleanup owner, not a passing cleanup proof."""
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+
+ROOT = Path(__file__).resolve().parent
+MIRROR = ROOT / 'mirror'
+ENV = json.loads((ROOT / 'environment.json').read_text())
+source = str(MIRROR / 'scripts/phase5_recovery_process.py')
+wrapper = str(ROOT / 'heldout_wrapper.py')
+
+def alive(pid):
+    try: os.kill(pid, 0); return True
+    except ProcessLookupError: return False
+
+results = []
+for runtime, executable in [('node', '/Users/shersingh/.hermes/node/bin/node'), ('bun', '/Users/shersingh/.bun/bin/bun')]:
+    case = ROOT / 'monitor-pause-diagnostic' / runtime
+    case.mkdir(parents=True)
+    spec = case / 'spec.json'
+    spec.write_text(json.dumps({'root': str(case), 'source': source, 'proof_to_stdout': False,
+        'poll_hold': 1.300, 'child_gate_delay': .010}, indent=2) + '\n')
+    host = case / 'host.ts'
+    script = '''import cp from 'node:child_process';
+import {syncBuiltinESMExports} from 'node:module';
+import {writeFileSync} from 'node:fs';
+import {executeRecoveryWorker} from RUNNER;
+const source=SOURCE,wrapper=WRAPPER,spec=SPEC,root=ROOT;
+if ((process.versions as any).bun) {
+ const bun=(globalThis as any).Bun,original=bun.spawn;
+ bun.spawn=function(command:any,options:any){return original.call(bun,command[3]===source?[...command.slice(0,3),wrapper,...command.slice(4),spec]:command,options);};
+} else {
+ const original=cp.spawn;
+ (cp as any).spawn=function(executable:any,args:any,options:any){return original(executable,args[2]===source?[...args.slice(0,2),wrapper,...args.slice(3),spec]:args,options);};
+ syncBuiltinESMExports();
+}
+writeFileSync(root+'/host-started.json',JSON.stringify({executable:process.execPath,versions:process.versions}));
+const started=performance.now();
+const result=await executeRecoveryWorker({dbPath:root+'/unused.sqlite',docsDir:root,outputJson:root+'/absent-report.json',stateRoot:root+'/state',timeoutMs:200,
+ command:['/usr/bin/python3','-B','-S','-c',WORKCODE]});
+writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-started,result}));
+'''
+    for key, value in {'RUNNER': (MIRROR / 'scripts/phase5_e2e_runner.ts').as_uri(), 'SOURCE': source,
+        'WRAPPER': wrapper, 'SPEC': str(spec), 'ROOT': str(case), 'WORKCODE': 'from pathlib import Path;Path(%r).write_text("actual-user-work")' % str(case / 'work')}.items():
+        script = script.replace(key, json.dumps(value))
+    host.write_text(script)
+    args = [executable, *(['--import', str(MIRROR / 'scripts/phase5_recovery_process_loader.mjs')] if runtime == 'node' else []), str(host)]
+    process = subprocess.Popen(args, cwd=MIRROR, env=ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+    start = time.monotonic()
+    signal_sent = False
+    while process.poll() is None and time.monotonic()-start < 5:
+        if not signal_sent and (case / 'event-e-forwarded').exists():
+            process.send_signal(signal.SIGTERM)
+            signal_sent = True
+        if (case / 'helper.json').exists():
+            break
+        time.sleep(.001)
+    helper = json.loads((case / 'helper.json').read_text()) if (case / 'helper.json').exists() else None
+    event_path = case / 'events.jsonl'
+    events = [json.loads(line) for line in event_path.read_text().splitlines()] if event_path.exists() else []
+    forks = [(item['pid'], item['child']) for item in events if item['kind'] == 'fork-parent']
+    at_return = {'helper': helper, 'forks': forks,
+        'supervisorsAlive': [p for p,c in forks if alive(p)], 'workersAlive': [c for p,c in forks if alive(c)],
+        'work': (case / 'work').read_text() if (case / 'work').exists() else None}
+    (case / 'at-helper-return.json').write_text(json.dumps(at_return, indent=2) + '\n')
+    time.sleep(1.450)
+    stdout, stderr = process.communicate(timeout=3)
+    (case / 'stdout.log').write_bytes(stdout); (case / 'stderr.log').write_bytes(stderr)
+    events = [json.loads(line) for line in event_path.read_text().splitlines()] if event_path.exists() else []
+    record = {'runtime': runtime, 'signalSent': signal_sent, 'hostExit': process.returncode, 'atHelperReturn': at_return,
+        'allAbsentAfterHold': all(not alive(p) and not alive(c) for p,c in forks),
+        'workAfterHold': (case / 'work').read_text() if (case / 'work').exists() else None,
+        'gateResults': [item for item in events if item['kind'] == 'child-gate-result'],
+        'pollHeld': any(item['kind'] == 'pre-exec-readable-held' for item in events),
+        'realReaps': [item for item in events if item['kind'] == 'waitpid'], 'fixtureKills': [],
+        'nativeRuntime': json.loads((case / 'host-started.json').read_text()) if (case / 'host-started.json').exists() else None}
+    (case / 'before-finally.json').write_text(json.dumps(record, indent=2) + '\n')
+    results.append(record)
+    print(json.dumps({'runtime': runtime, 'helperMs': helper['elapsedMs'] if helper else None,
+        'cleanup': helper['result']['cleanup'] if helper else None, 'atReturnSupervisorsAlive': at_return['supervisorsAlive'],
+        'allAbsentAfterHold': record['allAbsentAfterHold'], 'noWork': record['workAfterHold'] is None, 'pollHeld': record['pollHeld']}), flush=True)
+    assert record['workAfterHold'] is None and record['allAbsentAfterHold'] and helper and helper['elapsedMs'] < 1500
+    assert signal_sent and record['pollHeld']
+(ROOT / 'monitor-pause-diagnostic-results.json').write_text(json.dumps(results, indent=2) + '\n')

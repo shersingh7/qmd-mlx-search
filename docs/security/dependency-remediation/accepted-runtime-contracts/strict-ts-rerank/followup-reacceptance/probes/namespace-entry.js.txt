@@ -1,0 +1,3 @@
+import * as z from './namespace-leaf.js';
+export * from './namespace-leaf.js';
+export {z,z as default};

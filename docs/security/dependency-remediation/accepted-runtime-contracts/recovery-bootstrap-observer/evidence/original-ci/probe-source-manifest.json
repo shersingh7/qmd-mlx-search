@@ -1,0 +1,43 @@
+{
+  "head": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+  "closure_source_lines": [
+    37,
+    451
+  ],
+  "exact_function_body_preserved": true,
+  "builtin_imports_only": true,
+  "type_and_barrier_definitions_exact_worker_lines": [
+    9,
+    39
+  ],
+  "original_timeout_ms": 200,
+  "original_teardown_ms": 800,
+  "original_guard_ms": 1800,
+  "original_elapsed_bound_ms_exclusive": 1500,
+  "not_a_full_repository_module_import": true,
+  "observed_transformations": [
+    {
+      "old": "    const { child, control } = spawnSupervisor();\n",
+      "new": "    const { child, control } = spawnSupervisor();\n\n    const probeStarted = performance.now();\n    const probeEvents: unknown[] = [];\n    const probeStreamState = () => Object.fromEntries(Object.entries({stdin:child.stdin,stdout:child.stdout,stderr:child.stderr,control}).map(([name,stream]) => [name, { closed:stream.closed, destroyed:stream.destroyed, readableEnded:stream.readableEnded, writableEnded:stream.writableEnded, readableLength:stream.readableLength, fd:(stream as any)._handle?.fd }]));\n    const probeRecord = (event:string, fields:object={}) => { probeEvents.push({tMs:performance.now()-probeStarted,event,...fields}); };\n    const probe = {child,control,events:probeEvents, snapshot:probeStreamState, record:probeRecord};\n    ((globalThis as any).__bootstrapHandles ??= []).push(probe);\n    probeRecord('spawn-returned',{pid:child.pid,streams:probeStreamState()});\n    for (const [name,stream] of Object.entries({stdin:child.stdin,stdout:child.stdout,stderr:child.stderr,control})) {\n      for (const event of ['end','close','finish','error']) stream.on(event,(error?:Error) => probeRecord(name+'.'+event,{error:error?.message,streams:probeStreamState()}));\n    }\n    child.on('exit',(code:number|null,signal:string|null) => probeRecord('child.exit',{code,signal,streams:probeStreamState()}));\n    child.on('close',() => probeRecord('child.close',{streams:probeStreamState()}));\n    child.on('error',(error:Error) => probeRecord('child.error',{error:error.message}));\n    control.on('data',(chunk:Buffer) => probeRecord('control.data',{text:chunk.toString()}));\n"
+    },
+    {
+      "old": "        supervisorKillRequested = child.kill(\"SIGKILL\");",
+      "new": "        probeRecord(\"kill-unadmitted\",{streams:probeStreamState()});\n        supervisorKillRequested = child.kill(\"SIGKILL\");"
+    },
+    {
+      "old": "      settled = true;\n",
+      "new": "      probeRecord(\"finish-before-settle\",{helperExited,closed,prepared,cleanupReceived,protocolFailed,streams:probeStreamState()});\n      settled = true;\n"
+    },
+    {
+      "old": "        receipt.cleanup.forcedPipeClose = true;",
+      "new": "        probeRecord(\"forced-close-before-destroy\",{helperExited,closed,prepared,cleanupReceived,streams:probeStreamState()});\n        receipt.cleanup.forcedPipeClose = true;"
+    },
+    {
+      "old": "      receipt.timedOut = true;\n",
+      "new": "      probeRecord(\"execution-timeout\",{streams:probeStreamState()});\n      receipt.timedOut = true;\n"
+    }
+  ],
+  "source_sha256": "4f4e539cd7cc18a06bb151dd2e5d9d1009dd58325919da5d66b2e5e0dc691660",
+  "exact_closure_sha256": "8a631c736ca6449e00379193ed00d8f564a3e2b30bb75c99687b7f879151e8a4",
+  "observed_closure_sha256": "d89f9efb4e4c448580dc75298f51d920f9365096ddcdc440974292da4e1c555c"
+}

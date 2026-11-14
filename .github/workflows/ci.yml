@@ -41,26 +41,64 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
       - name: Build Node SQLite addon for the Vitest runner
         run: npm rebuild better-sqlite3 --ignore-scripts=false
+      - name: Static macOS bootstrap metadata (no added interpreter launch)
+        if: runner.os == 'macOS'
+        env:
+          QMD_DIAGNOSTIC_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          QMD_DIAGNOSTIC_MATRIX_RUNTIME: ${{ matrix.runtime }}
+        run: |
+          printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          node test/helpers/recovery-bootstrap-diagnostics.mjs --metadata "$RUNNER_TEMP/qmd-recovery-bootstrap"
       - name: Full source build
         run: python scripts/run-offline.py npm run build
       - name: Real launcher argv/runtime tests
         run: python scripts/run-offline.py bash test/launcher-detection.test.sh
       - name: Node tests
         if: matrix.runtime == 'node'
-        run: python scripts/run-offline.py node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=verbose --testTimeout 60000 test/
+        # Pass opt-in AFTER the offline wrapper clears ambient variables.
+        env:
+          QMD_BOOTSTRAP_ENABLED: ${{ runner.os == 'macOS' && '1' || '0' }}
+        run: >-
+          python scripts/run-offline.py env QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED"
+          QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap"
+          node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=verbose --testTimeout 60000 test/
       - name: Vitest suite through Bun's package-script launcher
         if: matrix.runtime == 'bun'
         # The suite uses Vitest APIs, not Bun's incomplete Vitest test shim.
         # Native Bun recovery/GC checks must not skip in this advertised runtime.
         # Set the literal requirement AFTER the offline wrapper strips ambient env.
         # CLI/SDK/SQLite/MCP-stdio and HTTP refusal are also checked below.
-        run: python scripts/run-offline.py env REQUIRE_BUN=1 bun run test --maxWorkers=2 --testTimeout 60000
+        # package.json explicitly invokes Node: this is not a native Bun stream trace.
+        run: >-
+          python scripts/run-offline.py env REQUIRE_BUN=1 QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED"
+          QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap"
+          bun run test --maxWorkers=2 --testTimeout 60000
         env:
+          QMD_BOOTSTRAP_ENABLED: ${{ runner.os == 'macOS' && '1' || '0' }}
           DYLD_LIBRARY_PATH: /opt/homebrew/opt/sqlite/lib
           LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu
       - name: Real isolated tarball install and CLI/SQLite smoke
         # runtime is a fixed matrix enum, never interpolated PR/event content.
         run: python scripts/run-offline.py bash test/smoke-install.sh --runtime ${{ matrix.runtime }}
+      # Explicit AFTER the canonical suite/smoke: these controls never warm its
+      # first recovery invocation. They are Node-only, not native Bun coverage.
+      - name: After-canonical Node diagnostic controls
+        if: always() && runner.os == 'macOS'
+        run: |
+          mkdir -p "$RUNNER_TEMP/qmd-recovery-bootstrap"
+          TMPDIR="$RUNNER_TEMP" python scripts/run-offline.py node --test --test-concurrency=1 test/helpers/recovery-bootstrap-diagnostics.selftest.mjs > "$RUNNER_TEMP/qmd-recovery-bootstrap/after-canonical-selftests.tap" 2>&1
+      - name: Preserve first-invocation bootstrap observations even on failure
+        if: always() && runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-bootstrap-${{ matrix.runtime }}-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/qmd-recovery-bootstrap/*.json
+            ${{ runner.temp }}/qmd-recovery-bootstrap/*.tap
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: false
+          include-hidden-files: false
 
   python-portable:
     name: Python offline safety (Linux, no Metal)

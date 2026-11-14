@@ -1,0 +1,114 @@
+"""Parent replay of scoped lease review; C1 remains a cleanup qualification."""
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+REPO = Path('/Users/shersingh/github/qmd-mlx-search')
+BINDINGS = json.loads((ROOT / 'source-bindings.json').read_text())
+ENV = json.loads((ROOT / 'environment.json').read_text())
+ENV['HERMES_KNOWLEDGE_DIR'] = ENV['KNOWLEDGE_DIR']
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def assert_source_identity():
+    assert len(BINDINGS['public_sources']) == 244
+    for name, digest in BINDINGS['public_sources'].items():
+        assert sha(ROOT / 'mirror' / name) == digest, name
+    for name, digest in BINDINGS['candidate'].items():
+        assert sha(REPO / name) == digest, name
+    for name, digest in BINDINGS['harness_sha256'].items():
+        assert sha(ROOT / name) == digest, name
+
+
+def run(label, script, *args):
+    assert_source_identity()
+    command = ['/usr/bin/python3', '-B', '-S', str(ROOT / script), *args]
+    result = subprocess.run(command, cwd=ROOT, env=ENV, capture_output=True, timeout=65)
+    (ROOT / f'{label}.stdout').write_bytes(result.stdout)
+    (ROOT / f'{label}.stderr').write_bytes(result.stderr)
+    (ROOT / f'{label}-invocation.json').write_text(json.dumps({
+        'command': command, 'cwd': str(ROOT), 'env': ENV,
+        'exit_code': result.returncode,
+    }, indent=2) + '\n')
+    assert result.returncode == 0, (label, result.stdout.decode(), result.stderr.decode())
+    assert_source_identity()
+
+
+def test_real_gate_fork_clock_and_join_controls():
+    run('parent-controls', 'clock_and_join.py')
+    clocks = read(ROOT / 'fork-clock-results.json')
+    assert len(clocks) == 3 and all(row['sameInheritedEpoch'] for row in clocks)
+    gates = read(ROOT / 'gate-controls.json')['cases']
+    assert len(gates) == 7
+    assert {row['mode'] for row in gates} == {'live-empty', 'EOF', 'K', 'T', 'unexpected', 'EBADF', 'expired'}
+    assert all(row['allowed'] == (row['mode'] == 'live-empty') and row['CLOEXEC'] for row in gates)
+    refusal = read(ROOT / 'join-refusal/before-finally.json')
+    assert refusal['exitCode'] == 125 and not refusal['signalAttempt']
+    assert refusal['sentinelAliveBeforeCleanup']
+
+
+def test_retained_semantic_heldouts_without_assertion_changes():
+    run('parent-heldouts', 'run_heldouts.py', 'parent-heldouts')
+    results = read(ROOT / 'heldout-results-parent-heldouts.json')
+    assert len(results) == len({row['name'] for row in results}) == 15
+    assert all(row['passed'] and not row['fixtureKills'] for row in results)
+    assert all(row['sentinelAlive'] and row['supervisorAbsent'] and row['workersAbsent'] for row in results)
+
+
+def test_c1_no_execution_but_truthfully_incomplete_cleanup():
+    run('parent-c1', 'monitor_pause_diagnostic.py')
+    results = read(ROOT / 'monitor-pause-diagnostic-results.json')
+    assert len(results) == 2 and {row['runtime'] for row in results} == {'node', 'bun'}
+    summary = []
+    for row in results:
+        at_return = row['atHelperReturn']
+        helper = at_return['helper']
+        result = helper['result']
+        assert row['hostExit'] == 0 and row['signalSent'] and row['pollHeld']
+        assert len(at_return['forks']) == 1
+        assert at_return['supervisorsAlive'] and at_return['workersAlive']
+        assert helper['elapsedMs'] < 1500
+        assert not result['launch']['supervisorReaped']
+        assert not result['cleanup']['childReaped'] and not result['cleanup']['pipesClosed']
+        assert result['cleanup']['forcedPipeClose']
+        assert at_return['work'] is None and row['workAfterHold'] is None
+        assert row['allAbsentAfterHold'] and not row['fixtureKills']
+        assert row['gateResults'] and all(not gate['allowed'] for gate in row['gateResults'])
+        assert {worker for _, worker in at_return['forks']} <= {event['reaped'] for event in row['realReaps']}
+        summary.append({
+            'runtime': row['runtime'], 'helperMs': helper['elapsedMs'],
+            'completeCleanupAtReturn': False, 'forcedPipeClose': True,
+            'noWork': True, 'naturalReapAfterHold': True, 'fixtureKills': [],
+            'unexpiredGateRefusal': all(gate['remainingMs'] > 0 for gate in row['gateResults']),
+            'gateRemainingMs': [gate['remainingMs'] for gate in row['gateResults']],
+        })
+    (ROOT / 'parent-c1-summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+    print(json.dumps({'C1': summary}, indent=2))
+
+
+def test_durable_scoped_acceptance_keeps_c1_and_ci_open():
+    assert_source_identity()
+    ledger = read(Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/integration-gates-wave4.json'))
+    gate = next(item for item in ledger['gates'] if item['id'] == 'recovery-startup')
+    accepted = read(REPO / gate['execution_lease_scoped_acceptance_archive'])
+    assert accepted['specVerdict'] == 'SPEC_PASS_SCOPED'
+    assert accepted['qualityVerdict'] == 'QUALITY_PASS_WITH_QUALIFICATION'
+    assert accepted['parentReplay']['semanticHeldouts'] == 15
+    assert accepted['parentReplay']['realGateControls'] == 7
+    assert accepted['parentReplay']['forkClockControls'] == 3
+    assert accepted['qualification']['id'] == 'C1'
+    assert accepted['qualification']['unrestrictedSuccessfulCleanupClaim'] is False
+    assert accepted['nativeCiAccepted'] is False
+    assert len(accepted['parentReplay']['C1']) == 2
+    assert all(not row['completeCleanupAtReturn'] and row['noWork'] and row['naturalReapAfterHold'] for row in accepted['parentReplay']['C1'])
+    assert gate['execution_lease_review_delegation'] == 'deleg_29cc12a0'
+    assert 'C1' in gate['status'] and 'open' in gate['status'].lower()

@@ -1,0 +1,29 @@
+{
+  "retained_negative_and_summary_paths": [
+    "evidence/validation-red.json",
+    "evidence/synthetic-final-v2/summary.json"
+  ],
+  "actual_launcher_GGUF_IMAGE_name_nodes": [
+    {
+      "kind": "Name",
+      "line": 49,
+      "context": "Store"
+    },
+    {
+      "kind": "Name",
+      "line": 285,
+      "context": "Load"
+    }
+  ],
+  "baseline_cases": 74,
+  "baseline_expected_nonzero": 66,
+  "heldout_cases": 34,
+  "heldout_expected_nonzero": 27,
+  "heldout_actual_nonzero": 25,
+  "failed_contracts": [
+    "ast-match-direct-capture",
+    "ast-match-mapping-capture",
+    "receipt-write-failure",
+    "timeout-group-descendant"
+  ]
+}

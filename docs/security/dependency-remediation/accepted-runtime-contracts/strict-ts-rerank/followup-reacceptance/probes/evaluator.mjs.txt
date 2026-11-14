@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import * as ns from 'zod';
+import { VitestModuleEvaluator } from '../node_modules/vitest/dist/module-evaluator.js';
+const id=import.meta.resolve('zod');
+const describe=(m)=>({keys:Object.keys(m),z:typeof m.z,object:typeof m.object,default:typeof m.default,hasEsModule:'__esModule' in m,ownEsModule:Object.hasOwn(m,'__esModule'),esModule:m.__esModule,esModuleDescriptor:Object.getOwnPropertyDescriptor(m,'__esModule')});
+const observations={execPath:process.execPath,versions:process.versions,id,native:describe(ns),nativeDefault:describe(ns.default)};
+const evaluated=await new VitestModuleEvaluator(undefined,{}).runExternalModule(id);
+const noInterop=await new VitestModuleEvaluator(undefined,{interopDefault:false}).runExternalModule(id);
+observations.defaultEvaluator=describe(evaluated);
+observations.noInteropEvaluator=describe(noInterop);
+observations.defaultEqualsNativeDefault=evaluated.default===ns.default;
+observations.noInteropIdentity=noInterop===ns;
+console.log(JSON.stringify(observations,null,2));
+assert.equal(typeof ns.z,'object');
+assert.equal(noInterop.z,ns.z);
+assert.equal(typeof evaluated.z,'object','Actual Vitest evaluator must retain the named ESM namespace export');

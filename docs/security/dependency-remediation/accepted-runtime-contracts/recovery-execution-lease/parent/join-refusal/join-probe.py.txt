@@ -1,0 +1,15 @@
+import json,os,sys
+source='/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_recovery_process.py'
+sys.path.insert(0,os.path.dirname(source));scope=dict(__name__='independent_join_refusal')
+exec(compile(open(source,'rb').read(),source,'exec'),scope)
+root='/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/join-refusal';target=38078
+original=os.setpgid
+def setpgid(pid,group):
+ try: original(pid,group)
+ except OSError as error:
+  with open(root+'/join.json','w') as out:json.dump(dict(errno=error.errno,group=group,currentSession=os.getsid(0),targetSession=os.getsid(target)),out)
+  raise
+def killpg(*args):
+ with open(root+'/UNAUTHORIZED-SIGNAL-ATTEMPT.json','w') as out:json.dump(args,out)
+os.setpgid,os.killpg=setpgid,killpg
+scope['refuse_execution'](target)

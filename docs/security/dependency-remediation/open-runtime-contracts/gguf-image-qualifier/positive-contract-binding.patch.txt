@@ -1,0 +1,11 @@
+--- original-positive-contract
++++ same-contract-new-source-binding
+@@ -19,7 +19,7 @@
+     ('wrong-release-control', 'uv 0.11.17 (x86_64-unknown-linux-musl)', 2),
+ ])
+ def test_uv_release_contract(tmp_path, label, display, expected):
+-    assert hashlib.sha256(PROBE.read_bytes()).hexdigest() == '6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf'
++    assert hashlib.sha256(PROBE.read_bytes()).hexdigest() == '72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc'
+     uv = tmp_path / 'uv'
+     uv.write_text('#!/bin/sh\nprintf "%s\\n" "' + display + '"\n')
+     uv.chmod(0o700)

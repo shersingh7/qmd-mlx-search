@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "--reverse",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repair.patch"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/composition-replay",
+  "name": "compose-reverse-repair",
+  "returncode": 0,
+  "seconds": 0.010408875008579344,
+  "stderr": "",
+  "stdout": ""
+}

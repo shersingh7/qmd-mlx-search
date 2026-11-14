@@ -199,13 +199,13 @@ exec(compile(open(${JSON.stringify(supervisorScript)}, 'rb').read(), ${JSON.stri
       const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1);
       if (message.type === "prepared") {
         observedLive = alive(child.pid!);
-        if (mode === "queued-cancel") child.stdin!.write("SK");
+        if (mode === "queued-cancel") child.stdin!.write("S200\nK");
         else if (mode === "signal") child.kill("SIGTERM");
       } else if (message.type === "ready") child.stdin!.write("K"); // Failure-only cancellation.
     }
   });
   child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
-  if (mode === "closed-parent") child.stdin!.end("S"); // An old grant must not survive EOF.
+  if (mode === "closed-parent") child.stdin!.end("S200\n"); // An old grant must not survive EOF.
   try {
     const exit = await Promise.race([new Promise<number | null>(resolve => child.once("close", resolve)),
       new Promise<never>((_resolve, reject) => { guard = setTimeout(() => {
@@ -307,5 +307,86 @@ describe.skipIf(process.platform === "win32")("recovery admission protocol refus
   }
   for (const mode of ["wrong-supervisor", "unadmitted-worker", "unadmitted-cleanup", "truncated"] as const) {
     it(`does not certify ${mode} protocol`, () => malformedAdmissionCase(mode));
+  }
+});
+
+async function gatedCancellationCase(mode: "eof" | "SIGTERM" | "SIGINT" | "cancel" | "malformed" | "duplicate" | "no-grant") {
+  const root = mkdtempSync(path.join(tmpdir(), "qmd-recovery-execution-gate-"));
+  const wrapper = path.join(root, "proof-to-stdout.py");
+  const workFile = path.join(root, "unexpected-work");
+  // Python exec compiles only this fixed local source; no shell/user input.
+  writeFileSync(wrapper, `import os,sys
+os.dup2(1,3)
+sys.path.insert(0, ${JSON.stringify(path.dirname(supervisorScript))})
+exec(compile(open(${JSON.stringify(supervisorScript)}, 'rb').read(), ${JSON.stringify(supervisorScript)}, 'exec'))
+`);
+  const sentinel = childProcess.spawn("/usr/bin/python3", ["-S", "-c", "import time;time.sleep(60)"], { detached: true, stdio: "ignore" });
+  const child = childProcess.spawn("/usr/bin/python3", ["-S", "-u", wrapper, JSON.stringify({
+    command: ["/usr/bin/python3", "-S", "-c", `open(${JSON.stringify(workFile)}, 'w').write('work')`], timeoutMs: 200, contained: false,
+  })], { detached: true, stdio: ["pipe", "pipe", "pipe"] });
+  const messages: any[] = [];
+  let pending = "";
+  let stderr = "";
+  let workerPid: number | undefined;
+  let guard: ReturnType<typeof setTimeout> | undefined;
+  let guardFired = false;
+  const finallyKilled: number[] = [];
+  child.stdout!.on("data", chunk => {
+    pending += chunk.toString(); let newline: number;
+    while ((newline = pending.indexOf("\n")) !== -1) {
+      const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1); messages.push(message);
+      if (message.type === "prepared") child.stdin!.write("S200\n");
+      if (message.type === "ready") {
+        workerPid = message.pid;
+        if (mode === "eof") child.stdin!.end();
+        else if (mode === "SIGTERM" || mode === "SIGINT") child.kill(mode);
+        else if (mode === "cancel") child.stdin!.write("K");
+        else if (mode === "malformed") child.stdin!.write("X");
+        else if (mode === "duplicate") child.stdin!.write("EE");
+      }
+    }
+  });
+  child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
+  try {
+    const started = performance.now();
+    const code = await Promise.race([new Promise<number | null>(resolve => child.once("close", resolve)),
+      new Promise<never>((_resolve, reject) => { guard = setTimeout(() => {
+        guardFired = true; reject(new Error("Gated cancellation exceeded 1800ms guard"));
+      }, 1_800); })]);
+    clearTimeout(guard);
+    const elapsedMs = performance.now() - started;
+    console.log(JSON.stringify({ evidence: "recovery-execution-gate-before-finally", mode, elapsedMs, supervisorPid: child.pid,
+      supervisorAbsent: !alive(child.pid!), workerPid, workerAbsent: workerPid !== undefined && !alive(workerPid),
+      sentinelAlive: alive(sentinel.pid!), guardFired, messages, stderr, work: existsSync(workFile) }));
+    expect(code, stderr).toBe(0);
+    expect(messages.map(message => message.type)).toEqual(["prepared", "ready", "exit", "cleanup"]);
+    expect(messages[3]).toMatchObject({ childReaped: true, groupTerminated: true, sessionTerminated: true,
+      containmentVerified: false, timedOut: mode === "no-grant" });
+    if (mode === "malformed" || mode === "duplicate") expect(messages[3].errors.join(";")).toMatch(/Invalid recovery execution admission/);
+    expect(workerPid).toBeTypeOf("number");
+    expect(alive(workerPid!)).toBe(false);
+    expect(alive(child.pid!)).toBe(false);
+    expect(alive(sentinel.pid!)).toBe(true);
+    expect(existsSync(workFile)).toBe(false);
+    expect(guardFired).toBe(false);
+    expect(elapsedMs).toBeLessThan(1_500);
+  } finally {
+    if (guard) clearTimeout(guard); child.stdin!.end();
+    if (child.exitCode === null && child.signalCode === null) {
+      finallyKilled.push(child.pid!); const exited = new Promise<void>(resolve => child.once("exit", () => resolve())); child.kill("SIGKILL"); await exited;
+    }
+    if (workerPid !== undefined && alive(workerPid)) { finallyKilled.push(workerPid); process.kill(workerPid, "SIGKILL"); }
+    if (sentinel.exitCode === null && sentinel.signalCode === null) {
+      const exited = new Promise<void>(resolve => sentinel.once("exit", () => resolve())); sentinel.kill("SIGKILL"); await exited;
+    }
+    rmSync(root, { recursive: true, force: true });
+    console.log(JSON.stringify({ evidence: "recovery-execution-gate-finally", mode, finallyKilled }));
+    expect(finallyKilled).toEqual([]);
+  }
+}
+
+describe.skipIf(process.platform === "win32")("created recovery worker requires execution acknowledgement", () => {
+  for (const mode of ["eof", "SIGTERM", "SIGINT", "cancel", "malformed", "duplicate", "no-grant"] as const) {
+    it(`reaps the gated child without user work on ${mode}`, () => gatedCancellationCase(mode));
   }
 });

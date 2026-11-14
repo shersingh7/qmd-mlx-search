@@ -1,0 +1,12 @@
+{
+  "engine_value": [
+    {
+      "Server": {
+        "Version": "SYNTHETIC",
+        "Os": "linux",
+        "Arch": "amd64"
+      }
+    }
+  ],
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/engine-root-array/workspace"
+}

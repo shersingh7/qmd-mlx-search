@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-S",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/run_heldouts.py",
+    "parent-heldouts"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk",
+  "env": {
+    "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8",
+    "CI": "1",
+    "REQUIRE_BUN": "1",
+    "BUN_EXECUTABLE": "/Users/shersingh/.bun/bin/bun",
+    "QMD_LLAMA_GPU": "false",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "NO_COLOR": "1",
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/home",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/hermes",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/hermes",
+    "KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/knowledge",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/cache",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/data",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/hf",
+    "HUGGINGFACE_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/hf/hub",
+    "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/hf/transformers",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/tmp",
+    "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/tmp",
+    "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/tmp",
+    "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/cache/bun-install",
+    "BUN_RUNTIME_TRANSPILER_CACHE_PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/cache/bun-transpiler",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/knowledge"
+  },
+  "exit_code": 0
+}

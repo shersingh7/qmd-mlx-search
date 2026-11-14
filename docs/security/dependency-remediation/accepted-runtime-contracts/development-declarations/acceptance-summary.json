@@ -1,0 +1,52 @@
+{
+  "status": "SPEC_PASS_QUALITY_PASS_SCOPED_NOT_INTEGRATED",
+  "delegation": "deleg_3f9188dc",
+  "reviewRoot": "/Users/shersingh/.hermes/cache/scratch/qmd-declarations-review-C2FZRvxD",
+  "reviewIndexSha256": "8f8fb010e0eea5824f5de8cb36a7af83b485420950e45764b1499ccdee24f31d",
+  "reportSha256": "cc99a622998a844dc31ed3fef69898db88951e43de1ad3300b57bf0ab7203304",
+  "artifactsVerified": 339,
+  "freshReviewerCommands": 33,
+  "expectedExitCounts": {
+    "0": 21,
+    "2": 4,
+    "1": 8
+  },
+  "graphs": {
+    "previousIdentities": 372,
+    "candidateIdentities": 375,
+    "preservesAllPreviousRecords": true,
+    "additions": [
+      "@types/bun@1.3.8",
+      "@types/picomatch@4.0.3",
+      "bun-types@1.3.8"
+    ]
+  },
+  "genuineInstalledDeclarationFiles": 44,
+  "strictDiagnosticCounts": {
+    "before": 35,
+    "after": 31,
+    "historicalReadRefusalsPerHost": 2,
+    "wholeRootAccepted": false
+  },
+  "frozenManagerScope": "actual cold-cache lockfile-only commands, not a full dependency/native install",
+  "sourcePostimages": {
+    "package.json": "7607a98a802ec455328ce0452fb2e43fb6c955e774d30e17cc49befac5e7ef1a",
+    "pnpm-lock.yaml": "c8dc5bf3011bef4a9417f49dbb37f47fa8aaa45dad97ba13366709554f2e308e",
+    "bun.lock": "c1dca7fd35ac82ef213872fc997d023218028d51b9fffb92b0e12b0ac070d329"
+  },
+  "bundle": {
+    "path": "review-evidence.tar.gz",
+    "sha256": "30774a1ded67700b68f46865e1e59916f824377ea4cdc4a00a48bf7489ec12d0",
+    "bytes": 4162989,
+    "regularEntriesReadbackVerified": 340
+  },
+  "remainingParentGates": [
+    "independent22-pathcompositionreview",
+    "integratedwhole-rootbuild/types/tests",
+    "actualLinuxDarwinNixhashes",
+    "exact-headCI",
+    "authorizedmergeandalertreadback"
+  ],
+  "liveMetadataOrDependencyInstallationPerformed": false,
+  "noAlertDismissals": true
+}

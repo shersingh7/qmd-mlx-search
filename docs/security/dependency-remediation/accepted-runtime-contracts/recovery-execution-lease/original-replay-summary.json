@@ -1,0 +1,85 @@
+{
+  "originalSha256": "645d5d249875cffda60e6d2b0e59829cfa3e5b29799ce0a6ddc8ff3cd644a0e3",
+  "originalUnchanged": true,
+  "adaptation": "Exactly one S -> S200\\n frame substitution; all holds, controls, assertions and 200/1800 bounds retained",
+  "runs": [
+    {
+      "label": "old-red",
+      "exitCode": 1,
+      "results": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/old-red/probes/stale-e-confirm-s9309gty/results.json",
+      "cases": [
+        {
+          "name": "positive",
+          "elapsedMs": 117.65554099999999,
+          "guardFired": false,
+          "work": "actual-user-work",
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        },
+        {
+          "name": "eof-no-E",
+          "elapsedMs": 117.22125,
+          "guardFired": false,
+          "work": null,
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        },
+        {
+          "name": "stale-E-eof",
+          "elapsedMs": 1740.5357919999997,
+          "guardFired": false,
+          "work": "actual-user-work",
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        }
+      ],
+      "fixtureKills": [
+        [],
+        [],
+        []
+      ]
+    },
+    {
+      "label": "candidate-green",
+      "exitCode": 0,
+      "results": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/candidate-green/probes/stale-e-confirm-n31xcxmo/results.json",
+      "cases": [
+        {
+          "name": "positive",
+          "elapsedMs": 118.70420800000001,
+          "guardFired": false,
+          "work": "actual-user-work",
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        },
+        {
+          "name": "eof-no-E",
+          "elapsedMs": 118.239,
+          "guardFired": false,
+          "work": null,
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        },
+        {
+          "name": "stale-E-eof",
+          "elapsedMs": 368.54441699999995,
+          "guardFired": false,
+          "work": null,
+          "supervisorAbsent": true,
+          "workersAbsent": true,
+          "sentinelAlive": true
+        }
+      ],
+      "fixtureKills": [
+        [],
+        [],
+        []
+      ]
+    }
+  ]
+}

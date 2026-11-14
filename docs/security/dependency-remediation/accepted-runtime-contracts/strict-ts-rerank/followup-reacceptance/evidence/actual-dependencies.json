@@ -1,0 +1,56 @@
+{
+  "packages": {
+    "zod": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod",
+      "version": "4.6.7",
+      "manifest_sha256": "c2d190d9ee4e0bdb60332aaa2130a6a98d65ddb903fe1d29248b15de57832c45"
+    },
+    "@modelcontextprotocol/sdk": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@modelcontextprotocol/sdk",
+      "version": "1.32.2",
+      "manifest_sha256": "7a8d6f79ee52e2bf7cfe23f2d79f7e3c0ab6a3912a340ec345d6ff014534d59d"
+    },
+    "vitest": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vitest",
+      "version": "4.1.12",
+      "manifest_sha256": "e5a6d55e103f04929442595df0f641f128b02fd706ff01474c094863b44511d0"
+    },
+    "vite": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vite",
+      "version": "7.3.8",
+      "manifest_sha256": "4e87f89a19661c197033a55e54dc94790b5a3e28bcc9d2c9ee374ee54eec8dc2"
+    },
+    "typescript": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/typescript",
+      "version": "5.9.3",
+      "manifest_sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+    },
+    "node-llama-cpp": {
+      "directory": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-llama-cpp",
+      "version": "3.22.3",
+      "manifest_sha256": "a510a4fefe11c0e56d583f97f615e1249e274c1dfb26f7a5dac5fc7e97417ee0"
+    }
+  },
+  "relevant_entry_sha256": {
+    "zod/index.js": "32e7efd49a94a765f6d10a1a0a3c02c50c246def17c80c6f0225f85525d98505",
+    "zod/index.cjs": "d93a8730d52c0fedab13619c8bc971cc99934c13d8dce7c97ee4d03a98d4096e",
+    "vitest/dist/module-evaluator.js": "a0b36fb2211d2587d8df68d5855d48141be27e99bdb973378a83f927e03b004e",
+    "vitest/dist/chunks/cli-api.B0Pz1_R7.js": "222aa60f8555aea9311703c68edaaa8eba0888ea29bfb4a49b37f98e0811ee2d",
+    "@modelcontextprotocol/sdk/dist/esm/server/mcp.js": "ff9037a1f78433963c41af740f02b5f493e980ae24ac7259dbbb338ea78bc257",
+    "@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js": "66b539b003646258b9d82c382f2832836291e4ce2b0a37e253cfdc1222dafde1",
+    "@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js": "c639ae841e53d32479cd8e4df2f373400cfe9b44bba072cafdf34a7235990dfa",
+    "@modelcontextprotocol/sdk/dist/esm/inMemory.js": "8eb57dc4b4c0993869273a5e01a35c71e8d84c3d5050e9871a8cf141360f883d"
+  },
+  "runtime_binaries": {
+    "node": {
+      "path": "/Users/shersingh/.hermes/node/bin/node",
+      "realpath": "/Users/shersingh/.hermes/node/bin/node",
+      "sha256": "5d9d3872911e2340a43b707962e68143de8a4e8d54628845c0c4f2de1fb7cd5c"
+    },
+    "bun": {
+      "path": "/Users/shersingh/.bun/bin/bun",
+      "realpath": "/Users/shersingh/.bun/bin/bun",
+      "sha256": "308ed847a45d87086b86c82d033867d9798ffb757ac73695980d502559ba7a73"
+    }
+  }
+}

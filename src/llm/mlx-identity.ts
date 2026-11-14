@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { ReadableStreamDefaultReader } from "node:stream/web";
 import { abortable, linkSignals, throwIfAborted } from "./lifecycle.js";
 
 export type MlxStage = "rerank" | "expand";
