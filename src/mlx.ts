@@ -485,10 +485,11 @@ export class MlxEmbedClient {
   private readonly _config: TransportConfig;
   private readonly _lifetime = new AbortController();
   private _descriptor: EmbeddingDescriptor | null = null;
+  private readonly _embeddingDeadlines = new WeakMap<AbortSignal, number>();
   private _negotiation: {
     promise: Promise<EmbeddingDescriptor | null>;
     controller: AbortController;
-    waiters: number;
+    waiters: Set<RequestScope>;
   } | null = null;
   private _removeExternalListener?: () => void;
 
@@ -519,22 +520,26 @@ export class MlxEmbedClient {
     if (this._descriptor) return this._descriptor;
     if (!this._negotiation) {
       const controller = new AbortController();
-      const negotiation = { controller, waiters: 0, promise: Promise.resolve<EmbeddingDescriptor | null>(null) };
+      const negotiation = { controller, waiters: new Set<RequestScope>(), promise: Promise.resolve<EmbeddingDescriptor | null>(null) };
       negotiation.promise = getMlxDescriptor(this.config(), controller.signal).then((descriptor) => {
         throwIfCancelled(this._config, controller.signal);
-        if (descriptor) this._descriptor = descriptor;
+        // A delayed timer is not permission to publish for expired consumers.
+        // Another actually registered, live waiter may still own this result.
+        const now = performance.now();
+        if (descriptor && [...negotiation.waiters].some(waiter => !waiter.signal.aborted && now < waiter.deadline)) this._descriptor = descriptor;
         return descriptor;
       }).finally(() => { if (this._negotiation === negotiation) this._negotiation = null; });
       this._negotiation = negotiation;
     }
     const negotiation = this._negotiation;
-    negotiation.waiters++;
-    try { return await abortable(negotiation.promise, signal ?? this._lifetime.signal); }
+    const waiter = { signal: signal ?? this._lifetime.signal, deadline: signal ? this._embeddingDeadlines.get(signal) ?? Infinity : Infinity };
+    negotiation.waiters.add(waiter);
+    try { return await abortable(negotiation.promise, waiter.signal); }
     finally {
-      negotiation.waiters--;
+      negotiation.waiters.delete(waiter);
       // One cancelled waiter must not poison another caller's negotiation.
       // With no remaining consumers, cancel the shared HTTP request as well.
-      if (negotiation.waiters === 0 && this._negotiation === negotiation) {
+      if (negotiation.waiters.size === 0 && this._negotiation === negotiation) {
         this._negotiation = null;
         negotiation.controller.abort(abortError());
       }
@@ -545,10 +550,16 @@ export class MlxEmbedClient {
     if (!descriptor) throw new Error("Could not probe MLX dimensions: server unreachable or missing a valid embedding descriptor");
     return descriptor.outputDimensions;
   }
-  private async embeddingConfig(signal?: AbortSignal, dims?: number): Promise<MlxEmbedConfig> {
-    const descriptor = await this.getDescriptor(signal);
+  private async embeddingConfig(scope: RequestScope, dims?: number): Promise<MlxEmbedConfig> {
+    this._embeddingDeadlines.set(scope.signal, scope.deadline);
+    let descriptor: EmbeddingDescriptor | null;
+    try { descriptor = await this.getDescriptor(scope.signal); }
+    finally { this._embeddingDeadlines.delete(scope.signal); }
+    // Metadata returns null on its own timeout. Check the absolute caller
+    // budget before treating that null as a malformed/missing descriptor.
+    checkScope(scope);
     if (!descriptor) throw new EmbeddingProtocolError("MLX server did not provide a valid embedding descriptor");
-    throwIfCancelled(this._config, signal);
+    throwIfCancelled(this._config, scope.signal);
     if (dims === undefined || dims === descriptor.outputDimensions) return this.config();
     if (dims > descriptor.nativeDimensions) throw new EmbeddingProtocolError("Requested embedding dimensions exceed native dimensions");
     // A projection changes only this request's expected output geometry. The
@@ -559,7 +570,7 @@ export class MlxEmbedClient {
     run: (config: MlxEmbedConfig, options: MlxEmbedOptions) => Promise<T>): Promise<T> {
     try {
       return await withScope(this._config, options?.signal, false, async (scope) => {
-        const config = await this.embeddingConfig(scope.signal, options?.dims);
+        const config = await this.embeddingConfig(scope, options?.dims);
         checkScope(scope);
         return run(config, { ...options, signal: scope.signal });
       });
