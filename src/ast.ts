@@ -273,37 +273,59 @@ export async function getASTBreakPoints(
     if (!grammar) return [];
 
     const parser = new ParserClass!();
-    parser.setLanguage(grammar);
+    let tree: import("web-tree-sitter").Tree | null = null;
+    let points: BreakPoint[] = [];
+    const errors: unknown[] = [];
 
-    const tree = parser.parse(content);
-    if (!tree) {
-      parser.delete();
-      return [];
-    }
+    try {
+      parser.setLanguage(grammar);
+      tree = parser.parse(content);
+      if (tree) {
+        const query = getQuery(language, grammar);
+        const captures = query.captures(tree.rootNode);
 
-    const query = getQuery(language, grammar);
-    const captures = query.captures(tree.rootNode);
+        // Deduplicate: at each byte position, keep the highest-scoring capture.
+        // This handles cases like export_statement wrapping a class_declaration
+        // at different offsets — we want the outermost (earliest) position.
+        const seen = new Map<number, BreakPoint>();
 
-    // Deduplicate: at each byte position, keep the highest-scoring capture.
-    // This handles cases like export_statement wrapping a class_declaration
-    // at different offsets — we want the outermost (earliest) position.
-    const seen = new Map<number, BreakPoint>();
+        for (const cap of captures) {
+          const pos = cap.node.startIndex;
+          const score = SCORE_MAP[cap.name] ?? 20;
+          const type = `ast:${cap.name}`;
 
-    for (const cap of captures) {
-      const pos = cap.node.startIndex;
-      const score = SCORE_MAP[cap.name] ?? 20;
-      const type = `ast:${cap.name}`;
+          const existing = seen.get(pos);
+          if (!existing || score > existing.score) {
+            seen.set(pos, { pos, score, type });
+          }
+        }
 
-      const existing = seen.get(pos);
-      if (!existing || score > existing.score) {
-        seen.set(pos, { pos, score, type });
+        points = Array.from(seen.values()).sort((a, b) => a.pos - b.pos);
+      }
+    } catch (err) {
+      errors.push(err);
+    } finally {
+      // Each acquired resource gets one release attempt, even if another fails.
+      try {
+        tree?.delete();
+      } catch (err) {
+        errors.push(err);
+      }
+      try {
+        parser.delete();
+      } catch (err) {
+        errors.push(err);
       }
     }
 
-    tree.delete();
-    parser.delete();
-
-    return Array.from(seen.values()).sort((a, b) => a.pos - b.pos);
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) {
+      // Keep the operation error first rather than replacing it with cleanup.
+      throw new AggregateError(errors, errors.map(err => err instanceof Error ? err.message : String(err)).join("; "), {
+        cause: errors[0],
+      });
+    }
+    return points;
   } catch (err) {
     console.warn(`[qmd] AST parse failed for ${filepath}, falling back to regex: ${err instanceof Error ? err.message : err}`);
     return [];

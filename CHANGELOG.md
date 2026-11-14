@@ -7,6 +7,7 @@
 - Corrected BERT/MiniLM forward semantics by supplying learned segment-zero embeddings; verified against the same local Hugging Face model rather than relying only on self-consistency.
 - Added per-response embedding descriptors, strict bounded/cancellable transport, per-instance lifecycle ownership, isolated SDK configuration and safer indexing/search/cache behavior.
 - Added bounded HTTP/SSE handling, source-level loopback origin protection, reproducible packaging/CI and fresh-process recovery fixtures.
+- **AST cleanup:** parser and tree disposal is attempted on every acquired-resource path, including parse/query/capture failures; a tree-disposal error no longer skips parser cleanup. Cleanup failures retain the regex fallback rather than masquerading as successful AST output.
 - Made bulk scheduling targets explicit and separate from the memory budget. Removed unconditional speedup/zero-copy claims; old wrong-vector benchmarks are not performance evidence.
 - **Migration:** context-aware space fingerprints and corrected BERT numerics require an explicit validated index rebuild. Storage quantization uses `auto`/`none`/`4bit`/`8bit`, independently of floating compute dtype. Unqualified Nomic/Gemma adapters fail closed.
 - **Runtime compatibility:** MCP/REST HTTP hosting requires Node.js 22+; native Bun HTTP startup is explicitly refused because disconnect cancellation is unreliable. Bun CLI, SDK and MCP stdio remain supported. The Vitest suite uses `bun run test`, with independent installed-native-runtime checks rather than Bun's partial Vitest shim.
