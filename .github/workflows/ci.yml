@@ -87,6 +87,32 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/qmd-recovery-bootstrap"
           TMPDIR="$RUNNER_TEMP" python scripts/run-offline.py node --test --test-concurrency=1 test/helpers/recovery-bootstrap-diagnostics.selftest.mjs > "$RUNNER_TEMP/qmd-recovery-bootstrap/after-canonical-selftests.tap" 2>&1
+      # Supplemental and non-gating: neither longer positive work nor diagnostic
+      # success repairs a canonical failure. Every step stays AFTER suite/smoke.
+      # Literal runtimes only; opt-in/paths go AFTER run-offline.py strips env.
+      - name: After-canonical caller startup observation (actual Node)
+        if: always() && runner.os == 'macOS'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: >-
+          TMPDIR="$RUNNER_TEMP" python scripts/run-offline.py env QMD_RECOVERY_STARTUP_OBSERVATION=1
+          QMD_RECOVERY_STARTUP_DIR="$RUNNER_TEMP/qmd-recovery-startup"
+          node --import tsx test/helpers/recovery-startup-observation.ts --runtime node
+      - name: After-canonical caller startup observation (native Bun)
+        if: always() && runner.os == 'macOS'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: >-
+          TMPDIR="$RUNNER_TEMP" python scripts/run-offline.py env QMD_RECOVERY_STARTUP_OBSERVATION=1
+          QMD_RECOVERY_STARTUP_DIR="$RUNNER_TEMP/qmd-recovery-startup"
+          bun test/helpers/recovery-startup-observation.ts --runtime bun
+      - name: After-canonical startup observation selftests
+        if: always() && runner.os == 'macOS'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: |
+          mkdir -p "$RUNNER_TEMP/qmd-recovery-startup"
+          TMPDIR="$RUNNER_TEMP" python scripts/run-offline.py env QMD_RECOVERY_STARTUP_TEST_DIR="$RUNNER_TEMP/qmd-recovery-startup" node --import tsx --test --test-concurrency=1 test/helpers/recovery-startup-observation.selftest.mjs > "$RUNNER_TEMP/qmd-recovery-startup/selftests.tap" 2>&1
       - name: Preserve first-invocation bootstrap observations even on failure
         if: always() && runner.os == 'macOS'
         uses: actions/upload-artifact@v4
@@ -95,6 +121,9 @@ jobs:
           path: |
             ${{ runner.temp }}/qmd-recovery-bootstrap/*.json
             ${{ runner.temp }}/qmd-recovery-bootstrap/*.tap
+            ${{ runner.temp }}/qmd-recovery-startup/**/*.json
+            ${{ runner.temp }}/qmd-recovery-startup/**/*.jsonl
+            ${{ runner.temp }}/qmd-recovery-startup/*.tap
           if-no-files-found: error
           retention-days: 7
           overwrite: false
