@@ -1,0 +1,205 @@
+{
+  "scope": "Real local MiniLM inference and public authored fixture; no representative corpus-quality or long-run leak claim",
+  "passed": true,
+  "documents": 8,
+  "descriptor": {
+    "version": 1,
+    "backend": "mlx",
+    "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+    "pooling": "mean",
+    "nativeDimensions": 384,
+    "outputDimensions": 384,
+    "maxTokens": 256,
+    "normalized": true,
+    "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+    "dtype": "float16",
+    "quantization": "none"
+  },
+  "jsonBinaryMaxAbs": 0,
+  "update": {
+    "collections": 1,
+    "indexed": 8,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0,
+    "needsEmbedding": 8
+  },
+  "embed": {
+    "status": "complete",
+    "docsProcessed": 8,
+    "docsSelected": 8,
+    "chunksAttempted": 8,
+    "chunksCommitted": 8,
+    "chunksEmbedded": 8,
+    "chunksFailed": 0,
+    "chunksSkipped": 0,
+    "chunksPending": 0,
+    "errors": 0,
+    "durationMs": 42,
+    "checkpoint": {
+      "jobId": "bb673c66-63b4-4cf4-8ef4-4d572751e66f",
+      "fingerprint": {
+        "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+        "dimensions": 384,
+        "chunkStrategy": "regex",
+        "descriptorSignature": "4a382a2400996e4400d7fa56",
+        "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+        "quantization": "none"
+      },
+      "startedAt": "2026-11-12T04:05:57.290Z",
+      "updatedAt": "2026-11-12T04:05:57.337Z",
+      "status": "completed",
+      "docsTotal": 8,
+      "docsCompleted": 8,
+      "chunksTotal": 8,
+      "chunksCommitted": 8
+    }
+  },
+  "noopEmbed": {
+    "status": "complete",
+    "docsProcessed": 0,
+    "docsSelected": 0,
+    "chunksAttempted": 0,
+    "chunksCommitted": 0,
+    "chunksEmbedded": 0,
+    "chunksFailed": 0,
+    "chunksSkipped": 0,
+    "chunksPending": 0,
+    "errors": 0,
+    "durationMs": 0,
+    "checkpoint": {
+      "jobId": "e29dd0d1-2bc2-44f6-8b3c-bb3e846e8370",
+      "fingerprint": {
+        "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+        "dimensions": 384,
+        "chunkStrategy": "regex",
+        "descriptorSignature": "4a382a2400996e4400d7fa56",
+        "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+        "quantization": "none"
+      },
+      "startedAt": "2026-11-12T04:05:57.337Z",
+      "updatedAt": "2026-11-12T04:05:57.339Z",
+      "status": "completed",
+      "docsTotal": 0,
+      "docsCompleted": 0,
+      "chunksTotal": 0,
+      "chunksCommitted": 0
+    }
+  },
+  "queries": [
+    {
+      "query": "distributed consensus chooses a leader and replicates logs",
+      "expected": "raft.md",
+      "results": [
+        {
+          "file": "public/raft.md",
+          "score": 0.8224105089902878
+        },
+        {
+          "file": "public/transactions.md",
+          "score": 0.6237229406833649
+        },
+        {
+          "file": "public/spaces.md",
+          "score": 0.6138650476932526
+        }
+      ]
+    },
+    {
+      "query": "reuse database connections instead of opening them repeatedly",
+      "expected": "pooling.md",
+      "results": [
+        {
+          "file": "public/pooling.md",
+          "score": 0.7741959989070892
+        },
+        {
+          "file": "public/spaces.md",
+          "score": 0.5948567986488342
+        },
+        {
+          "file": "public/transactions.md",
+          "score": 0.5791530311107635
+        }
+      ]
+    },
+    {
+      "query": "block untrusted browser origins from localhost APIs",
+      "expected": "origins.md",
+      "results": [
+        {
+          "file": "public/origins.md",
+          "score": 0.8322770148515701
+        },
+        {
+          "file": "public/spaces.md",
+          "score": 0.5570615828037262
+        },
+        {
+          "file": "public/deadlines.md",
+          "score": 0.5521410405635834
+        }
+      ]
+    }
+  ],
+  "hybrid": [
+    {
+      "file": "public/raft.md",
+      "score": 1
+    },
+    {
+      "file": "public/transactions.md",
+      "score": 0.5
+    },
+    {
+      "file": "public/spaces.md",
+      "score": 0.3333333333333333
+    }
+  ],
+  "restoredRankingsIdentical": true,
+  "mcpTools": [
+    "query",
+    "get",
+    "multi_get",
+    "status"
+  ],
+  "mcpQuery": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 3 results for \"distributed consensus chooses a leader and replicates logs\":\n\n#08d7e8 100% public/raft.md - Raft consensus\n#bb7ec6 50% public/transactions.md - SQLite transactions\n#a69600 33% public/spaces.md - Embedding identity"
+      }
+    ],
+    "structuredContent": {
+      "results": [
+        {
+          "docid": "#08d7e8",
+          "file": "public/raft.md",
+          "title": "Raft consensus",
+          "score": 1,
+          "context": null,
+          "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Raft elects a leader and replicates a log across servers. A majority quorum agrees on committed entries in a distributed consensus cluster.\n6: "
+        },
+        {
+          "docid": "#bb7ec6",
+          "file": "public/transactions.md",
+          "title": "SQLite transactions",
+          "score": 0.5,
+          "context": null,
+          "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # SQLite transactions\n3: \n4: A database transaction groups writes atomically. Readers must not see uncommitted changes. Commit makes changes durable; rollback restores the previous logical state."
+        },
+        {
+          "docid": "#a69600",
+          "file": "public/spaces.md",
+          "title": "Embedding identity",
+          "score": 0.33,
+          "context": null,
+          "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Index and query vectors must use the same model, revision, pooling and dimensions. Different models can have equally sized vectors but incompatible semantic spaces. Reject identity changes rather than mixing vectors.\n6: "
+        }
+      ]
+    }
+  },
+  "mcpGetVerified": true,
+  "sseStreamVerified": true,
+  "foreignOriginRejected": true
+}

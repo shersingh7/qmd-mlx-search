@@ -1,0 +1,82 @@
+[
+  {
+    "line": 726,
+    "text": "2026-11-13T20:40:58.2026770Z \u001b[90mstdout\u001b[2m | test/audit-recovery-tree.test.ts\u001b[2m > \u001b[22m\u001b[2mrecovery helper owns its POSIX worker group\u001b[2m > \u001b[22m\u001b[2mbounds a 200ms execution deadline without assuming cold-command readiness"
+  },
+  {
+    "line": 727,
+    "text": "2026-11-13T20:40:58.2167420Z \u001b[22m\u001b[39m{\"evidence\":\"recovery-fast-timeout-before-finally\",\"timeoutMs\":200,\"elapsedMs\":1007,\"supervisorAbsent\":true,\"sentinelAlive\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":1616},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":true,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 729,
+    "text": "2026-11-13T20:40:58.2420030Z \u001b[90mstdout\u001b[2m | test/audit-recovery-tree.test.ts\u001b[2m > \u001b[22m\u001b[2mrecovery helper owns its POSIX worker group\u001b[2m > \u001b[22m\u001b[2mbounds a 200ms execution deadline without assuming cold-command readiness"
+  },
+  {
+    "line": 741,
+    "text": "2026-11-13T20:41:03.3823150Z  \u001b[31m\u00d7\u001b[39m test/audit-recovery-tree.test.ts\u001b[2m > \u001b[22mrecovery helper owns its POSIX worker group\u001b[2m > \u001b[22mbounds a 200ms execution deadline without assuming cold-command readiness\u001b[33m 1021\u001b[2mms\u001b[22m\u001b[39m"
+  },
+  {
+    "line": 742,
+    "text": "2026-11-13T20:41:03.3955960Z \u001b[31m   \u2192 expected 'unconfirmed' to be 'started' // Object.is equality\u001b[39m"
+  },
+  {
+    "line": 1375,
+    "text": "2026-11-13T20:42:14.0707110Z \u001b[22m\u001b[39m{\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"wrong-supervisor\",\"supervisorPid\":2648,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2648},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid supervisor admission identity; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1380,
+    "text": "2026-11-13T20:42:14.3081980Z \u001b[22m\u001b[39m{\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"unadmitted-worker\",\"supervisorPid\":2650,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2650},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid worker ownership identity; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1384,
+    "text": "2026-11-13T20:42:14.5613140Z \u001b[22m\u001b[39m{\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"unadmitted-cleanup\",\"supervisorPid\":2653,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2653},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid session cleanup proof; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1388,
+    "text": "2026-11-13T20:42:16.5765830Z \u001b[22m\u001b[39m{\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"truncated\",\"supervisorPid\":2656,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2656},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 2000ms (PID undefined); Recovery supervisor protocol failed: incomplete terminal message; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1820,
+    "text": "2026-11-13T20:42:39.8314520Z {\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"wrong-supervisor\",\"supervisorPid\":2928,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2928},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid supervisor admission identity; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1821,
+    "text": "2026-11-13T20:42:39.8320720Z {\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"unadmitted-worker\",\"supervisorPid\":2931,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2931},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid worker ownership identity; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1822,
+    "text": "2026-11-13T20:42:39.8328380Z {\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"unadmitted-cleanup\",\"supervisorPid\":2933,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":false,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2933},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery supervisor protocol failed: Error: Invalid session cleanup proof; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1823,
+    "text": "2026-11-13T20:42:39.8467750Z {\"evidence\":\"recovery-malformed-admission-before-finally\",\"mode\":\"truncated\",\"supervisorPid\":2936,\"supervisorAbsent\":true,\"forked\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2936},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 2000ms (PID undefined); Recovery supervisor protocol failed: incomplete terminal message; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+  },
+  {
+    "line": 1954,
+    "text": "2026-11-13T20:43:02.2681160Z \u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m test/audit-recovery-tree.test.ts\u001b[2m > \u001b[22mrecovery helper owns its POSIX worker group\u001b[2m > \u001b[22mbounds a 200ms execution deadline without assuming cold-command readiness"
+  },
+  {
+    "line": 1955,
+    "text": "2026-11-13T20:43:02.2684090Z \u001b[31m\u001b[1mAssertionError\u001b[22m: expected 'unconfirmed' to be 'started' // Object.is equality\u001b[39m"
+  },
+  {
+    "line": 1957,
+    "text": "2026-11-13T20:43:02.2685210Z Expected: \u001b[32m\"\u001b[7mstart\u001b[27med\"\u001b[39m"
+  },
+  {
+    "line": 1958,
+    "text": "2026-11-13T20:43:02.2685550Z Received: \u001b[31m\"\u001b[7munconfirm\u001b[27med\"\u001b[39m"
+  },
+  {
+    "line": 1971,
+    "text": "2026-11-13T20:43:02.2826800Z \u001b[31m\u001b[1mAssertionError\u001b[22m: expected 'Recovery command injection is unconta\u2026' to match /spawn failed/\u001b[39m"
+  },
+  {
+    "line": 1973,
+    "text": "2026-11-13T20:43:02.2827460Z \u001b[32m- Expected:\u001b[39m"
+  },
+  {
+    "line": 1976,
+    "text": "2026-11-13T20:43:02.2828000Z \u001b[31m+ Received:\u001b[39m"
+  }
+]

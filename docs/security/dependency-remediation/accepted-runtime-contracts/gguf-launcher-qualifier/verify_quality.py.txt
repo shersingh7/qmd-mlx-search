@@ -1,0 +1,183 @@
+from __future__ import annotations
+import ast
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import runpy
+import shutil
+import stat
+
+ROOT = Path(__file__).resolve().parent
+S = runpy.run_path(str(ROOT / 'review_support.py'))
+intake = json.loads((ROOT / 'intake.json').read_text())
+prior = Path('/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_')
+base = Path('/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1')
+live = Path('/Users/shersingh/github/qmd-mlx-search')
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def save(name, obj):
+    (ROOT / 'evidence' / name).write_text(json.dumps(obj, indent=2, sort_keys=True))
+
+# Reconstruct and replay BOTH patches solely in an owned 42-file data fixture.
+replay = ROOT / 'composition-replay'
+replay.mkdir()
+for relative in intake['new_source_bindings']:
+    target = replay / relative
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(ROOT / 'repo' / relative,target)
+for label,patch,options in [
+    ('compose-reverse-repair-check',ROOT/'repair.patch',['--reverse','--check']),
+    ('compose-reverse-repair',ROOT/'repair.patch',['--reverse']),
+    ('compose-reverse-base-check',base/'delivery/proposal.patch',['--reverse','--check']),
+    ('compose-reverse-base',base/'delivery/proposal.patch',['--reverse']),
+]:
+    record = S['run_case'](label,['/usr/bin/git','apply',*options,patch],cwd=replay)
+    assert record['returncode'] == 0,record
+manifest = json.loads((base/'delivery/manifest.json').read_text())
+for entry in manifest['files']:
+    f=replay/entry['path']
+    if entry['original_sha256'] is None:
+        assert not f.exists(),entry
+    else:
+        assert sha(f)==entry['original_sha256'],entry
+for label,patch,options in [
+    ('compose-base-check',base/'delivery/proposal.patch',['--check']),
+    ('compose-base',base/'delivery/proposal.patch',[]),
+    ('compose-repair-check',ROOT/'repair.patch',['--check']),
+    ('compose-repair',ROOT/'repair.patch',[]),
+]:
+    record=S['run_case'](label,['/usr/bin/git','apply',*options,patch],cwd=replay)
+    assert record['returncode']==0,record
+assert all(sha(replay/p)==h for p,h in intake['new_source_bindings'].items())
+
+# Byte-level inverse limited to the launcher delta approved by ownership.
+new=(ROOT/'repo/finetune/tools/submit_locked_job.py').read_text()
+old=(live/'finetune/tools/submit_locked_job.py').read_text()
+inverse=[
+ ('    "finetune/convert_gguf.py": ("finetune/gguf_toolchain.py",),\n',
+  '    "finetune/convert_gguf.py": (),\n'),
+ ('    "finetune/train.py": ("finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt", "finetune/gguf_toolchain.py"),\n',
+  '    "finetune/train.py": ("finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt"),\n'),
+ ('    "finetune/train_unsloth.py": ("finetune/train.py", "finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt", "finetune/gguf_toolchain.py"),\n',
+  '    "finetune/train_unsloth.py": ("finetune/train.py", "finetune/eval.py", "finetune/reward.py", "finetune/evals/queries.txt"),\n'),
+ ('# Non-slim Python base retains native build prerequisites for GGUF exports.\n'
+  '# Registry/config metadata is verified; native execution is a separate CI gate.\n'
+  'GGUF_IMAGE = ("ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:"\n'
+  '              "c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e")\n',''),
+ ('    image = args.image\n    if image is None:\n'
+  '        image = GGUF_IMAGE if "finetune/gguf_toolchain.py" in CODE_CLOSURE[args.runner] else DEFAULT_IMAGE\n',''),
+ ('"timeout": args.timeout, "attempts": 1, "image": image,',
+  '"timeout": args.timeout, "attempts": 1, "image": DEFAULT_IMAGE,'),
+ ('    parser.add_argument("--image", default=None, help="Explicit image override, preserved literally; otherwise selected by runner")\n',''),
+]
+reconstructed=new
+for needle,replacement in inverse:
+    assert reconstructed.count(needle)==1,needle
+    reconstructed=reconstructed.replace(needle,replacement,1)
+assert reconstructed==old
+assert (ROOT/'repo/finetune/tests/test_locked_job_submission.py').read_bytes().startswith(
+    (live/'finetune/tests/test_locked_job_submission.py').read_bytes())
+
+# Verify retained immutable public-source bytes without network access.
+public=[]
+for item in json.loads((prior/'evidence/public-source-fetch.json').read_text()):
+    if 'path' not in item:
+        continue
+    f=Path(item['path'])
+    assert sha(f)==item['sha256'] and f.stat().st_size==item['size'],item
+    public.append(item)
+assert any(x['path'].endswith('/uv-cli/src/version.rs') for x in public)
+save('retained-public-source-verification.json',public)
+
+# Inspect actual local call sites as AST/data only, never execute their modules.
+callers={}
+for relative in ['finetune/convert_gguf.py','finetune/train.py','finetune/train_unsloth.py',
+                 'finetune/eval.py','finetune/gguf_toolchain.py']:
+    f=ROOT/'repo'/relative
+    tree=ast.parse(f.read_bytes(),filename=str(f))
+    imports=[{'line':n.lineno,'module':n.module,'names':[a.name for a in n.names]}
+             for n in ast.walk(tree) if isinstance(n,ast.ImportFrom)]
+    calls=[{'line':n.lineno,'name':n.func.id} for n in ast.walk(tree)
+           if isinstance(n,ast.Call) and isinstance(n.func,ast.Name)
+           and n.func.id in {'prepare_toolchain','convert_model','check_prerequisites','export_gguf','export_gguf_artifacts','run_eval'}]
+    callers[relative]={'sha256':sha(f),'imports':imports,'relevant_calls':calls,'executed':False}
+save('actual-callers-as-data.json',callers)
+
+# Preserve a narrow nonblocking quality counterexample on the OLD source too.
+empty=json.loads((ROOT/'evidence/heldout-grammar-0.json').read_text())
+old_command=empty['command'].copy()
+old_command[-1]=str(ROOT/'red/repo/finetune/tools/qualify_gguf_image.py')
+old_empty=S['run_case']('old-probe-empty-banner',old_command,
+                         env=empty['environment'],cwd=Path(empty['cwd']))
+assert old_empty['returncode']==1 and not old_empty['stdout']
+assert 'IndexError: list index out of range' in old_empty['stderr']
+
+# Exact before/after source and artifacts; no mutable/shared fixture writes.
+protected={}
+for label,files in intake['groups'].items():
+    results={}
+    for path in files:
+        f=Path(path)
+        expected=intake['protected'][path]
+        results[path]=sha(f)==expected['sha256'] and f.stat().st_size==expected['size']
+    assert all(results.values()),label
+    protected[label]={'count':len(results),'unchanged':all(results.values()),'files':results}
+old_intake=json.loads((prior/'intake.json').read_text())
+for name,entry in old_intake['delivery'].items():
+    assert sha(base/'delivery'/name)==entry['sha256'],name
+for relative,entry in old_intake['live_originals'].items():
+    assert sha(live/relative)==entry['sha256'],relative
+
+candidate={}
+red_fixture={}
+for relative,expected in intake['new_source_bindings'].items():
+    f=ROOT/'repo'/relative
+    info=f.lstat()
+    candidate[relative]=stat.S_ISREG(info.st_mode) and info.st_nlink==1 and sha(f)==expected
+    red_fixture[relative]=sha(ROOT/'red/repo'/relative)==intake['old_source_bindings'][relative]['sha256']
+assert all(candidate.values()) and all(red_fixture.values())
+
+candidate_j=S['junit'](ROOT/'evidence/candidate-suite.xml')
+green_j=S['junit'](ROOT/'evidence/green-positive-contract.xml')
+heldout_j=S['junit'](ROOT/'evidence/repair-heldouts-final.xml')
+for expected,summary in [(162,candidate_j),(4,green_j),(59,heldout_j)]:
+    assert summary['tests']==expected and all(summary[k]==0 for k in ('failures','errors','skipped'))
+real_source_cases=[name for name in candidate_j['case_names'] if name.startswith(
+    ('test_gguf_closure_follows_real_imports_and_export_calls[',
+     'test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv['))]
+assert len(real_source_cases)==6
+quality={'composition_replay_exact_all_42_inputs':True,
+         'launcher_bytes_identical_outside_seven_exact_scoped_replacements':True,
+         'all_live_original_test_bytes_preserved_as_prefix':True,
+         'repair_delta_exactly_two_files':True,
+         'real_source_closure_cases_freshly_executed':real_source_cases,
+         'retained_public_source_verified_count':len(public),
+         'reviewed_scope':['launcher closure/image selection and unaffected accepted safety contracts',
+                           'qualifier release grammar/exact identity/real CPU smoke build and receipt semantics',
+                           'append-only regression tests and related documentation',
+                           'affected actual callers as source data only'],
+         'blocking_findings':[],
+         'nonblocking_findings':[{'id':'Q1','severity':'P3','file':'finetune/tools/qualify_gguf_image.py',
+             'lines':[54,84], 'summary':'Empty successful --version stdout fails closed via uncaught IndexError rather than the intended bounded diagnostic',
+             'effect':'Exit 1, no receipt or build; unchanged from original qualifier and does not reopen R1',
+             'reproduction':'Synthetic uv --version exits 0 with empty stdout; other four version tools succeed',
+             'current_evidence':str(ROOT/'evidence/heldout-grammar-0.json'),
+             'old_source_evidence':str(ROOT/'evidence/old-probe-empty-banner.json'),
+             'recommendation':'Optional follow-up: explicitly reject an empty first-line result with RuntimeError; add clean refusal coverage. No repair applied here.'}],
+         'quality_verdict':'PASS_WITH_NONBLOCKING_NIT',
+         'spec_verdict':'PASS_FOR_EXACT_COMPOSED_FOUR_FILE_SOURCE_PROPOSAL',
+         'R1':'CLOSED_BY_SOURCE_BOUND_FRESH_POSITIVE_EXECUTION',
+         'prior_85_heldouts_and_7_mutations':'retained unchanged launcher binding; NOT rerun or counted as fresh',
+         'workflow':'separate unsettled proposal not reviewed or touched',
+         'image_executed':False,'cloud_executed':False}
+save('quality-review.json',quality)
+save('final-verification.json',{'protected':protected,'candidate42':candidate,
+     'red_fixture42':red_fixture,'new_input_count':len(candidate),'quality':quality})
+print(json.dumps({'spec':quality['spec_verdict'],'R1':quality['R1'],
+                  'quality':quality['quality_verdict'],'protected_group_counts':{k:v['count'] for k,v in protected.items()},
+                  'all_protected_inputs_unchanged':True,'candidate_inputs_unchanged':len(candidate),
+                  'real_source_closure_case_count':len(real_source_cases),
+                  'retained_public_sources_verified':len(public),'nonblocking_findings':quality['nonblocking_findings']},indent=2))

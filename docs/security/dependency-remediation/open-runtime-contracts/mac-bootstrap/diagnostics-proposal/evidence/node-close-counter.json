@@ -1,0 +1,42 @@
+[
+  {
+    "line": 257,
+    "text": "  FunctionPrototypeCall(EventEmitter, this);\n\n  this._closesNeeded = 1;\n  this._closesGot = 0;\n  this.connected = false;"
+  },
+  {
+    "line": 258,
+    "text": "\n  this._closesNeeded = 1;\n  this._closesGot = 0;\n  this.connected = false;\n"
+  },
+  {
+    "line": 304,
+    "text": "    process.nextTick(flushStdio, this);\n\n    maybeClose(this);\n  };\n  if (childProcessChannel.hasSubscribers) {"
+  },
+  {
+    "line": 432,
+    "text": "\n    if (stream.ipc) {\n      this._closesNeeded++;\n      continue;\n    }"
+  },
+  {
+    "line": 454,
+    "text": "\n      if (i > 0 && this.pid !== 0) {\n        this._closesNeeded++;\n        stream.socket.on('close', () => {\n          maybeClose(this);"
+  },
+  {
+    "line": 456,
+    "text": "        this._closesNeeded++;\n        stream.socket.on('close', () => {\n          maybeClose(this);\n        });\n      }"
+  },
+  {
+    "line": 644,
+    "text": "      channel.close();\n      target.channel = null;\n      maybeClose(target);\n    }\n  };"
+  },
+  {
+    "line": 1097,
+    "text": "\n\nfunction maybeClose(subprocess) {\n  subprocess._closesGot++;\n"
+  },
+  {
+    "line": 1098,
+    "text": "\nfunction maybeClose(subprocess) {\n  subprocess._closesGot++;\n\n  if (subprocess._closesGot === subprocess._closesNeeded) {"
+  },
+  {
+    "line": 1100,
+    "text": "  subprocess._closesGot++;\n\n  if (subprocess._closesGot === subprocess._closesNeeded) {\n    subprocess.emit('close', subprocess.exitCode, subprocess.signalCode);\n  }"
+  }
+]

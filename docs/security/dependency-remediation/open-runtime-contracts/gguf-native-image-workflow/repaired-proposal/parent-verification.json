@@ -1,0 +1,194 @@
+{
+  "status": "PARENT_FOCUSED_VERIFIED_NOT_ACCEPTED",
+  "workflowSha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+  "sourceManifestAuthenticated": {
+    "regular": 12170,
+    "specialMetadataOnly": 47
+  },
+  "permanentTests": {
+    "command": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+      "-I",
+      "-B",
+      "-S",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "test/security",
+      "-p",
+      "test_gguf_workflow_controller.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "tests": 26,
+    "elapsed_seconds": 41.99,
+    "passed": 26,
+    "failures": 0,
+    "errors": 0
+  },
+  "syntaxAndActionlint": {
+    "workflow_sha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+    "checks": [
+      {
+        "check": "controller compile",
+        "exit_code": 0
+      },
+      {
+        "check": "command owner compile",
+        "exit_code": 0
+      },
+      {
+        "check": "candidate/mirror/test/security/test_gguf_workflow_controller.py compile",
+        "exit_code": 0
+      },
+      {
+        "check": "candidate/mirror/test/security/fixtures/gguf_workflow_fake_cli.py compile",
+        "exit_code": 0
+      },
+      {
+        "check": "Bash syntax",
+        "command": [
+          "/bin/bash",
+          "-n",
+          "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/evidence/generated-step.bash"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "check": "actionlint version",
+        "command": [
+          "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+          "-version"
+        ],
+        "exit_code": 0,
+        "stdout": "1.7.12\ninstalled by downloading from release page\nbuilt with go1.26.1 compiler for darwin/arm64\n",
+        "stderr": ""
+      },
+      {
+        "check": "actionlint",
+        "command": [
+          "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+          "-no-color",
+          "-shellcheck=",
+          "-pyflakes=",
+          "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/candidate/mirror/.github/workflows/gguf-native-image-qualification.yml"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "physical_host": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    },
+    "actual_python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+    "shellcheck_pyflakes": "disabled, not run",
+    "native_docker_ci_execution": false,
+    "passed": true
+  },
+  "sevenLifetimeReadbacks": [
+    {
+      "case": "test_controller_killed_pipe_revocation",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.7315802079974674,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_failure_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.0978496659663506,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_success_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.1499999170191586,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_interrupt_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.0588454580283724,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_repeated_signals_during_registration",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.0438232500455342,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.1184032500023022,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_with_failed_docker_cleanup",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.1911527079646476,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    }
+  ],
+  "currentPublicInputHashes": {
+    "finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "finetune/tools/qualify_gguf_image.py": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2"
+  },
+  "probeExecuted": false,
+  "original74AndPositive34FreshParentReplay": false,
+  "independentReview": {
+    "delegation": "deleg_34d9c9b4",
+    "reviewer": "sa-0-c0a2de91",
+    "SPEC": "PENDING",
+    "QUALITY": "PENDING_SPEC"
+  },
+  "liveIntegrated": false,
+  "realDockerCiNativeQualification": false,
+  "reviewDispatchErratum": "Executable version and digest/count prose separators explicitly corrected by queued steer; authoritative manifest fields unchanged, incorporation must be checked on return."
+}

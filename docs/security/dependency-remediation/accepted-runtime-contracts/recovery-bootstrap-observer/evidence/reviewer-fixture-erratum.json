@@ -1,0 +1,7 @@
+{
+  "kind": "reviewer oracle error, not product failure",
+  "initialCommand": "independent-heldouts-command.json",
+  "initialResult": "5pass/1fail",
+  "location": "harness/heldouts.mjs:73",
+  "reason": "Constructor notification proves pre-spawn absence; reviewer incorrectly required undefined rather than Node actual null for spawnfile. Correct only the nullish-absence oracle and record runtime state in fresh rerun. No proposal edits."
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "scope": "static-runner-metadata-no-added-interpreter-launch",
+  "freshHomeIsNotColdOS": true,
+  "execution": "local-metadata-command-not-CI-proof",
+  "git": {
+    "sourceHead": null,
+    "eventSha": null,
+    "actualCheckout": null,
+    "checkoutSource": "read-only .git/HEAD/ref; no git/CLT launcher"
+  },
+  "runner": {
+    "os": null,
+    "arch": null,
+    "imageOS": null,
+    "imageVersion": null,
+    "runId": null,
+    "runAttempt": null,
+    "job": null
+  },
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "kernel": "27.2.0",
+    "osVersion": "Darwin Kernel Version 27.2.0: Thu Oct 15 00:00:57 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T6020",
+    "swVers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131",
+    "cpuModel": "Apple M2 Pro"
+  },
+  "runtime": {
+    "metadataNode": "22.22.3",
+    "executable": "/Users/shersingh/.hermes/node/bin/node",
+    "uv": "1.51.0",
+    "packageLauncher": "local-node-after-first-focused-case",
+    "expectedMainSuiteHost": "Node (package.json test explicitly invokes node); actual observed host is in fast-timeout artifact"
+  },
+  "systemPython": {
+    "requested": "/usr/bin/python3",
+    "launcherIsRegularFile": true,
+    "firstSelectedInterpreterVersion": "not-observed",
+    "versionQuery": "not-run; no Python/xcrun/xcode-select diagnostic warmup"
+  },
+  "sourceSha256": {
+    "scripts/phase5_e2e_runner.ts": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+    "scripts/phase5_recovery_process.py": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+    "scripts/phase5_recovery_process_loader.mjs": "f3084a9542828252d5cd8b107ae1061ccb4e500854fcadb9e29c8bb8224cedf1",
+    "scripts/phase5_recovery_worker.ts": "6d0b868044aa0b9dfbb074558a6164de2874d9ca92151c22f055d31d54222511",
+    "scripts/qmd_mlx/process_anchor.py": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+    "test/audit-recovery-tree.test.ts": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+    "test/helpers/recovery-bootstrap-diagnostics.mjs": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+    "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e",
+    ".github/workflows/ci.yml": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+    "package.json": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+    "bun.lock": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719"
+  }
+}

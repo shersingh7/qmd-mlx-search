@@ -1,0 +1,24 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/bench-rerank-entrypoint.test.ts > benchmark fallback entrypoint (default) > launches once through symlink with URL-significant path characters
+ FAIL  test/bench-rerank-entrypoint.test.ts > benchmark fallback entrypoint (default) > launches once through multihop with URL-significant path characters
+ FAIL  test/bench-rerank-entrypoint.test.ts > benchmark fallback entrypoint (default) > launches once through relative-symlink with URL-significant path characters
+ FAIL  test/bench-rerank-entrypoint.test.ts > benchmark fallback entrypoint (default) > launches once through relative-multihop with URL-significant path characters
+AssertionError: expected '' to contain 'QMD Reranker Benchmark'
+
+- Expected
++ Received
+
+- QMD Reranker Benchmark
+
+ ❯ test/bench-rerank-entrypoint.test.ts:131:29
+    129|       const entry = scenario.startsWith("relative-") ? relative(direct…
+    130|       const { result, events, runtime } = run(variant, mode, scenario,…
+    131|       expect(result.stdout).toContain("QMD Reranker Benchmark");
+       |                             ^
+    132|       expect(result.stdout).toContain("Best:");
+    133|       expect(events).toEqual(["llama:create", "resolve", "model:create…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+

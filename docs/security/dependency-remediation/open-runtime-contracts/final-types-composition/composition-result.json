@@ -1,0 +1,136 @@
+{
+  "status": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW",
+  "currentLivePreimagesVerified": 295,
+  "sourceCount": 298,
+  "changeCount": 22,
+  "patchSha256": "f2db636f1c6b113f15b44fe28742764dc5c7a3accb67fca9f5119cbe54469f1c",
+  "patchReplays": [
+    {
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "--whitespace=error",
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-types-final-composition-mer5fi8x/final-composition.patch"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "--whitespace=error",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-types-final-composition-mer5fi8x/final-composition.patch"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "all298ReplayPostimagesMatched": true,
+  "testResults": {
+    "report-boundaries-red": {
+      "files": 1,
+      "passes": 0,
+      "failures": 3,
+      "skips": 0,
+      "statuses": {
+        "failed": 3
+      }
+    },
+    "green-boundaries-node": {
+      "files": 1,
+      "passes": 3,
+      "failures": 0,
+      "skips": 0,
+      "statuses": {
+        "passed": 3
+      }
+    },
+    "green-boundaries-bun": {
+      "files": 1,
+      "passes": 3,
+      "failures": 0,
+      "skips": 0,
+      "statuses": {
+        "passed": 3
+      }
+    },
+    "green-focused-node": {
+      "files": 14,
+      "passes": 256,
+      "failures": 0,
+      "skips": 40,
+      "statuses": {
+        "passed": 256,
+        "skipped": 40
+      }
+    },
+    "green-focused-bun": {
+      "files": 13,
+      "passes": 227,
+      "failures": 0,
+      "skips": 40,
+      "statuses": {
+        "passed": 227,
+        "skipped": 40
+      }
+    }
+  },
+  "parentPreservation": {
+    "typescript": "5.9.3",
+    "sourceBeforeSha256": "ef2202822b4992acb27b9b989f23f49280f3b66b22a1630569ee057ef1a7601c",
+    "sourceAfterSha256": "4626805b4c9cefa234911d896395da6a56266c79e720164eee6a048e09c81630",
+    "sourceComplementByteIdentical": true,
+    "beforeFunction": {
+      "start": 29564,
+      "end": 32683
+    },
+    "afterFunction": {
+      "start": 29564,
+      "end": 33110
+    },
+    "emittedCommentsRemovedComplementIdentical": true,
+    "originalT2TestsBytePreserved": true,
+    "newTestInsertion": {
+      "start": 10278,
+      "end": 12079,
+      "sha256": "26189aef9aaa0151aef5478101dae167330115ac89d11fbefc452eb5e3cf198b"
+    },
+    "vitestCommentOnlyIdenticalEmittedJS": true,
+    "outsideMetricLeaseChanges": false,
+    "emissionOptions": {
+      "lib": [
+        "lib.esnext.d.ts"
+      ],
+      "target": 99,
+      "module": 199,
+      "moduleDetection": 3,
+      "jsx": 4,
+      "allowJs": true,
+      "moduleResolution": 99,
+      "verbatimModuleSyntax": true,
+      "noEmit": false,
+      "strict": true,
+      "skipLibCheck": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "noUnusedLocals": false,
+      "noUnusedParameters": false,
+      "noPropertyAccessFromIndexSignature": false,
+      "removeComments": true,
+      "sourceMap": false,
+      "inlineSourceMap": false,
+      "declaration": false,
+      "declarationMap": false
+    },
+    "wholeProjectTypeAcceptance": false
+  },
+  "wholeRootAccepted": false,
+  "compilerQualification": "Bothhosts exit0/zero diagnostics but2historicalreadguardrefusals remain; actualintegratedwhole-root gate stillrequired",
+  "T3IndependentReview": "deleg_3f9188dc",
+  "liveIntegrated": false
+}

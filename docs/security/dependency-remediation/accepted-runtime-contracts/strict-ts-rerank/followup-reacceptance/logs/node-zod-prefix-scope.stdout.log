@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe
+
+·
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  21:19:50
+   Duration  112ms (transform 17ms, setup 23ms, import 19ms, tests 3ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/node-zod-prefix-scope-results.json

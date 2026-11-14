@@ -1,0 +1,33 @@
+{
+  "actual_records": {
+    "independent-v2-installed": {
+      "cases": 119,
+      "failures": 0,
+      "errors": 0,
+      "pytest_elapsed": "96.021",
+      "source_recorded_pytest_status": 0,
+      "collected_worker_exit": 0,
+      "first_bad": []
+    },
+    "independent-v2-pinned": {
+      "cases": 85,
+      "failures": 0,
+      "errors": 1,
+      "pytest_elapsed": "38.627",
+      "source_recorded_pytest_status": 3,
+      "collected_worker_exit": null,
+      "first_bad": [
+        {
+          "case": "internal",
+          "diagnostic": "shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/_pytest/runner.py\", line 256, in call_and_report\n    ihook.pytest_runtest_logreport(report=report)\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/pluggy/_caller.py\", line 197, in __call__\n    return self._hookexec(\n           ^^^^^^^^^^^^^^^\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/pluggy/_manager.py\", line 183, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/pluggy/_execution.py\", line 195, in _multicall\n    raise exception\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/pluggy/_execution.py\", line 147, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/_pytest/terminal.py\", line 714, in pytest_runtest_logreport\n    self.flush()\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/_pytest/terminal.py\", line 545, in flush\n    self._tw.flush()\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/_pytest/_io/terminalwriter.py\", line 187, in flush\n    self._file.flush()\nBrokenPipeError: [Errno 32] Broken pipe"
+        }
+      ]
+    }
+  },
+  "review_loaded_closure": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/gguf_toolchain.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/convert_gguf.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train_unsloth.py"
+  ]
+}

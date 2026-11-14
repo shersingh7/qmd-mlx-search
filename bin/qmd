@@ -1,8 +1,14 @@
 #!/bin/sh
-# Resolve symlinks so global installs (npm link / npm install -g) can find the
-# actual package directory instead of the global bin directory.
+# Resolve npm/pnpm/Bun bin symlinks before selecting a runtime. Keep argv intact.
+set -eu
 SOURCE="$0"
+LINKS=0
 while [ -L "$SOURCE" ]; do
+  LINKS=$((LINKS + 1))
+  if [ "$LINKS" -gt 40 ]; then
+    printf '%s\n' 'error: qmd launcher symlink cycle' >&2
+    exit 1
+  fi
   SOURCE_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
   TARGET="$(readlink "$SOURCE")"
   case "$TARGET" in
@@ -10,23 +16,47 @@ while [ -L "$SOURCE" ]; do
     *) SOURCE="$SOURCE_DIR/$TARGET" ;;
   esac
 done
-
-# Detect the runtime used to install this package and use the matching one
-# to avoid native module ABI mismatches (e.g., better-sqlite3 compiled for bun vs node)
 DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
-
-# Detect the package manager that installed dependencies by checking lockfiles.
-# $BUN_INSTALL is intentionally NOT checked — it only indicates that bun exists
-# on the system, not that it was used to install this package (see #361).
-#
-# package-lock.json takes priority: if it exists, npm installed the native
-# modules for Node.  The repo ships bun.lock, so without this check, source
-# builds that use npm would be incorrectly routed to bun, causing ABI
-# mismatches with better-sqlite3 / sqlite-vec (see #381).
-if [ -f "$DIR/package-lock.json" ]; then
-  exec node "$DIR/dist/cli/qmd.js" "$@"
-elif [ -f "$DIR/bun.lock" ] || [ -f "$DIR/bun.lockb" ]; then
-  exec bun "$DIR/dist/cli/qmd.js" "$@"
-else
-  exec node "$DIR/dist/cli/qmd.js" "$@"
+ENTRY="$DIR/dist/cli/qmd.js"
+if [ ! -f "$ENTRY" ]; then
+  printf '%s\n' "error: qmd build missing at $ENTRY; run npm run build in a source checkout or reinstall the package" >&2
+  exit 1
 fi
+
+# QMD_RUNTIME is an explicit override for installs whose package manager did not
+# retain lockfile metadata. BUN_INSTALL means only that Bun exists, not that its
+# native ABI was used. Actual npm/pnpm install metadata outranks a shipped lock.
+case "${QMD_RUNTIME:-}" in
+  node|bun) RUNTIME="$QMD_RUNTIME" ;;
+  '')
+    if [ -f "$DIR/package-lock.json" ] || [ -f "$DIR/node_modules/.package-lock.json" ] || [ -f "$DIR/node_modules/.modules.yaml" ]; then
+      RUNTIME=node
+    elif [ -f "$DIR/bun.lock" ] || [ -f "$DIR/bun.lockb" ]; then
+      RUNTIME=bun
+    else
+      RUNTIME=node
+      # Published packages omit repository locks. Discover the nearest actual
+      # installation root, including pnpm's nested node_modules layout.
+      PARENT="$(dirname "$DIR")"
+      while [ "$PARENT" != / ]; do
+        if [ "$(basename "$PARENT")" = node_modules ]; then
+          INSTALL_ROOT="$(dirname "$PARENT")"
+          if [ -f "$PARENT/.package-lock.json" ] || [ -f "$PARENT/.modules.yaml" ] || [ -f "$INSTALL_ROOT/package-lock.json" ]; then
+            RUNTIME=node
+            break
+          elif [ -f "$INSTALL_ROOT/bun.lock" ] || [ -f "$INSTALL_ROOT/bun.lockb" ]; then
+            RUNTIME=bun
+            break
+          fi
+        fi
+        PARENT="$(dirname "$PARENT")"
+      done
+    fi
+    ;;
+  *) printf '%s\n' 'error: QMD_RUNTIME must be node or bun' >&2; exit 1 ;;
+esac
+if ! command -v "$RUNTIME" >/dev/null 2>&1; then
+  printf '%s\n' "error: qmd requires $RUNTIME on PATH (or select an installed runtime with QMD_RUNTIME=node|bun)" >&2
+  exit 127
+fi
+exec "$RUNTIME" "$ENTRY" "$@"

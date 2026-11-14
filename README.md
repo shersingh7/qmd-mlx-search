@@ -1,8 +1,10 @@
 # QMD — Query Markup Documents (MLX-Native)
 
+> **Fork installation:** this repository is `shersingh7/qmd-mlx-search`. Build it from source or install a verified tarball from this checkout to use these MLX changes. The registry package `@tobilu/qmd` and its `npx` examples refer to the upstream release, not automatically to this fork. The package/import name remains unchanged for SDK compatibility; no registry publication is implied.
+
 An on-device search engine for everything you need to remember. Index your markdown notes, meeting transcripts, documentation, and knowledge bases. Search with keywords or natural language.
 
-QMD combines BM25 full-text search, vector semantic search, and LLM re-ranking — all running locally. Two embedding backends: **MLX-native** (Apple Silicon GPU, 2-5× faster) or **GGUF** (node-llama-cpp, CPU/Metal).
+QMD combines BM25 full-text search, vector semantic search, and LLM re-ranking — all running locally. Two embedding backends: **MLX-native** (Apple Silicon GPU; performance is model/workload dependent) or **GGUF** (node-llama-cpp, CPU/Metal).
 
 ![QMD Architecture](assets/qmd-architecture.png)
 
@@ -12,16 +14,16 @@ You can read more about QMD's progress in the [CHANGELOG](CHANGELOG.md).
 
 ## MLX-Native Embeddings (Apple Silicon)
 
-On Apple Silicon (M-series MacBooks/Macs), QMD supports **native MLX embeddings** via a dedicated Python server powered by Apple's MLX framework. The MLX runtime runs models directly on the unified memory GPU with a single-flight execution owner, model-aware pooling, token-once batching, and zero-copy binary transport.
+On Apple Silicon (M-series MacBooks/Macs), QMD supports **native MLX embeddings** via a dedicated Python server powered by Apple's MLX framework. The MLX runtime runs models directly on the unified memory GPU with a single-flight execution owner, model-aware pooling, token-once batching, and bounded binary transport. The client validates the serving embedding descriptor on every production inference response. Binary typed-array views reduce decoding overhead, but transport and public `number[]` conversions are not end-to-end zero-copy.
 
 ### Architectural Highlights
 
 | Feature | GGUF (node-llama-cpp) | MLX-Native (`scripts/mlx_embed_server.py`) |
 |---|---|---|
 | **GPU Execution** | Metal via llama.cpp | Direct MLX Metal Compute (Dedicated Worker Thread) |
-| **Model Families** | GGUF quantized models | HuggingFace MLX models (`nomic-embed-text`, `bge-small`, `qwen3-embed`) |
+| **Model Families** | GGUF quantized models | Explicit standard BERT MiniLM/BGE and supported Qwen causal adapters; unqualified Nomic/Gemma architectures fail closed |
 | **Hidden State Extraction** | Native embedding GGUFs | Architectural hidden state extraction (Encoder BERT / Causal LM backbone) |
-| **Pooling & Norm** | Model-specific GGUF | Universal Mean / CLS / Last-token pooling + float32 L2 normalization |
+| **Pooling & Norm** | Model-specific GGUF | Model-specific mean / CLS / last-token pooling + float32 accumulation and L2 normalization |
 | **Wire Protocol** | In-process native bindings | Bounded HTTP + Little-endian Binary Float32 (`/embed-bin`) |
 | **Safety & Contracts** | GGUF model path checks | SHA-256 `EmbeddingDescriptor` space identity (fail-closed backend selection) |
 
@@ -35,8 +37,8 @@ pip install -r scripts/mlx_server_requirements.txt
 
 # 2. Start the MLX embedding server
 python scripts/mlx_embed_server.py \
-  --model mlx-community/nomic-embed-text-v1.5 \
-  --dtype float16 \
+  --model sentence-transformers/all-MiniLM-L6-v2 \
+  --dtype float32 \
   --preload \
   --port 8787
 
@@ -67,24 +69,40 @@ The MLX server exposes standard REST and binary endpoints:
 ### MLX Server Flags
 
 ```
---model PATH             HuggingFace repo ID or local path (e.g. mlx-community/nomic-embed-text-v1.5)
+--model PATH             Supported HF repo or local path (default: sentence-transformers/all-MiniLM-L6-v2)
 --rerank-model PATH      Reranker model; enables /rerank (e.g. local Qwen3-Reranker-4B MLX 4-bit)
 --generate-model PATH    Generation model; enables /generate (e.g. mlx-community/Qwen3-1.7B-4bit)
 --port 8787              Server port (default: 8787)
 --host 127.0.0.1         Bind address (default: 127.0.0.1 loopback)
---dtype float16          Precision: float32, float16, or bfloat16 (default: float16)
---max-batch-tokens N     Max padded tokens per micro-batch (auto-scaled to RAM by default)
+--dtype float32          Floating compute precision: float32, float16, bfloat16
+--quantization auto      Verify stored weights: auto, none, 4bit, 8bit; not on-load quantization
+--max-batch-tokens N     Memory/model-aware padded-token budget (default: automatic)
+--max-bulk-microbatch-tokens N  Bulk scheduling target (default: 512; larger is opt-in)
 --preload                Preload and validate model weights at startup before serving
 ```
 
+### HTTP host runtime
+
+**MCP/REST HTTP hosting requires Node.js 22 or newer.** Bun 1.3.8's `node:http` compatibility layer did not reliably propagate request disconnects, so HTTP startup under Bun is explicitly refused rather than pretending that cancellation works. Bun remains usable for the CLI, SDK and MCP stdio. For HTTP, use a Node/npm installation (with a Node-compatible `better-sqlite3` addon) and `QMD_RUNTIME=node qmd mcp --http`.
+
+Development CLI scripts use Node's `--import tsx` loader rather than a separate
+`tsx` CLI wrapper, avoiding its Unix IPC-socket collisions under long temporary paths.
+
+The full unit suite uses **Vitest**: run `bun run test` or `npm test`, not `bun test` against Vitest's APIs. CI separately installs the tarball and exercises native Node and Bun CLI/SQLite/SDK/MCP-stdio behavior; only Node receives HTTP/SSE feature acceptance, and Bun's safe HTTP refusal is tested explicitly.
+
 ### Daemon supervision
+
+The persistent daemon requires an **explicit model selection**. The selected model must already exist locally (an absolute snapshot directory or a cached Hugging Face repository ID); startup never downloads weights. Unlike the interactive Python server's convenience default, no legacy Qwen checkpoint is silently selected.
 
 ```sh
 scripts/qmd-mlx-daemon.sh status   # launchd state + /ready probe
-scripts/qmd-mlx-daemon.sh start    # install ~/Library/LaunchAgents/com.qmd.mlxd.plist + bootstrap
+MLX_EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2 \
+  scripts/qmd-mlx-daemon.sh start  # install the explicitly selected cached model
 scripts/qmd-mlx-daemon.sh stop     # bootout
 QMD_EMBED_BACKEND=mlx qmd status   # includes an MLX Daemon section (embed/rerank/generate models)
 ```
+
+The separate `qmd mcp --http --daemon` command also waits for the owned listener's health identity before reporting startup. Its PID record now includes the port and instance token; legacy integer-only or mismatched records are deliberately refused for process termination.
 
 ### Environment Variables
 
@@ -93,27 +111,36 @@ QMD_EMBED_BACKEND=mlx qmd status   # includes an MLX Daemon section (embed/reran
 | `QMD_EMBED_BACKEND` | `gguf` | Active embedding backend: `mlx` or `gguf` |
 | `QMD_MLX_EMBED_URL` | `http://127.0.0.1:8787` | MLX server URL |
 | `QMD_MLX_CONCURRENCY` | `2` | Bounded concurrent in-flight batch requests |
-| `QMD_MLX_FALLBACK` | `false` | Fallback to GGUF (fail-closed by default to prevent space corruption) |
-| `QMD_MLX_RERANK` | unset (GGUF) | Set to `1` to route reranking through the MLX daemon (opt-in: GGUF ranks hard queries better — 80% vs 68–72% ground-truth accuracy, Sep 2026 eval) |
+| `QMD_MLX_FALLBACK` | `false` | Legacy configuration; embeddings remain fail-closed and never substitute a different GGUF space |
+| `QMD_MLX_RERANK` | unset (GGUF) | Set to `1` to route reranking through the MLX daemon; qualify ranking quality and memory on your corpus before changing backends |
 | `QMD_MLX_EXPAND` | unset (GGUF) | Set to `1` to route query expansion through the MLX daemon (opt-in pending Recall@10 eval) |
 | `QMD_MLX_RERANK_FALLBACK` / `QMD_MLX_EXPAND_FALLBACK` | `1` | Set to `0` for fail-closed (error instead of GGUF fallback) |
 | `MLX_RERANK_MODEL` / `MLX_GENERATE_MODEL` | unset | Daemon-side model selection (also `--rerank-model` / `--generate-model`) |
-| `MLX_IDLE_UNLOAD_S` | `300` | Seconds of inactivity before the daemon unloads model weights (frees GPU/unified memory; next request reloads in ~1s). `0` = always-on |
+| `MLX_IDLE_UNLOAD_S` | `300` | Seconds of inactivity before weight eviction; reload cost depends on the model. `0` disables idle eviction |
 | `XDG_CACHE_HOME` | `~/.cache` | Cache directory location |
 
-`llm_cache` keys are namespaced by serving backend (`mlx:<daemon-model>` vs the
-GGUF model string), so toggling the opt-in flags can never serve cross-backend
-scores.
+Expansion and reranking cache keys include the verified serving-stage identity,
+not just a model name. Fallback results must match their actual backend identity.
+Embedding selection does not automatically move expansion or reranking to MLX;
+the stage flags above are independent.
 
-### Metal Benchmark Performance (Apple M2 Pro 32GB)
+### Verification and performance scope
 
-Measured with `scripts/bench_mlx.py` using `mlx-community/nomic-embed-text-v1.5` (768d, float16):
+Use `scripts/bench_apple_silicon.py` for bounded, offline, real-Metal measurements from an existing local checkpoint. It records source identity, raw latency samples, actual token counts, current/peak RSS, active/cache/peak Metal memory and teardown state. `scripts/check_embedding_reference.py` compares its saved BERT vectors with the same local Hugging Face model on CPU.
 
-- **Batch 1 (Single Query):** ~3.7 ms per text (269 texts/sec)
-- **Batch 8:** ~4.9 ms total (1,621 texts/sec)
-- **Batch 32 (Bulk Indexing):** ~10.7 ms total (2,989 texts/sec)
-- **Active Metal Memory:** ~86 MB resident footprint
-- **End-to-end Binary Wire Latency:** <0.2 ms decoding overhead for 32 × 768 Float32 vectors
+The current audit found that the earlier MiniLM/BERT adapter omitted learned segment-zero embeddings: it was self-consistent but disagreed with the trained model. The repaired adapter passes the [same-model numerical reference fixture](docs/benchmarks/apple-silicon-audit/rc-core-minilm-float32-512-reference.json). Old timings from semantically wrong vectors are **not** valid speedup evidence. Historical Nomic throughput claims have therefore been removed rather than relabeled as current results.
+
+The [repeated M2 Pro measurements](docs/benchmarks/apple-silicon-audit/RESULTS.md) show MiniLM 64-text batch medians of **85.6–85.8 ms** for corrected FP32/512 versus **61.6–61.9 ms** for the opt-in FP16/4096 profile. Active Metal allocations fell from **86.7 to 43.3 MiB**, while the larger batch raised peak active allocation to **379.7 MiB**. These are configuration-specific synthetic measurements, not a universal code-speedup claim.
+
+Larger bulk targets trade latency and memory against throughput; they are opt-in, not a universal fast mode. A short small-encoder run does not establish 4B performance, representative retrieval quality, every M-series Mac or long-run leak freedom. See the [implementation plan](docs/plans/apple-silicon-audit-implementation.md) and [baseline limitations](docs/reviews/apple-silicon-audit-baseline.md).
+
+### Compatibility and index safety
+
+- The space fingerprint now includes context policy and validates actual inference identity. Old MLX descriptors, corrected BERT numerics, changed dtype/pooling/revision or chunk strategy require an **explicit rebuilt index**. Matching dimensions do not establish compatibility.
+- Back up an existing index and validate a separate rebuilt index before switching. Do not silently relabel old vectors, delete a live index, or enable fallback to make a mismatch disappear.
+- `--quantization` verifies checkpoint storage (`auto`, `none`, `4bit`, `8bit`); floating precision is selected with `--dtype`. Old `bf16`/`fp16`/`q4_0` quantization labels are not accepted as equivalent storage identities.
+- Nomic and Gemma are not currently qualified by these adapters and are rejected explicitly. Model-family support is narrower than historical README examples.
+- Creating a daemon with `scripts/qmd-mlx-daemon.sh start` is an explicit installation action, not part of testing this fork. The launcher validates local weights and persists selected settings; it does not download a model for you.
 
 ---
 
@@ -291,7 +318,7 @@ const store = await createStore({
       embedBackend: 'mlx',
       mlxUrl: 'http://127.0.0.1:8787',
       mlxConcurrency: 2,
-      mlxFallback: true,     // degrade to GGUF if MLX down
+      mlxFallback: false,    // never mix another backend's vectors into this index
     },
   },
 })
@@ -300,26 +327,23 @@ const store = await createStore({
 Or use the MLX client directly for standalone embedding:
 
 ```typescript
-import { embedWithMlx, embedBatchConcurrent, mlxStats } from '@tobilu/qmd'
+import { MlxEmbedClient } from '@tobilu/qmd'
 
-// Single embedding
-const vec = await embedWithMlx("what is the meaning of life?")
-// vec: Float32Array(768)
-
-// Batch embedding with concurrent pipelining
-const batch = await embedBatchConcurrent([
-  "first query",
-  "second query",
-  // ... hundreds more
-], {
+const client = new MlxEmbedClient({
   url: 'http://127.0.0.1:8787',
+  timeoutMs: 30_000,
   concurrency: 2,
-  dtype: 'float16',
 })
-
-// Check MLX server stats
-const stats = await mlxStats('http://127.0.0.1:8787')
-console.log(stats) // { avg_ms: 12.3, compiled_shapes: [[1,512], [32,512]], ... }
+try {
+  const descriptor = await client.getDescriptor()
+  const result = await client.embed("what is the meaning of life?")
+  // result is { embedding: number[], model: string } or null on failure.
+  // The production wrapper rejects missing/mismatched serving identity.
+  const batch = await client.embedBatchConcurrent(["first query", "second query"])
+  console.log(descriptor, result, batch, await client.stats())
+} finally {
+  client.dispose()
+}
 ```
 
 #### Store Creation
@@ -597,9 +621,9 @@ The SDK requires explicit `dbPath` — no defaults are assumed. This makes it sa
                         ├────────────┬─────────────┤
                         │  MLX       │  GGUF       │
                         │  (GPU)     │  (CPU/Metal)│
-                        │  @mx.comp  │  node-llama │
-                        │  binary    │  JSON       │
-                        │  float16   │  Q8_0       │
+                        │  1 owner   │  node-llama │
+                        │  binary    │  native     │
+                        │  dtype cfg │  quant cfg  │
                         └────────────┴─────────────┘
 ```
 

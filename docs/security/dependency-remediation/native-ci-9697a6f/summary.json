@@ -1,0 +1,82 @@
+{
+  "status": "NIX_HASHES_MEASURED_UPDATED_RECHECK_PENDING_MACOS_CI_STILL_FAILS",
+  "candidate": "9697a6fd9707a2787ab417cd72213d3fa7d7be66",
+  "actualMergeCheckout": "3f74eaffbe4edc6044ab8d09ca20c95b64e26529",
+  "macos": {
+    "node": {
+      "ownerPid": 1810,
+      "sourceBindingsMatched": 11,
+      "actualTestHost": "Node22.22.3",
+      "canonicalTraceAndLogAgree": true,
+      "failures": 32,
+      "launch": {
+        "state": "not-started",
+        "admissionGranted": false,
+        "supervisorReaped": true,
+        "supervisorPid": 1810
+      },
+      "cleanup": {
+        "childReaped": false,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "containmentVerified": false
+      },
+      "causality": "not established by runtime events"
+    },
+    "bun": {
+      "ownerPid": 1638,
+      "sourceBindingsMatched": 11,
+      "actualTestHost": "Node22.22.3",
+      "canonicalTraceAndLogAgree": true,
+      "failures": 30,
+      "launch": {
+        "state": "unconfirmed",
+        "admissionGranted": false,
+        "supervisorReaped": true,
+        "supervisorPid": 1638
+      },
+      "cleanup": {
+        "childReaped": false,
+        "groupTerminated": false,
+        "sessionTerminated": false,
+        "pipesClosed": false,
+        "forcedPipeClose": true,
+        "containmentVerified": false
+      },
+      "causality": "not established by runtime events"
+    }
+  },
+  "linuxJavascriptAndBothPythonJobs": "passed in run43587714173; not a macOS acceptance substitute",
+  "nativeGguf": "run43587714085 source-bound nativeLinuxamd64 C/C++prerequisites and ownedcontainerabsence verified; no converter/training/GPU/cloud qualification",
+  "nix": {
+    "run": 43587714131,
+    "measured": {
+      "x86_64-linux": {
+        "specified": "sha256-lYii6J60m9lQmhDmCjP4lYmEdDxkExke+XIrRN7Vuho=",
+        "measured": "sha256-FShClrkZs1dqlIJD3ygyda018rRhYhMJWSPDsAyS+Vc="
+      },
+      "aarch64-darwin": {
+        "specified": "sha256-bF4vRAwHesw3dFXS7q4sFyRxFmgFpiUdfv/8TTOyBuY=",
+        "measured": "sha256-Hb23tGns07IbiyUyXXdTrVpAA9Qamqagd/iYMOW3qZ4="
+      }
+    },
+    "exactInputsMatched": {
+      "package.json": "7607a98a802ec455328ce0452fb2e43fb6c955e774d30e17cc49befac5e7ef1a",
+      "bun.lock": "c1dca7fd35ac82ef213872fc997d023218028d51b9fffb92b0e12b0ac070d329",
+      "flake.lock": "7edc1e51b4229b9e33d636ae47c67b2aa4551bebae621ab437fe16a4871912f2",
+      "flake.nix": "71d40a36e4d80c3080ff8ef42dda14d441fcb52cab31967920ba9c6452abaaea"
+    },
+    "localContractsPassed": 7,
+    "actualBuildAndInstalledSmokesStillPending": true
+  },
+  "diagnosisDelegation": "deleg_e3151dd8",
+  "noTimeoutAssertionOrCleanupRelaxation": true,
+  "evidence": {
+    "bundle": "evidence.tar.gz",
+    "sha256": "0e01d3bb2d060fadbd67a19c387b09f75c4a12261e6f746abb640f139476a382",
+    "bytes": 235117,
+    "entriesReadbackVerified": 17
+  }
+}

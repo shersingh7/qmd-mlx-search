@@ -1,0 +1,103 @@
+from __future__ import annotations
+import hashlib
+import json
+from pathlib import Path
+import runpy
+import sys
+
+ROOT = Path(__file__).resolve().parent
+S = runpy.run_path(str(ROOT / 'review_support.py'))
+R = runpy.run_path(str(ROOT / 'red/review_support.py'))
+intake = json.loads((ROOT / 'intake.json').read_text())
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def save(name, obj):
+    (ROOT / 'evidence' / name).write_text(json.dumps(obj, indent=2, sort_keys=True))
+
+environments = {name: support['environment'](name) for name, support in [
+    ('repair-apply-check', S), ('repair-apply', S), ('repair-reverse-check', S),
+    ('red-positive-contract', R), ('green-positive-contract', S), ('candidate-suite', S),
+    ('real-uv-full', S), ('real-native-only', S)]}
+save('environments.json', environments)
+for name, arguments in [('repair-apply-check', ['--check']), ('repair-apply', []),
+                        ('repair-reverse-check', ['--reverse', '--check'])]:
+    record = S['run_case'](name, ['/usr/bin/git', 'apply', *arguments, ROOT / 'repair.patch'],
+                           cwd=ROOT / 'repo', env=environments[name])
+    assert record['returncode'] == 0, record
+
+changed = []
+for path, expected in intake['new_source_bindings'].items():
+    f = ROOT / 'repo' / path
+    assert sha(f) == expected, path
+    if expected != intake['old_source_bindings'][path]['sha256']:
+        changed.append(path)
+assert sorted(changed) == ['finetune/tests/test_locked_job_submission.py',
+                           'finetune/tools/qualify_gguf_image.py'], changed
+old_test = (ROOT / 'red/repo/finetune/tests/test_locked_job_submission.py').read_bytes()
+new_test = (ROOT / 'repo/finetune/tests/test_locked_job_submission.py').read_bytes()
+assert new_test.startswith(old_test)
+source_proof = {'exact_changed_paths': changed, 'candidate_inputs': 42,
+                'exact_test_prefix_preserved': True, 'old_test_bytes': len(old_test),
+                'new_test_bytes': len(new_test), 'green_positive_contract_sha256': sha(ROOT / 'test_probe_contract_green.py'),
+                'original_positive_contract_preserved': (ROOT / 'preserved/test_probe_contract_original.py').read_bytes()
+                     == (ROOT / 'red/test_probe_contract.py').read_bytes()}
+save('repair-source-proof.json', source_proof)
+
+red = R['suite']('red-positive-contract', selected=[ROOT / 'red/test_probe_contract.py'])
+assert red['returncode'] == 1, red
+assert {k:red['junit'][k] for k in ('tests','failures','errors','skipped')} == {
+    'tests':4, 'failures':2, 'errors':0, 'skipped':0}, red
+assert all('upstream' in x['name'] for x in red['junit']['failure_cases']), red
+
+green = S['suite']('green-positive-contract', selected=[ROOT / 'test_probe_contract_green.py'])
+assert green['returncode'] == 0, green
+assert {k:green['junit'][k] for k in ('tests','failures','errors','skipped')} == {
+    'tests':4, 'failures':0, 'errors':0, 'skipped':0}, green
+
+candidate = S['suite']('candidate-suite')
+assert candidate['returncode'] == 0, candidate
+assert {k:candidate['junit'][k] for k in ('tests','failures','errors','skipped')} == {
+    'tests':162, 'failures':0, 'errors':0, 'skipped':0}, candidate
+
+from collections import Counter
+prior = Path('/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_')
+old_xml = prior / 'evidence/frozen-suite-final.xml'
+old_junit = S['junit'](old_xml)
+assert old_junit['tests'] == 149
+assert not (Counter(old_junit['case_names']) - Counter(candidate['junit']['case_names']))
+closure_cases = [n for n in old_junit['case_names'] if 'real_' in n or 'actual_' in n]
+coverage = {'all_149_original_cases_executed': True, 'old_case_count': 149,
+            'new_case_count': 162, 'additional_case_count': 13,
+            'original_real_or_actual_case_names': closure_cases,
+            'old_xml_sha256': sha(old_xml)}
+save('suite-coverage.json', coverage)
+
+probe = ROOT / 'repo/finetune/tools/qualify_gguf_image.py'
+for name, flags in [('real-uv-full', []), ('real-native-only', ['--native-only'])]:
+    env = environments[name]
+    if not flags:
+        env['PATH'] = '/Users/shersingh/.local/bin:' + env['PATH']
+    record = S['run_case'](name, [S['PYTHON'], '-I', '-B', '-S', probe, *flags],
+                           cwd=ROOT, env=env, timeout=120)
+    record['environment'] = env
+    record['probe_source_sha256'] = sha(probe)
+    record['image_executed'] = False
+    save(name + '.json', record)
+    assert record['returncode'] == 0, record
+    receipt = json.loads(record['stdout'])
+    assert receipt['outputs'] == ['qmd-c-ok', 'qmd-cxx-ok'], receipt
+    assert receipt['locked_python_converter_training_gpu_cloud_qualified'] is False
+    assert receipt['native_only'] is bool(flags)
+    assert receipt['probe_sha256'] == sha(probe)
+    assert ('uv' in receipt['versions']) is not bool(flags)
+
+summary = {'source_proof':source_proof, 'coverage':coverage,
+           'red':{k:red['junit'][k] for k in ('tests','failures','errors','skipped')},
+           'green':{k:green['junit'][k] for k in ('tests','failures','errors','skipped')},
+           'candidate':{k:candidate['junit'][k] for k in ('tests','failures','errors','skipped')},
+           'host_full_and_native_probes':'pass; not image execution',
+           'interpreter':sys.version}
+save('reacceptance-summary.json', summary)
+print(json.dumps(summary, indent=2, sort_keys=True))

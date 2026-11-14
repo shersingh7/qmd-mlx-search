@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+······················
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  21:15:44
+   Duration  924ms (transform 54ms, setup 14ms, import 340ms, tests 504ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/bun-baseline-guard-results.json

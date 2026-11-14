@@ -1,0 +1,121 @@
+{
+  "status": "COMPOSED_REPAIRED_DECLARATIONS_REVIEWED_METRIC_REVIEW_PENDING",
+  "inputs": {
+    "T2": {
+      "root": "/Users/shersingh/.hermes/cache/scratch/qmd-types-metrics-ppnll4m1",
+      "indexSha256": "b64e19f60ac5ec3b7675f802a03f92cc0e632bd9aa7b189973c975c6f1bf272d",
+      "artifactCount": 194
+    },
+    "T3": {
+      "root": "/Users/shersingh/.hermes/cache/scratch/qmd-types-declarations-1yp0w89j",
+      "indexSha256": "35b02bf22d08f008adc60c684af3a2d56ae83260df6e97c79a697c7b91bc11dd",
+      "artifactCount": 263
+    },
+    "composition": {
+      "root": "/Users/shersingh/.hermes/cache/scratch/qmd-types-final-composition-mer5fi8x",
+      "indexSha256": "20b7291d264daa47e2017070c8747ba962db1160ce5802bd38eac8e6b82859cb",
+      "artifactCount": 50
+    }
+  },
+  "candidateSources": 298,
+  "baselineSources": 295,
+  "changedPaths": 22,
+  "candidateManifestSha256": "cada46c60b45ccd367282c06c6daecc58f233ff2c831c96c53318b597e29d3b0",
+  "combinedPatchSha256": "f2db636f1c6b113f15b44fe28742764dc5c7a3accb67fca9f5119cbe54469f1c",
+  "metricReview": {
+    "delegation": "deleg_01f17941",
+    "owner": "sa-0-f2a4a68e",
+    "state": "PENDING"
+  },
+  "declarationReview": {
+    "delegation": "deleg_3f9188dc",
+    "owner": "sa-0-53401424",
+    "state": "SPEC_PASS_QUALITY_PASS_SCOPED_NOT_INTEGRATED",
+    "reviewIndexSha256": "8f8fb010e0eea5824f5de8cb36a7af83b485420950e45764b1499ccdee24f31d",
+    "parentVerifiedArtifacts": 339,
+    "archive": "docs/security/dependency-remediation/accepted-runtime-contracts/development-declarations/acceptance-summary.json"
+  },
+  "freshParentTests": {
+    "report-boundaries-red": {
+      "files": 1,
+      "passes": 0,
+      "failures": 3,
+      "skips": 0,
+      "statuses": {
+        "failed": 3
+      }
+    },
+    "green-boundaries-node": {
+      "files": 1,
+      "passes": 3,
+      "failures": 0,
+      "skips": 0,
+      "statuses": {
+        "passed": 3
+      }
+    },
+    "green-boundaries-bun": {
+      "files": 1,
+      "passes": 3,
+      "failures": 0,
+      "skips": 0,
+      "statuses": {
+        "passed": 3
+      }
+    },
+    "green-focused-node": {
+      "files": 14,
+      "passes": 256,
+      "failures": 0,
+      "skips": 40,
+      "statuses": {
+        "passed": 256,
+        "skipped": 40
+      }
+    },
+    "green-focused-bun": {
+      "files": 13,
+      "passes": 227,
+      "failures": 0,
+      "skips": 40,
+      "statuses": {
+        "passed": 227,
+        "skipped": 40
+      }
+    }
+  },
+  "compilerDiagnosticCountPerHost": 0,
+  "compilerGuardRefusalsPerHost": 2,
+  "wholeRootAccepted": false,
+  "security": {
+    "currentDefaultBranchOpenAlerts": 262,
+    "critical": 17,
+    "candidateGraphInstances": 1780,
+    "retainedAffectedAlerts": 0,
+    "npmPackageVersionsChecked": 375,
+    "osvQueriesChecked": 489,
+    "freshNpmAndOsvFindings": 0,
+    "defaultBranchAlertsClosed": false,
+    "sourceApprovalStillRequired": true,
+    "actualNixHashVerificationPending": true
+  },
+  "sourceBundles": {
+    "path": "proposal-evidence.tar.gz",
+    "sha256": "1bc8795669a73c83ed9b5d81e7a7497fcad2e822f97ca5e954ebc28cebb31b24",
+    "bytes": 12974214,
+    "regularEntriesReadbackVerified": 1156,
+    "index": "bundle-index.json.gz",
+    "indexSha256": "80aa4ef504cd9653558ed41c8dcd01a111b6b857ac5ecd254755bc085f6ef5ad"
+  },
+  "standaloneSha256": {
+    "REPORT.md": "dd6924bd6e8e1efe1cdbbc3449c5fe63ca5594c225a8a80f8e1c4aaab19ae4ee",
+    "composition-result.json": "71c50570c4789e0b3871ea53dff6bb09c7242ab824b8d1aeb8f1c1aa50b62bc9",
+    "candidate-manifest.json": "cada46c60b45ccd367282c06c6daecc58f233ff2c831c96c53318b597e29d3b0",
+    "security-inventory.json": "89eaefd4e185afad98e1e49df80bf26cabe3c3de4e4f0622e0aa2841632b10d6",
+    "security-scan-executions.json": "e19db0ac28e1e7f703eb0b51f0cc954f837020060f445e2099500029e2e31d16",
+    "security-source-manifest.json": "d9ca0f99be84c86d45aa86cbaa548c4dc5986d72ec336ec838b0ec884feb51e4"
+  },
+  "liveTypesAndMetadataIntegrated": false,
+  "committedOrPushed": false,
+  "oldEvidencePreserved": true
+}

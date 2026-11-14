@@ -1,0 +1,237 @@
+{
+  "count": 260,
+  "page_sizes": [
+    99,
+    100,
+    61
+  ],
+  "severity": {
+    "medium": 121,
+    "low": 30,
+    "high": 92,
+    "critical": 17
+  },
+  "manifests": {
+    "pnpm-lock.yaml": 101,
+    "finetune/uv.lock": 157,
+    "package.json": 2
+  },
+  "packages": [
+    {
+      "ecosystem": "npm",
+      "package": "hono",
+      "alerts": 37
+    },
+    {
+      "ecosystem": "pip",
+      "package": "Pillow",
+      "alerts": 34
+    },
+    {
+      "ecosystem": "pip",
+      "package": "aiohttp",
+      "alerts": 32
+    },
+    {
+      "ecosystem": "pip",
+      "package": "pillow",
+      "alerts": 24
+    },
+    {
+      "ecosystem": "pip",
+      "package": "authlib",
+      "alerts": 14
+    },
+    {
+      "ecosystem": "npm",
+      "package": "fast-uri",
+      "alerts": 12
+    },
+    {
+      "ecosystem": "npm",
+      "package": "vite",
+      "alerts": 10
+    },
+    {
+      "ecosystem": "pip",
+      "package": "gradio",
+      "alerts": 7
+    },
+    {
+      "ecosystem": "pip",
+      "package": "cryptography",
+      "alerts": 7
+    },
+    {
+      "ecosystem": "npm",
+      "package": "ip-address",
+      "alerts": 6
+    },
+    {
+      "ecosystem": "npm",
+      "package": "tar",
+      "alerts": 6
+    },
+    {
+      "ecosystem": "pip",
+      "package": "python-multipart",
+      "alerts": 6
+    },
+    {
+      "ecosystem": "pip",
+      "package": "urllib3",
+      "alerts": 5
+    },
+    {
+      "ecosystem": "npm",
+      "package": "@hono/node-server",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "npm",
+      "package": "qs",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "npm",
+      "package": "simple-git",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "pip",
+      "package": "transformers",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "npm",
+      "package": "vitest",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "npm",
+      "package": "postcss",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "pip",
+      "package": "starlette",
+      "alerts": 4
+    },
+    {
+      "ecosystem": "npm",
+      "package": "nanoid",
+      "alerts": 3
+    },
+    {
+      "ecosystem": "npm",
+      "package": "tinypool",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "pip",
+      "package": "Authlib",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "pip",
+      "package": "filelock",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "pip",
+      "package": "setuptools",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "npm",
+      "package": "body-parser",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "npm",
+      "package": "@vitest/mocker",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "pip",
+      "package": "anyio",
+      "alerts": 2
+    },
+    {
+      "ecosystem": "pip",
+      "package": "multidict",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "fsspec",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "certifi",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "brotli",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "npm",
+      "package": "source-map-js",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "npm",
+      "package": "proxy-addr",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "datasets",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "accelerate",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "torch",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "Starlette",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "npm",
+      "package": "esbuild",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "pyarrow",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "idna",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "Pygments",
+      "alerts": 1
+    },
+    {
+      "ecosystem": "pip",
+      "package": "requests",
+      "alerts": 1
+    }
+  ],
+  "saved": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/alerts-before.json"
+}

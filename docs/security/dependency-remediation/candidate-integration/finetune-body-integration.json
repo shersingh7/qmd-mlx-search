@@ -1,0 +1,22 @@
+{
+  "applied_files": [
+    "finetune/eval.py",
+    "finetune/eval_retrieval.py",
+    "finetune/tests/test_finetune_correctness.py",
+    "finetune/tests/test_review_compatibility.py",
+    "finetune/train.py",
+    "finetune/train_unsloth.py"
+  ],
+  "current_source_sha256": {
+    "finetune/eval.py": "5532b14620bbb8cf317f3f8be65e8019dbdd842352077afef5da0c9acb881f4e",
+    "finetune/eval_retrieval.py": "5cde4cbe78d90ea126b31be74f384b6f002f78b3c8c80366dead5d8693705709",
+    "finetune/tests/test_finetune_correctness.py": "ddb66e2dd4e67394eba2eae61a613984bf0b3212b1d2c04ed922132ad7e2e032",
+    "finetune/tests/test_review_compatibility.py": "1d2f37ce8878bd3b4fe95967c17dfbdb4b9bfca56ec92cc5acd64118085f4359",
+    "finetune/train.py": "f554cba836bd89253323677d60414742f48f254d931ad8ef902c8a707ac519e5",
+    "finetune/train_unsloth.py": "2afc5740035eb22342d1a85b356e4132ac7d8d26255bacc61b10dd72e8c44efe"
+  },
+  "preserved_headers": 15,
+  "preserved_script_locks": 15,
+  "patch_sha256": "5de6c64827c205a5169f68321beb48803179ce7649c1bbf2bd71ad41ac4bfdcd",
+  "independent_reacceptance": "pending"
+}

@@ -1,0 +1,18 @@
+{
+  "label": "release-candidate-python",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python",
+    "-q",
+    "-m",
+    "not real_model",
+    "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-python-results.xml"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 136.88176925,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-python.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-python-15r1hhe7"
+}

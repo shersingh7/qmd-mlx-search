@@ -1,0 +1,11 @@
+#!/bin/sh
+# Orchestration only: all executed workloads receive explicit, owned environments.
+ROOT=/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD
+exec /usr/bin/env -i \
+  HOME="$ROOT/environment/home" HERMES_HOME="$ROOT/environment/hermes" HERMES_DIR="$ROOT/environment/hermes" \
+  HERMES_KNOWLEDGE_DIR="$ROOT/environment/knowledge" KNOWLEDGE_DIR="$ROOT/environment/knowledge" \
+  XDG_CACHE_HOME="$ROOT/environment/cache" XDG_CONFIG_HOME="$ROOT/environment/config" XDG_DATA_HOME="$ROOT/environment/data" \
+  HF_HOME="$ROOT/environment/hf" TMPDIR="$ROOT/environment/tmp" BUN_INSTALL_CACHE_DIR="$ROOT/environment/bun" \
+  PATH=/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin:/usr/sbin:/sbin \
+  CI=1 REQUIRE_BUN=1 QMD_LLAMA_GPU=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 UV_OFFLINE=1 \
+  /Users/shersingh/.hermes/node/bin/node "$ROOT/harness/run-local.mjs" "$@"

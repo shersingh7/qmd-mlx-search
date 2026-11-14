@@ -1,0 +1,38 @@
+// Bounded comparison ONLY: same frozen TS entries; never execute archived docs JS.
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+import ts from '../mirror/node_modules/typescript/lib/typescript.js';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const input=JSON.parse(fs.readFileSync(path.join(root,'evidence/provided-input.json'),'utf8'));
+const deps=input.dependencyAliases.map(a=>({name:a.name,root:fs.realpathSync(a.target)})).sort((a,b)=>b.root.length-a.root.length);
+const aliasRoots=['original','mirror'].flatMap(tree=>input.dependencyAliases.map(a=>path.join(root,tree,'node_modules',a.name)));
+function inside(p,base){return p===base||p.startsWith(base+path.sep);}
+function compare(which){
+ const base=path.join(root,which);const reads=[];
+ function allow(name){
+  const abs=path.resolve(name);const real=fs.existsSync(abs)?fs.realpathSync(abs):abs;
+  assert.ok(inside(abs,base)||aliasRoots.some(a=>inside(abs,a))||deps.some(d=>inside(abs,d.root)),'lexical read outside approved closure: '+abs);
+  assert.ok(inside(real,base)||deps.some(d=>inside(real,d.root)),'resolved read outside approved closure: '+real);
+  return {abs,real};
+ }
+ function read(name){const p=allow(name);reads.push(p);return ts.sys.readFile(name);}
+ const config=ts.readConfigFile(path.join(base,'tsconfig.json'),read);assert.equal(config.error,undefined);
+ const parsed=ts.parseJsonConfigFileContent(config.config,{...ts.sys,readFile:read},base);assert.deepEqual(parsed.errors,[]);
+ const entries=parsed.fileNames.filter(n=>n.endsWith('.ts'));
+ assert.ok(entries.every(p=>inside(p,base)));assert.ok(!entries.some(p=>p.endsWith('.mjs')));
+ const host=ts.createCompilerHost(parsed.options);const get=host.getSourceFile.bind(host);
+ host.readFile=read;
+ host.getSourceFile=(name,...args)=>{allow(name);return get(name,...args);};
+ const program=ts.createProgram(entries,parsed.options,host);
+ const diagnostic=ts.getPreEmitDiagnostics(program).map(d=>({file:d.file?path.relative(base,d.file.fileName):null,code:d.code,start:d.start??null,message:ts.flattenDiagnosticMessageText(d.messageText,'\n')}));
+ const originals=new Set(Object.keys(input.source_sha256).map(x=>path.join(base,x)));
+ const importedOwn=program.getSourceFiles().filter(s=>inside(s.fileName,base)&&!s.fileName.includes('/node_modules/')).map(s=>s.fileName);
+ for(const name of importedOwn)assert.ok(originals.has(name)||name===path.join(base,'test/helpers/recovery-bootstrap-diagnostics.mjs'),'undeclared own source: '+name);
+ return {which,entryCount:entries.length,entries:entries.map(n=>path.relative(base,n)),excludedJsEntryCount:parsed.fileNames.length-entries.length,sourceCount:program.getSourceFiles().length,readCount:reads.length,reads,ownSourceFiles:importedOwn.map(n=>path.relative(base,n)),diagnostics:diagnostic};
+}
+const before=compare('original');const after=compare('mirror');assert.deepEqual(after.entries,before.entries);assert.deepEqual(after.diagnostics,before.diagnostics);
+const report={status:'PASS_UNCHANGED_BASELINE',scope:'Same TS source entries and imported JS under unchanged product tsconfig; JS entrypoints (including historical docs with absolute imports) deliberately not entrypoints in either bounded comparison. All compiler source reads guarded to own snapshot or explicitly approved read-use dependency targets. Not a canonical full/root typecheck, not the parent 61 baseline gate.',before,after,newDiagnostics:0};
+fs.writeFileSync(path.join(root,'evidence/bounded-types.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({status:report.status,before:before.diagnostics.length,after:after.diagnostics.length,newDiagnostics:0,entryCount:before.entryCount,beforeSourceCount:before.sourceCount,afterSourceCount:after.sourceCount,beforeReadCount:before.readCount,afterReadCount:after.readCount,excludedJsEntryCount:before.excludedJsEntryCount,scope:report.scope}));

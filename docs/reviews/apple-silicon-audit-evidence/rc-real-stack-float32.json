@@ -1,0 +1,18 @@
+{
+  "label": "rc-real-stack-float32",
+  "command": [
+    "/Users/shersingh/github/qmd-mlx-search/.venv/bin/python",
+    "scripts/verify_local_stack.py",
+    "--model",
+    "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+    "--dtype",
+    "float32",
+    "--output",
+    "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/rc-real-stack-float32.json"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 5.381463624999999,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o"
+}

@@ -16,17 +16,42 @@ import argparse
 import hashlib
 import http.server
 import json
-import math
 import os
 import signal
-import socket
 import socketserver
-import struct
 import sys
 import threading
 import time
 from typing import Any, Optional
+from urllib.parse import quote
 import numpy as np
+
+if __package__:
+    from .protocol import (BoundedDeadlineReader, DeadlineExceededError, MLXServerError, ProtocolError,
+                           decode_json_request, encode_binary_embeddings, parse_http_body_headers,
+                           parse_timeout, validate_embed_request)
+else:  # Preserve direct execution of scripts/qmd_mlx/fake_server.py.
+    from protocol import (BoundedDeadlineReader, DeadlineExceededError, MLXServerError, ProtocolError,
+                          decode_json_request, encode_binary_embeddings, parse_http_body_headers,
+                          parse_timeout, validate_embed_request)
+
+
+class _FakeDescriptorMixin:
+    model_name: str
+    dims: int
+
+    def get_descriptor(self, requested_dims: Optional[int] = None) -> dict[str, Any]:
+        return {
+            "version": 1,
+            "backend": "mlx_fake",
+            "model": self.model_name,
+            "nativeDimensions": self.dims,
+            "outputDimensions": min(requested_dims or self.dims, self.dims),
+            "normalized": True,
+            "maxSequenceLength": 2048,
+            "pooling": "mean",
+            "synthetic": True,
+        }
 
 
 def generate_deterministic_embedding(text: str, dims: int = 2560) -> np.ndarray:
@@ -72,16 +97,7 @@ class FakeMLXControlHandler(http.server.BaseHTTPRequestHandler):
                     "completed_requests": server.request_count,
                     "last_active_duration_s": 0.0,
                 },
-                "descriptor": {
-                    "version": 1,
-                    "backend": "mlx_fake",
-                    "model": server.model_name,
-                    "nativeDimensions": server.dims,
-                    "outputDimensions": server.dims,
-                    "normalized": True,
-                    "maxSequenceLength": 2048,
-                    "pooling": "mean",
-                },
+                "descriptor": server.get_descriptor(),
             }
             body = json.dumps(payload).encode("utf-8")
             self.send_response(200)
@@ -98,16 +114,7 @@ class FakeMLXControlHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         elif self.path in ("/descriptor", "/descriptor/"):
-            body = json.dumps({
-                "version": 1,
-                "backend": "mlx_fake",
-                "model": server.model_name,
-                "nativeDimensions": server.dims,
-                "outputDimensions": server.dims,
-                "normalized": True,
-                "maxSequenceLength": 2048,
-                "pooling": "mean",
-            }).encode("utf-8")
+            body = json.dumps(server.get_descriptor()).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
@@ -120,6 +127,37 @@ class FakeMLXControlHandler(http.server.BaseHTTPRequestHandler):
 
 class FakeMLXInferenceHandler(http.server.BaseHTTPRequestHandler):
     """Handles inference and data queries on the primary inference port."""
+
+    def setup(self):
+        super().setup()
+        self.rfile.close()
+        self.rfile = BoundedDeadlineReader(self.connection, time.monotonic() + 15.0)  # type: ignore
+
+    def _send_error_json(self, exc: MLXServerError):
+        body = json.dumps({"error": str(exc), "type": exc.error_type}).encode()
+        self.send_response(exc.status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Connection", "close")
+        self.close_connection = True
+        self.end_headers()
+        self.wfile.write(body)
+
+    def handle_one_request(self):
+        self._request_started_at = time.monotonic()
+        self.request_version = "HTTP/1.1"
+        self.requestline = ""
+        self.command = ""
+        self.rfile.set_limits(self._request_started_at + 15.0, 16384)
+        try:
+            super().handle_one_request()
+        except MLXServerError as exc:
+            try:
+                self._send_error_json(exc)
+            except OSError:
+                self.close_connection = True
+        except OSError:
+            self.close_connection = True
 
     def log_message(self, format, *args):
         pass
@@ -149,16 +187,7 @@ class FakeMLXInferenceHandler(http.server.BaseHTTPRequestHandler):
                     "completed_requests": server.request_count,
                     "last_active_duration_s": 0.0,
                 },
-                "descriptor": {
-                    "version": 1,
-                    "backend": "mlx_fake",
-                    "model": server.model_name,
-                    "nativeDimensions": server.dims,
-                    "outputDimensions": server.dims,
-                    "normalized": True,
-                    "maxSequenceLength": 2048,
-                    "pooling": "mean",
-                },
+                "descriptor": server.get_descriptor(),
             }
             body = json.dumps(payload).encode("utf-8")
             self.send_response(200)
@@ -175,16 +204,7 @@ class FakeMLXInferenceHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         elif self.path in ("/descriptor", "/descriptor/"):
-            body = json.dumps({
-                "version": 1,
-                "backend": "mlx_fake",
-                "model": server.model_name,
-                "nativeDimensions": server.dims,
-                "outputDimensions": server.dims,
-                "normalized": True,
-                "maxSequenceLength": 2048,
-                "pooling": "mean",
-            }).encode("utf-8")
+            body = json.dumps(server.get_descriptor()).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
@@ -215,84 +235,59 @@ class FakeMLXInferenceHandler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         server: FakeMLXInferenceServer = self.server  # type: ignore
+        path = self.path.split("?", 1)[0].rstrip("/")
+        if path not in ("/embed", "/embed-bin"):
+            self.send_response(404)
+            self.send_header("Content-Length", "0")
+            self.send_header("Connection", "close")
+            self.close_connection = True
+            self.end_headers()
+            return
+        length = parse_http_body_headers(self.headers, 10 * 1024 * 1024)
+        header_timeout = self.headers.get("X-Request-Timeout")
+        timeout = parse_timeout(header_val=header_timeout)
+        self.rfile.set_limits(min(self._request_started_at + timeout, time.monotonic() + 15.0), length)
+        raw_body = self.rfile.read(length)
+        if len(raw_body) != length:
+            raise ProtocolError("Incomplete request body read")
+        data = decode_json_request(raw_body)
+        texts, requested_dims, _ = validate_embed_request(data)
+        timeout = parse_timeout(data, header_timeout)
+        if time.monotonic() >= self._request_started_at + timeout:
+            raise DeadlineExceededError("Request deadline exceeded during upload")
 
-        # Check hang simulation trigger
         if server.hang_on_embed or (
             server.hang_after_requests > 0 and server.request_count >= server.hang_after_requests
         ):
-            # Hang deliberately to simulate stuck worker
+            # Deliberate opt-in fault simulation, not a real inference path.
             while True:
                 time.sleep(1.0)
 
-        content_length = int(self.headers.get("Content-Length", 0))
-        raw_body = self.rfile.read(content_length)
-
-        if self.path in ("/embed", "/embed/"):
-            try:
-                data = json.loads(raw_body.decode("utf-8"))
-            except Exception:
-                self.send_response(400)
-                self.end_headers()
-                return
-
-            texts = data.get("texts", [])
-            if not isinstance(texts, list):
-                self.send_response(400)
-                self.end_headers()
-                return
-
-            server.request_count += 1
-            dims = data.get("dims", server.dims) or server.dims
-
-            embeddings = []
-            for t in texts:
-                emb = generate_deterministic_embedding(str(t), dims=dims)
-                embeddings.append(emb.tolist())
-
-            resp_payload = {
-                "embeddings": embeddings,
-                "model": server.model_name,
-                "dims": dims,
-                "count": len(embeddings),
-            }
-            body = json.dumps(resp_payload).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-
-        elif self.path in ("/embed-bin", "/embed-bin/"):
-            try:
-                data = json.loads(raw_body.decode("utf-8"))
-            except Exception:
-                self.send_response(400)
-                self.end_headers()
-                return
-
-            texts = data.get("texts", [])
-            server.request_count += 1
-            dims = data.get("dims", server.dims) or server.dims
-
-            count = len(texts)
-            arr = np.empty((count, dims), dtype=np.float32)
-            for i, t in enumerate(texts):
-                arr[i] = generate_deterministic_embedding(str(t), dims=dims)
-
-            header = struct.pack("<ii", count, dims)
-            body = header + arr.tobytes()
-
+        descriptor = server.get_descriptor(requested_dims)
+        dims = descriptor["outputDimensions"]
+        count = len(texts)
+        arr = np.empty((count, dims), dtype=np.float32)
+        for i, text in enumerate(texts):
+            arr[i] = generate_deterministic_embedding(text, dims=dims)
+        server.request_count += 1
+        if path == "/embed-bin":
+            body = encode_binary_embeddings(arr, count, dims)
             self.send_response(200)
             self.send_header("Content-Type", "application/octet-stream")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self.send_header("X-QMD-Embedding-Descriptor", quote(json.dumps(descriptor), safe=""))
         else:
-            self.send_response(404)
-            self.end_headers()
+            body = json.dumps({
+                "embeddings": arr.tolist(), "model": server.model_name,
+                "dims": dims, "count": count, "descriptor": descriptor,
+            }, allow_nan=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 
-class FakeMLXControlServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class FakeMLXControlServer(_FakeDescriptorMixin, socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
@@ -314,7 +309,7 @@ class FakeMLXControlServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         self.start_time = time.time()
 
 
-class FakeMLXInferenceServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class FakeMLXInferenceServer(_FakeDescriptorMixin, socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 

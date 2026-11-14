@@ -1,0 +1,192 @@
+"""Fresh held-out protocol/clock/ownership tests; source is never rewritten."""
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import subprocess
+import sys
+import time
+import traceback
+
+ROOT = Path(__file__).resolve().parent
+SOURCE = ROOT / 'mirror/scripts/phase5_recovery_process.py'
+ENV = json.loads((ROOT / 'environment.json').read_text())
+CASES = [
+    {'name': 'valid-fragmented', 'positive': True, 'timeout': 5000, 'fragment': .010},
+    {'name': 'valid-canonical-containment', 'positive': True, 'timeout': 5000, 'contained': True},
+    {'name': 'prepared-transport-charged', 'timeout': 800, 'prepared_delay': .150, 'computed_budget': True, 'work_then_sleep': True},
+    {'name': 'fragmentation-does-not-refresh-lease', 'fragment': .050, 'child_gate_delay': .120, 'forward_hold': 1.300},
+    {'name': 'consumed-S-does-not-refresh-lease', 's_read_delay': .300},
+    {'name': 'delayed-fork-does-not-refresh-lease', 'pre_fork_delay': .300},
+    {'name': 'canonical-containment-does-not-refresh-lease', 'contained': True, 'containment_delay': .300, 'forward_hold': 1.300},
+    *[{'name': 'unexpired-final-gate-' + byte, 'queue_before_forward': True, 'cancel_byte': byte, 'forward_hold': 1.300} for byte in ['K', 'T', 'X']],
+    {'name': 'queued-K-reader-handoff', 'poll_hold': 1.300, 'child_gate_delay': .050, 'cancel_byte': 'K'},
+    {'name': 'child-gate-real-EBADF', 'child_fd_error': True, 'forward_hold': 1.300},
+    {'name': 'supervisor-control-real-EBADF', 'owner_control_error': True, 'child_gate_delay': .050},
+    {'name': 'ready-proof-real-EBADF', 'proof_error': True},
+    {'name': 'double-TERM-at-exception-transfer', 'double_term': True, 'consumed_hold': 1.300},
+]
+
+def alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+
+PREFIX = sys.argv[1] if len(sys.argv) > 1 else 'heldouts'
+if len(sys.argv) > 2:
+    CASES = [item for item in CASES if item['name'] in sys.argv[2:]]
+    assert CASES, sys.argv
+results = []
+for spec in CASES:
+    case = ROOT / PREFIX / spec['name']
+    case.mkdir(parents=True)
+    spec = {**spec, 'root': str(case), 'source': str(SOURCE)}
+    (case / 'spec.json').write_text(json.dumps(spec, indent=2) + '\n')
+    work = case / 'work'
+    command_code = 'from pathlib import Path;Path(%r).write_text("actual-user-work")' % str(work)
+    if spec.get('work_then_sleep'):
+        command_code += ';import time;time.sleep(60)'
+    config = {'command': ['/usr/bin/python3', '-B', '-S', '-c', command_code],
+              'timeoutMs': spec.get('timeout', 200), 'contained': spec.get('contained', False)}
+    sentinel = subprocess.Popen(['/usr/bin/python3', '-B', '-S', '-c', 'import time;time.sleep(60)'], env=ENV,
+        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    process = subprocess.Popen(['/usr/bin/python3', '-B', '-S', '-u', str(ROOT / 'heldout_wrapper.py'), json.dumps(config), str(case / 'spec.json')],
+        env=ENV, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+    started = time.monotonic()
+    original_deadline = started + config['timeoutMs']/1000
+    guard_deadline = started + (5 if spec.get('positive') else 1.8)
+    stdout, stderr, pending = b'', b'', b''
+    streams = {process.stdout.fileno(): 'stdout', process.stderr.fileno(): 'stderr'}
+    messages, sent, actions = [], [], []
+    scheduled = []
+    queue_sent, term_sent, guard_fired = False, False, False
+    final_kills = []
+    error = None
+    try:
+        while streams:
+            now = time.monotonic()
+            if now >= guard_deadline:
+                guard_fired = True
+                break
+            if not queue_sent and spec.get('cancel_byte'):
+                kind = 'await-cancel' if spec.get('queue_before_forward') else 'e-forwarded'
+                if (case / ('event-' + kind)).exists():
+                    data = spec['cancel_byte'].encode()
+                    process.stdin.write(data); process.stdin.flush()
+                    queue_sent = True
+                    actions.append({'action': 'queued-byte', 'dataHex': data.hex(), 'elapsedMs': (now-started)*1000})
+            if not term_sent and spec.get('double_term') and (case / 'event-e-consumed').exists():
+                process.send_signal(signal.SIGTERM)
+                term_sent = True
+                actions.append({'action': 'actual-parent-TERM', 'elapsedMs': (now-started)*1000})
+            due = [item for item in scheduled if item[0] <= now]
+            scheduled = [item for item in scheduled if item[0] > now]
+            for _, data in due:
+                process.stdin.write(data); process.stdin.flush()
+                sent.append({'hex': data.hex(), 'elapsedMs': (time.monotonic()-started)*1000})
+            readable, _, _ = select.select(list(streams), [], [], .002)
+            for fd in readable:
+                data = os.read(fd, 65536)
+                if not data:
+                    streams.pop(fd)
+                    continue
+                if streams[fd] == 'stderr':
+                    stderr += data
+                    continue
+                stdout += data
+                pending += data
+                while b'\n' in pending:
+                    line, pending = pending.split(b'\n', 1)
+                    message = json.loads(line)
+                    messages.append(message)
+                    if message['type'] == 'prepared':
+                        remaining = int((original_deadline-time.monotonic())*1000) if spec.get('computed_budget') else config['timeoutMs']
+                        assert remaining > 0
+                        frame = ('S%d\n' % remaining).encode()
+                        actions.append({'action': 'budget-calculated-after-prepared', 'remainingMs': remaining, 'elapsedMs': (time.monotonic()-started)*1000})
+                        if spec.get('fragment'):
+                            pieces = [frame[:1], frame[1:2], frame[2:-1], frame[-1:]]
+                            scheduled += [(time.monotonic()+i*spec['fragment'], part) for i, part in enumerate(pieces) if part]
+                        else:
+                            process.stdin.write(frame); process.stdin.flush()
+                            sent.append({'hex': frame.hex(), 'elapsedMs': (time.monotonic()-started)*1000})
+                    elif message['type'] == 'ready':
+                        process.stdin.write(b'E'); process.stdin.flush()
+                        sent.append({'hex': '45', 'elapsedMs': (time.monotonic()-started)*1000})
+        if not guard_fired:
+            process.wait(timeout=max(.001, guard_deadline-time.monotonic()))
+        elapsed = (time.monotonic()-started)*1000
+        # Retain the original hold window before any fixture cleanup.
+        if not spec.get('positive'):
+            time.sleep(max(0, 1.450-(time.monotonic()-started)))
+        events = [json.loads(line) for line in (case / 'events.jsonl').read_text().splitlines()]
+        forks = [item['child'] for item in events if item['kind'] == 'fork-parent' and item['pid'] == process.pid]
+        reaps = [item['reaped'] for item in events if item['kind'] == 'waitpid' and item['pid'] == process.pid]
+        gates = [item for item in events if item['kind'] == 'child-gate-result']
+        group_signals = [item for item in events if item['kind'] == 'group-signal' and item['pid'] != process.pid]
+        record = {'name': spec['name'], 'guardFired': guard_fired, 'elapsedMs': elapsed, 'exitCode': process.returncode,
+                  'supervisorPid': process.pid, 'supervisorAbsent': not alive(process.pid), 'workers': forks,
+                  'workersAbsent': bool(forks) and all(not alive(pid) for pid in forks), 'reapedWorkers': reaps,
+                  'sentinelAlive': sentinel.poll() is None, 'work': work.read_text() if work.exists() else None,
+                  'messages': messages, 'gates': gates, 'groupSignals': group_signals, 'actions': actions,
+                  'sent': sent, 'stderr': stderr.decode(errors='replace'), 'eventCount': len(events)}
+        (case / 'before-finally.json').write_text(json.dumps(record, indent=2) + '\n')
+        (case / 'stdout.log').write_bytes(stdout)
+        (case / 'stderr.log').write_bytes(stderr)
+        assert not guard_fired and record['supervisorAbsent'] and record['workersAbsent'] and record['sentinelAlive'], record
+        assert set(forks) <= set(reaps), record
+        assert record['work'] == ('actual-user-work' if spec.get('positive') or spec.get('work_then_sleep') else None), record
+        if not spec.get('proof_error'):
+            assert messages[-1]['type'] == 'cleanup' and messages[-1]['childReaped'] and messages[-1]['groupTerminated'] and messages[-1]['sessionTerminated'], record
+        else:
+            assert not any(item['type'] == 'cleanup' for item in messages), record
+        assert all(not item['inheritable'] and not item['blocking'] for item in events if item['kind'] == 'child-gate-enter'), events
+        assert all(item['pinned'] and item['termBlocked'] and item['currentSession'] == process.pid and item['group'] == process.pid for item in group_signals), group_signals
+        if spec.get('queue_before_forward') or spec.get('child_fd_error'):
+            assert gates and not gates[-1]['allowed'] and gates[-1]['remainingMs'] > 0, record
+        if spec.get('cancel_byte'):
+            assert queue_sent
+            assert not any(item['preExec'] and item['dataHex'] == spec['cancel_byte'].encode().hex() for item in events if item['kind'] == 'control-read'), events
+        if spec.get('poll_hold'):
+            assert any(item['kind'] == 'pre-exec-readable-held' for item in events), events
+            assert gates and not gates[-1]['allowed'] and gates[-1]['remainingMs'] > 0, record
+        if spec.get('double_term'):
+            assert term_sent and any(item['kind'] == 'second-term-at-exception-transfer' for item in events), events
+            assert sum(item['kind'] == 'interrupt-handler' for item in events) >= 2, events
+        if spec.get('containment_delay'):
+            assert any(item['kind'] == 'containment-applied' for item in events) and gates and not gates[-1]['allowed'] and gates[-1]['remainingMs'] < 0, record
+        if spec.get('fragment') and not spec.get('positive'):
+            assert gates and not gates[-1]['allowed'] and gates[-1]['remainingMs'] < 0, record
+        if spec.get('prepared_delay'):
+            anchor = next(item for item in events if item['kind'] == 'prepared-anchor')
+            fork = next(item for item in events if item['kind'] == 'fork-parent')
+            budget = next(item['remainingMs'] for item in actions if item['action'] == 'budget-calculated-after-prepared')
+            assert abs(fork['inheritedDeadline'] - (anchor['preparedAt'] + budget/1000)) < .000001, events
+            assert gates and gates[-1]['deadline'] == fork['inheritedDeadline'], record
+            assert elapsed < config['timeoutMs'], record
+        record['passed'] = True
+    except BaseException:
+        error = traceback.format_exc()
+        (case / 'harness-or-contract-error.txt').write_text(error)
+        record = {'name': spec['name'], 'passed': False, 'error': error, 'guardFired': guard_fired}
+    finally:
+        # No signals are sent to stale, reaped, or historical PIDs. Popen retains
+        # this exact live supervisor; normal cases never use this cleanup path.
+        if process.poll() is None:
+            final_kills.append(process.pid)
+            process.send_signal(signal.SIGCONT)
+            process.kill()
+            process.wait(timeout=2)
+        if sentinel.poll() is None:
+            sentinel.kill(); sentinel.wait()
+        (case / 'finally.json').write_text(json.dumps({'fixtureKills': final_kills, 'sentinelAbsent': sentinel.poll() is not None}, indent=2) + '\n')
+        record['fixtureKills'] = final_kills
+        results.append(record)
+        (ROOT / ('heldout-results-' + PREFIX + '.json')).write_text(json.dumps(results, indent=2) + '\n')
+        print(json.dumps({key: record.get(key) for key in ['name', 'passed', 'elapsedMs', 'guardFired', 'work', 'fixtureKills', 'error']}), flush=True)
+assert len(results) == len(CASES)
+assert all(item.get('passed') and not item['fixtureKills'] for item in results)
+print(json.dumps({'heldoutCases': len(results), 'passed': sum(item.get('passed', False) for item in results), 'failed': sum(not item.get('passed', False) for item in results)}))

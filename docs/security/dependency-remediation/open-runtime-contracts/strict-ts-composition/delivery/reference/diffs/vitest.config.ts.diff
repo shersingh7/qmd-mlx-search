@@ -1,0 +1,13 @@
+--- baseline/vitest.config.ts
++++ accepted19/vitest.config.ts
+@@ -7,5 +7,10 @@
+     maxWorkers: 2,
+     testTimeout: 30000,
+     include: ["test/**/*.test.ts"],
++    // Bun's ESM namespace membership trips Vitest's CJS default interop.
++    // Transform only Zod on that test host; leave native product imports alone.
++    server: {
++      deps: { inline: process.versions.bun ? ["zod"] : [] },
++    },
+   },
+ });

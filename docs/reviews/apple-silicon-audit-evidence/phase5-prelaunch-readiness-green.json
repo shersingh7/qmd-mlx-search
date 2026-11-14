@@ -1,0 +1,19 @@
+{
+  "label": "phase5-prelaunch-readiness-green",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python/test_qualification_http_status.py",
+    "test/python/test_phase5_qualification.py",
+    "test/python/test_audit_qualification.py",
+    "test/python/test_qualification_review_regressions.py",
+    "test/python/test_mlx_sustained.py",
+    "-q"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 40.839640917,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-green.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-green-hld_63ph"
+}

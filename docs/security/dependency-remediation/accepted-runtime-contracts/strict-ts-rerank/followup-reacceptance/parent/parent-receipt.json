@@ -1,0 +1,28 @@
+{
+  "node": {
+    "passed": 4,
+    "files": 2,
+    "tool_calls": 20,
+    "positive_inputs": 4,
+    "rejected_inputs": 14,
+    "rejected_outputs": 2,
+    "external_sdk_identity": true,
+    "same_zod_instance": true,
+    "zero_network_native_attempts": true,
+    "actual_exec_path": "/Users/shersingh/.hermes/node/bin/node"
+  },
+  "bun": {
+    "passed": 4,
+    "files": 2,
+    "tool_calls": 20,
+    "positive_inputs": 4,
+    "rejected_inputs": 14,
+    "rejected_outputs": 2,
+    "external_sdk_identity": true,
+    "same_zod_instance": false,
+    "zero_network_native_attempts": true,
+    "actual_exec_path": "/Users/shersingh/.bun/bin/bun"
+  },
+  "copied_sources_unchanged": true,
+  "scope": "Actual SDK schema/instance boundary and documented prefix breadth; no production/recovery/full-suite qualification"
+}

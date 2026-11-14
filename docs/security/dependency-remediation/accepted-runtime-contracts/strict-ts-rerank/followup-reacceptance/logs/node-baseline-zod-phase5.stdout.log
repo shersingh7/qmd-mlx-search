@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+···················
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  21:15:43
+   Duration  705ms (transform 231ms, setup 20ms, import 636ms, tests 48ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/node-baseline-zod-phase5-results.json

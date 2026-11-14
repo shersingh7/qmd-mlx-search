@@ -1,0 +1,155 @@
+{
+  "merge_paths": [
+    {
+      "path": ".github/workflows/gguf-native-image-qualification.yml",
+      "preimage": {
+        "status": "existing",
+        "sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+        "bytes": 18224
+      },
+      "final": {
+        "sha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+        "bytes": 25847,
+        "lines": 418
+      }
+    },
+    {
+      "path": "test/security/test_gguf_workflow_controller.py",
+      "preimage": {
+        "status": "absent",
+        "sha256": null,
+        "bytes": 0
+      },
+      "final": {
+        "sha256": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+        "bytes": 19338,
+        "lines": 371
+      }
+    },
+    {
+      "path": "test/security/fixtures/gguf_workflow_fake_cli.py",
+      "preimage": {
+        "status": "absent",
+        "sha256": null,
+        "bytes": 0
+      },
+      "final": {
+        "sha256": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78",
+        "bytes": 4697,
+        "lines": 109
+      }
+    }
+  ],
+  "diff_stat": [
+    {
+      "path": ".github/workflows/gguf-native-image-qualification.yml",
+      "added": 156,
+      "removed": 25
+    },
+    {
+      "path": "test/security/test_gguf_workflow_controller.py",
+      "added": 371,
+      "removed": 0
+    },
+    {
+      "path": "test/security/fixtures/gguf_workflow_fake_cli.py",
+      "added": 109,
+      "removed": 0
+    }
+  ],
+  "workflow_repair_patch": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/workflow-repair.patch",
+    "sha256": "db0e846e4d8f06a538815a8d9a765462772f90dccf3253698dbc205df94edd88"
+  },
+  "unintegrated_new_files_patch": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/unintegrated-new-files.patch",
+    "sha256": "ba2463a0f8417134b85ebe51b001a1b29b29208c8881a1943f44239f03aee932"
+  },
+  "controller_body_sha256_without_newline": "80444b357af0fe1e53675f9441d8a9400d66d687224c170bf5cdb2de3ce2540c",
+  "generated_controller_sha256_with_newline": "980e4d63bcaabe8447447f95dae1b12739306641c9f0701729948149b27fef85",
+  "generated_owner_sha256": "06cfe818b581d40d0f1d7ca41f023c1434550ac1a1d66e8abbe2ac03966f3cb6",
+  "frozen_launcher_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+  "frozen_probe_data_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+  "results": {
+    "baseline_supplied": {
+      "summary": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/baseline-safe-supplied/evidence/synthetic-reproduced-original/summary.json",
+      "cases": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "fixture_errors": 0,
+      "expected_nonzero": 66,
+      "recorded_actual_nonzero": 66,
+      "recorded_actual_exit_rows": 74
+    },
+    "baseline_heldout": {
+      "summary": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/baseline-safe-heldout/heldout/summary.json",
+      "cases": 34,
+      "passed": 30,
+      "failed": 4,
+      "skipped": 0,
+      "fixture_errors": 0,
+      "expected_nonzero": 27,
+      "recorded_actual_nonzero": 25,
+      "recorded_actual_exit_rows": 34
+    },
+    "repaired_supplied": {
+      "summary": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/verified-supplied/evidence/synthetic-repaired/summary.json",
+      "cases": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "fixture_errors": 0,
+      "expected_nonzero": 66,
+      "recorded_actual_nonzero": 66,
+      "recorded_actual_exit_rows": 74
+    },
+    "repaired_original_characterization": {
+      "summary": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/verified-heldout-characterization/heldout/summary.json",
+      "cases": 34,
+      "passed": 33,
+      "failed": 1,
+      "skipped": 0,
+      "fixture_errors": 1,
+      "expected_nonzero": 27,
+      "recorded_actual_nonzero": 26,
+      "recorded_actual_exit_rows": 33
+    },
+    "repaired_positive_heldout": {
+      "summary": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/verified-heldout-positive/heldout/summary.json",
+      "cases": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "fixture_errors": 0,
+      "expected_nonzero": 27,
+      "recorded_actual_nonzero": 27,
+      "recorded_actual_exit_rows": 34
+    }
+  },
+  "permanent_tests": {
+    "command": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+      "-I",
+      "-B",
+      "-S",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "test/security",
+      "-p",
+      "test_gguf_workflow_controller.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "tests": 26,
+    "elapsed_seconds": 41.206,
+    "passed": 26,
+    "failures": 0,
+    "errors": 0
+  },
+  "independent_SPEC": "PENDING_REACCEPTANCE",
+  "independent_QUALITY": "PENDING_SPEC_GATE",
+  "real_docker_ci_native_execution": false
+}

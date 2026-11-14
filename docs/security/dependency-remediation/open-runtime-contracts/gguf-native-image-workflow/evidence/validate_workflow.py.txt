@@ -1,0 +1,68 @@
+"""Validate only this owned workflow; no application or image execution."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import subprocess
+import sys
+
+ROOT = Path(__file__).parent.parent
+WORKFLOW = ROOT / 'mirror/.github/workflows/gguf-native-image-qualification.yml'
+ENV = {
+    'PATH': '/usr/bin:/bin', 'HOME': str(ROOT / 'home'),
+    'HERMES_HOME': str(ROOT / 'hermes'), 'KNOWLEDGE_DIR': str(ROOT / 'knowledge'),
+    'XDG_CACHE_HOME': str(ROOT / 'cache'), 'XDG_CONFIG_HOME': str(ROOT / 'config'),
+    'XDG_DATA_HOME': str(ROOT / 'data'), 'TMPDIR': str(ROOT / 'tmp'),
+    'HF_HOME': str(ROOT / 'hf'), 'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1',
+    'HF_DATASETS_OFFLINE': '1', 'QMD_LLAMA_GPU': 'false', 'CUDA_VISIBLE_DEVICES': '',
+    'PYTHONDONTWRITEBYTECODE': '1',
+}
+
+def extract():
+    text = WORKFLOW.read_text()
+    marker = '        run: |\n'
+    assert text.count(marker) == 1
+    block = text.split(marker, 1)[1]
+    assert all(not line or line.startswith('          ') for line in block.splitlines())
+    script = '\n'.join(line[10:] if line else '' for line in block.splitlines()) + '\n'
+    return text, script
+
+def main():
+    phase = sys.argv[1] if len(sys.argv) > 1 else 'final'
+    receipt = {'phase': phase, 'image_execution': False, 'checks': []}
+    try:
+        text, script = extract()
+        assert '  pull_request:' in text
+        assert '  push:\n    branches: [hermes/apple-silicon-audit]' in text
+        assert '  workflow_dispatch:' in text
+        assert 'pull_request_target' not in text
+        assert 'persist-credentials: false' in text
+        assert 'd23441a48e516b6c34aea4fa41551a30e30af803' in text
+        assert '--native-only' not in script
+        assert 'c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e' not in script
+        assert 'ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@' not in script
+        (ROOT / 'evidence/generated-step.bash').write_text(script)
+        py = script.split("<<'PY'\n", 1)[1].rsplit('\nPY\n', 1)[0] + '\n'
+        compile(py, str(WORKFLOW) + ':inline-python', 'exec')
+        (ROOT / 'evidence/generated-controller.py').write_text(py)
+        receipt['checks'].append({'check': 'structural assertions + inline Python compile', 'exit_code': 0})
+        linter = Path('/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint')
+        assert hashlib.sha256(linter.read_bytes()).hexdigest() == '8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388'
+        for name, command in [
+            ('bash syntax', ['/bin/bash', '-n', str(ROOT / 'evidence/generated-step.bash')]),
+            ('actionlint version', [str(linter), '-version']),
+            ('actionlint', [str(linter), '-no-color', '-shellcheck=', '-pyflakes=', str(WORKFLOW)]),
+        ]:
+            result = subprocess.run(command, env=ENV, cwd=ROOT, capture_output=True, text=True, timeout=30)
+            receipt['checks'].append({'check': name, 'command': command, 'exit_code': result.returncode,
+                                      'stdout': result.stdout, 'stderr': result.stderr})
+            assert result.returncode == 0, name
+        receipt['passed'] = True
+    except (OSError, AssertionError, ValueError) as exc:
+        receipt.update(passed=False, error=f'{type(exc).__name__}: {exc}')
+    (ROOT / f'evidence/validation-{phase}.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    print(json.dumps(receipt, indent=2))
+    return 0 if receipt['passed'] else 1
+
+if __name__ == '__main__':
+    raise SystemExit(main())

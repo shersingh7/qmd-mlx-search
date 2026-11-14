@@ -1,0 +1,36 @@
+{
+  "mode": "independent-v2-installed",
+  "status": 0,
+  "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "python_executable": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python3.12",
+  "pip_present": false,
+  "versions": {
+    "torch": "2.15.0",
+    "transformers": "5.22.2",
+    "accelerate": "1.15.0+qmd.2",
+    "gguf": "0.19.0",
+    "numpy": "2.5.4",
+    "sentencepiece": "0.2.3",
+    "protobuf": "7.36.2"
+  },
+  "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/gguf_reader.py",
+  "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad",
+  "helper_path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/gguf_toolchain.py",
+  "helper_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+  "compiled_sources": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/constants.py": "19e98ab20fb4d197efb4e23e5fc8de21a8c0d528af1dffc14695af84a0015f24",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/lazy.py": "ec35541320443e1bdc293e39c699fa5d1adb7fb594f3f87af093b4c756a4ebe2",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/gguf_reader.py": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/quants.py": "db403c3b2292d3f2c5cfef4109d4b5745f437b5599c7afc94d4b97feca7e9247",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/gguf_writer.py": "f34418d0bb2004980eb26d15aec665186fbf17687a3b28e1daf40216da5c1268",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/tensor_mapping.py": "64c24cf3560015d8faf30be5d801fe7b511349f9ba2d96fa33782b3a2efbc624",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/vocab.py": "c3a6ddea051579d48e1a591c1cb481bddd4439b756952531a25c4cddf6382b97",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/utility.py": "da920e2c62166ec9f30e407e9fb35ec29fda671310ffbf0f8ce856b62f1c70d7",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/gguf/metadata.py": "c871748f49f7fb8e67aa9a18867adf8a8ba862f0f1f4a89a0a0e285daa52a312",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5"
+  }
+}

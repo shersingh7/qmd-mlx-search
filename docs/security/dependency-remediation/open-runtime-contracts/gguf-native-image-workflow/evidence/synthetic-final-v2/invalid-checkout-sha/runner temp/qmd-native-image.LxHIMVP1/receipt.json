@@ -1,0 +1,41 @@
+{
+  "arm64_converter_training_gpu_cloud_qualified": false,
+  "cleanup": {
+    "absence_verified": null,
+    "status": "container-command-not-attempted"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-checkout-sha/public work space",
+        "rev-parse",
+        "--verify",
+        "HEAD"
+      ],
+      "exit": 0,
+      "name": "checkout",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "not-a-sha\n",
+      "timeout_seconds": 15
+    }
+  ],
+  "context_sha": "3333333333333333333333333333333333333333",
+  "error": "Refused: invalid actual checkout SHA",
+  "event": "pull_request",
+  "event_head_sha": "2222222222222222222222222222222222222222",
+  "final_exit": 1,
+  "hard_termination_limit": "SIGKILL, runner loss or job hard timeout can prevent cleanup/readback; no absence proof then.",
+  "primary_exit": 1,
+  "probe_exit": null,
+  "runner": {
+    "arch": "X64",
+    "name": "SYNTHETIC fixture runner",
+    "os": "Linux"
+  },
+  "schema": 1,
+  "scope": "native Linux amd64 CPU C/C++ prerequisites only",
+  "status": "not-qualified"
+}

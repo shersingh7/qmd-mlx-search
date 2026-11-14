@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+R=/Users/shersingh/.hermes/cache/scratch/qmd-parent-types-compose-ilo1y_9c
+export HOME="$R/home" HERMES_HOME="$R/hermes" HERMES_DIR="$R/hermes" HERMES_KNOWLEDGE_DIR="$R/knowledge" KNOWLEDGE_DIR="$R/knowledge"
+export XDG_CONFIG_HOME="$R/xdg/config" XDG_CACHE_HOME="$R/xdg/cache" XDG_DATA_HOME="$R/xdg/data" XDG_STATE_HOME="$R/xdg/state"
+export HF_HOME="$R/hf" TMPDIR="$R/tmp" TMP="$R/tmp" TEMP="$R/tmp" BUN_INSTALL_CACHE_DIR="$R/cache/bun" BUN_RUNTIME_TRANSPILER_CACHE_PATH="$R/cache/bun" npm_config_cache="$R/cache/npm" PNPM_HOME="$R/cache/pnpm" UV_CACHE_DIR="$R/cache/uv" PYTHONPYCACHEPREFIX="$R/cache/python"
+export PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 UV_OFFLINE=1 npm_config_offline=true CI=1 REQUIRE_BUN=1 QMD_LLAMA_GPU=false
+export PATH="$R/tools/bin:/usr/bin:/bin" LANG=en_US.UTF-8
+exec /usr/bin/python3 -I "$R/probes/run.py" "$@"

@@ -1,0 +1,28 @@
+{
+  "sourcePathsApplied": 10,
+  "allReviewedPostimagesMatched": true,
+  "pytest": {
+    "tests": 372,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "deselectedNumericalPeftCases": 6,
+  "caseGroups": {
+    "tests.test_finetune_correctness": 31,
+    "tests.test_gguf_toolchain": 74,
+    "tests.test_gguf_structure": 78,
+    "tests.test_locked_job_submission": 162,
+    "tests.test_qualify_empty_version": 27
+  },
+  "realSourceCaseNames": [],
+  "graphs": 16,
+  "locksUnchanged": true,
+  "baselineAlertsChecked": 262,
+  "retainedAffectedAlerts": 0,
+  "graphInstances": 1772,
+  "newOnlineScan": false,
+  "defaultBranchAlertsClosed": false,
+  "nativeLinuxImageExecuted": false,
+  "scope": "Current accepted GGUF/launcher composition verified locally; model numerical cases deliberately not rerun, no native conversion/image/training/GPU/cloud qualification"
+}

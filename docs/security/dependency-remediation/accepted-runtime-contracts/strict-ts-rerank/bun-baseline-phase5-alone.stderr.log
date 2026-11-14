@@ -1,0 +1,15 @@
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/phase5-recovery.test.ts [ test/phase5-recovery.test.ts ]
+TypeError: undefined is not an object (evaluating 'z.object')
+ ❯ src/mcp/server.ts:42:25
+     40| // Keep REST and MCP validation aligned. Limits bound work as well as …
+     41| // in particular, never coerce a client-supplied type, collection list…
+     42| const subSearchSchema = z.object({
+       |                         ^
+     43|   type: z.enum(["lex", "vec", "hyde"]).describe(
+     44|     "lex = BM25 keywords (supports phrases and negation); vec = semant…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

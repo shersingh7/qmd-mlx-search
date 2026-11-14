@@ -37,6 +37,16 @@ export function computeDescriptorSignature(descriptor?: EmbeddingDescriptor): st
   return computeEmbeddingSpaceId(descriptor);
 }
 
+/** The completed index's identity outlives a resumable job's active state. */
+export function getCompletedFingerprint(db: Database): IndexingFingerprint | null {
+  const row = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_index_fingerprint'`).get() as { value: string } | undefined;
+  return row ? JSON.parse(row.value) as IndexingFingerprint : null;
+}
+
+export function saveCompletedFingerprint(db: Database, fingerprint: IndexingFingerprint): void {
+  db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_index_fingerprint', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(JSON.stringify(fingerprint));
+}
+
 export function initCheckpointTable(db: Database): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS indexing_checkpoints (

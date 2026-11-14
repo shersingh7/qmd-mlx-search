@@ -1,8 +1,8 @@
 """
-benchmark.py — Bounded Sustained GGUF Embedding Qualification Harness
+benchmark.py — Bounded Pilot-Only GGUF Embedding Benchmark Harness
 
-Executes bounded pilot (<=30 requests, <=120s) and bounded soak (<=100 requests, <=180s)
-benchmarks for GGUF embedding models via node-llama-cpp under active Watchdog supervision
+Executes bounded pilot benchmarks (<=30 measured requests, <=120s); no soak loop is implemented.
+Uses node-llama-cpp under active Watchdog supervision
 with strict process isolation, identical token strata, and structured JSON reporting.
 """
 
@@ -40,6 +40,13 @@ from scripts.qmd_mlx.sustained import (
     compute_metrics_summary,
     evaluate_qualification_gates,
     extract_watchdog_breach_dict,
+    MIN_FREE_MEMORY_PCT,
+    _finite_number,
+    _valid_counts,
+    fetch_token_counts,
+    request_token_metrics,
+    compute_memory_assessment,
+    validate_benchmark_bounds,
 )
 from scripts.qmd_mlx.watchdog import (
     BreachType,
@@ -67,6 +74,8 @@ def compute_code_manifest(repo_root: str) -> dict[str, str]:
         "src/llm.ts",
         "src/embedding/config.ts",
         "src/embedding/contract.ts",
+        "test/python/test_audit_qualification.py",
+        "test/python/test_gguf_benchmark.py",
     ]
     manifest: dict[str, str] = {}
     for rel_path in manifest_files:
@@ -108,13 +117,46 @@ def inspect_gguf_metadata(model_path: str) -> dict[str, Any]:
     }
 
 
+def probe_gguf_health(host: str, port: int, timeout_s: float) -> tuple[bool, Any, Optional[int]]:
+    """Adapt the existing GGUF status protocol, without bypassing watchdog validation.
+
+    The Node producer names its readiness field ``status: ok|starting`` rather
+    than ``state``. Only that known legacy shape is translated; explicit states,
+    contradictory flags, dead workers and malformed progress remain unchanged
+    for the strict watchdog to reject. PID/token binding still belongs to it.
+    """
+    healthy, payload, status = MLXWatchdog._default_health_probe(host, port, timeout_s)
+    if not healthy or status != 200 or not isinstance(payload, dict) or "state" in payload:
+        return healthy, payload, status
+    if payload.get("backend") != "gguf" or payload.get("worker_alive") is not True:
+        return healthy, payload, status
+    idle, sequence = payload.get("worker_idle"), payload.get("completed_sequence")
+    if not isinstance(idle, bool) or type(sequence) is not int or sequence < 0:
+        return healthy, payload, status
+    age = payload.get("active_job_age_s")
+    if idle:
+        age_valid = age is None
+    else:
+        age_valid = _finite_number(age, 0)
+    if not age_valid:
+        return healthy, payload, status
+    state = None
+    if payload.get("status") == "ok" and payload.get("ready") is True:
+        state = "idle" if idle else "ready"
+    elif payload.get("status") == "starting" and payload.get("ready") is False:
+        state = "starting"
+    if state is not None:
+        payload = {**payload, "state": state, "state_source": "legacy_gguf_status_adapter"}
+    return healthy, payload, status
+
+
 @dataclasses.dataclass
 class GGUFBenchmarkConfig:
     model_path: Optional[str] = None
     host: str = "127.0.0.1"
     port: int = 8795
     control_port: int = 8796
-    mode: str = "pilot"          # 'pilot' (<=30 reqs, <=120s) or 'soak' (<=100 reqs, <=180s)
+    mode: str = "pilot"          # Pilot only (<=30 measured reqs, <=120s); no soak loop.
     timeout_s: float = 120.0
     max_requests: int = 30
     min_headroom_mb: float = 6000.0
@@ -124,6 +166,11 @@ class GGUFBenchmarkConfig:
     real_model_opt_in: bool = False
     output_file: Optional[str] = None
     contexts: int = 2
+
+    def __post_init__(self) -> None:
+        validate_benchmark_bounds(self.mode, self.timeout_s, self.max_requests, self.min_headroom_mb, pilot_only=True)
+        if isinstance(self.contexts, bool) or not isinstance(self.contexts, int) or not 1 <= self.contexts <= 2:
+            raise ValueError("Bounded GGUF pilot contexts must be 1 or 2")
 
 
 class GGUFBenchmarkRunner:
@@ -143,6 +190,7 @@ class GGUFBenchmarkRunner:
         Enforces system memory headroom (>=6000 MB for real models), port distinctness/availability,
         and loopback policy before process spawn.
         """
+        self.config.__post_init__()
         preflight_info: dict[str, Any] = {
             "timestamp": time.time(),
             "host": self.config.host,
@@ -150,6 +198,7 @@ class GGUFBenchmarkRunner:
             "control_port": self.config.control_port,
             "mode": self.config.mode,
             "backend": "gguf",
+            "health_protocol_adapter": "legacy_gguf_status_to_state",
         }
 
         # 1. Host restriction
@@ -188,6 +237,11 @@ class GGUFBenchmarkRunner:
             "headroom_mb": headroom,
             "swap_used_mb": swap_used,
             "free_memory_pct": free_pct,
+            "watchdog_limits": {
+                "max_rss_mb": defaults.max_rss_mb,
+                "max_swap_growth_mb": defaults.max_swap_growth_mb,
+                "min_free_memory_pct": MIN_FREE_MEMORY_PCT,
+            },
         })
 
         # 5. Model-aware preflight headroom check
@@ -226,6 +280,7 @@ class GGUFBenchmarkRunner:
         repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
         report: dict[str, Any] = {
+            "schema_version": 2,
             "status": "in_progress",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(run_start_time)),
             "backend": "gguf",
@@ -252,7 +307,11 @@ class GGUFBenchmarkRunner:
             "concurrent_load_interleaving": [],
             "metrics_summary": {},
             "telemetry_samples": [],
-            "metal_memory_telemetry": {},
+            "metal_memory_telemetry": {
+                "measurement_kind": "process_rss_proxy",
+                "limitations": "GGUF /memory active_mb and peak_mb are current process RSS snapshots, not Metal allocator active/peak telemetry; Metal stability cannot qualify.",
+            },
+            "limitations": ["Pilot only; no GGUF soak loop or Metal allocator telemetry is implemented."],
             "captured_logs": "",
             "child_cleanup": {
                 "cleaned": False,
@@ -305,6 +364,9 @@ class GGUFBenchmarkRunner:
         breach_result: list[Optional[WatchdogCheckResult]] = [None]
         telemetry_samples: list[dict[str, Any]] = []
         cleanup_errors: list[str] = []
+        measured_records: list[dict[str, Any]] = []
+        rejection_records: list[dict[str, Any]] = []
+        concurrent_interleaving_records: list[dict[str, Any]] = []
 
         try:
             log_file = tempfile.NamedTemporaryFile(mode="w+", prefix="gguf_sustained_server_", suffix=".log", delete=False)
@@ -336,13 +398,17 @@ class GGUFBenchmarkRunner:
             watchdog = MLXWatchdog(
                 config=watchdog_config,
                 sampler=self.sampler,
+                health_probe_fn=probe_gguf_health,
                 owned_child=child,
                 baseline_swap_mb=preflight.get("swap_used_mb"),
                 defaults=self._preflight_defaults,
             )
 
-            def _supervisor_loop():
-                while not stop_supervisor.is_set():
+            watchdog_step_lock = threading.Lock()
+
+            def _sample_watchdog() -> bool:
+                # Serialize endpoint sampling with the periodic watchdog state machine.
+                with watchdog_step_lock:
                     now_m = time.monotonic()
                     if now_m >= deadline:
                         reason = f"Absolute execution ceiling of {self.config.timeout_s:.1f}s exceeded"
@@ -358,24 +424,31 @@ class GGUFBenchmarkRunner:
                         )
                         breach_result[0] = res
                         breach_event.set()
-                        break
+                        return False
 
                     check = watchdog.check_step()
                     if not check.healthy:
                         breach_result[0] = check
                         breach_event.set()
-                        break
+                        return False
 
-                    if check.metrics:
+                    if check.metrics.get("startup_grace") is True:
+                        report.setdefault("startup_supervision_events", []).append(dict(check.metrics))
+                    elif check.metrics:
                         telemetry_samples.append({
-                            "timestamp": round(check.timestamp, 2),
-                            "elapsed_s": round(time.monotonic() - start_mono, 2),
+                            "timestamp": check.timestamp,
+                            "elapsed_s": time.monotonic() - start_mono,
                             "rss_mb": check.metrics.get("rss_mb"),
                             "swap_used_mb": check.metrics.get("swap_used_mb"),
                             "swap_growth_mb": check.metrics.get("swap_growth_mb"),
                             "memory_free_pct": check.metrics.get("memory_free_pct"),
                         })
+                    return True
 
+            def _supervisor_loop():
+                while not stop_supervisor.is_set():
+                    if not _sample_watchdog():
+                        break
                     stop_supervisor.wait(timeout=0.25)
 
             t_supervisor = threading.Thread(target=_supervisor_loop, daemon=True, name="GGUF-Watchdog-Supervisor")
@@ -402,11 +475,11 @@ class GGUFBenchmarkRunner:
                 try:
                     status_code, data = client.get_json(f"{ctrl_url}/health", deadline=startup_deadline, timeout_s=1.0)
                     if status_code == 200 and isinstance(data, dict):
-                        if data.get("ready") is True and data.get("instance_token") == instance_token:
+                        if data.get("ready") is True and data.get("instance_token") == instance_token and _sample_watchdog():
                             ready = True
                             report["cold_startup"] = {
                                 "ready": True,
-                                "cold_startup_elapsed_s": round(time.monotonic() - start_mono, 3),
+                                "cold_startup_elapsed_s": time.monotonic() - start_mono,
                                 "status": "passed",
                             }
                             break
@@ -461,8 +534,9 @@ class GGUFBenchmarkRunner:
                 st_tok, r_tok = client.post_json(f"{base_url}/tokenize", {"texts": texts}, deadline=deadline)
                 if st_tok != 200 or not isinstance(r_tok, dict) or "counts" not in r_tok:
                     raise RuntimeError(f"Tokenization failed for {stratum_name}: HTTP {st_tok}, payload {r_tok}")
-                counts = [int(c) for c in r_tok["counts"]]
-                assert len(counts) == len(texts), f"Count mismatch for {stratum_name}: {len(counts)} != {len(texts)}"
+                counts = r_tok["counts"]
+                if not _valid_counts(counts, len(texts)):
+                    raise RuntimeError(f"Malformed tokenizer counts for {stratum_name}: {counts}")
                 strata_verified[stratum_name] = {
                     "item_count": len(counts),
                     "token_counts": counts,
@@ -477,7 +551,9 @@ class GGUFBenchmarkRunner:
             rejection_error_str = str(r_b_over)
             if st_b_over == 400:
                 m_tokens = re.search(r"\((\d+)\)\s+exceeds\s+max_length\s+\((\d+)\)", rejection_error_str)
-                parsed_len = int(m_tokens.group(1)) if m_tokens else 2049
+                if not m_tokens or int(m_tokens.group(1)) != 2049 or int(m_tokens.group(2)) != 2048:
+                    raise RuntimeError("Boundary tokenizer rejection did not verify exact 2049/2048 lengths")
+                parsed_len = int(m_tokens.group(1))
                 strata_verified["boundary_2049"] = {
                     "policy": "explicit_rejection",
                     "status_code": 400,
@@ -489,8 +565,8 @@ class GGUFBenchmarkRunner:
                 raise RuntimeError(f"Expected HTTP 400 rejection for boundary_2049, got HTTP {st_b_over}: {r_b_over}")
 
             # Verify strata compliance ranges strictly
-            assert 5 <= strata_verified["short"]["min_tokens"] <= 25, f"Short stratum out of range: {strata_verified['short']}"
-            assert 50 <= strata_verified["medium"]["min_tokens"] and strata_verified["medium"]["max_tokens"] <= 300, f"Medium stratum out of range: {strata_verified['medium']}"
+            assert 5 <= strata_verified["short"]["min_tokens"] and strata_verified["short"]["max_tokens"] <= 25, f"Short stratum out of range: {strata_verified['short']}"
+            assert 50 <= strata_verified["medium"]["min_tokens"] and strata_verified["medium"]["max_tokens"] <= 200, f"Medium stratum out of range: {strata_verified['medium']}"
             assert 400 <= strata_verified["long"]["min_tokens"] and strata_verified["long"]["max_tokens"] <= 1500, f"Long stratum out of range: {strata_verified['long']}"
             assert 50 <= strata_verified["code"]["min_tokens"] and strata_verified["code"]["max_tokens"] <= 500, f"Code stratum out of range: {strata_verified['code']}"
             assert strata_verified["boundary_2047"]["min_tokens"] == 2047, f"Boundary 2047 not exact: {strata_verified['boundary_2047']}"
@@ -527,9 +603,11 @@ class GGUFBenchmarkRunner:
                     raise RuntimeError(f"Solo baseline request {solo_idx} failed: HTTP {st_s}")
                 solo_baseline_latencies.append(solo_ms)
 
+            # Keep derived metrics reproducible from the persisted samples.
+            solo_baseline_latencies = [round(value, 2) for value in solo_baseline_latencies]
             solo_baseline_p50 = float(np.percentile(solo_baseline_latencies, 50))
             report["solo_baseline"] = {
-                "samples_ms": [round(x, 2) for x in solo_baseline_latencies],
+                "samples_ms": solo_baseline_latencies,
                 "percentiles": compute_explicit_percentiles(solo_baseline_latencies),
             }
 
@@ -549,7 +627,7 @@ class GGUFBenchmarkRunner:
                 request_counter += 1
                 _check_breach()
 
-                tok_counts: list[int] = []
+                tok_counts: Optional[list[int]]
                 if stratum == "boundary_2047":
                     tok_counts = [2047]
                 elif stratum == "boundary_2048":
@@ -557,11 +635,7 @@ class GGUFBenchmarkRunner:
                 elif stratum == "boundary_2049":
                     tok_counts = [2049]
                 else:
-                    st_tok, r_tok = client.post_json(f"{base_url}/tokenize", {"texts": texts}, deadline=deadline)
-                    if st_tok == 200 and isinstance(r_tok, dict) and "counts" in r_tok:
-                        tok_counts = [int(c) for c in r_tok["counts"]]
-                    else:
-                        tok_counts = [len(t.split()) for t in texts]
+                    tok_counts = fetch_token_counts(client, base_url, texts, deadline)
 
                 t0 = time.monotonic()
                 st_emb, r_emb = client.post_json(
@@ -599,19 +673,15 @@ class GGUFBenchmarkRunner:
                 if not (fin_ok and dim_ok and norm_ok):
                     raise ValueError(f"Vector validation failed for request {request_counter}: {dim_msg}, {norm_msg}, {fin_msg}")
 
-                total_tokens = sum(tok_counts)
-                tok_per_sec = (total_tokens / (elapsed_ms / 1000.0)) if elapsed_ms > 0 else 0.0
-
                 record = {
                     "request_idx": request_counter,
                     "stratum": stratum,
                     "tag": tag,
                     "batch_size": len(texts),
-                    "token_counts": tok_counts,
-                    "total_tokens": total_tokens,
+                    **request_token_metrics(texts, tok_counts, round(elapsed_ms, 2), synthetic=self.config.use_fake_child),
                     "is_query": is_query,
                     "wire_ms": round(elapsed_ms, 2),
-                    "effective_tokens_per_sec": round(tok_per_sec, 1),
+
                     "shape": list(arr.shape),
                     "finite": fin_ok,
                     "l2_normalized": norm_ok,
@@ -672,6 +742,8 @@ class GGUFBenchmarkRunner:
                 _check_breach()
                 bulk_texts = [LONG_FIXTURES[0], MEDIUM_FIXTURES[0], CODE_FIXTURES[0], SHORT_FIXTURES[0]]
                 query_texts = [SHORT_FIXTURES[c_iter % len(SHORT_FIXTURES)]]
+                bulk_counts = fetch_token_counts(client, base_url, bulk_texts, deadline)
+                query_counts = fetch_token_counts(client, base_url, query_texts, deadline)
 
                 bulk_client = SmokeHttpClient(default_timeout_s=15.0)
                 query_client = SmokeHttpClient(default_timeout_s=15.0)
@@ -706,7 +778,7 @@ class GGUFBenchmarkRunner:
                 def _query_worker():
                     try:
                         bulk_started.wait(timeout=2.0)
-                        time.sleep(0.015)  # Handshake: ensure bulk request is in-flight on server
+                        time.sleep(0.015)  # Opportunity only; recorded client intervals must verify overlap.
                         t0_q = time.monotonic()
                         query_launched.set()
                         st_q, r_q = query_client.post_json(
@@ -753,8 +825,10 @@ class GGUFBenchmarkRunner:
                 norm_b, _, _ = check_l2_normalization(arr_b)
                 fin_q, _ = check_finite(arr_q)
                 norm_q, _, _ = check_l2_normalization(arr_q)
+                dim_b, _ = check_dimensions(arr_b, expected_rows=len(bulk_texts), expected_dims=expected_dims)
+                dim_q, _ = check_dimensions(arr_q, expected_rows=len(query_texts), expected_dims=expected_dims)
 
-                if not (fin_b and norm_b and fin_q and norm_q):
+                if not (fin_b and norm_b and fin_q and norm_q and dim_b and dim_q):
                     raise ValueError("Concurrent embeddings validation failed (finite or norm violation)")
 
                 request_counter += 1
@@ -763,11 +837,10 @@ class GGUFBenchmarkRunner:
                     "stratum": "mixed",
                     "tag": f"concurrent_bulk_batch_{c_iter}",
                     "batch_size": len(bulk_texts),
-                    "token_counts": [len(t.split()) for t in bulk_texts],
-                    "total_tokens": sum(len(t.split()) for t in bulk_texts),
+                    **request_token_metrics(bulk_texts, bulk_counts, bulk_res["wire_ms"], synthetic=self.config.use_fake_child),
                     "is_query": False,
                     "wire_ms": bulk_res["wire_ms"],
-                    "effective_tokens_per_sec": round((sum(len(t.split()) for t in bulk_texts) / (bulk_res["wire_ms"] / 1000.0)), 1),
+
                     "shape": list(arr_b.shape),
                     "finite": fin_b,
                     "l2_normalized": norm_b,
@@ -780,11 +853,10 @@ class GGUFBenchmarkRunner:
                     "stratum": "short",
                     "tag": f"concurrent_interactive_query_{c_iter}",
                     "batch_size": 1,
-                    "token_counts": [len(query_texts[0].split())],
-                    "total_tokens": len(query_texts[0].split()),
+                    **request_token_metrics(query_texts, query_counts, query_res["wire_ms"], synthetic=self.config.use_fake_child),
                     "is_query": True,
                     "wire_ms": query_res["wire_ms"],
-                    "effective_tokens_per_sec": round((len(query_texts[0].split()) / (query_res["wire_ms"] / 1000.0)), 1),
+
                     "shape": list(arr_q.shape),
                     "finite": fin_q,
                     "l2_normalized": norm_q,
@@ -807,6 +879,11 @@ class GGUFBenchmarkRunner:
                     "iteration": c_iter,
                     "fixture_index": c_iter % len(SHORT_FIXTURES),
                     "overlap_verified": overlap,
+                    "overlap_basis": "client_request_intervals",
+                    "bulk_start_mono": bulk_res["start_mono"],
+                    "bulk_end_mono": bulk_res["end_mono"],
+                    "query_start_mono": query_res["start_mono"],
+                    "query_end_mono": query_res["end_mono"],
                     "bulk_wire_ms": bulk_res["wire_ms"],
                     "concurrent_interactive_wire_ms": query_res["wire_ms"],
                     "solo_baseline_fixture_ms": round(baseline_fixture_ms, 2),
@@ -822,34 +899,18 @@ class GGUFBenchmarkRunner:
             _, final_mem = client.get_json(f"{ctrl_url}/memory", deadline=deadline, timeout_s=2.0)
             report["metal_memory_telemetry"]["final"] = final_mem
 
-            init_act = initial_mem.get("active_mb", 0.0) if isinstance(initial_mem, dict) else 0.0
-            fin_act = final_mem.get("active_mb", 0.0) if isinstance(final_mem, dict) else 0.0
-            peak_act = final_mem.get("peak_mb", 0.0) if isinstance(final_mem, dict) else 0.0
-            pw_act = post_warmup_mem.get("active_mb", 0.0) if isinstance(post_warmup_mem, dict) else init_act
+            # Always record a live process endpoint after the workload, even for a fast pilot.
+            stop_supervisor.set()
+            t_supervisor.join(timeout=1.0)
+            if t_supervisor.is_alive():
+                raise RuntimeError("Watchdog supervisor did not stop before final process sampling")
+            _sample_watchdog()
+            _check_breach()
+            benchmark_elapsed_s = time.monotonic() - start_mono
 
-            delta_active = round(fin_act - init_act, 2)
-            delta_post_warmup = round(fin_act - pw_act, 2)
-            report["metal_memory_telemetry"]["delta_active_mb"] = delta_active
-            report["metal_memory_telemetry"]["delta_post_warmup_active_mb"] = delta_post_warmup
-            report["metal_memory_telemetry"]["peak_active_mb"] = round(peak_act, 2)
-
-            rss_samples = [s["rss_mb"] for s in telemetry_samples if isinstance(s.get("rss_mb"), (int, float))]
-            swap_samples = [s["swap_growth_mb"] for s in telemetry_samples if isinstance(s.get("swap_growth_mb"), (int, float))]
-            max_swap_growth = max(swap_samples) if swap_samples else 0.0
-            rss_growth = (rss_samples[-1] - rss_samples[0]) if len(rss_samples) >= 2 else 0.0
-
-            stability_verdict = "provisional_stable" if (delta_active <= 500.0 and max_swap_growth == 0.0) else "unstable"
-            report["metal_memory_telemetry"]["provisional_stability_assessment"] = {
-                "verdict": stability_verdict,
-                "rss_growth_mb": round(rss_growth, 2),
-                "swap_growth_mb": round(max_swap_growth, 2),
-                "metal_delta_active_mb": delta_active,
-                "metal_peak_active_mb": round(peak_act, 2),
-                "notes": (
-                    "Provisional stability verified under matched warmed batch shapes across bounded qualification window. "
-                    "Longer multi-thousand request soak required for unprovisional leak certification."
-                ),
-            }
+            report["metal_memory_telemetry"].update(compute_memory_assessment(
+                report["metal_memory_telemetry"], telemetry_samples, preflight.get("swap_used_mb"),
+            ))
 
             # 12. Compute Metrics Aggregations
             report["measured_requests"] = measured_records
@@ -862,16 +923,11 @@ class GGUFBenchmarkRunner:
                 rejection_records=rejection_records,
                 concurrent_interleaving_records=concurrent_interleaving_records,
                 solo_baseline_percentiles=report.get("solo_baseline", {}).get("percentiles"),
-                total_benchmark_elapsed_s=time.monotonic() - start_mono,
+                total_benchmark_elapsed_s=benchmark_elapsed_s,
                 partial_run=False,
             )
 
-            # 13. Evaluate Qualification Gates against Explicit Criteria
-            qual_eval = evaluate_qualification_gates(report, self.config)
-            report["qualification_evaluation"] = qual_eval
-            report["status"] = qual_eval["overall_status"]
-            if qual_eval["overall_status"] != "passed" and qual_eval.get("failure_reasons"):
-                report["error"] = "; ".join(qual_eval["failure_reasons"])
+            report["status"] = "completed"  # Qualification is finalized after actual cleanup.
 
         except Exception as e:
             report["status"] = "failed"
@@ -937,6 +993,7 @@ class GGUFBenchmarkRunner:
                 except Exception:
                     pass
 
+            report["supervisor_cleanup"] = {"stopped": t_supervisor is None or not t_supervisor.is_alive()}
             client.close()
 
             sigkill_used = False
@@ -979,6 +1036,16 @@ class GGUFBenchmarkRunner:
                 report["cleanup_errors"] = cleanup_errors
 
             report["duration_s"] = round(time.time() - run_start_time, 2)
+            if breach_result[0] is not None:
+                report["watchdog_breach"] = extract_watchdog_breach_dict(breach_result[0])
+            report["qualification_evaluation"] = evaluate_qualification_gates(report, self.config)
+            if report["status"] == "completed":
+                if self.config.use_fake_child and not cleanup_errors and report["supervisor_cleanup"]["stopped"] and "watchdog_breach" not in report:
+                    report["status"] = "rehearsal_completed"
+                else:
+                    report["status"] = report["qualification_evaluation"]["overall_status"]
+                    if report["status"] != "passed":
+                        report["error"] = "; ".join(report["qualification_evaluation"]["failure_reasons"])
             self.last_report = report
 
             if self.config.output_file:

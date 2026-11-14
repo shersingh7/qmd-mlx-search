@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Offline CPU-only image prerequisite probe; no installs, models or Hub SDK.
+
+Run with Python -I -B -S inside an isolated --network none container. A host
+--native-only run checks the probe, not the image or the locked converter graph.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+def run(command, cwd, env, timeout=30):
+    result = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)
+    if result.returncode != 0:
+        raise RuntimeError(f"native prerequisite command failed: {Path(command[0]).name}")
+    return result.stdout.strip()
+
+
+def qualify(*, native_only=False):
+    names = ("git", "cc", "c++", "make") + (() if native_only else ("uv",))
+    tools = {}
+    for name in names:
+        path = shutil.which(name)
+        if path is None:
+            raise RuntimeError(f"missing native prerequisite: {name}")
+        tools[name] = path
+    with tempfile.TemporaryDirectory(prefix="qmd-native-image-") as temporary:
+        work = Path(temporary)
+        for name in ("home", "cache", "tmp", "hf"):
+            (work / name).mkdir()
+        env = {"PATH": os.environ.get("PATH", os.defpath), "HOME": str(work / "home"),
+               "XDG_CACHE_HOME": str(work / "cache"), "TMPDIR": str(work / "tmp"),
+               "HF_HOME": str(work / "hf"), "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
+               "HF_DATASETS_OFFLINE": "1", "QMD_LLAMA_GPU": "false", "PYTHONDONTWRITEBYTECODE": "1",
+               "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1", "GIT_TERMINAL_PROMPT": "0"}
+        versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]
+                    for name, path in tools.items()}
+        if not native_only:
+            if sys.version_info[:2] != (3, 12):
+                raise RuntimeError("image probe requires Python 3.12")
+            if versions["uv"] != "uv 0.11.18":
+                raise RuntimeError("image probe requires uv 0.11.18")
+        (work / "hello.c").write_text('#include <stdio.h>\nint main(void) { puts("qmd-c-ok"); return 0; }\n')
+        (work / "hello.cc").write_text('#include <iostream>\nint main() { std::cout << "qmd-cxx-ok\\n"; return 0; }\n')
+        (work / "Makefile").write_text(
+            'all: c-smoke cxx-smoke\n'
+            'c-smoke: hello.c\n\t"$(CC)" -std=c11 -O0 hello.c -o c-smoke\n'
+            'cxx-smoke: hello.cc\n\t"$(CXX)" -std=c++17 -O0 hello.cc -o cxx-smoke\n')
+        run([tools["make"], "-j2", "CC=" + tools["cc"], "CXX=" + tools["c++"]], work, env, timeout=60)
+        outputs = [run([str(work / name)], work, env, timeout=10) for name in ("c-smoke", "cxx-smoke")]
+        if outputs != ["qmd-c-ok", "qmd-cxx-ok"]:
+            raise RuntimeError("native build output verification failed")
+    return {"status": "pass", "scope": "native CPU C/C++ prerequisites only", "native_only": native_only,
+            "platform": platform.system() + "/" + platform.machine(), "python": platform.python_version(),
+            "versions": versions, "outputs": outputs,
+            "probe_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "locked_python_converter_training_gpu_cloud_qualified": False}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--native-only", action="store_true", help="Host probe exercise only; omit Python/uv image-version checks")
+    args = parser.parse_args(argv)
+    try:
+        receipt = qualify(native_only=args.native_only)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+        print(f"Native prerequisite probe failed: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(receipt, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

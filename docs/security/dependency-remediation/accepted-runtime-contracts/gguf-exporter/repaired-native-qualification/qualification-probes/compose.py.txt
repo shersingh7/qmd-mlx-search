@@ -1,0 +1,169 @@
+"""Compose only approved public metadata and reviewed bodies; never edit inputs."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import re
+import shutil
+import stat
+
+ROOT = Path(__file__).resolve().parent
+PREVIEW = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_')
+REVIEW = Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru')
+OLD = Path('/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr')
+INTAKE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/intake.json')
+ENVIRONMENT = PREVIEW / 'repo/finetune/.venv'
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with Path(path).open('rb') as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def dump(path, value):
+    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True))
+
+
+def inventory(root):
+    root = Path(root)
+    entries = {}
+    counts = {'file': 0, 'directory': 0, 'symlink': 0}
+    regular_bytes = 0
+    for directory, dirs, files in os.walk(root, followlinks=False):
+        for name in sorted(dirs + files):
+            p = Path(directory) / name
+            s = p.lstat()
+            entry = {'mode': stat.S_IMODE(s.st_mode)}
+            if stat.S_ISLNK(s.st_mode):
+                entry.update(kind='symlink', target=os.readlink(p))
+            elif stat.S_ISDIR(s.st_mode):
+                entry.update(kind='directory')
+            elif stat.S_ISREG(s.st_mode):
+                entry.update(kind='file', bytes=s.st_size, sha256=sha256(p))
+                regular_bytes += s.st_size
+            else:
+                raise AssertionError(('Unexpected nonregular entry', str(p)))
+            counts[entry['kind']] += 1
+            entries[str(p.relative_to(root))] = entry
+    return {'counts': counts, 'regular_file_bytes': regular_bytes, 'entries': entries}
+
+
+def state_digest(inv):
+    return hashlib.sha256(json.dumps(inv, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def split_header(data):
+    matches = list(re.finditer(rb'(?m)^# /// script\r?\n(?:[^\n]*\n)*?^# ///\r?\n', data))
+    assert len(matches) == 1
+    m = matches[0]
+    return data[:m.start()], data[m.start():m.end()], data[m.end():]
+
+
+def originals():
+    intake = json.loads(INTAKE.read_text())
+    preview_inputs = json.loads((PREVIEW / 'input-manifest.json').read_text())
+    paths = set(intake['protected']) | {str(INTAKE)}
+    paths.update(str(PREVIEW / 'repo' / rel) for rel in preview_inputs['inputs_sha256'])
+    paths.update(str(REVIEW / 'mirror' / rel) for rel in intake['union_paths'])
+    paths.update(str(PREVIEW / name) for name in ('input-manifest.json', 'preview-summary.json', 'cold-project-install.json', 'cold-project-environment-inventory.json'))
+    return {'files': {str(p): sha256(p) for p in sorted(paths)},
+            'old_qualification_full_tree': inventory(OLD)}
+
+
+if __name__ == '__main__':
+    assert not (ROOT / 'repo').exists()
+    baseline_path = PREVIEW / 'cold-project-environment-inventory.json'
+    assert sha256(baseline_path) == '302117f66bf0390428ce14d22c883b892935f93c22932cc2f5a9f5cf8d386d51'
+    installed_baseline = json.loads(baseline_path.read_text())
+    before = inventory(ENVIRONMENT)
+    for key in ('entries', 'counts', 'regular_file_bytes'):
+        assert before[key] == installed_baseline[key], key
+    dump(ROOT / 'environment-before.json', before)
+    protected = originals()
+    dump(ROOT / 'preserved-originals-before.json', protected)
+    inputs = json.loads((PREVIEW / 'input-manifest.json').read_text())
+    summary = json.loads((PREVIEW / 'preview-summary.json').read_text())
+    intake = json.loads(INTAKE.read_text())
+    manifest = {'root': str(ROOT), 'metadata_preview': str(PREVIEW), 'reviewed_source': str(REVIEW),
+                'environment': str(ENVIRONMENT), 'environment_parent_baseline_sha256': sha256(baseline_path),
+                'environment_before_digest': state_digest(before), 'metadata_inputs': {}, 'reviewed_overlay': [],
+                'status': 'Own composed qualification source only; no live integration/graph acceptance'}
+    for rel, baseline_hash in inputs['inputs_sha256'].items():
+        src = PREVIEW / 'repo' / rel
+        assert '.venv' not in src.parts and not src.is_symlink()
+        expected = summary['changed_files'].get(rel, {}).get('proposed_sha256', baseline_hash)
+        assert sha256(src) == expected, rel
+        dst = ROOT / 'repo' / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        assert sha256(dst) == expected
+        manifest['metadata_inputs'][rel] = {'source': str(src), 'sha256': expected}
+    for item in intake['files']:
+        rel = item['path']
+        src = REVIEW / 'mirror' / rel
+        assert not src.is_symlink() and sha256(src) == item['composed_sha256']
+        original = src.read_bytes()
+        dst = ROOT / 'repo' / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        binding = {'path': rel, 'reviewed_whole_sha256': sha256(src)}
+        if rel in {'finetune/train.py', 'finetune/train_unsloth.py', 'finetune/convert_gguf.py'}:
+            left, old_header, right = split_header(original)
+            pleft, new_header, pright = split_header((PREVIEW / 'repo' / rel).read_bytes())
+            composed = left + new_header + right
+            cleft, cheader, cright = split_header(composed)
+            assert cleft == left and cright == right and cheader == new_header
+            dst.write_bytes(composed)
+            binding.update(metadata_preview_whole_sha256=sha256(PREVIEW / 'repo' / rel),
+                           old_header_sha256=hashlib.sha256(old_header).hexdigest(),
+                           new_header_sha256=hashlib.sha256(new_header).hexdigest(),
+                           reviewed_body_sha256=hashlib.sha256(left + right).hexdigest(),
+                           composed_body_sha256=hashlib.sha256(cleft + cright).hexdigest(),
+                           every_nonheader_byte_unchanged=True)
+        else:
+            shutil.copy2(src, dst)
+            assert sha256(dst) == item['composed_sha256']
+            binding['exact_reviewed_whole_bytes'] = True
+        binding['composed_whole_sha256'] = sha256(dst)
+        manifest['reviewed_overlay'].append(binding)
+    manifest['composed_files_sha256'] = {str(p.relative_to(ROOT / 'repo')): sha256(p)
+        for p in (ROOT / 'repo').rglob('*') if p.is_file()}
+    # Old random CPU fixtures, not outputs or pretrained weights, are hash-qualified inputs.
+    assert sha256(OLD / 'qualification-manifest.json') == 'd909c6414b617b37aa28000fbb80650702c55a6948c5bdabb1e1d5284ec0c813'
+    old = json.loads((OLD / 'qualification-manifest.json').read_text())
+    fixture = old['fixture']
+    copies = []
+    for srcdir, hashes in [(Path(fixture['path']), fixture['files'])] + [(Path(a['path']), a['files']) for a in fixture['adapters']]:
+        assert srcdir.parent == OLD
+        for name, expected in hashes.items():
+            src = srcdir / name
+            assert src.is_file() and not src.is_symlink() and sha256(src) == expected
+            dst = ROOT / srcdir.name / name
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+            assert sha256(dst) == expected
+            copies.append({'source': str(src), 'destination': str(dst), 'sha256': expected})
+    provenance = json.loads((OLD / 'tokenizer-provenance.json').read_text())
+    assert len(provenance['assets']) == 4
+    assert provenance['revision'] == '851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a'
+    for entry in provenance['assets']:
+        src = OLD / 'public-tokenizer' / entry['file']
+        assert entry['file'] in {'tokenizer.json', 'tokenizer_config.json', 'vocab.json', 'merges.txt'}
+        assert sha256(src) == entry['sha256']
+        dst = ROOT / 'public-tokenizer' / entry['file']
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        copies.append({'source': str(src), 'destination': str(dst), 'sha256': sha256(dst)})
+    shutil.copy2(OLD / 'tokenizer-provenance.json', ROOT / 'tokenizer-provenance.json')
+    # Retain template provenance; originals never run or modified.
+    for name in ('qual_common.py', 'launch.py', 'qualify_standalone.py', 'qualify_native.py', 'qualify_verify2.py'):
+        assert sha256(OLD / name) == old['evidence_sha256'][name]
+        shutil.copy2(OLD / name, ROOT / name)
+    dump(ROOT / 'fixture-input-copy-manifest.json', {'old_manifest_sha256': sha256(OLD / 'qualification-manifest.json'), 'files': copies, 'old_fixture_provenance': fixture})
+    dump(ROOT / 'source-header-environment-manifest.json', manifest)
+    print(json.dumps({'root': str(ROOT), 'metadata_inputs': len(manifest['metadata_inputs']),
+                      'overlay': len(manifest['reviewed_overlay']), 'composed_files': len(manifest['composed_files_sha256']),
+                      'environment_counts': before['counts'], 'environment_digest': state_digest(before),
+                      'fixture_copies': len(copies)}, indent=2))

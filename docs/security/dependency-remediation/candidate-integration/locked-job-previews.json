@@ -1,0 +1,907 @@
+{
+  "launcher_sha256": "521b9d5b4d19fdec079c353a594ae4be5353f6be4997641afd1cd0a69aa83933",
+  "count": 15,
+  "all_passed": true,
+  "results": [
+    {
+      "runner": "finetune/convert_gguf.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-46692f2c5b944cc29dd9dae0edafb0ff"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "convert_gguf.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/convert_gguf.py",
+            "sha256": "709064002f9409defecb6869d4a27954044ca76d9100de973e9253a00b1d3236",
+            "size": 8969
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/convert_gguf.py.lock",
+            "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+            "size": 336994
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/convert_onnx.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-d996101e79f54ecbbafd14300697ffeb"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "convert_onnx.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/convert_onnx.py",
+            "sha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+            "size": 19643
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/convert_onnx.py.lock",
+            "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+            "size": 316024
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/dataset/analyze_data.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-abd6dab45f6b44b9bcbf19590e054607"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "dataset/analyze_data.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/analyze_data.py",
+            "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+            "size": 9063
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/analyze_data.py.lock",
+            "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+            "size": 46218
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/schema.py",
+            "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+            "size": 7405
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/dataset/prepare_data.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-be0c1ea28883486e9bdd1d247480828f"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "dataset/prepare_data.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/prepare_data.py",
+            "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+            "size": 6501
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/prepare_data.py.lock",
+            "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+            "size": 219553
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/schema.py",
+            "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+            "size": 7405
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/dataset/prepare_data_lfm2.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-b7e573e5c76042e4b4db75379baabe8d"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "dataset/prepare_data_lfm2.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/prepare_data_lfm2.py",
+            "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+            "size": 3382
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/prepare_data_lfm2.py.lock",
+            "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+            "size": 219553
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/schema.py",
+            "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+            "size": 7405
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/dataset/score_data.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-537083cf688a4d26af5fb7f43913623c"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "dataset/score_data.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/schema.py",
+            "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+            "size": 7405
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/score_data.py",
+            "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+            "size": 3670
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/score_data.py.lock",
+            "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+            "size": 46218
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/reward.py",
+            "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+            "size": 28276
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/dataset/validate_schema.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-1886c8970e8b43318bd07870a185b9d8"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "dataset/validate_schema.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/schema.py",
+            "sha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+            "size": 7405
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/validate_schema.py",
+            "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+            "size": 3297
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/dataset/validate_schema.py.lock",
+            "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+            "size": 46218
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/eval.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-55ac0997cad54a02a6df1b788c4c9d57"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "eval.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py",
+            "sha256": "5532b14620bbb8cf317f3f8be65e8019dbdd842352077afef5da0c9acb881f4e",
+            "size": 8821
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py.lock",
+            "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+            "size": 271807
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/evals/queries.txt",
+            "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+            "size": 2280
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/reward.py",
+            "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+            "size": 28276
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/eval_retrieval.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-60d1d0fd9e83489aa9bf3ac5f43acd0c"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "eval_retrieval.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval_retrieval.py",
+            "sha256": "5cde4cbe78d90ea126b31be74f384b6f002f78b3c8c80366dead5d8693705709",
+            "size": 21725
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval_retrieval.py.lock",
+            "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+            "size": 271807
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/experiments/grpo/grpo.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-e21122dc6fc94b73a1cb7eaf6f8ce247"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "experiments/grpo/grpo.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/experiments/grpo/grpo.py",
+            "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+            "size": 6165
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/experiments/grpo/grpo.py.lock",
+            "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+            "size": 375142
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/eval_common.py",
+            "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+            "size": 13332
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/experiments/lfm2/sft_lfm2.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-0bec42ae541d4d0694d1131311949cd3"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "experiments/lfm2/sft_lfm2.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/experiments/lfm2/sft_lfm2.py",
+            "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+            "size": 4027
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/experiments/lfm2/sft_lfm2.py.lock",
+            "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+            "size": 375142
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/jobs/eval.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-10e103a4f464447d9aa4cac5b5ce8b93"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "jobs/eval.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/eval.py",
+            "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+            "size": 18901
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/eval.py.lock",
+            "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+            "size": 271867
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/jobs/sft.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-7c99c5b83bc942c5a0e7e65bce1a3584"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "jobs/sft.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/eval_common.py",
+            "sha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+            "size": 13332
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/sft.py",
+            "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+            "size": 4842
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/jobs/sft.py.lock",
+            "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+            "size": 375142
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/train.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-09d4ff6db3a74a67ad6ff1805abff950"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "train.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py",
+            "sha256": "5532b14620bbb8cf317f3f8be65e8019dbdd842352077afef5da0c9acb881f4e",
+            "size": 8821
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py.lock",
+            "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+            "size": 271807
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/evals/queries.txt",
+            "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+            "size": 2280
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/reward.py",
+            "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+            "size": 28276
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train.py",
+            "sha256": "f554cba836bd89253323677d60414742f48f254d931ad8ef902c8a707ac519e5",
+            "size": 24321
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train.py.lock",
+            "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+            "size": 604247
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    },
+    {
+      "runner": "finetune/train_unsloth.py",
+      "exit_code": 0,
+      "manifest": {
+        "artifacts": {
+          "bucket_id": "qmd-verification/jobs-artifacts",
+          "mount_path": "/qmd-code",
+          "read_only": true,
+          "remote_name": "qmd-locked-903b1d7efe954677a90d083e88c53ce0"
+        },
+        "attempts": 1,
+        "command": [
+          "sh",
+          "-c",
+          "source=\"$1\"; shift; work=\"$(mktemp -d \"${TMPDIR:-/tmp}/qmd-locked.XXXXXXXXXX\")\" && cp -R \"$source/.\" \"$work/\" && cd \"$work/finetune\" && exec \"$@\"",
+          "qmd-locked-job",
+          "/qmd-code",
+          "uv",
+          "run",
+          "--locked",
+          "--no-project",
+          "--script",
+          "train_unsloth.py"
+        ],
+        "env": {
+          "UV_NO_CONFIG": "1"
+        },
+        "files": [
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py",
+            "sha256": "5532b14620bbb8cf317f3f8be65e8019dbdd842352077afef5da0c9acb881f4e",
+            "size": 8821
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/eval.py.lock",
+            "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+            "size": 271807
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/evals/queries.txt",
+            "sha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+            "size": 2280
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/reward.py",
+            "sha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+            "size": 28276
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train.py",
+            "sha256": "f554cba836bd89253323677d60414742f48f254d931ad8ef902c8a707ac519e5",
+            "size": 24321
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train.py.lock",
+            "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+            "size": 604247
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train_unsloth.py",
+            "sha256": "2afc5740035eb22342d1a85b356e4132ac7d8d26255bacc61b10dd72e8c44efe",
+            "size": 9105
+          },
+          {
+            "kind": "reviewed-code-or-lock",
+            "path": "finetune/train_unsloth.py.lock",
+            "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+            "size": 603500
+          }
+        ],
+        "flavor": "cpu-basic",
+        "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+        "local_staging": "temporary; deleted when this command exits",
+        "mode": "dry-run",
+        "namespace": "qmd-verification",
+        "resource_group_id": null,
+        "secret_env_names": [],
+        "timeout": "5m",
+        "volumes": []
+      }
+    }
+  ]
+}

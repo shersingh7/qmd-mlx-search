@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "--check",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/empty-version.patch"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "stdout": ""
+}

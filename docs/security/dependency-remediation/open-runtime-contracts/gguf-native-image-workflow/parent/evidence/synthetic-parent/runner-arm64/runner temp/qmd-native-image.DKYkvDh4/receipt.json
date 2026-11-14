@@ -1,0 +1,53 @@
+{
+  "arm64_converter_training_gpu_cloud_qualified": false,
+  "checkout_sha": "1111111111111111111111111111111111111111",
+  "cleanup": {
+    "absence_verified": null,
+    "status": "container-command-not-attempted"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/evidence/synthetic-parent/runner-arm64/public work space",
+        "rev-parse",
+        "--verify",
+        "HEAD"
+      ],
+      "exit": 0,
+      "name": "checkout",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "1111111111111111111111111111111111111111\n",
+      "timeout_seconds": 15
+    }
+  ],
+  "context_sha": "3333333333333333333333333333333333333333",
+  "error": "Refused: runner/host is not native Linux amd64",
+  "event": "pull_request",
+  "event_head_sha": "2222222222222222222222222222222222222222",
+  "expected_repo_digest": "ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+  "final_exit": 1,
+  "hard_termination_limit": "SIGKILL, runner loss or job hard timeout can prevent cleanup/readback; no absence proof then.",
+  "host": {
+    "architecture": "x86_64",
+    "os": "Linux",
+    "python": "3.12.13"
+  },
+  "image_input": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+  "primary_exit": 1,
+  "probe_exit": null,
+  "runner": {
+    "arch": "ARM64",
+    "name": "SYNTHETIC fixture runner",
+    "os": "Linux"
+  },
+  "schema": 1,
+  "scope": "native Linux amd64 CPU C/C++ prerequisites only",
+  "sources": {
+    "launcher_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "probe_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf"
+  },
+  "status": "not-qualified"
+}

@@ -3,7 +3,12 @@ protocol.py — Framing, binary serialization, typed errors, and request/respons
 """
 
 from enum import Enum
+import json
+import math
+import re
+import socket
 import struct
+import time
 import numpy as np
 from typing import Any, Optional
 
@@ -84,6 +89,146 @@ class WorkerUnavailableError(MLXServerError):
     error_type = "worker_unavailable"
 
 
+class RequestReadTimeoutError(ProtocolError):
+    """An absolute HTTP header/upload deadline expired (not an inference timeout)."""
+    status_code = 408
+    error_type = "request_timeout"
+
+
+class BoundedDeadlineReader:
+    """Socket reader with per-phase absolute deadlines and consumed-byte bounds.
+
+    Read-ahead is limited to one socket chunk and retained across header/body and
+    keepalive boundaries. It does not charge a coalesced body to the header limit.
+    Every recv recomputes the remaining wall-clock budget; socket inactivity
+    timeouts alone cannot bound a client that regularly drips bytes.
+    """
+
+    def __init__(self, raw_socket: socket.socket, deadline: float, max_bytes: int = 16384):
+        self._sock = raw_socket
+        self._buf = bytearray()
+        self.set_limits(deadline, max_bytes)
+
+    def set_limits(self, deadline: float, max_bytes: int):
+        self._deadline = deadline
+        self._max_bytes = max_bytes
+        self._bytes_read = 0
+
+    def _check_deadline(self):
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            raise RequestReadTimeoutError("HTTP request read deadline exceeded")
+        self._sock.settimeout(remaining)
+
+    def _receive(self):
+        self._check_deadline()
+        try:
+            data = self._sock.recv(4096)
+        except socket.timeout as exc:
+            raise RequestReadTimeoutError("HTTP request read deadline exceeded") from exc
+        self._buf.extend(data)
+        return bool(data)
+
+    def _take(self, size: int) -> bytes:
+        self._check_deadline()
+        if self._bytes_read + size > self._max_bytes:
+            raise ProtocolError("HTTP request exceeded maximum byte budget", status_code=431)
+        data = bytes(self._buf[:size])
+        del self._buf[:size]
+        self._bytes_read += size
+        return data
+
+    def read(self, size: int = -1) -> bytes:
+        if size == 0:
+            return b""
+        if size > self._max_bytes - self._bytes_read:
+            raise ProtocolError("HTTP request exceeded maximum byte budget")
+        chunks = []
+        remaining = size
+        while remaining != 0:
+            self._check_deadline()
+            if self._buf:
+                count = len(self._buf) if remaining < 0 else min(remaining, len(self._buf))
+                chunks.append(self._take(count))
+                if remaining > 0:
+                    remaining -= count
+            elif not self._receive():
+                break
+        return b"".join(chunks)
+
+    def readline(self, limit: int = -1) -> bytes:
+        while True:
+            self._check_deadline()
+            newline = self._buf.find(b"\n")
+            size = newline + 1 if newline >= 0 else len(self._buf)
+            if limit > 0:
+                size = min(size, limit)
+            if self._bytes_read + size > self._max_bytes:
+                raise ProtocolError("HTTP request exceeded maximum byte budget", status_code=431)
+            if newline >= 0 or (limit > 0 and len(self._buf) >= limit):
+                return self._take(size)
+            if not self._receive():
+                return self._take(len(self._buf))
+
+    def close(self):
+        # The HTTP server owns the socket; closing a phase reader must not close it.
+        pass
+
+
+def parse_http_body_headers(headers: Any, max_body_bytes: int) -> int:
+    """Require unambiguous length-delimited JSON before reading/allocating a body."""
+    if headers.get_all("Transfer-Encoding"):
+        raise ProtocolError("Transfer-Encoding is not supported")
+    lengths = headers.get_all("Content-Length", [])
+    if len(lengths) != 1 or not re.fullmatch(r"[0-9]+", lengths[0].strip(" \t")):
+        raise ProtocolError("Exactly one valid Content-Length header is required")
+    # Compare decimal strings first, avoiding arbitrary-size integer parsing.
+    digits = lengths[0].strip(" \t").lstrip("0") or "0"
+    maximum = str(max_body_bytes)
+    if len(digits) > len(maximum) or (len(digits) == len(maximum) and digits > maximum):
+        raise ProtocolError(f"Request body exceeds {max_body_bytes} bytes", status_code=413)
+    length = int(digits)
+    if length <= 0:
+        raise ProtocolError("Request body cannot be empty")
+    types = headers.get_all("Content-Type", [])
+    if len(types) != 1 or types[0].split(";", 1)[0].strip().lower() != "application/json":
+        raise ProtocolError("Content-Type must be application/json", status_code=415)
+    if len(headers.get_all("X-Request-Timeout", [])) > 1:
+        raise ProtocolError("X-Request-Timeout must not be repeated")
+    return length
+
+
+def decode_json_request(body: bytes) -> dict[str, Any]:
+    def finite_float(value):
+        number = float(value)
+        if not math.isfinite(number):
+            raise InvalidInputError("JSON numbers must be finite")
+        return number
+
+    def reject_constant(value):
+        raise InvalidInputError(f"Non-finite JSON constant is not allowed: {value}")
+
+    try:
+        payload = json.loads(body.decode("utf-8"), parse_float=finite_float, parse_constant=reject_constant)
+    except (ValueError, UnicodeError, RecursionError) as exc:
+        raise InvalidInputError("Invalid JSON in request body") from exc
+    if not isinstance(payload, dict):
+        raise InvalidInputError("Payload must be a JSON object")
+    return payload
+
+
+def _finite_number(value: Any, name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise InvalidInputError(f"'{name}' must be a finite number")
+    try:
+        number = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise InvalidInputError(f"'{name}' must be a finite number") from exc
+    if not math.isfinite(number):
+        raise InvalidInputError(f"'{name}' must be a finite number")
+    return number
+
+
 def parse_timeout(
     payload: Optional[dict] = None,
     header_val: Optional[str] = None,
@@ -91,25 +236,19 @@ def parse_timeout(
     min_timeout: float = 0.1,
     max_timeout: float = 3600.0,
 ) -> float:
-    """
-    Extracts and validates request timeout in seconds from header or body payload.
-    """
+    """Validate provided timeouts, retaining body precedence and finite clamping."""
     timeout = default_timeout
-
     if header_val is not None:
         try:
-            val = float(header_val)
-            if val > 0:
-                timeout = val
-        except ValueError:
-            pass
-
-    if payload and isinstance(payload, dict) and "timeout" in payload:
-        val = payload["timeout"]
-        if isinstance(val, (int, float)) and not isinstance(val, bool):
-            if val > 0:
-                timeout = float(val)
-
+            timeout = float(header_val)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise InvalidInputError("X-Request-Timeout must be a finite positive number") from exc
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise InvalidInputError("X-Request-Timeout must be a finite positive number")
+    if isinstance(payload, dict) and "timeout" in payload:
+        timeout = _finite_number(payload["timeout"], "timeout")
+        if timeout <= 0:
+            raise InvalidInputError("'timeout' must be a finite positive number")
     return max(min_timeout, min(timeout, max_timeout))
 
 
@@ -119,16 +258,25 @@ def encode_binary_embeddings(arr: np.ndarray, count: int, dims: int) -> bytes:
     Header: [int32 count (4B)][int32 dims (4B)] little-endian (<ii)
     Data: raw float32 bytes
     """
-    if count == 0 or dims == 0:
-        return struct.pack("<ii", 0, 0)
-
+    if any(isinstance(n, bool) or not isinstance(n, int) or not 0 <= n <= 2**31 - 1 for n in (count, dims)):
+        raise ProtocolError("count and dims must be non-negative int32 integers")
+    if not isinstance(arr, np.ndarray):
+        raise ProtocolError("Expected a numpy array")
     if arr.ndim != 2:
         raise ProtocolError(f"Expected 2D array, got ndim={arr.ndim} with shape {arr.shape}")
     if arr.shape[0] != count or arr.shape[1] != dims:
         raise ProtocolError(f"Shape {arr.shape} does not match count={count}, dims={dims}")
 
-    if arr.dtype != np.float32:
-        arr = arr.astype(np.float32)
+    if count == 0 or dims == 0:
+        if count != 0 or dims != 0:
+            raise ProtocolError("Empty frames must have count=0 and dims=0")
+        return struct.pack("<ii", 0, 0)
+
+    if arr.dtype != np.dtype("<f4"):
+        try:
+            arr = arr.astype("<f4")
+        except (ValueError, TypeError, OverflowError) as exc:
+            raise ProtocolError("Array cannot be encoded as float32") from exc
     if not arr.flags["C_CONTIGUOUS"]:
         arr = np.ascontiguousarray(arr)
 
@@ -151,6 +299,8 @@ def decode_binary_embeddings(buffer: bytes) -> tuple[np.ndarray, int, int]:
         raise ProtocolError(f"Invalid count={count} or dims={dims}")
 
     if count == 0 or dims == 0:
+        if count != 0 or dims != 0 or len(buffer) != 8:
+            raise ProtocolError("Empty frames require count=0, dims=0 and exactly 8 bytes")
         return np.empty((0, 0), dtype=np.float32), 0, 0
 
     expected_bytes = 8 + count * dims * 4
@@ -159,7 +309,7 @@ def decode_binary_embeddings(buffer: bytes) -> tuple[np.ndarray, int, int]:
             f"Buffer length {len(buffer)} does not match expected {expected_bytes} for {count}x{dims} float32"
         )
 
-    floats = np.frombuffer(buffer[8:], dtype=np.float32).reshape((count, dims))
+    floats = np.frombuffer(buffer, dtype="<f4", offset=8).reshape((count, dims))
     if not np.all(np.isfinite(floats)):
         raise ProtocolError("Decoded array contains NaN or Infinite float values")
 
@@ -198,11 +348,12 @@ def validate_embed_request(
 
     dims = payload.get("dims")
     if dims is not None:
-        if isinstance(dims, bool) or not isinstance(dims, (int, float)) or int(dims) <= 0:
+        if isinstance(dims, bool) or not isinstance(dims, int) or not 0 < dims <= 2**31 - 1:
             raise InvalidInputError(f"'dims' must be a positive integer, got: {dims}")
-        dims = int(dims)
 
-    is_query = bool(payload.get("is_query", False))
+    is_query = payload.get("is_query", False)
+    if not isinstance(is_query, bool):
+        raise InvalidInputError("'is_query' must be a boolean")
     return cleaned_texts, dims, is_query
 
 
@@ -219,6 +370,8 @@ def validate_rerank_request(
     documents = payload.get("documents")
     if not isinstance(query, str) or not query.strip():
         raise InvalidInputError("'query' must be a non-empty string")
+    if len(query) > max_doc_len:
+        raise InvalidInputError(f"'query' exceeds max length {max_doc_len}")
     if not isinstance(documents, list) or len(documents) == 0:
         raise InvalidInputError("'documents' must be a non-empty list of strings")
     if len(documents) > max_documents:
@@ -249,7 +402,7 @@ def validate_generate_request(
     max_tokens = payload.get("max_tokens", 600)
     if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or max_tokens <= 0 or max_tokens > 4096:
         raise InvalidInputError(f"'max_tokens' must be an integer in (0, 4096], got {max_tokens}")
-    temperature = payload.get("temperature", 0.0)
-    if not isinstance(temperature, (int, float)) or isinstance(temperature, bool) or not (0.0 <= float(temperature) <= 2.0):
+    temperature = _finite_number(payload.get("temperature", 0.0), "temperature")
+    if not 0.0 <= temperature <= 2.0:
         raise InvalidInputError(f"'temperature' must be a number in [0.0, 2.0], got {temperature}")
     return prompt, max_tokens, float(temperature)

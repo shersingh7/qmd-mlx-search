@@ -1,0 +1,12 @@
+{
+  "candidate_inputs": 42,
+  "exact_changed_paths": [
+    "finetune/tests/test_locked_job_submission.py",
+    "finetune/tools/qualify_gguf_image.py"
+  ],
+  "exact_test_prefix_preserved": true,
+  "green_positive_contract_sha256": "8a7b2ddbe50cf5025d115eadf3d056771b601ab649a1438366c79107c09985ff",
+  "new_test_bytes": 42117,
+  "old_test_bytes": 39234,
+  "original_positive_contract_preserved": true
+}

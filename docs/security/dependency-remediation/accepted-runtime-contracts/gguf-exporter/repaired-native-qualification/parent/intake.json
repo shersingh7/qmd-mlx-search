@@ -1,0 +1,87 @@
+{
+  "manifest_sha256": "1a986b2d077fc49afbd102cbe56804167f834b2910612967799c11b9b254e79c",
+  "evidence_hashes_verified": 191,
+  "artifacts_verified": [
+    {
+      "bytes": 140593376,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-f16.gguf",
+      "sha256": "4aaf136b76ca60b91c3107db953b435a58e65c6a6ebe55ffc1c417866b0505ff",
+      "tensors": 25,
+      "types": {
+        "F16": 14,
+        "F32": 11
+      }
+    },
+    {
+      "bytes": 63829280,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q4_k_m.gguf",
+      "sha256": "dba3d739e11e483e783e7baf2f1e643df6658deacff6b4fa2ac84666e54bf562",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q4_K": 11,
+        "Q6_K": 3
+      }
+    },
+    {
+      "bytes": 64125504,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q6_k.gguf",
+      "sha256": "659a7ea01f8843c3c1abee6be703d6876a5f34e9f0e17871f94e084faeab3447",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "bytes": 79824192,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q8_0.gguf",
+      "sha256": "e260da836b8e5df34bd662186f0807788e57a518972b848c2ddf4cc6f33c38d3",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    },
+    {
+      "bytes": 63829280,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "sha256": "32a4f31df10fe1ccbf1bb5df5742ebdd5255f836ab1c2a80dce7b9ab1a5c40f7",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q4_K": 11,
+        "Q6_K": 3
+      }
+    },
+    {
+      "bytes": 64125504,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "sha256": "8f485b8f4fce4b82361a1787c96c3dfb0977b991a928d415257c4460b09705ce",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "bytes": 79824192,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "sha256": "adb5d3e358ba75c6132bd5738351e9c1738eef9cfb5cbcfaf580998c79be7464",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    }
+  ],
+  "composed_sources_verified": 40,
+  "scope": "Parent authenticated returned evidence/source/artifact bytes; native reader replay pending"
+}

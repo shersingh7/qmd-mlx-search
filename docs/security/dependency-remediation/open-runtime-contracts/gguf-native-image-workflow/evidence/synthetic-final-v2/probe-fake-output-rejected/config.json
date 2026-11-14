@@ -1,0 +1,9 @@
+{
+  "probe_update": {
+    "outputs": [
+      "not-C",
+      "not-C++"
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-fake-output-rejected/public work space"
+}

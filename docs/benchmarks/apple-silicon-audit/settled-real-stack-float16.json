@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "scope": "Real cached MLX model -> JSON/binary -> SDK SQLite -> REST/MCP, authored public fixture only",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "dtype_requested": "float16",
+  "source_sha256": "2b7705ee8f9cff87549cbb4ca6b4f1d336b76821218305dd86d8e35012e3c679",
+  "integration_source_sha256": "be3cbe88e18419f6a4a254bfdf5b3c9a96221249158157b68cb0a58d4387b55d",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/settled-real-stack-float16-rgdm36ly/tmp/qmd-real-g1ekdlxq",
+  "sdk_report": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/settled-real-stack-float16-sdk.json",
+  "ready_seconds": 2.662704667018261,
+  "url": "http://127.0.0.1:63250",
+  "control_port": 63251,
+  "instance_token": "cd9bf801bd62435099c8c7cf18da5ed7",
+  "command": [
+    "/Users/shersingh/.local/bin/node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/github/qmd-mlx-search/scripts/verify_local_stack.ts",
+    "--url",
+    "http://127.0.0.1:63250",
+    "--root",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/settled-real-stack-float16-rgdm36ly/tmp/qmd-real-g1ekdlxq",
+    "--output",
+    "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/settled-real-stack-float16-sdk.json"
+  ],
+  "child_pid": 6655,
+  "child_cleanup": {
+    "cleaned": true,
+    "sigkill_used": false
+  },
+  "child_exit_code": 0,
+  "node_log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/settled-real-stack-float16-rgdm36ly/tmp/qmd-real-g1ekdlxq/node.log",
+  "checks": {
+    "documents": 8,
+    "jsonBinaryMaxAbs": 0,
+    "restoredRankingsIdentical": true,
+    "mcpGetVerified": true,
+    "sseStreamVerified": true,
+    "foreignOriginRejected": true,
+    "noopEmbed": {
+      "status": "complete",
+      "docsProcessed": 0,
+      "docsSelected": 0,
+      "chunksAttempted": 0,
+      "chunksCommitted": 0,
+      "chunksEmbedded": 0,
+      "chunksFailed": 0,
+      "chunksSkipped": 0,
+      "chunksPending": 0,
+      "errors": 0,
+      "durationMs": 0,
+      "checkpoint": {
+        "jobId": "42ba4c5b-79df-47dc-b521-b45855fe7b74",
+        "fingerprint": {
+          "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "dimensions": 384,
+          "chunkStrategy": "regex",
+          "descriptorSignature": "4a382a2400996e4400d7fa56",
+          "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "quantization": "none"
+        },
+        "startedAt": "2026-11-12T02:36:55.053Z",
+        "updatedAt": "2026-11-12T02:36:55.054Z",
+        "status": "completed",
+        "docsTotal": 0,
+        "docsCompleted": 0,
+        "chunksTotal": 0,
+        "chunksCommitted": 0
+      }
+    }
+  },
+  "memory_before_stop": {
+    "active_mb": 43.3,
+    "peak_mb": 130.0,
+    "model_mb": 43.3,
+    "residency_budget_mb": 16384.0,
+    "notes": "Resident weight budgets are not total activation memory guarantees."
+  },
+  "server_stopped": true,
+  "worker_alive_after_stop": false,
+  "http_threads_alive": false,
+  "metal_active_immediate_after_stop": 0,
+  "metal_active_after_stop": 0,
+  "metal_cache_after_stop": 0
+}

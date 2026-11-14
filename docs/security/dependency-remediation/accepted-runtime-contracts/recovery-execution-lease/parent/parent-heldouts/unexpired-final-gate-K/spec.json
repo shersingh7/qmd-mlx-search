@@ -1,0 +1,8 @@
+{
+  "name": "unexpired-final-gate-K",
+  "queue_before_forward": true,
+  "cancel_byte": "K",
+  "forward_hold": 1.3,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/parent-heldouts/unexpired-final-gate-K",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_recovery_process.py"
+}

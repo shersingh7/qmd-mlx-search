@@ -1,0 +1,30 @@
+from pathlib import Path
+import json, shutil, hashlib
+R=Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+# Already authenticated fixture bytes, checked for absolute executable imports:
+# both bridge modules import only named installed public dependency packages.
+for rel in ['sdk-isolated.config.mjs','probes/host-setup.mjs','probes/sdk-network-guard.mjs','sdk-probe/test/sdk-inlined-zod.test.ts','sdk-probe/test/zod-prefix-scope.test.ts','sdk-probe/node_modules/review-converter-native/index.mjs','sdk-probe/node_modules/review-converter-native/package.json','sdk-probe/node_modules/review-native-zod/index.mjs','sdk-probe/node_modules/review-native-zod/package.json']:
+    src=R/'reference/fixtures'/rel
+    dest=R/rel
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(src,dest)
+    assert src.read_bytes()==dest.read_bytes()
+a=json.loads((R/'evidence/mirror-package-aliases.json').read_text())
+nm=R/'sdk-probe/node_modules'
+for name,target in a.items():
+    dest=nm/name
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    dest.symlink_to(target,target_is_directory=True)
+for sub in ['.vite','.cache','.vitest']:
+    (nm/sub).mkdir()
+    (R/'sdk-probe'/sub).mkdir()
+(R/'sdk-probe/package.json').write_text('{"type":"module","private":true}\n')
+# Retain the unchanged original accepted test for the blocked lease-related
+# regression as a separate evidence fixture, not a root added to the source tree.
+p=R/'held/phase5-recovery.test.ts'
+p.parent.mkdir()
+src=(R/'reference/accepted19/test/phase5-recovery.test.ts').read_text()
+for token,repl in [('"./fixtures/public_eval_dataset.js"','"../mirror/test/fixtures/public_eval_dataset.js"'),('"../src/','"../mirror/src/'),('"../scripts/','"../mirror/scripts/')]:
+    src=src.replace(token,repl)
+p.write_text(src)
+print(json.dumps({'sdk_fixture_copies':9,'sdk_package_aliases':len(a),'held_accepted_test_relocation':'owned mirror public imports only'},indent=2))

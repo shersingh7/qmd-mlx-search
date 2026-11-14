@@ -1,0 +1,21 @@
+--- baseline/test/phase5-recovery.test.ts
++++ accepted19/test/phase5-recovery.test.ts
+@@ -185,5 +185,18 @@
+       expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
+       expect(verifyRetrievalEquivalence(post, post).identical).toBe(false);
+     });
++
++    it("refuses missing query slots in either retrieval report without throwing", () => {
++      for (const missingSide of ["pre", "post", "both"]) {
++        const pre = stage();
++        const post = stage();
++        if (missingSide !== "post") pre.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
++        if (missingSide !== "pre") post.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
++        expect(verifyRetrievalEquivalence(pre, post)).toMatchObject({
++          identical: false,
++          details: [{ docOrderMatch: false, scoreToleranceMatch: false }],
++        });
++      }
++    });
+   });
+ });

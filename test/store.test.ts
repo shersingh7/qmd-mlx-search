@@ -48,6 +48,7 @@ import {
   syncConfigToDb,
   STRONG_SIGNAL_MIN_SCORE,
   STRONG_SIGNAL_MIN_GAP,
+  DEFAULT_RERANK_MODEL,
   generateEmbeddings,
   type Store,
   type DocumentResult,
@@ -2541,6 +2542,7 @@ describe.skipIf(!!process.env.CI)("LlamaCpp Integration", () => {
 
     const llmSpy = vi.spyOn(llmModule, "getDefaultLlamaCpp").mockReturnValue({
       rerank: rerankSpy,
+      getCacheIdentity: async () => "mock-reranker",
     } as any);
 
     try {
@@ -2572,7 +2574,7 @@ describe("MLX backend cache namespacing", () => {
     const store = await createTestStore();
     const rerankSpy = vi.fn(async (_query: string, docs: { file: string; text: string }[]) => ({
       results: docs.map((doc, index) => ({ file: doc.file, score: 0.9 - index * 0.1, index })),
-      model: "mock-reranker",
+      model: mlxTag ?? DEFAULT_RERANK_MODEL,
     }));
     // Mutable backend tag: starts as MLX, toggles to GGUF mid-test.
     let mlxTag: string | null = "mlx:fake-reranker-v1";
@@ -2786,6 +2788,7 @@ describe("Embedding batching", () => {
     const embedCalls: { text: string; options?: { model?: string } }[] = [];
     const embedBatchModelCalls: ({ model?: string } | undefined)[] = [];
     return {
+      ...createFakeTokenizer(),
       embedBatchCalls,
       embedCalls,
       embedBatchModelCalls,
@@ -2859,7 +2862,8 @@ describe("Embedding batching", () => {
       });
 
       expect(fakeLlm.embedBatchCalls).toHaveLength(2);
-      expect(fakeLlm.embedBatchCalls.map(call => call.length)).toEqual([2, 1]);
+      // Keyset pages are ordered by content hash, not the sample path.
+      expect(fakeLlm.embedBatchCalls.map(call => call.length).sort()).toEqual([1, 2]);
       expect(result.docsProcessed).toBe(3);
       expect(result.chunksEmbedded).toBe(3);
     } finally {
@@ -2884,7 +2888,8 @@ describe("Embedding batching", () => {
 
       expect(result.chunksEmbedded).toBe(1);
       expect(fakeLlm.embedCalls[0]?.options?.model).toBe(model);
-      expect(fakeLlm.embedBatchModelCalls).toEqual([{ model }]);
+      expect(fakeLlm.embedBatchModelCalls).toHaveLength(1);
+      expect(fakeLlm.embedBatchModelCalls[0]).toMatchObject({ model });
       expect(db.prepare(`SELECT DISTINCT model FROM content_vectors`).all()).toEqual([{ model }]);
     } finally {
       setDefaultLlamaCpp(null);

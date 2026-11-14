@@ -1,0 +1,203 @@
+{
+  "status": "CODE_SPEC_AND_QUALITY_ACCEPTED; NOT_LIVE_INTEGRATION_OR_RELEASE_ACCEPTANCE",
+  "review_delegation": "deleg_9a18dd99",
+  "source_sha256": {
+    "finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+    "finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+    "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+    "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617"
+  },
+  "independent_case_executions": {
+    "portable-installed": 183,
+    "portable-pinned": 183,
+    "counterexamples": 10,
+    "independent-v2-installed": 119,
+    "independent-v2-pinned": 119
+  },
+  "parent_cases_per_reader": {
+    "independent-v2-installed": 119,
+    "independent-v3-pinned": 119
+  },
+  "parent_resources": {
+    "independent-v2-installed": {
+      "cases": 9,
+      "mappings_closed": 153,
+      "retained_exceptions": 153,
+      "fd_pairs": [
+        [
+          12,
+          12
+        ]
+      ]
+    },
+    "independent-v3-pinned": {
+      "cases": 9,
+      "mappings_closed": 153,
+      "retained_exceptions": 153,
+      "fd_pairs": [
+        [
+          12,
+          12
+        ]
+      ]
+    }
+  },
+  "failed_parent_harness_history": "Unnecessary absent eval.py copy failed before tests; corrected minimal closure. Later 140s two-reader controller cap interrupted pinned pytest terminal output. Installed scope119/exit0 retained; pinned scope rerun directly in fresh directory119/exit0. No product assertion failures or test-deadline changes; all negatives preserved.",
+  "remaining_gates": [
+    "Fresh real native exports bound to changed helper and composed metadata (deleg_6e612155 / sa-0-1457b5a5)",
+    "Parent selective integration and all16graphs/initialenvironment binding",
+    "Three helper closures and build-capable image execution",
+    "Combined numerical/full suites/package/exact-head CI and main-alert verification"
+  ],
+  "limits": [
+    "No pretrained or MTP model-quality qualification",
+    "Old artifact positives do not qualify new native conversions",
+    "Structural validation is not quantization/model semantic correctness",
+    "No group-atomic guarantee after later rename/upload failure"
+  ],
+  "evidence_files": {
+    "independent-review.md": {
+      "sha256": "c17cc6cdc9e81cc1a224b8ffded6717e918df643546f54ad05a7dea446eca7d5",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/REPORT.md"
+    },
+    "independent-spec.json": {
+      "sha256": "475898f393ce699d24ba0d2c62e60032ca40478264a5606c98a73caf76f4e96d",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/SPEC.json"
+    },
+    "independent-quality.json": {
+      "sha256": "bec6b552146057e3e04dac7a930ffe6f83bcab66aa97e8c5b5931f8da906e79e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/QUALITY.json"
+    },
+    "independent-intake.json": {
+      "sha256": "c5b1afeff14550635a0d796945e2ba94d585c3baec5750dd06547b18a35e5880",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/intake.json"
+    },
+    "independent-harness-issues.md": {
+      "sha256": "8bd65a9464f0a8cf9bb86e59b6929dbc3b5a1411f67bbc72e19a4db2b850d46c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/harness-issues.md"
+    },
+    "independent-contracts.py.txt": {
+      "sha256": "1d13ccb0318465518ea393d954e673dfc1af7247f236fbcf1d5dd281bc59f45c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/test_independent_contracts.py"
+    },
+    "independent-runner.py.txt": {
+      "sha256": "ab5a428604444a2cfab5b3082eec7e8a96349ae2f85bf5272fc9c45db0194eea",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/run_checks.py"
+    },
+    "parent-runner.py.txt": {
+      "sha256": "06f96d9708da502a62dead057d9e08ef0019010913c793470de775b3cd6ff8d9",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/run_checks.py"
+    },
+    "parent-receipt.json": {
+      "sha256": "9c9d8d7e7ae9c25d8dc63f3dc04646221f02e7fd5bdca4a694879ac4a112bcf0",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/parent-receipt.json"
+    },
+    "parent-input.json": {
+      "sha256": "aa32906c7b08f3caf2d7823816903225c0926731c89c9ff828cd8795c6fb6b63",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/input.json"
+    },
+    "parent-timeout-disposition.json": {
+      "sha256": "77ba473c8f80c0f02c8bc821c6bf416ab5befcae5ab023b7327d3c030c0947ed",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/timeout-disposition.json"
+    },
+    "parent-interrupted-diagnostic.json": {
+      "sha256": "65bc464435f65dba1c776216b1fac8cf5eec04ecc9818d6ce7101191badf7454",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/diagnostic-record.json"
+    },
+    "parent-interrupted-pinned.xml": {
+      "sha256": "f614b51879af38ae9ed48cb9e1a6ccd7f8033e660e096181b77319cb23fa6c25",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v2-pinned/pytest.xml"
+    },
+    "parent-setup-failure.json": {
+      "sha256": "6435a15611936337bd9d315ffa5c98bcb5a3af46e4d04656624b2a9529c5e4aa",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-reaccepted-dfq3wjhf/setup-failure.json"
+    },
+    "original-body.patch.txt": {
+      "sha256": "a2cee04e4f1d482b6080311c1233aa99b182594eaa3b38d771d545871e0ccbec",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/delivery/gguf-toolchain-body.patch"
+    },
+    "repair-delta.patch.txt": {
+      "sha256": "6952897a0338fe1d1081f2335b893632143549b1fa37ee958beec54c281d2430",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru/delivery-final/repair-delta.patch"
+    },
+    "independent-portable-installed.xml": {
+      "sha256": "cb3a10a66cc96d85ef07fdcd2d6b82828a0ee2a3225e7fb550f5fa055b9c0391",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/portable-installed/pytest.xml"
+    },
+    "independent-portable-pinned.xml": {
+      "sha256": "7461c4131f3b7a485df9ccd18b5655e3fcf3da960337bb4c1e8df3d6c4de7fbd",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/portable-pinned/pytest.xml"
+    },
+    "independent-counterexamples.xml": {
+      "sha256": "ddf93243a2fc460549a3def898016d45d3bfd4b403922580a41b673589851578",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/counterexamples/pytest.xml"
+    },
+    "independent-independent-v2-installed.xml": {
+      "sha256": "026640deb5bc6316146bb79a1e65c23f8ef6dd0a97ec2ac050efcc534f83889e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/pytest.xml"
+    },
+    "independent-independent-v2-pinned.xml": {
+      "sha256": "7fa6c4b599f299d2ae3977f0b4be9567798a84f7253170179cce57d651688ce4",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/pytest.xml"
+    },
+    "independent-independent-v2-installed-resources.jsonl": {
+      "sha256": "a211001bec7d29bd3334c75e4aa4b015dc63f5fefcdb75bd6d3bbc34ed1f3a12",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/resources.jsonl"
+    },
+    "independent-independent-v2-installed-entrypoints.jsonl": {
+      "sha256": "efa1f8af1e9256686ef24029e30fd0426aefd9227a8ed72b4cea537ccfa740c4",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/entrypoints.jsonl"
+    },
+    "independent-independent-v2-installed-retained.jsonl": {
+      "sha256": "520ec8bfb0db2c858d034b51ee13605817e753fbd7766ea9fa04a456b63ec412",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/retained.jsonl"
+    },
+    "independent-independent-v2-installed-source-receipt.json": {
+      "sha256": "58431ee30c17ccbaffda209cc9d7dd04a733f71282363be711a493630ecc2942",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-installed/source-receipt.json"
+    },
+    "independent-independent-v2-pinned-resources.jsonl": {
+      "sha256": "a211001bec7d29bd3334c75e4aa4b015dc63f5fefcdb75bd6d3bbc34ed1f3a12",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/resources.jsonl"
+    },
+    "independent-independent-v2-pinned-entrypoints.jsonl": {
+      "sha256": "3daae270033a518dfb3eb8bd507707b9d4501d66751ce6a8f51cccd0ac8d7819",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/entrypoints.jsonl"
+    },
+    "independent-independent-v2-pinned-retained.jsonl": {
+      "sha256": "520ec8bfb0db2c858d034b51ee13605817e753fbd7766ea9fa04a456b63ec412",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/retained.jsonl"
+    },
+    "independent-independent-v2-pinned-source-receipt.json": {
+      "sha256": "cec3fe87712297085e224efd6e220aca2c389588a4bba07ae53e2f14db163a11",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/independent-v2-pinned/source-receipt.json"
+    },
+    "parent-independent-v2-installed-pytest.xml": {
+      "sha256": "f66d1602516eecd6bfec30a1b084cd401bd04960d0356ab4ba225f9a4db8efc9",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v2-installed/pytest.xml"
+    },
+    "parent-independent-v2-installed-source-receipt.json": {
+      "sha256": "cce9c1b91dae147236b40fd484846f0d1c6585d95367f2ea557aca216d5f6ff3",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v2-installed/source-receipt.json"
+    },
+    "parent-independent-v2-installed-resources.jsonl": {
+      "sha256": "a211001bec7d29bd3334c75e4aa4b015dc63f5fefcdb75bd6d3bbc34ed1f3a12",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v2-installed/resources.jsonl"
+    },
+    "parent-independent-v3-pinned-pytest.xml": {
+      "sha256": "68492aa18361fdc4cca2e0d6203dd574aa49865d21d0459061eecedfb13e0a5f",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v3-pinned/pytest.xml"
+    },
+    "parent-independent-v3-pinned-source-receipt.json": {
+      "sha256": "a387a2d4191b6795d8b8d7dc6c9df95d1304e4dbbbeb2492c2713732cee6de56",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v3-pinned/source-receipt.json"
+    },
+    "parent-independent-v3-pinned-resources.jsonl": {
+      "sha256": "a211001bec7d29bd3334c75e4aa4b015dc63f5fefcdb75bd6d3bbc34ed1f3a12",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v3-pinned/resources.jsonl"
+    }
+  }
+}

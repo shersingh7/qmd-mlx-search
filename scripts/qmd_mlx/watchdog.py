@@ -3,8 +3,8 @@ watchdog.py — External Resource Watchdog for MLX Production Qualification
 
 Monitors:
 1. Target PID RSS (in MB) vs headroom-derived limits.
-2. System memory pressure (via memory_pressure -Q / vm_stat).
-3. Swap growth (via sysctl vm.swapusage) relative to baseline.
+2. System memory pressure (macOS memory_pressure / vm_stat; Linux MemAvailable).
+3. Swap growth (macOS sysctl vm.swapusage; Linux /proc/meminfo) relative to baseline.
 4. HTTP /health endpoint responsiveness (on dedicated control or inference port) and worker progress telemetry.
 5. Stuck GPU inference detection (monotonic job age vs completed sequence).
 
@@ -14,7 +14,8 @@ Safety Invariants:
   No fabricated startup defaults in __init__ or telemetry methods.
 - Strict process identity & lifecycle isolation:
   * Owned child processes by default. External attach requires explicit opt-in, non-empty start identity, and instance token.
-  * Revalidates process identity and immutable start time before EVERY signal (SIGTERM and SIGKILL).
+  * Pins owned leader PIDs through final group cleanup; revalidates live identity before TERM/KILL.
+  * Revalidates external PID start identity before each leader-only signal; external attach never owns a group.
   * Never sends signals to recycled PIDs, mismatched handles, or unrelated services.
   * Never attempts to reap (os.waitpid) non-child processes.
   * Cleanly reaps owned child process handles on every exit path.
@@ -35,9 +36,12 @@ import signal
 import socket
 import subprocess
 import sys
+import threading
 import time
 from enum import Enum
 from typing import Any, Callable, Optional
+
+from .process_anchor import require_waitid_support, wait_child_without_reaping
 
 
 class BreachType(str, Enum):
@@ -59,6 +63,222 @@ class SystemMetricsError(RuntimeError):
 class TargetValidationError(ValueError):
     """Raised when target PID fails safety or identity checks."""
     pass
+
+
+class _AnchoredPopen(subprocess.Popen):
+    """Observe exits without recycling the leader PID until group cleanup.
+
+    poll()/wait()/communicate() retain their exit-code semantics, but only
+    terminate_owned_process() reaps. All handle waits and group signals share
+    one lock. Application code must not bypass the handle with waitpid/wait(-1)
+    or install a SIGCHLD reaper; detected loss permanently revokes authority.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        self._anchor_lock = threading.RLock()
+        self._anchor_released = False
+        self._anchor_error: Optional[str] = None
+        super().__init__(*args, **kwargs)
+
+    def _assert_anchor(self) -> Optional[int]:
+        if self._anchor_error is not None or self._anchor_released:
+            raise TargetValidationError(self._anchor_error or "Owned process anchor has been released")
+        if signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL:
+            raise TargetValidationError("Owned process anchor requires default SIGCHLD handling, not an application reaper")
+        try:
+            code = wait_child_without_reaping(self.pid)
+        except ChildProcessError as error:
+            self._anchor_error = "Owned process ownership anchor was reaped outside its handle; refusing numerical PGID signals"
+            raise TargetValidationError(self._anchor_error) from error
+        if self.returncode is not None and code != self.returncode:
+            self._anchor_error = "Owned process anchor lost its previously observed exit identity"
+            raise TargetValidationError(self._anchor_error)
+        if code is not None:
+            self.returncode = code
+        return code
+
+    def _internal_poll(self, _deadstate=None, **_kwargs):
+        with self._anchor_lock:
+            if not self._anchor_released:
+                # Even a cached exit code is not proof that the anchor remains
+                # waitable after an application bypasses this handle.
+                try:
+                    self._assert_anchor()
+                except (OSError, RuntimeError, TargetValidationError):
+                    if _deadstate is None:
+                        raise
+                    # Popen.__del__ is not a cleanup/signalling path. Do not
+                    # raise an unraisable exception for an already lost anchor.
+                    if self.returncode is None:
+                        self.returncode = _deadstate
+            return self.returncode
+
+    def _wait(self, timeout):
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while True:
+            code = self._internal_poll()
+            if code is not None:
+                return code
+            remaining = None if deadline is None else deadline - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                assert timeout is not None
+                raise subprocess.TimeoutExpired(self.args, timeout)
+            time.sleep(0.01 if remaining is None else min(0.01, remaining))
+
+    def _reap_anchor(self) -> bool:
+        """Revoke signalling authority BEFORE the sole consuming waitpid."""
+        if self._assert_anchor() is None:
+            return False
+        self._anchor_released = True
+        pid, status = os.waitpid(self.pid, os.WNOHANG)
+        if pid != self.pid:
+            raise TargetValidationError("Owned process anchor could not be reaped after cleanup")
+        self.returncode = os.waitstatus_to_exitcode(status)
+        return True
+
+    def send_signal(self, sig):
+        # A concurrent group cleanup must not reap between Popen's ordinary
+        # poll() and kill(pid). Keep even leader-only handle signals under the
+        # same ownership lock as the final consuming wait.
+        with self._anchor_lock:
+            if self._anchor_released or self._assert_anchor() is not None:
+                return
+            try:
+                os.kill(self.pid, sig)
+            except ProcessLookupError:
+                pass
+
+
+class _OwnedProcessGroup:
+    """An isolated-session capability anchored by the unreaped direct child.
+
+    The live OR zombie leader reserves its PID, preventing a foreign group from
+    acquiring that PGID even after every executing descendant exits. The anchor
+    is kept through TERM, grace, KILL and live-member readback, then revoked and
+    reaped. Group existence and coarse ps start times never establish ownership.
+    Descendants deliberately creating a different session are not contained.
+    """
+
+    def __init__(self, child: _AnchoredPopen):
+        self.child = child
+        self.pgid = child.pid
+        self.lock = child._anchor_lock
+        self.cleaned = False
+        self.sigkill_used = False
+
+    def _has_live_members(self) -> bool:
+        # ps is completion telemetry only, not signal authority. Retaining the
+        # anchor allows us to distinguish its zombie from executing descendants.
+        self.child._assert_anchor()
+        result = subprocess.run(
+            ["ps", "-g", str(self.pgid), "-o", "pgid=,stat="],
+            capture_output=True, text=True, timeout=0.5, check=False,
+        )
+        # ps uses status 1 for a genuine empty selection, but also for failed
+        # snapshots. Diagnostics or partial output cannot prove group absence:
+        # retain the anchor rather than publishing a false cleanup success.
+        if (result.stderr.strip() or result.returncode not in (0, 1)
+                or (result.returncode == 1 and result.stdout.strip())):
+            raise SystemMetricsError(
+                f"Could not inspect owned process group {self.pgid} "
+                f"(status {result.returncode}): {result.stderr.strip() or 'incomplete process snapshot'}"
+            )
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) != 2 or not parts[0].isdigit():
+                raise SystemMetricsError("Malformed owned process-group telemetry")
+            if int(parts[0]) == self.pgid and not parts[1].startswith("Z"):
+                return True
+        if self.child._assert_anchor() is None:
+            raise SystemMetricsError("Owned live leader missing from process-group telemetry")
+        return False
+
+    def terminate(self, grace_s: float, validate_signal: Optional[Callable[[], None]] = None) -> tuple[bool, bool]:
+        if isinstance(grace_s, bool) or not isinstance(grace_s, (int, float)) or not math.isfinite(grace_s) or grace_s < 0:
+            raise ValueError("Process cleanup grace must be finite and non-negative")
+        with self.lock:
+            if self.cleaned:
+                return True, self.sigkill_used
+            if self.pgid != self.child.pid or self.pgid <= 1 or self.pgid == os.getpgrp():
+                raise TargetValidationError("Refusing to signal a shared or invalid process group")
+
+            def send(sig: int) -> bool:
+                # WNOWAIT checks the exact child even AFTER its exit. poll/wait
+                # cannot consume this anchor, including in concurrent threads.
+                if self.child._assert_anchor() is None:
+                    try:
+                        if os.getpgid(self.child.pid) != self.pgid:
+                            raise TargetValidationError("Owned child left its isolated process group")
+                        if validate_signal is not None:
+                            validate_signal()
+                    except (ProcessLookupError, TargetValidationError):
+                        # A pinned zombie still authorizes descendant cleanup.
+                        # Darwin getpgid(zombie) returns ESRCH, not its old PGID.
+                        if self.child._assert_anchor() is None:
+                            raise
+                self.child._assert_anchor()  # Also check after callback/telemetry.
+                try:
+                    os.killpg(self.pgid, sig)
+                    return True
+                except ProcessLookupError:
+                    return False
+                except PermissionError:
+                    # Darwin reports EPERM for a group that became zombie-only
+                    # after the last readback. A real denial with live members
+                    # remains an error, never a successful cleanup verdict.
+                    if self._has_live_members():
+                        raise
+                    return False
+
+            group_present = self._has_live_members()
+            if group_present:
+                send(signal.SIGTERM)
+            grace_deadline = time.monotonic() + grace_s
+            while group_present and time.monotonic() < grace_deadline:
+                time.sleep(min(0.02, max(0, grace_deadline - time.monotonic())))
+                group_present = self._has_live_members()
+            if group_present:
+                # Also read back with a zero grace period; TERM may already
+                # have left only the reserved zombie leader by this point.
+                group_present = self._has_live_members()
+            if group_present:
+                self.sigkill_used = send(signal.SIGKILL) or self.sigkill_used
+                kill_deadline = time.monotonic() + 1.0
+                while self._has_live_members():
+                    if time.monotonic() >= kill_deadline:
+                        return False, self.sigkill_used
+                    time.sleep(0.02)
+            # Success requires a real non-executing-group readback, not just a
+            # successful kill syscall or a reaped direct child. Non-child zombies
+            # cannot execute; the OS reaper may retain them briefly.
+            self.cleaned = self.child._reap_anchor()
+            return self.cleaned, self.sigkill_used
+
+
+def spawn_owned_process(cmd: list[str], **kwargs: Any) -> subprocess.Popen:
+    """Spawn an isolated, PID-anchored child; cleanup MUST use its capability.
+
+    poll/wait report exit without reaping until terminate_owned_process. This
+    preserves actual target PID accounting, including threaded supervisors, with
+    no guardian PID, custom fork, or thread-unsafe preexec_fn.
+    """
+    require_waitid_support()
+    if signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL:
+        raise TargetValidationError("Owned process anchor requires default SIGCHLD handling")
+    if kwargs.get("preexec_fn") is not None:
+        raise ValueError("Owned process supervision does not permit preexec_fn")
+    kwargs["start_new_session"] = True
+    child = _AnchoredPopen(cmd, **kwargs)
+    setattr(child, "_qmd_owned_group", _OwnedProcessGroup(child))
+    return child
+
+
+def terminate_owned_process(child: subprocess.Popen, grace_s: float = 0.2) -> tuple[bool, bool]:
+    """Clean the owned group, then reap its retained (possibly exited) leader."""
+    group = getattr(child, "_qmd_owned_group", None)
+    if not isinstance(group, _OwnedProcessGroup) or group.child is not child:
+        raise TargetValidationError("Child has no owned process-group capability")
+    return group.terminate(grace_s)
 
 
 def is_numeric_loopback(host: str) -> bool:
@@ -216,15 +436,58 @@ class WatchdogCheckResult:
 
 class SystemMemorySampler:
     """
-    Samples macOS system memory statistics, pressure levels, swap usage, and target PID RSS.
-    Fails closed when telemetry commands fail or return unparseable outputs.
+    Samples measured macOS/Linux memory, available headroom, swap, and PID RSS.
+    Missing, malformed, or unsupported telemetry always fails closed.
     """
 
     def __init__(
         self,
         cmd_runner: Optional[Callable[[list[str], float], tuple[int, str, str]]] = None,
+        *,
+        platform_name: Optional[str] = None,
+        proc_meminfo_path: str = "/proc/meminfo",
     ):
         self._cmd_runner = cmd_runner or self._default_cmd_runner
+        self._platform_name = sys.platform if platform_name is None else platform_name
+        self._proc_meminfo_path = proc_meminfo_path
+
+    def _require_memory_platform(self) -> None:
+        if self._platform_name not in ("darwin", "linux"):
+            raise SystemMetricsError(f"Unsupported memory telemetry platform: {self._platform_name}")
+
+    def _linux_memory_kb(self) -> dict[str, int]:
+        """Read a bounded kernel snapshot; never invent missing MemAvailable.
+
+        MemAvailable already estimates reclaimable cache and kernel reserves.
+        Adding MemFree/Buffers/Cached would double-count headroom. Old kernels
+        without MemAvailable are unsupported, not a reason to guess a budget.
+        """
+        required = {"MemTotal", "MemAvailable", "SwapTotal", "SwapFree"}
+        try:
+            with open(self._proc_meminfo_path, "r", encoding="ascii") as stream:
+                text = stream.read(65537)
+            if len(text) > 65536:
+                raise ValueError("snapshot exceeds 65536 bytes")
+            values: dict[str, int] = {}
+            for line in text.splitlines():
+                key = line.partition(":")[0]
+                if key not in required:
+                    continue
+                match = re.fullmatch(r"([A-Za-z]+):\s+([0-9]+)\s+kB\s*", line)
+                if match is None or key in values:
+                    raise ValueError(f"malformed or duplicate {key}")
+                values[key] = int(match.group(2))
+            if values.keys() != required:
+                raise ValueError(f"missing fields: {', '.join(sorted(required - values.keys()))}")
+            if values["MemTotal"] <= 0 or values["MemAvailable"] > values["MemTotal"]:
+                raise ValueError("invalid MemTotal/MemAvailable relationship")
+            if values["SwapFree"] > values["SwapTotal"]:
+                raise ValueError("SwapFree exceeds SwapTotal")
+            if any(not math.isfinite(value / 1024.0) for value in values.values()):
+                raise ValueError("non-finite memory reading")
+            return values
+        except (OSError, UnicodeError, ValueError, OverflowError) as error:
+            raise SystemMetricsError(f"Failed to sample Linux meminfo at {self._proc_meminfo_path}: {error}") from error
 
     @staticmethod
     def _default_cmd_runner(cmd: list[str], timeout_s: float = 2.0) -> tuple[int, str, str]:
@@ -243,7 +506,10 @@ class SystemMemorySampler:
             return -1, "", str(e)
 
     def get_installed_ram_mb(self) -> float:
-        """Returns total installed physical RAM in MB via sysctl hw.memsize. Fails closed on error."""
+        """Return measured physical RAM in MB, never a platform fallback budget."""
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            return self._linux_memory_kb()["MemTotal"] / 1024.0
         rc, out, err = self._cmd_runner(["sysctl", "-n", "hw.memsize"], 2.0)
         if rc == 0 and out.strip().isdigit():
             val = float(int(out.strip()) / (1024 * 1024))
@@ -253,23 +519,29 @@ class SystemMemorySampler:
 
     def get_memory_headroom_mb(self) -> float:
         """
-        Calculates currently available memory headroom in MB on macOS from vm_stat.
+        Calculates currently available memory headroom in MB from OS telemetry.
+        Linux uses measured MemAvailable (not MemFree plus cache).
         Headroom = (Pages free + Pages inactive + Pages speculative) * page_size.
         DOES NOT double-count Pages purgeable (purgeable pages are already counted within inactive/file cache).
         Fails closed on command failure.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            return self._linux_memory_kb()["MemAvailable"] / 1024.0
         rc, out, err = self._cmd_runner(["vm_stat"], 2.0)
         if rc != 0 or not out:
             raise SystemMetricsError(f"Failed to sample vm_stat: rc={rc}, err={err}")
 
-        page_size = 16384  # Default Apple Silicon page size (16KB)
         m_page = re.search(r"page size of (\d+) bytes", out, re.IGNORECASE)
-        if m_page:
-            page_size = int(m_page.group(1))
+        if m_page is None or int(m_page.group(1)) <= 0:
+            raise SystemMetricsError("Missing or invalid vm_stat page size")
+        page_size = int(m_page.group(1))
 
         def _extract_pages(key: str) -> int:
             m = re.search(rf"{key}:\s+(\d+)\.", out)
-            return int(m.group(1)) if m else 0
+            if m is None:
+                raise SystemMetricsError(f"Missing or invalid vm_stat counter: {key}")
+            return int(m.group(1))
 
         pages_free = _extract_pages("Pages free")
         pages_inactive = _extract_pages("Pages inactive")
@@ -284,6 +556,10 @@ class SystemMemorySampler:
         Queries system memory free percentage from `memory_pressure -Q` or falls back to headroom ratio.
         Returns a float percentage in [0.0, 100.0]. Fails closed on error.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            values = self._linux_memory_kb()
+            return round(values["MemAvailable"] / values["MemTotal"] * 100.0, 1)
         rc, out, _ = self._cmd_runner(["memory_pressure", "-Q"], 2.0)
         if rc == 0 and out:
             m = re.search(r"System-wide memory free percentage:\s*(\d+)%", out)
@@ -302,6 +578,10 @@ class SystemMemorySampler:
         Queries current system swap usage in MB via sysctl vm.swapusage.
         Fails closed on error.
         """
+        self._require_memory_platform()
+        if self._platform_name == "linux":
+            values = self._linux_memory_kb()
+            return (values["SwapTotal"] - values["SwapFree"]) / 1024.0
         rc, out, err = self._cmd_runner(["sysctl", "vm.swapusage"], 2.0)
         if rc == 0 and out:
             m = re.search(r"used\s*=\s*([0-9.]+)([KMG]?)", out)
@@ -338,10 +618,10 @@ class SystemMemorySampler:
         raise SystemMetricsError(f"Failed to query RSS for active PID {pid}: rc={rc}, err={err}, out='{out.strip()}'")
 
     def get_process_cmdline(self, pid: int) -> Optional[str]:
-        """Queries full command-line of target PID via `ps -o command= -p <pid>`."""
+        """Request an untruncated command line on both BSD and GNU ps."""
         if pid <= 1:
             return None
-        rc, out, _ = self._cmd_runner(["ps", "-o", "command=", "-p", str(pid)], 2.0)
+        rc, out, _ = self._cmd_runner(["ps", "-ww", "-o", "command=", "-p", str(pid)], 2.0)
         if rc == 0 and out.strip():
             return out.strip()
         return None
@@ -549,6 +829,7 @@ class MLXWatchdog:
         self.consecutive_failures_count: int = 0
         self.last_completed_sequence: int = 0
         self.last_check_result: Optional[WatchdogCheckResult] = None
+        self._has_been_ready = False
 
     @staticmethod
     def _default_health_probe(
@@ -660,6 +941,21 @@ class MLXWatchdog:
         """
         pid = self.config.pid
 
+        group = getattr(self.owned_child, "_qmd_owned_group", None)
+        if isinstance(group, _OwnedProcessGroup) and group.child is self.owned_child and group.pgid == pid:
+            def validate_signal():
+                TargetProcessValidator.validate_target(
+                    pid=pid, sampler=self.sampler, expected_start_time=self.expected_start_time,
+                    expected_cmd_pattern=self.config.expected_cmd_pattern,
+                    owned_child=self.owned_child, allow_external_pid=self.config.allow_external_pid,
+                    instance_token=self.config.instance_token,
+                )
+            try:
+                return group.terminate(self.grace_period_s, validate_signal=validate_signal)
+            except (OSError, TargetValidationError) as e:
+                print(f"[watchdog] Refusing owned-group termination: {e}", file=sys.stderr)
+                return False, group.sigkill_used
+
         # Re-validate target PID before sending SIGTERM
         try:
             TargetProcessValidator.validate_target(
@@ -747,6 +1043,23 @@ class MLXWatchdog:
 
         return False, sigkill_used
 
+    def _target_exited_result(self, timestamp: float) -> WatchdogCheckResult:
+        cleaned, sigkill_used = False, False
+        group = getattr(self.owned_child, "_qmd_owned_group", None)
+        if isinstance(group, _OwnedProcessGroup) and not self.config.dry_run:
+            cleaned, sigkill_used = self.terminate_target_process("Leader exited; cleaning owned descendants")
+        cleanup_failed = isinstance(group, _OwnedProcessGroup) and not self.config.dry_run and not cleaned
+        result = WatchdogCheckResult(
+            timestamp=timestamp, healthy=False,
+            breach_type=BreachType.HEALTH_CHECK_FAILED if cleanup_failed else BreachType.TARGET_EXITED,
+            breach_reason=("Owned descendant cleanup failed after leader exit" if cleanup_failed
+                           else f"Target PID {self.config.pid} has already exited."),
+            metrics={"target_pid": self.config.pid, "target_alive": False},
+            terminated_pid=self.config.pid if cleaned else None, sigkill_used=sigkill_used,
+        )
+        self.last_check_result = result
+        return result
+
     def check_step(self) -> WatchdogCheckResult:
         """
         Executes a single non-blocking check cycle.
@@ -757,15 +1070,7 @@ class MLXWatchdog:
 
         # 1. Target process liveness and start time identity check
         if not TargetProcessValidator.is_pid_alive(self.config.pid, owned_child=self.owned_child):
-            res = WatchdogCheckResult(
-                timestamp=now,
-                healthy=True,
-                breach_type=BreachType.TARGET_EXITED,
-                breach_reason=f"Target PID {self.config.pid} has already exited.",
-                metrics={"target_pid": self.config.pid, "target_alive": False},
-            )
-            self.last_check_result = res
-            return res
+            return self._target_exited_result(now)
 
         curr_start_time = self.sampler.get_process_start_time(self.config.pid)
         if self.expected_start_time is not None and curr_start_time != self.expected_start_time:
@@ -784,15 +1089,7 @@ class MLXWatchdog:
         try:
             target_rss = self.sampler.get_process_rss_mb(self.config.pid)
             if target_rss is None:
-                res = WatchdogCheckResult(
-                    timestamp=now,
-                    healthy=True,
-                    breach_type=BreachType.TARGET_EXITED,
-                    breach_reason=f"Target PID {self.config.pid} has exited.",
-                    metrics={"target_pid": self.config.pid, "target_alive": False},
-                )
-                self.last_check_result = res
-                return res
+                return self._target_exited_result(now)
 
             current_swap = self.sampler.get_swap_used_mb()
             free_pct = self.sampler.get_memory_free_pct()
@@ -892,7 +1189,10 @@ class MLXWatchdog:
         )
 
         # Handle startup grace period
-        in_startup_grace = elapsed_since_start < self.startup_grace_period_s
+        in_startup_grace = (
+            time.monotonic() - self.start_time_mono < self.startup_grace_period_s
+            and not self._has_been_ready
+        )
 
         if not is_healthy or not isinstance(probe_payload, dict):
             # If server is still starting and within startup grace period, do not trigger breach
@@ -997,6 +1297,37 @@ class MLXWatchdog:
                     self.last_check_result = res
                     return res
 
+            # HTTP 200 is not worker health. Permit real cold loading only before
+            # the first ready result, and accept a ready, live idle worker.
+            state = probe_payload.get("state")
+            if in_startup_grace and state in ("starting", "loading"):
+                res = WatchdogCheckResult(
+                    timestamp=now, healthy=True,
+                    metrics={"target_pid": self.config.pid, "startup_grace": True,
+                             "health_ok": False, "state": state},
+                )
+                self.last_check_result = res
+                return res
+            if (
+                probe_payload.get("ready") is not True
+                or probe_payload.get("worker_alive") is not True
+                or state not in ("ready", "idle")
+            ):
+                reason = (
+                    f"Unhealthy worker state in /health: state={state!r}, "
+                    f"ready={probe_payload.get('ready')!r}, worker_alive={probe_payload.get('worker_alive')!r}"
+                )
+                term_success, sigkill_used = (False, False)
+                if not self.config.dry_run:
+                    term_success, sigkill_used = self.terminate_target_process(reason)
+                res = WatchdogCheckResult(
+                    timestamp=now, healthy=False, breach_type=BreachType.HEALTH_CHECK_FAILED,
+                    breach_reason=reason, metrics={"target_pid": self.config.pid, "probe_payload": probe_payload},
+                    terminated_pid=self.config.pid if term_success else None, sigkill_used=sigkill_used,
+                )
+                self.last_check_result = res
+                return res
+
             # 3. Validate typed finite progress fields
             is_idle = probe_payload.get("worker_idle")
             worker_alive = probe_payload.get("worker_alive")
@@ -1078,6 +1409,7 @@ class MLXWatchdog:
                     return res
 
             self.last_completed_sequence = completed_sequence
+            self._has_been_ready = True
 
         # All checks passed
         res = WatchdogCheckResult(
@@ -1112,13 +1444,12 @@ class MLXWatchdog:
         try:
             while True:
                 result = self.check_step()
-                if not result.healthy:
-                    print(f"[watchdog] BREACH: {result.breach_reason}", file=sys.stderr)
-                    return 1
-
                 if result.breach_type == BreachType.TARGET_EXITED:
                     print(f"[watchdog] Target process {self.config.pid} has exited.")
                     return 0
+                if not result.healthy:
+                    print(f"[watchdog] BREACH: {result.breach_reason}", file=sys.stderr)
+                    return 1
 
                 time.sleep(interval)
         except KeyboardInterrupt:

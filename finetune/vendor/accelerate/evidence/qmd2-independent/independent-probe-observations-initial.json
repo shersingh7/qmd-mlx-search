@@ -1,0 +1,214 @@
+{
+  "scope": "qmd.2 positive descriptor-lifetime acceptance; owned synthetic fixtures only",
+  "platform": "darwin",
+  "collected": 24,
+  "failed": 1,
+  "observations": [
+    {
+      "contract": "R1-expired-root",
+      "operation": "public-load",
+      "preflight_consumed": false,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "public-load",
+      "preflight_consumed": true,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "preflight",
+      "preflight_consumed": false,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "preflight",
+      "preflight_consumed": true,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "validate",
+      "preflight_consumed": false,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "validate",
+      "preflight_consumed": true,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "locate",
+      "preflight_consumed": false,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "locate",
+      "preflight_consumed": true,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "open",
+      "preflight_consumed": false,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R1-expired-root",
+      "operation": "open",
+      "preflight_consumed": true,
+      "numeric_fd_recycled": 12,
+      "io_attempts": 0,
+      "closed_root_sentinel": -1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "unlink",
+      "format": "bin",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "unlink",
+      "format": "safetensors",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "stage-directory-close",
+      "format": "bin",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "stage-directory-close",
+      "format": "safetensors",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "temporary-directory-exit",
+      "format": "bin",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "R2-staging-ownership",
+      "fault": "temporary-directory-exit",
+      "format": "safetensors",
+      "opened_readable_descriptors": [
+        13
+      ],
+      "raw_fd_closed_once": true,
+      "later_public_load_succeeded": true,
+      "fixture_link_count": 1,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "open-setup-owner",
+      "fault": "directory-context-exit",
+      "nested_directory_fixture": true,
+      "raw_fd_closed_once": true,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "open-setup-owner",
+      "fault": "wrapper-construction",
+      "nested_directory_fixture": true,
+      "raw_fd_closed_once": true,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "wrapper-teardown-owner",
+      "original_error_preserved": true,
+      "raw_fd_closed_once": true,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "caller-error-owner",
+      "error_class": "RuntimeError",
+      "iterations": 20,
+      "original_error_preserved": true,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "caller-error-owner",
+      "error_class": "KeyboardInterrupt",
+      "iterations": 20,
+      "original_error_preserved": true,
+      "fd_set_restored": true
+    },
+    {
+      "contract": "root-construction-owner",
+      "fault": "inode-mismatch",
+      "fd_set_restored": true
+    },
+    {
+      "contract": "root-construction-owner",
+      "fault": "fstat-error",
+      "fd_set_restored": true
+    }
+  ]
+}

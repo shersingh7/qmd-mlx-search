@@ -1,0 +1,9 @@
+#!/bin/sh
+printf '%s\n' make" $*" >> /Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/multiline-quiet-tool-calls.log
+if [ "$#" -eq 1 ] && [ "$1" = "--version" ]; then
+  printf ' \t\n'
+  /usr/bin/make "$@" || exit $?
+  printf '\nsecond authored version-only line\n \t\n'
+  exit 0
+fi
+exec /usr/bin/make "$@" >/dev/null

@@ -1,0 +1,79 @@
+{
+  "name": "valid-canonical-containment",
+  "guardFired": false,
+  "elapsedMs": 171.13070800000003,
+  "exitCode": 0,
+  "supervisorPid": 38085,
+  "supervisorAbsent": true,
+  "workers": [
+    38086
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38086
+  ],
+  "sentinelAlive": true,
+  "work": "actual-user-work",
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38085,
+      "sessionId": 38085
+    },
+    {
+      "type": "ready",
+      "pid": 38086,
+      "sessionId": 38085,
+      "processGroupId": 38086
+    },
+    {
+      "type": "exit",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": true,
+      "sigkillUsed": false,
+      "processGroups": [
+        38086
+      ],
+      "timedOut": false,
+      "errors": []
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 38086,
+      "owner": 38085,
+      "at": 0.082740083,
+      "allowed": true,
+      "remainingMs": 4991.30025,
+      "deadline": 5.074034041
+    }
+  ],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 5000,
+      "elapsedMs": 88.23658299999998
+    }
+  ],
+  "sent": [
+    {
+      "hex": "53353030300a",
+      "elapsedMs": 88.26066700000001
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 89.84637499999998
+    }
+  ],
+  "stderr": "",
+  "eventCount": 14
+}

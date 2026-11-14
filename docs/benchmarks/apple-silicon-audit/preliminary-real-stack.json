@@ -1,0 +1,32 @@
+{
+  "passed": false,
+  "scope": "Real cached MLX model -> JSON/binary -> SDK SQLite -> REST/MCP, authored public fixture only",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "source_sha256": "af914ce9a66dca560be819d89bfdf77872a034341ede344be98ee059a17f5ebf",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-zmt61383/tmp/qmd-real-p7eda8x2",
+  "sdk_report": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/preliminary-real-stack-sdk.json",
+  "ready_seconds": 3.2597867920121644,
+  "url": "http://127.0.0.1:53997",
+  "control_port": 53998,
+  "instance_token": "16709ac4732347b9898924d98333d9a3",
+  "command": [
+    "/Users/shersingh/.local/bin/node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/local-stack-snapshot/scripts/verify_local_stack.ts",
+    "--url",
+    "http://127.0.0.1:53997",
+    "--root",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-zmt61383/tmp/qmd-real-p7eda8x2",
+    "--output",
+    "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/preliminary-real-stack-sdk.json"
+  ],
+  "child_pid": 31450,
+  "child_exit_code": 1,
+  "node_log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-zmt61383/tmp/qmd-real-p7eda8x2/node.log",
+  "error": "RuntimeError: Actual SDK/MCP runner failed with exit 1; see /Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-zmt61383/tmp/qmd-real-p7eda8x2/node.log",
+  "server_stopped": true,
+  "worker_alive_after_stop": false,
+  "http_threads_alive": true,
+  "cleanup_error": "RuntimeError: Server did not fully stop"
+}

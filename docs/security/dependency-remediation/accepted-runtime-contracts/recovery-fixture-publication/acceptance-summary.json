@@ -1,0 +1,72 @@
+{
+  "status": "A_SPEC_PASS_QUALITY_PASS_LIVE_LOCAL_ACCEPTANCE_PASSED_ACTUAL_CI_PENDING",
+  "baseHead": "a6144903be9715334f66bd9ea134157f679516a5",
+  "acceptedPaths": {
+    "test/audit-recovery-execution-admission.test.ts": "9b305d366775be0e04a856a47ea40be467c37d7f7fe14644d81adeda028fdc0b",
+    "test/fixtures/bun_recovery_ownership.ts": "8830c5fff7e66b82141a47c2a03cf92e97bbb858793ed0d7e979bc21bfed1592"
+  },
+  "reviewIndexSha256": "d165bb1b64a80c3f508e3d2537d350947d4aeb37bb68e0cffec2cb16b6923f0c",
+  "reviewArtifactsVerified": 1992,
+  "parentFullNode": {
+    "schema": "parent-canonical-stdout-reduction-v1",
+    "command": "pnpm run test",
+    "terminalExit": 0,
+    "terminalVerification": {
+      "status": "passed",
+      "kind": "test",
+      "scope": "full"
+    },
+    "rawLogSha256": "b9529817a5a162cdb3fbe523a6b3f09f1c618db09f5733974d1fdf82a8d33f8b",
+    "parsedPassed": 1524,
+    "parsedSkipped": 66,
+    "parsedFailed": 0,
+    "parsedFiles": 54,
+    "individualReporterRowsReconciled": true
+  },
+  "wholeRoot": {
+    "node": 154,
+    "bun": 154,
+    "diagnostics": 0,
+    "refusedReads": 0
+  },
+  "nativeBunFocused": {
+    "pass": 6,
+    "filtered out": 43,
+    "fail": 0
+  },
+  "nativeWrapperObservationOn": {
+    "passed": 4,
+    "failed": 0,
+    "filtered": 3,
+    "realNativeCalls": 13,
+    "descriptorObservations": 13
+  },
+  "qualifiedPackageSha256": "ce36bcaca2037d7ae1c6e0a63e71260554e6c9e0a837158f24821b4fe69ad3be",
+  "BThreePathsApplied": false,
+  "retainedHarnessFailure": {
+    "receipt": "native-bun-A.receipt.json",
+    "classification": "Compiler-only read guard incorrectly used for runtime tests; it refused owned fixture stage reads",
+    "originalCounts": {
+      "passed": 1,
+      "failed": 5,
+      "filtered": 43
+    },
+    "correction": "Separate runtime guard permits the exact call-owned scratch root; compiler guard unchanged; out-of-scope read negative passed",
+    "reusedCompilerExecutions": "Previously completed successful compiler receipts remain source-bound and were not rerun"
+  },
+  "scope": "Two test/fixture paths only; unchanged production, clock, protocol, dependencies and original assertions; C1 and remote-CI gates remain",
+  "bundles": [
+    {
+      "archive": "independent-review.tar.gz",
+      "sha256": "cccae2ea4cbf4740f6cb1a339926ec533780b08a015a69c18ba7991a6eb5b9ea",
+      "bytes": 11505155,
+      "entriesVerified": 1993
+    },
+    {
+      "archive": "parent-integration.tar.gz",
+      "sha256": "0afdc8581f66716532fdee359ae6a7312cc639a7e5e88f3b4c5ee1212a3cc17d",
+      "bytes": 341530,
+      "entriesVerified": 78
+    }
+  ]
+}

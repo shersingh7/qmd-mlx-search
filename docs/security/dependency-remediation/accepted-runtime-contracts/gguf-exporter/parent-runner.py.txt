@@ -1,0 +1,84 @@
+"""Fresh-source read-only qualification; no native commands or inference."""
+from __future__ import annotations
+import hashlib, importlib.machinery, importlib.metadata, json, os
+from pathlib import Path
+import subprocess, sys
+ROOT=Path(__file__).resolve().parent
+FT=ROOT/'mirror/finetune'
+O=Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e')
+PYTHON=Path('/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python3.12')
+def environment(target):
+    for p in ('home','tmp','cache','hf','bytecode'):(target/p).mkdir(parents=True,exist_ok=True)
+    return {'PATH':str(PYTHON.parent)+':'+str(O/'cmake-venv/bin')+':/usr/bin:/bin',
+        'HOME':str(target/'home'),'TMPDIR':str(target/'tmp'),'XDG_CACHE_HOME':str(target/'cache'),
+        'HF_HOME':str(target/'hf'),'HF_HUB_CACHE':str(target/'hf/hub'),'HF_DATASETS_CACHE':str(target/'hf/datasets'),
+        'HF_HUB_OFFLINE':'1','HF_DATASETS_OFFLINE':'1','TRANSFORMERS_OFFLINE':'1',
+        'HF_HUB_DISABLE_TELEMETRY':'1','GRADIO_ANALYTICS_ENABLED':'False',
+        'ACCELERATE_USE_CPU':'true','CUDA_VISIBLE_DEVICES':'','OMP_NUM_THREADS':'1',
+        'TOKENIZERS_PARALLELISM':'false','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1',
+        'PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1','PYTHONPYCACHEPREFIX':str(target/'bytecode')}
+if '--worker' not in sys.argv:
+    modes=sys.argv[1:] or ['portable-installed','portable-pinned','counterexamples']
+    results=[]
+    for mode in modes:
+        target=ROOT/mode; env=environment(target)
+        argv=[str(PYTHON),'-B',str(Path(__file__).resolve()),mode,'--worker']
+        r=subprocess.run(argv,cwd=ROOT,env=env,capture_output=True,text=True)
+        (target/'stdout').write_text(r.stdout);(target/'stderr').write_text(r.stderr)
+        data={'argv':argv,'cwd':str(ROOT),'env':env,'returncode':r.returncode}
+        (target/'command.json').write_text(json.dumps(data,indent=2)+'\n')
+        results.append({'mode':mode,'returncode':r.returncode,'stdout_tail':r.stdout.splitlines()[-12:],'stderr':r.stderr})
+    print(json.dumps(results,indent=2));raise SystemExit(any(r['returncode'] for r in results))
+
+mode=sys.argv[1];target=ROOT/mode
+compiled={};original_code=importlib.machinery.SourceFileLoader.get_code
+reader_installed=Path(sys.prefix)/'lib/python3.12/site-packages/gguf'
+def fresh(loader,fullname):
+    p=Path(loader.path)
+    if any(p.is_relative_to(q) for q in (ROOT,O/'upstream',reader_installed)):
+        b=p.read_bytes();compiled[str(p)]=hashlib.sha256(b).hexdigest()
+        return compile(b,str(p),'exec',dont_inherit=True)
+    return original_code(loader,fullname)
+importlib.machinery.SourceFileLoader.get_code=fresh
+sys.dont_write_bytecode=True
+sys.path[:0]=[str(FT),str(FT/'tests')]
+if mode.endswith('pinned') or mode=='counterexamples':sys.path.insert(0,str(O/'upstream/gguf-py'))
+import functools, socket, types
+import torch
+torch.backends.mps.is_available=functools.lru_cache()(lambda:False)
+torch.cuda.is_available=functools.lru_cache()(lambda:False)
+torch.set_num_threads(1)
+assert not torch.backends.mps.is_available() and not torch.cuda.is_available()
+import pytest
+# Portable tests replace this boundary with explicit fakes. No unmocked process
+# or external connection may escape any qualification mode.
+def forbidden(*a,**k):raise AssertionError('Unmocked process/network forbidden in review')
+subprocess.run=forbidden
+socket.create_connection=forbidden
+socket.socket.connect=forbidden
+args=['-c','/dev/null','--rootdir='+str(ROOT),'--confcutdir='+str(ROOT),'-q','-p','no:cacheprovider','--basetemp='+str(target/'fixtures'),'--junitxml='+str(target/'pytest.xml')]
+plugins=[]
+if mode.startswith('portable-'):
+    args[:0]=[str(FT/'tests'/name) for name in ('test_gguf_toolchain.py','test_finetune_correctness.py','test_gguf_structure.py')]
+    args+=['-k','not actual_peft_adapter']
+elif mode=='counterexamples':
+    args.insert(0,str(ROOT/'test_acceptance_counterexamples.py'))
+    p=FT/'tests/conftest.py';conftest=types.ModuleType('reaccept_conftest');conftest.__file__=str(p)
+    sys.modules[conftest.__name__]=conftest;exec(compile(p.read_bytes(),str(p),'exec'),conftest.__dict__)
+    plugins=[conftest]
+elif mode.startswith('independent-'):
+    args.insert(0,str(ROOT/'test_independent_contracts.py'))
+else:raise AssertionError(mode)
+status=pytest.main(args,plugins=plugins)
+import gguf, gguf_toolchain
+reader_path=Path(sys.modules[gguf.GGUFReader.__module__].__file__)
+assert str(reader_path) in compiled
+assert compiled[str(reader_path)]==hashlib.sha256(reader_path.read_bytes()).hexdigest()
+receipt={'mode':mode,'status':int(status),'python':sys.version,'python_executable':sys.executable,
+    'pip_present':__import__('importlib.util').util.find_spec('pip') is not None,
+    'versions':{n:importlib.metadata.version(n) for n in ('torch','transformers','accelerate','gguf','numpy','sentencepiece','protobuf')},
+    'reader_path':str(reader_path),'reader_sha256':hashlib.sha256(reader_path.read_bytes()).hexdigest(),
+    'helper_path':gguf_toolchain.__file__,'helper_sha256':hashlib.sha256(Path(gguf_toolchain.__file__).read_bytes()).hexdigest(),
+    'compiled_sources':compiled}
+(target/'source-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+raise SystemExit(status)

@@ -1,0 +1,8 @@
+{
+  "name": "queued-K-reader-handoff",
+  "poll_hold": 1.3,
+  "child_gate_delay": 0.05,
+  "cancel_byte": "K",
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts/queued-K-reader-handoff",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py"
+}

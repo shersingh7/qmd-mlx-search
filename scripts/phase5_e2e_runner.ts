@@ -5,10 +5,14 @@
  * against curated public fixtures in disposable shadow databases.
  */
 
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSync, linkSync, existsSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { accessSync, constants as fsConstants, statSync, mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSync, linkSync, existsSync } from "node:fs";
+import { constants as osConstants, tmpdir } from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import { EventEmitter } from "node:events";
+import { Readable, Writable } from "node:stream";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { RECOVERY_BARRIER_PREFIX, type RecoveryWorkerOptions, type RecoveryWorkerResult } from "./phase5_recovery_worker.js";
 import {
   createStore,
   runDurableIndexingJob,
@@ -18,7 +22,6 @@ import {
   getActiveCheckpoint,
   saveCheckpoint,
   type QMDStore,
-  type IndexingJobCheckpoint,
 } from "../src/index.js";
 import {
   startMcpHttpServer,
@@ -29,7 +32,488 @@ import {
   PUBLIC_HELD_OUT_QUERIES,
   computeIRMetrics,
 } from "../test/fixtures/public_eval_dataset.js";
-import { getDefaultLlamaCpp, disposeDefaultLlamaCpp } from "../src/llm.js";
+import { disposeDefaultLlamaCpp } from "../src/llm.js";
+
+export interface RecoveryProcessResult {
+  pid?: number;
+  launch: {
+    /** No-start requires withheld S or an explicit no-creation acknowledgement,
+     * plus observed reap/drains. Preflight no-attempt never claims a reap. */
+    state: "not-attempted" | "not-started" | "started" | "unconfirmed";
+    supervisorPid?: number;
+    admissionGranted: boolean;
+    supervisorReaped: boolean;
+    /** Required for a no-start receipt after S; never inferred from missing PID. */
+    noStartProof?: "supervisor-acknowledgement";
+  };
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+  timedOut: boolean;
+  stdout: string;
+  stderr: string;
+  report?: RecoveryWorkerResult;
+  error?: string;
+  /** Snapshot BEFORE any forced stream close; evidence, never cleanup proof. */
+  transportFailure?: {
+    prepared: boolean;
+    supervisorExited: boolean;
+    supervisorCloseObserved: boolean;
+    stdout: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+    stderr: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+    proof: { bytes: number; ended: boolean; closed: boolean; destroyed: boolean };
+  };
+  cleanup: {
+    processGroupId?: number;
+    /** False for a proved not-started launch: no worker ever existed to reap. */
+    childReaped: boolean;
+    /** All groups in the anchored owned session, not arbitrary escaped sessions. */
+    groupTerminated: boolean;
+    pipesClosed: boolean;
+    forcedPipeClose: boolean;
+    sigkillUsed: boolean;
+    sessionId?: number;
+    processGroups: number[];
+    sessionTerminated: boolean;
+    /** OS-enforced no-fork boundary; ALWAYS false for injected commands. */
+    containmentVerified: boolean;
+  };
+}
+
+/**
+ * Canonical SQLite/HTTP worker: OS-enforced no-fork containment in an anchored
+ * POSIX session. Arbitrary command injection is diagnostic-only and ALWAYS
+ * fails certification: a setsid escape with closed pipes is not observable.
+ */
+export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
+  outputJson: string;
+  stateRoot: string;
+  timeoutMs?: number;
+  terminateAtBarrier?: boolean;
+  /** Explicit local command injection for non-model timeout/error fixtures. */
+  command?: string[];
+}): Promise<RecoveryProcessResult> {
+  const timeoutMs = options.timeoutMs ?? 30_000;
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_482_647) {
+    throw new Error("worker timeoutMs must be a positive integer <= 2147482647");
+  }
+  // Bootstrap/admission is part of the caller's budget, not startup grace.
+  const executionDeadline = performance.now() + timeoutMs;
+  const stateRoot = path.resolve(options.stateRoot);
+  for (const name of ["home", "tmp", "cache", "config", "hermes"]) mkdirSync(path.join(stateRoot, name), { recursive: true });
+  const env: NodeJS.ProcessEnv = {};
+  for (const name of ["PATH", "LANG", "LC_ALL", "DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]) {
+    if (process.env[name] !== undefined) env[name] = process.env[name];
+  }
+  Object.assign(env, {
+    HOME: path.join(stateRoot, "home"), TMPDIR: path.join(stateRoot, "tmp"),
+    TMP: path.join(stateRoot, "tmp"), TEMP: path.join(stateRoot, "tmp"),
+    XDG_CACHE_HOME: path.join(stateRoot, "cache"), XDG_CONFIG_HOME: path.join(stateRoot, "config"),
+    HERMES_HOME: path.join(stateRoot, "hermes"), CI: "true",
+    HF_HUB_OFFLINE: "1", TRANSFORMERS_OFFLINE: "1", HF_DATASETS_OFFLINE: "1",
+    QMD_PHASE5_LAUNCH_TOKEN: options.launchToken || "",
+    QMD_EMBED_BACKEND: "mlx", QMD_MLX_EMBED_URL: `http://127.0.0.1:${options.mlxPort ?? 8797}`,
+    QMD_MLX_FALLBACK: "0", QMD_MLX_BINARY: "0",
+  });
+  const script = fileURLToPath(new URL("./phase5_recovery_worker.ts", import.meta.url));
+  const loader = fileURLToPath(new URL("./phase5_recovery_process_loader.mjs", import.meta.url));
+  const args = [
+    ...((process.versions as Record<string, string>).bun ? [] : ["--import", loader]), script,
+    "--db", path.resolve(options.dbPath), "--docs-dir", path.resolve(options.docsDir || path.join(path.dirname(options.dbPath), "public-docs")),
+    "--mlx-port", String(options.mlxPort ?? 8797), "--launch-token", options.launchToken || "",
+    "--action", options.action ?? "index", "--output-json", path.resolve(options.outputJson),
+    "--execution-timeout-ms", String(timeoutMs + 1_000),
+  ];
+  if (options.mlxModelPath) args.push("--mlx-model-path", options.mlxModelPath);
+  if (options.barrierAfterDocs !== undefined) args.push("--barrier-after-docs", String(options.barrierAfterDocs));
+  if (options.barrierAfterChunks !== undefined) args.push("--barrier-after-chunks", String(options.barrierAfterChunks));
+  if (options.terminateAtBarrier) args.push("--stop-mode", "pause", "--pause-timeout-ms", String(timeoutMs));
+  const [executable, ...commandArgs] = options.command ?? [process.execPath, ...args];
+  if (!executable || !path.isAbsolute(executable)) throw new Error("Worker executable must be an explicit absolute local path");
+  // Never consume a stale report from a previous invocation.
+  if (existsSync(options.outputJson)) throw new Error(`Worker report already exists: ${options.outputJson}`);
+  if (process.platform === "win32") throw new Error("Recovery session containment requires POSIX");
+  // Validate this cheap prerequisite before cold interpreter bootstrap can use
+  // the execution deadline. Python rechecks at use; this is not a TOCTOU claim.
+  try {
+    if (!statSync(executable).isFile()) throw new Error("worker executable is not an executable regular file");
+    accessSync(executable, fsConstants.X_OK);
+  } catch (error) {
+    return { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
+      error: `Recovery worker spawn failed (executable preflight): ${String(error)}`,
+      launch: { state: "not-attempted", admissionGranted: false, supervisorReaped: false },
+      cleanup: { childReaped: false, groupTerminated: true, sessionTerminated: true, pipesClosed: true,
+        forcedPipeClose: false, sigkillUsed: false, containmentVerified: false, processGroups: [] } };
+  }
+  return await new Promise(resolve => {
+    const receipt: RecoveryProcessResult = { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
+      launch: { state: "unconfirmed", admissionGranted: false, supervisorReaped: false },
+      cleanup: { childReaped: false, groupTerminated: false, pipesClosed: false, forcedPipeClose: false,
+        sigkillUsed: false, sessionTerminated: false, containmentVerified: false, processGroups: [] } };
+    const supervisorScript = fileURLToPath(new URL("./phase5_recovery_process.py", import.meta.url));
+    const supervisorArgs = ["-S", "-u", supervisorScript, JSON.stringify({
+      command: [executable, ...commandArgs], timeoutMs, contained: options.command === undefined,
+    })];
+    const supervisorOptions = { cwd: fileURLToPath(new URL("../", import.meta.url)), env,
+      detached: true, stdio: ["pipe", "pipe", "pipe", "pipe"] as ["pipe", "pipe", "pipe", "pipe"] };
+    // Python retains the exact worker and joining anchors with WNOWAIT. Neither
+    // runtime's automatic reap grants post-exit numerical-PGID authority.
+    const spawnSupervisor = () => {
+      if (!(process.versions as Record<string, string>).bun) {
+        const child = spawn("/usr/bin/python3", supervisorArgs, supervisorOptions);
+        return { child, control: child.stdio[3] as Readable };
+      }
+      // Bun 1.3.8's node:child_process extra-stdio Socket can close a reused FD
+      // when an earlier child is collected. Do not give node:net ownership of
+      // this FD. Bun.spawn owns it; Bun.file(fd).stream() borrows it. Retain that
+      // native owner through exit AND all stream drains, independently observed.
+      // Keep this narrow structural API so Node builds need no Bun type package.
+      type NativeProcess = {
+        pid: number; stdio: [null, null, null, ...number[]];
+        stdin: { write(data: Uint8Array): number; flush(): number | Promise<number>; end(): number | Promise<number> };
+        stdout: import("node:stream/web").ReadableStream<Uint8Array>;
+        stderr: import("node:stream/web").ReadableStream<Uint8Array>;
+        exited: Promise<number>; signalCode: NodeJS.Signals | null; unref(): void; kill(signal: number): void;
+      };
+      const bun = (globalThis as unknown as { Bun: {
+        spawn(command: string[], options: typeof supervisorOptions): NativeProcess;
+        file(fd: number): { stream(): import("node:stream/web").ReadableStream<Uint8Array> };
+      } }).Bun;
+      const native = bun.spawn(["/usr/bin/python3", ...supervisorArgs], supervisorOptions);
+      let inputEnded = false;
+      const endInput = async () => {
+        if (inputEnded) return;
+        inputEnded = true;
+        await native.stdin.end();
+      };
+      const stdin = new Writable({
+        write(chunk: Buffer, _encoding, callback) {
+          try { native.stdin.write(chunk); Promise.resolve(native.stdin.flush()).then(() => callback(), callback); }
+          catch (error) { callback(error as Error); }
+        },
+        final(callback) { endInput().then(() => callback(), callback); },
+        destroy(error, callback) { endInput().then(() => callback(error), failure => callback(error ?? failure)); },
+      });
+      const stdout = Readable.fromWeb(native.stdout);
+      const stderr = Readable.fromWeb(native.stderr);
+      const control = Readable.fromWeb(bun.file(native.stdio[3]!).stream());
+      const child = Object.assign(new EventEmitter(), {
+        pid: native.pid, stdin, stdout, stderr, unref: () => native.unref(),
+        // Bun 1.3.8 silently ignores string SIGCONT on Darwin. Use the actual
+        // platform signal number with its native owned-process API, not kill(pid).
+        kill: (signal: NodeJS.Signals) => { native.kill(osConstants.signals[signal]); return true; },
+      });
+      let exited = false;
+      let emittedClose = false;
+      const checkClose = () => {
+        if (!exited || emittedClose || ![stdout, stderr, control].every(stream => stream.closed)) return;
+        emittedClose = true;
+        child.emit("close");
+      };
+      for (const stream of [stdout, stderr, control]) stream.once("close", checkClose);
+      void native.exited.then(code => {
+        exited = true;
+        stdin.end();
+        child.emit("exit", native.signalCode === null ? code : null, native.signalCode);
+        checkClose();
+      }, error => {
+        exited = true;
+        child.emit("error", error);
+        checkClose();
+      });
+      return { child, control };
+    };
+    const { child, control } = spawnSupervisor();
+    receipt.launch.supervisorPid = child.pid;
+    const logLimit = 64 * 1024;
+    const teardownMs = 800;
+    let pendingLine = "";
+    let controlLine = "";
+    let barrier: RecoveryWorkerResult | undefined;
+    let helperExited = false;
+    let closed = false;
+    let settled = false;
+    let cleanupReceived = false;
+    let prepared = false;
+    let notStartedReceived = false;
+    let protocolFailed = false;
+    const transportBytes = { stdout: 0, stderr: 0, proof: 0 };
+    let supervisorKillRequested = false;
+    let supervisorInterruptRequested = false;
+    let workerExited = false;
+    let stopStarted: number | undefined;
+    let cleanupPoll: ReturnType<typeof setInterval> | undefined;
+    const addError = (message: string) => {
+      if (!receipt.error) receipt.error = message;
+      else if (!receipt.error.includes(message)) receipt.error += `; ${message}`;
+    };
+    if (options.command) addError("Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified");
+    const killUnadmittedSupervisor = () => {
+      if (receipt.launch.admissionGranted || helperExited || supervisorKillRequested) return;
+      // No S has been sent, so the trusted helper cannot have forked. Use the
+      // runtime's still-owned process handle, NEVER a sampled PID or PGID.
+      try {
+        supervisorKillRequested = child.kill("SIGKILL");
+        receipt.cleanup.sigkillUsed ||= supervisorKillRequested;
+      } catch (error) { addError(`Recovery unadmitted supervisor termination failed: ${String(error)}`); }
+    };
+    const requestStop = (signal: NodeJS.Signals) => {
+      // Never signal a numerical group from Node after its leader is reaped.
+      // This pipe belongs only to the still-anchored Python supervisor.
+      if (!helperExited && !child.stdin.destroyed && !child.stdin.writableEnded) {
+        child.stdin.write(signal === "SIGKILL" ? "K" : "T");
+      }
+    };
+    const interruptOwnedSupervisor = () => {
+      if (!receipt.launch.admissionGranted || helperExited) return;
+      // TERM interrupts startup but never discards registered Python anchors.
+      // Queue TERM before CONT so a stopped creation transition unwinds before
+      // user work can be admitted. Use only this runtime's owned exact handle.
+      try {
+        if (!supervisorInterruptRequested && !workerExited && !cleanupReceived && !barrier) {
+          supervisorInterruptRequested = true;
+          child.kill("SIGTERM");
+        }
+        // Even an observed barrier/exit/cleanup may have stopped its owner
+        // before the next protocol step. Resume without inventing a TERM error.
+        child.kill("SIGCONT");
+      }
+      catch (error) { addError(`Recovery supervisor interruption failed: ${String(error)}`); }
+    };
+    const onParentExit = () => { killUnadmittedSupervisor(); requestStop("SIGKILL"); interruptOwnedSupervisor(); child.stdin.end(); };
+    const onParentTerm = () => { addError("Recovery worker interrupted by parent SIGTERM"); stop("SIGKILL"); };
+    const onParentInt = () => { addError("Recovery worker interrupted by parent SIGINT"); stop("SIGKILL"); };
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cleanupPoll) clearInterval(cleanupPoll);
+      process.removeListener("exit", onParentExit);
+      process.removeListener("SIGTERM", onParentTerm);
+      process.removeListener("SIGINT", onParentInt);
+      child.stdin.end();
+      const noStartProved = (!receipt.launch.admissionGranted || notStartedReceived) && !protocolFailed && receipt.pid === undefined
+        && receipt.launch.supervisorPid !== undefined && receipt.launch.supervisorReaped && closed
+        && !receipt.cleanup.forcedPipeClose;
+      if (noStartProved) {
+        receipt.launch.state = "not-started";
+        if (receipt.launch.admissionGranted) receipt.launch.noStartProof = "supervisor-acknowledgement";
+        // No worker existed; childReaped intentionally remains false. Only the
+        // empty session is proved, not no-fork containment or successful work.
+        receipt.cleanup.groupTerminated = true;
+        receipt.cleanup.sessionTerminated = true;
+        addError(receipt.launch.admissionGranted
+          ? "Recovery worker was not started: supervisor acknowledged cancellation before creation"
+          : "Recovery worker was not started: launch admission was withheld");
+      } else if (!receipt.cleanup.childReaped || !receipt.cleanup.groupTerminated || !receipt.cleanup.sessionTerminated
+        || !cleanupReceived || !receipt.launch.supervisorReaped) addError("Recovery worker cleanup lacks complete owned-session proof");
+      if (!receipt.cleanup.containmentVerified && !options.command && receipt.pid !== undefined) {
+        addError("Recovery worker no-fork containment was not verified");
+      }
+      try {
+        if (existsSync(options.outputJson)) {
+          const report = JSON.parse(readFileSync(options.outputJson, "utf8")) as RecoveryWorkerResult;
+          if (report?.pid !== receipt.pid || report.dbPath !== path.resolve(options.dbPath)
+            || report.action !== (options.action ?? "index")) throw new Error("Worker report identity mismatch");
+          receipt.report = report;
+          if (report.error !== undefined && typeof report.error !== "string") throw new Error("Worker report error must be a string");
+          if (report.error !== undefined) addError(report.error || "Recovery worker reported an unspecified error");
+          if (report.status === "failed") addError(report.error || "Recovery worker reported failure");
+          if (report.status === "completed" && report.checkpointStatus !== null) throw new Error("Completed worker still has an active checkpoint");
+          if (options.terminateAtBarrier && barrier && JSON.stringify(barrier) !== JSON.stringify(report)) throw new Error("Barrier and durable report disagree");
+        }
+        if (options.terminateAtBarrier && (!barrier || receipt.signal !== "SIGKILL" || receipt.exitCode !== null)) {
+          addError("Worker did not reach a committed barrier followed by parent SIGKILL");
+        }
+        if (!options.terminateAtBarrier && (receipt.exitCode !== 0 || receipt.signal !== null || receipt.report?.status !== "completed")) {
+          addError(receipt.report?.error || `Recovery worker failed (exit=${receipt.exitCode}, signal=${receipt.signal})`);
+        }
+        if (!receipt.report) addError("Recovery worker produced no report");
+      } catch (error) {
+        addError(`Recovery worker report failed: ${String(error)}`);
+      }
+      resolve(receipt);
+    };
+    const checkCleanup = () => {
+      if (settled || stopStarted === undefined) return;
+      receipt.cleanup.pipesClosed = closed;
+      if (helperExited && closed && (cleanupReceived || !receipt.launch.admissionGranted || notStartedReceived)) { finish(); return; }
+      if (performance.now() - stopStarted < teardownMs) return;
+      if (!helperExited || !cleanupReceived) addError("Recovery supervisor did not provide bounded cleanup proof");
+      if (!closed) {
+        const snapshot = (stream: Readable, bytes: number) => ({ bytes, ended: stream.readableEnded,
+          closed: stream.closed, destroyed: stream.destroyed });
+        receipt.transportFailure = { prepared, supervisorExited: helperExited, supervisorCloseObserved: closed,
+          stdout: snapshot(child.stdout, transportBytes.stdout), stderr: snapshot(child.stderr, transportBytes.stderr),
+          proof: snapshot(control, transportBytes.proof) };
+        addError("Recovery worker pipes did not close within teardown budget");
+        receipt.cleanup.forcedPipeClose = true;
+        child.stdout.destroy();
+        child.stderr.destroy();
+        // destroyed is not drained. Never turn a local forced close into proof
+        // that all writers (possibly still in interpreter bootstrap) exited.
+      }
+      control.destroy();
+      if (!helperExited) { requestStop("SIGKILL"); child.stdin.destroy(); child.unref(); }
+      finish();
+    };
+    const stop = (signal: NodeJS.Signals = "SIGTERM") => {
+      if (settled) return;
+      clearTimeout(timer);
+      if (stopStarted === undefined) {
+        stopStarted = performance.now();
+        killUnadmittedSupervisor();
+        requestStop(signal);
+        cleanupPoll = setInterval(checkCleanup, 10);
+      } else if (signal === "SIGKILL") requestStop(signal);
+      interruptOwnedSupervisor();
+      checkCleanup();
+    };
+    const timeout = () => {
+      receipt.timedOut = true;
+      addError(`Recovery worker timed out after ${timeoutMs}ms (PID ${receipt.pid})`);
+      stop();
+    };
+    const timer = setTimeout(timeout, Math.max(0, Math.ceil(executionDeadline - performance.now())));
+    process.once("SIGTERM", onParentTerm);
+    process.once("SIGINT", onParentInt);
+    process.once("exit", onParentExit);
+    control.on("data", (chunk: Buffer) => {
+      if (settled) return;
+      transportBytes.proof += chunk.length;
+      controlLine += chunk.toString();
+      let newline: number;
+      while ((newline = controlLine.indexOf("\n")) !== -1) {
+        const line = controlLine.slice(0, newline);
+        controlLine = controlLine.slice(newline + 1);
+        try {
+          const message = JSON.parse(line);
+          if (message.type === "prepared") {
+            if (prepared || receipt.launch.admissionGranted || receipt.pid !== undefined
+              || message.supervisorPid !== child.pid || message.sessionId !== child.pid) throw new Error("Invalid supervisor admission identity");
+            prepared = true;
+            if (stopStarted !== undefined || helperExited) continue;
+            // A ready event can beat a delayed timer callback after the actual
+            // deadline. Check the clock rather than granting late admission.
+            const remainingMs = Math.floor(executionDeadline - performance.now());
+            if (remainingMs <= 0) { timeout(); continue; }
+            if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Supervisor admission channel is closed");
+            receipt.launch.admissionGranted = true;
+            // PREPARED's Python-side anchor precedes this subtraction. Charging
+            // the remaining duration from that earlier anchor is conservative;
+            // never compare independent runtime monotonic clock epochs.
+            child.stdin.write(`S${remainingMs}\n`);
+          } else if (message.type === "not-started") {
+            if (notStartedReceived || receipt.pid !== undefined
+              || message.supervisorPid !== child.pid || message.sessionId !== child.pid
+              || !["spawn-error", "cancelled", "parent-channel-closed", "parent-interrupted", "admission-timeout"].includes(message.reason)) {
+              throw new Error("Invalid supervisor no-start identity");
+            }
+            notStartedReceived = true;
+            receipt.timedOut ||= message.reason === "admission-timeout";
+            stop();
+          } else if (message.type === "ready") {
+            if (!receipt.launch.admissionGranted || receipt.pid !== undefined || !Number.isSafeInteger(message.pid) || message.pid < 1
+              || message.processGroupId !== message.pid || message.sessionId !== child.pid) throw new Error("Invalid worker ownership identity");
+            receipt.pid = message.pid;
+            receipt.launch.state = "started";
+            receipt.cleanup.processGroupId = message.processGroupId;
+            receipt.cleanup.sessionId = message.sessionId;
+            if (stopStarted === undefined && !helperExited) {
+              if (performance.now() >= executionDeadline) { timeout(); continue; }
+              if (child.stdin.destroyed || child.stdin.writableEnded) throw new Error("Worker execution admission channel is closed");
+              child.stdin.write("E");
+            }
+          } else if (message.type === "exit") {
+            if (workerExited || receipt.pid === undefined
+              || !(message.exitCode === null || Number.isSafeInteger(message.exitCode))
+              || !(message.signal === null || /^SIG[A-Z0-9]+$/.test(message.signal))) throw new Error("Invalid worker exit identity");
+            workerExited = true;
+            receipt.exitCode = message.exitCode;
+            receipt.signal = message.signal;
+            stop();
+          } else if (message.type === "cleanup") {
+            if (cleanupReceived || receipt.pid === undefined || !workerExited || ["childReaped", "groupTerminated", "sessionTerminated", "containmentVerified", "sigkillUsed"]
+              .some(key => typeof message[key] !== "boolean") || !Array.isArray(message.processGroups)
+              || message.processGroups.some((id: number) => !Number.isSafeInteger(id) || id < 1)
+              || (message.errors !== undefined && (!Array.isArray(message.errors) || message.errors.some((error: unknown) => typeof error !== "string")))) {
+              throw new Error("Invalid session cleanup proof");
+            }
+            cleanupReceived = true;
+            for (const key of ["childReaped", "groupTerminated", "sessionTerminated", "containmentVerified", "sigkillUsed", "processGroups"] as const) {
+              (receipt.cleanup as any)[key] = message[key];
+            }
+            receipt.timedOut ||= message.timedOut === true;
+            for (const error of message.errors ?? []) addError(error);
+            stop();
+          } else if (message.type === "spawn-error" || message.type === "supervisor-error") {
+            addError(String(message.error));
+            stop("SIGKILL");
+          } else throw new Error("Unexpected supervisor protocol message");
+        } catch (error) {
+          protocolFailed = true;
+          addError(`Recovery supervisor protocol failed: ${String(error)}`);
+          stop("SIGKILL");
+        }
+      }
+      if (controlLine.length > logLimit) { protocolFailed = true; addError("Recovery supervisor exceeded bounded protocol line length"); stop("SIGKILL"); }
+    });
+    child.stdout.on("data", (chunk: Buffer) => {
+      if (settled) return;
+      transportBytes.stdout += chunk.length;
+      const text = chunk.toString();
+      receipt.stdout = (receipt.stdout + text).slice(-logLimit);
+      pendingLine += text;
+      let newline: number;
+      while ((newline = pendingLine.indexOf("\n")) !== -1) {
+        const line = pendingLine.slice(0, newline);
+        pendingLine = pendingLine.slice(newline + 1);
+        if (!line.startsWith(RECOVERY_BARRIER_PREFIX)) continue;
+        try {
+          const candidate = JSON.parse(line.slice(RECOVERY_BARRIER_PREFIX.length)) as RecoveryWorkerResult;
+          if (barrier || candidate.pid !== receipt.pid || candidate.dbPath !== path.resolve(options.dbPath)
+            || candidate.action !== (options.action ?? "index") || candidate.status !== "barrier_reached"
+            || !Number.isSafeInteger(candidate.totalVectors) || candidate.totalVectors < 1
+            || candidate.consecutiveSequenceVerified !== true
+            || candidate.checkpointStatus !== (options.terminateAtBarrier ? "in_progress" : "cancelled")) {
+            throw new Error("Invalid committed worker barrier");
+          }
+          barrier = candidate;
+          if (options.terminateAtBarrier) stop("SIGKILL");
+        } catch (error) {
+          addError(`Recovery barrier protocol failed: ${String(error)}`);
+          stop("SIGKILL");
+        }
+      }
+      if (pendingLine.length > logLimit) { addError("Recovery worker exceeded bounded protocol line length"); stop("SIGKILL"); }
+    });
+    child.stderr.on("data", (chunk: Buffer) => { transportBytes.stderr += chunk.length; receipt.stderr = (receipt.stderr + chunk.toString()).slice(-logLimit); });
+    child.stdin.on("error", error => { if ((error as NodeJS.ErrnoException).code !== "EPIPE") addError(`Recovery supervisor control failed: ${error.message}`); });
+    control.on("end", () => {
+      if (!controlLine.length || settled) return;
+      protocolFailed = true;
+      addError("Recovery supervisor protocol failed: incomplete terminal message");
+      stop("SIGKILL");
+    });
+    control.on("error", error => { protocolFailed = true; addError(`Recovery supervisor proof stream failed: ${error.message}`); stop("SIGKILL"); });
+    child.stdout.on("error", error => { addError(`Recovery worker stdout failed: ${error.message}`); stop("SIGKILL"); });
+    child.stderr.on("error", error => { addError(`Recovery worker stderr failed: ${error.message}`); stop("SIGKILL"); });
+    child.on("error", (error: Error) => { helperExited = true; addError(`Recovery worker spawn failed: ${error.message}`); stop("SIGKILL"); });
+    child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
+      if (settled) return;
+      helperExited = true;
+      receipt.launch.supervisorReaped = true;
+      if ((code !== 0 || signal !== null) && !(supervisorKillRequested && signal === "SIGKILL")) {
+        addError(`Recovery supervisor failed (exit=${code}, signal=${signal})`);
+      }
+      stop();
+    });
+    child.on("close", () => {
+      if (settled) return;
+      closed = true;
+      stop();
+    });
+  });
+}
 
 export interface StageMetrics {
   recallAt1: number;
@@ -62,24 +546,57 @@ export function verifyRetrievalEquivalence(
   const details: Array<{ queryId: string; docOrderMatch: boolean; scoreToleranceMatch: boolean; diff?: string }> = [];
   let allMatch = true;
 
-  if (!pre.queryDetails.length || pre.queryDetails.length !== post.queryDetails.length) {
+  const validQueries = (stage: StageMetrics) => {
+    const queryIds = new Set<string>();
+    // Dense iteration observes missing slots; map/every silently skip holes.
+    for (const q of stage.queryDetails) {
+      if (!q || typeof q.queryId !== "string" || q.queryId.length === 0 || q.error
+        || queryIds.has(q.queryId) || !Array.isArray(q.topDocIds) || q.topDocIds.length === 0) return false;
+      queryIds.add(q.queryId);
+      const docIds = new Set<string>();
+      for (const id of q.topDocIds) {
+        if (typeof id !== "string" || id.length === 0 || docIds.has(id)) return false;
+        docIds.add(id);
+      }
+    }
+    return true;
+  };
+  if (!Number.isFinite(tolerance) || tolerance < 0 || !validQueries(pre) || !validQueries(post)
+    || !pre.queryDetails.length || pre.queryDetails.length !== post.queryDetails.length) {
     return {
       identical: false,
-      details: [{ queryId: "all", docOrderMatch: false, scoreToleranceMatch: false, diff: `Query counts differ: ${pre.queryDetails.length} vs ${post.queryDetails.length}` }],
+      details: [{ queryId: "all", docOrderMatch: false, scoreToleranceMatch: false, diff: `Invalid query identities, result IDs, tolerance, or counts: ${pre.queryDetails.length} vs ${post.queryDetails.length}` }],
     };
   }
 
   for (let i = 0; i < pre.queryDetails.length; i++) {
     const qPre = pre.queryDetails[i];
     const qPost = post.queryDetails[i];
+    if (!qPre || !qPost) {
+      return {
+        identical: false,
+        details: [{ queryId: "all", docOrderMatch: false, scoreToleranceMatch: false, diff: `Missing query detail at index ${i}` }],
+      };
+    }
     const docOrderMatch = JSON.stringify(qPre.topDocIds) === JSON.stringify(qPost.topDocIds);
     const hitMatch = qPre.hitAt5 === qPost.hitAt5 && qPre.rank1 === qPost.rank1;
 
-    const scoreToleranceMatch = Array.isArray(qPre.scores) && Array.isArray(qPost.scores)
+    let scoreToleranceMatch = Array.isArray(qPre.scores) && Array.isArray(qPost.scores)
       && qPre.scores.length > 0 && qPre.scores.length === qPost.scores.length
       && qPre.scores.length === qPre.topDocIds.length
-      && qPost.scores.length === qPost.topDocIds.length
-      && qPre.scores.every((score, j) => Number.isFinite(score) && Number.isFinite(qPost.scores[j]) && Math.abs(score - qPost.scores[j]) <= tolerance);
+      && qPost.scores.length === qPost.topDocIds.length;
+    if (scoreToleranceMatch) {
+      for (let j = 0; j < qPre.scores.length; j++) {
+        const preScore = qPre.scores[j];
+        const postScore = qPost.scores[j];
+        if (typeof preScore !== "number" || !Number.isFinite(preScore)
+          || typeof postScore !== "number" || !Number.isFinite(postScore)
+          || Math.abs(preScore - postScore) > tolerance) {
+          scoreToleranceMatch = false;
+          break;
+        }
+      }
+    }
     if (!docOrderMatch || !hitMatch || !scoreToleranceMatch || qPre.queryId !== qPost.queryId) {
       allMatch = false;
       details.push({
@@ -141,6 +658,7 @@ export interface Phase5ExecutionReport {
     logicalStateInvariantOnMismatch?: boolean;
     backupVectorCount: number;
     backupDocCount: number;
+    workers: Array<{ pid: number; exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean }>;
   };
   retrieval: {
     gguf06b?: {
@@ -176,6 +694,7 @@ function computeLatencies(latencies: number[]): { avg: number; p50: number; p95:
   const avg = sorted.reduce((sum, v) => sum + v, 0) / sorted.length;
   const p50 = sorted[Math.floor(sorted.length * 0.5)];
   const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
+  if (p50 === undefined || p95 === undefined) throw new Error("Missing latency percentile sample");
   return {
     avg: Math.round(avg * 100) / 100,
     p50: Math.round(p50 * 100) / 100,
@@ -243,8 +762,8 @@ async function evaluateRetrievalStage(
 
     const relSet = new Set(q.relevantDocIds);
     let rank1: number | null = null;
-    for (let i = 0; i < topIds.length; i++) {
-      if (relSet.has(topIds[i])) {
+    for (const [i, id] of topIds.entries()) {
+      if (relSet.has(id)) {
         rank1 = i + 1;
         break;
       }
@@ -282,6 +801,7 @@ export async function runPhase5Qualification(options?: {
   mlxPort?: number;
   ggufModelPath?: string;
   mlxModelPath?: string;
+  workerTimeoutMs?: number;
 }): Promise<Phase5ExecutionReport> {
   const startTime = Date.now();
   const errors: string[] = [];
@@ -308,6 +828,7 @@ export async function runPhase5Qualification(options?: {
     logicalStateInvariantOnMismatch: false,
     backupVectorCount: 0,
     backupDocCount: 0,
+    workers: [] as Array<{ pid: number; exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean }>,
   };
 
   const retrievalReport: Phase5ExecutionReport["retrieval"] = {};
@@ -320,6 +841,20 @@ export async function runPhase5Qualification(options?: {
   };
 
   const tempRootDir = mkdtempSync(path.join(tmpdir(), "qmd-phase5-shadow-root-"));
+  const openStores = new Set<QMDStore>();
+  let mcpHandle: HttpServerHandle | null = null;
+  const openStore = async (storeOptions: Parameters<typeof createStore>[0]) => {
+    const store = await createStore(storeOptions);
+    openStores.add(store);
+    const close = store.close;
+    store.close = async () => {
+      if (openStores.has(store)) {
+        await close();
+        openStores.delete(store);
+      }
+    };
+    return store;
+  };
 
   try {
     // -------------------------------------------------------------------------
@@ -382,35 +917,22 @@ export async function runPhase5Qualification(options?: {
       mlxFallback: false,
     };
     const recoveryDbPath = path.join(tempRootDir, "shadow-recovery.sqlite");
-    const workerScript = path.join(import.meta.dirname || path.dirname(process.argv[1]), "phase5_recovery_worker.ts");
     const launchToken = process.env.QMD_PHASE5_LAUNCH_TOKEN || "phase5-worker-token";
+    const workerOptions = { dbPath: recoveryDbPath, docsDir, mlxPort: options?.mlxPort ?? 8797,
+      mlxModelPath: isolatedModels.embed, launchToken, timeoutMs: options?.workerTimeoutMs ?? 30_000,
+      stateRoot: path.join(tempRootDir, "worker-state") };
 
     // Step 2a & 2b: Worker 1 (Fresh Subprocess) - partial indexing stopping at deterministic barrier
     console.log("[Phase 5] 2b. Launching Worker 1 fresh process with barrier after 2 documents...");
     const worker1ReportPath = path.join(tempRootDir, "worker1-report.json");
-    const worker1Proc = spawnSync(
-      "bun",
-      [
-        workerScript,
-        "--db", recoveryDbPath,
-        "--docs-dir", docsDir,
-        "--mlx-port", String(options?.mlxPort || 8797),
-        "--barrier-after-docs", "2",
-        "--launch-token", launchToken,
-        "--output-json", worker1ReportPath,
-      ],
-      {
-        env: { ...process.env, QMD_PHASE5_LAUNCH_TOKEN: launchToken },
-        encoding: "utf-8",
-      }
-    );
-
-    if (worker1Proc.error) {
-      errors.push(`Worker 1 spawn error: ${worker1Proc.error.message}`);
-    }
+    const worker1Proc = await executeRecoveryWorker({ ...workerOptions, action: "index",
+      barrierAfterDocs: 2, terminateAtBarrier: true, outputJson: worker1ReportPath });
+    if (worker1Proc.error) throw new Error(`Worker 1 failed: ${worker1Proc.error}
+${worker1Proc.stderr}`);
+    recoveryReport.workers.push({ pid: worker1Proc.pid!, exitCode: worker1Proc.exitCode, signal: worker1Proc.signal, timedOut: worker1Proc.timedOut });
 
     // Inspect intermediate DB state via lightweight store inspect
-    const inspectStore1 = await createStore({
+    const inspectStore1 = await openStore({
       dbPath: recoveryDbPath,
       config: {
         models: isolatedModels,
@@ -426,35 +948,24 @@ export async function runPhase5Qualification(options?: {
     const activeCp1 = getActiveCheckpoint(inspectStore1.internal.db);
     const vectorsMid = (inspectStore1.internal.db.prepare("SELECT count(*) as c FROM content_vectors").get() as any).c;
     recoveryReport.initialCancelledChunks = vectorsMid;
-    checks.durableIndexingCancellation = activeCp1 !== null && vectorsMid > 0;
+    checks.durableIndexingCancellation = worker1Proc.report?.status === "barrier_reached"
+      && worker1Proc.signal === "SIGKILL" && activeCp1?.status === "in_progress"
+      && activeCp1.jobId === worker1Proc.report.checkpointJobId && vectorsMid > 0
+      && vectorsMid === worker1Proc.report.totalVectors && worker1Proc.report.docsCompleted === 2;
+    const preservedVectors = inspectStore1.internal.db.prepare("SELECT * FROM content_vectors ORDER BY hash, seq").all();
+    const preservedBytes = inspectStore1.internal.db.prepare("SELECT hash_seq, hex(embedding) AS embedding FROM vectors_vec ORDER BY hash_seq").all();
     await inspectStore1.close();
 
     // Step 2c: Worker 2 (Fresh Subprocess) - resumes from active checkpoint to completion
     console.log("[Phase 5] 2c. Launching Worker 2 fresh process to resume indexing...");
     const worker2ReportPath = path.join(tempRootDir, "worker2-report.json");
-    const worker2Proc = spawnSync(
-      "bun",
-      [
-        workerScript,
-        "--db", recoveryDbPath,
-        "--docs-dir", docsDir,
-        "--mlx-port", String(options?.mlxPort || 8797),
-        "--action", "resume",
-        "--launch-token", launchToken,
-        "--output-json", worker2ReportPath,
-      ],
-      {
-        env: { ...process.env, QMD_PHASE5_LAUNCH_TOKEN: launchToken },
-        encoding: "utf-8",
-      }
-    );
-
-    if (worker2Proc.error) {
-      errors.push(`Worker 2 spawn error: ${worker2Proc.error.message}`);
-    }
+    const worker2Proc = await executeRecoveryWorker({ ...workerOptions, action: "resume", outputJson: worker2ReportPath });
+    if (worker2Proc.error) throw new Error(`Worker 2 failed: ${worker2Proc.error}
+${worker2Proc.stderr}`);
+    recoveryReport.workers.push({ pid: worker2Proc.pid!, exitCode: worker2Proc.exitCode, signal: worker2Proc.signal, timedOut: worker2Proc.timedOut });
 
     // Open store on completed recovery DB
-    const recoveryStore = await createStore({
+    const recoveryStore = await openStore({
       dbPath: recoveryDbPath,
       config: {
         models: isolatedModels,
@@ -470,7 +981,10 @@ export async function runPhase5Qualification(options?: {
     const activeCp2 = getActiveCheckpoint(recoveryStore.internal.db);
     const vectorsFinal = (recoveryStore.internal.db.prepare("SELECT count(*) as c FROM content_vectors").get() as any).c;
     recoveryReport.resumedTotalChunks = vectorsFinal;
-    checks.durableIndexingResumption = activeCp2 === null && vectorsFinal >= PUBLIC_CORPUS_DOCS.length;
+    checks.durableIndexingResumption = worker2Proc.pid !== worker1Proc.pid && worker2Proc.pid !== process.pid
+      && worker1Proc.pid !== process.pid && worker2Proc.exitCode === 0 && worker2Proc.report?.status === "completed"
+      && worker2Proc.report.checkpointJobId === activeCp1?.jobId && activeCp2 === null
+      && vectorsFinal === worker2Proc.report.totalVectors;
 
     // Step 2d: Reconcile sequence numbers for all documents to guarantee no duplicate chunks
     const allDocVectors = recoveryStore.internal.db.prepare(
@@ -493,7 +1007,18 @@ export async function runPhase5Qualification(options?: {
       }
     }
     recoveryReport.consecutiveSequenceVerified = allSeqsConsecutive;
-    checks.vectorDeduplicationReconciled = allSeqsConsecutive && vectorsFinal >= PUBLIC_CORPUS_DOCS.length;
+    const expectations = recoveryStore.internal.db.prepare(`
+      SELECT DISTINCT d.hash, e.total_chunks FROM documents d
+      LEFT JOIN content_chunk_expectations e ON e.hash = d.hash AND e.strategy = 'regex'
+      WHERE d.active = 1 ORDER BY d.hash
+    `).all() as Array<{ hash: string; total_chunks: number | null }>;
+    const finalVectorRows = recoveryStore.internal.db.prepare("SELECT * FROM content_vectors ORDER BY hash, seq").all();
+    const finalVectorBytes = recoveryStore.internal.db.prepare("SELECT hash_seq, hex(embedding) AS embedding FROM vectors_vec ORDER BY hash_seq").all();
+    const preserves = (before: unknown[], after: unknown[]) => before.every(row => after.some(candidate => JSON.stringify(row) === JSON.stringify(candidate)));
+    checks.vectorDeduplicationReconciled = allSeqsConsecutive && expectations.length === PUBLIC_CORPUS_DOCS.length
+      && expectations.every(row => row.total_chunks !== null && row.total_chunks > 0 && seqByHash.get(row.hash)?.length === row.total_chunks)
+      && seqByHash.size === expectations.length && vectorsFinal === expectations.reduce((sum, row) => sum + (row.total_chunks || 0), 0)
+      && finalVectorBytes.length === vectorsFinal && preserves(preservedVectors, finalVectorRows) && preserves(preservedBytes, finalVectorBytes);
     recoveryReport.mode = "fresh_process_recovery";
     recoveryReport.freshProcessRecovery = (checks.durableIndexingCancellation && checks.durableIndexingResumption && checks.vectorDeduplicationReconciled) ? "passed" : "failed";
 
@@ -502,10 +1027,12 @@ export async function runPhase5Qualification(options?: {
     const getLogicalDbState = (db: any) => ({
       content: db.prepare("SELECT hash, doc, created_at FROM content ORDER BY hash").all(),
       vectors: db.prepare("SELECT hash, seq, pos, model, embedded_at FROM content_vectors ORDER BY hash, seq").all(),
-      documents: db.prepare("SELECT collection, path, title, hash, active FROM documents ORDER BY collection, path").all(),
+      documents: db.prepare("SELECT * FROM documents ORDER BY collection, path").all(),
+      vectorBytes: db.prepare("SELECT hash_seq, hex(embedding) AS embedding FROM vectors_vec ORDER BY hash_seq").all(),
+      expectations: db.prepare("SELECT * FROM content_chunk_expectations ORDER BY hash, strategy").all(),
+      config: db.prepare("SELECT * FROM store_config ORDER BY key").all(),
+      checkpoints: db.prepare("SELECT * FROM indexing_checkpoints ORDER BY job_id").all(),
     });
-
-    const stateBeforeMismatch = getLogicalDbState(recoveryStore.internal.db);
 
     // Inject a synthetic in-progress checkpoint with mismatched model fingerprint
     saveCheckpoint(recoveryStore.internal.db, {
@@ -525,6 +1052,7 @@ export async function runPhase5Qualification(options?: {
       chunksCommitted: 5,
     });
 
+    const stateBeforeMismatch = getLogicalDbState(recoveryStore.internal.db);
     try {
       await runDurableIndexingJob(recoveryStore.internal, {
         model: "different-model-attempt",
@@ -535,12 +1063,12 @@ export async function runPhase5Qualification(options?: {
       }
     }
 
-    // Clean up synthetic checkpoint so DB returns to prior clean state
-    recoveryStore.internal.db.prepare("DELETE FROM indexing_checkpoints WHERE job_id = 'mismatch-test-job'").run();
-
     const stateAfterMismatch = getLogicalDbState(recoveryStore.internal.db);
     const logicalStateInvariant = JSON.stringify(stateBeforeMismatch) === JSON.stringify(stateAfterMismatch);
+    // Remove only our fixture after checking refusal preserved even the checkpoint.
+    recoveryStore.internal.db.prepare("DELETE FROM indexing_checkpoints WHERE job_id = ?").run("mismatch-test-job");
 
+    recoveryReport.logicalStateInvariantOnMismatch = logicalStateInvariant;
     recoveryReport.mismatchErrorCaught = mismatchCaught;
     checks.fingerprintMismatchRefused = mismatchCaught && logicalStateInvariant;
 
@@ -551,10 +1079,10 @@ export async function runPhase5Qualification(options?: {
 
     const backupDbPath = path.join(tempRootDir, "shadow-backup-restored.sqlite");
     // SQLite VACUUM INTO creates an atomic, consistent online backup
-    recoveryStore.internal.db.exec(`VACUUM INTO '${backupDbPath}'`);
+    recoveryStore.internal.db.prepare("VACUUM INTO ?").run(backupDbPath);
     await recoveryStore.close();
 
-    const restoredStore = await createStore({
+    const restoredStore = await openStore({
       dbPath: backupDbPath,
       config: {
         models: isolatedModels,
@@ -600,7 +1128,7 @@ export async function runPhase5Qualification(options?: {
         throw new Error(`Explicit GGUF model path does not exist: ${explicitGgufPath}. Network autodownloads are strictly prohibited.`);
       }
 
-      const ggufStore = await createStore({
+      const ggufStore = await openStore({
         dbPath: ggufDbPath,
         config: {
           collections: {
@@ -656,12 +1184,12 @@ export async function runPhase5Qualification(options?: {
       // Test health of MLX server
       let mlxAvailable = false;
       try {
-        const hRes = await fetch(`${mlxUrl}/health`);
+        const hRes = await fetch(`${mlxUrl}/health`, { signal: AbortSignal.timeout(5_000) });
         if (hRes.ok) mlxAvailable = true;
       } catch {}
 
       if (mlxAvailable) {
-        const mlxStore = await createStore({
+        const mlxStore = await openStore({
           dbPath: mlxDbPath,
           config: {
             collections: {
@@ -703,7 +1231,7 @@ export async function runPhase5Qualification(options?: {
     // -------------------------------------------------------------------------
     console.log("[Phase 5] 5. Running integrated MCP Streamable HTTP transport retrieval probe...");
     const mcpDbPath = path.join(tempRootDir, "shadow-mcp.sqlite");
-    const mcpStore = await createStore({
+    const mcpStore = await openStore({
       dbPath: mcpDbPath,
       config: {
         models: isolatedModels,
@@ -718,7 +1246,7 @@ export async function runPhase5Qualification(options?: {
     await mcpStore.update();
 
     // Start MCP server on ephemeral port (port 0) with injected store
-    const mcpHandle: HttpServerHandle = await startMcpHttpServer(0, { store: mcpStore, quiet: true });
+    mcpHandle = await startMcpHttpServer(0, { store: mcpStore, quiet: true });
     const baseUrl = `http://localhost:${mcpHandle.port}`;
 
     let mcpSessionId: string | null = null;
@@ -733,6 +1261,7 @@ export async function runPhase5Qualification(options?: {
         method: "POST",
         headers,
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(5_000),
       });
 
       const sid = res.headers.get("mcp-session-id");
@@ -810,17 +1339,21 @@ export async function runPhase5Qualification(options?: {
     );
 
     await mcpHandle.stop();
+    mcpHandle = null;
     await mcpStore.close();
 
   } catch (err: any) {
     console.error("[Phase 5] Unhandled execution error:", err);
     errors.push(err.message || String(err));
   } finally {
+    if (recoveryReport.freshProcessRecovery === "pending") recoveryReport.freshProcessRecovery = "failed";
+    if (mcpHandle) await mcpHandle.stop().catch(error => errors.push(`MCP cleanup: ${String(error)}`));
+    for (const store of openStores) await store.close().catch(error => errors.push(`Store cleanup: ${String(error)}`));
     // Release native llama resources
-    await disposeDefaultLlamaCpp();
+    await disposeDefaultLlamaCpp().catch(error => errors.push(`LLM cleanup: ${String(error)}`));
     try {
       rmSync(tempRootDir, { recursive: true, force: true });
-    } catch {}
+    } catch (error) { errors.push(`Scratch cleanup: ${String(error)}`); }
   }
 
   const durationMs = Date.now() - startTime;
@@ -856,7 +1389,7 @@ export async function runPhase5Qualification(options?: {
 }
 
 // CLI Execution Entrypoint
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const args = process.argv.slice(2);
   const launchTokenIdx = args.indexOf("--launch-token");
   const launchToken = (launchTokenIdx !== -1 && args[launchTokenIdx + 1])
@@ -871,7 +1404,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const skipGguf = args.includes("--skip-gguf");
   const skipMlx = args.includes("--skip-mlx");
   const mlxPortIdx = args.indexOf("--mlx-port");
-  const mlxPort = mlxPortIdx !== -1 && args[mlxPortIdx + 1] ? parseInt(args[mlxPortIdx + 1], 10) : 8797;
+  const mlxPortArg = mlxPortIdx !== -1 ? args[mlxPortIdx + 1] : undefined;
+  const mlxPort = mlxPortArg ? parseInt(mlxPortArg, 10) : 8797;
+  const modelIdx = args.indexOf("--mlx-model-path");
+  const mlxModelPath = modelIdx !== -1 ? args[modelIdx + 1] : undefined;
+  const workerTimeoutIdx = args.indexOf("--worker-timeout-ms");
+  const workerTimeoutMs = workerTimeoutIdx !== -1 ? Number(args[workerTimeoutIdx + 1]) : undefined;
   const outIdx = args.indexOf("--output-json");
   const outPath = outIdx !== -1 && args[outIdx + 1] ? args[outIdx + 1] : undefined;
 
@@ -879,6 +1417,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     skipGguf,
     skipMlx,
     mlxPort,
+    mlxModelPath,
+    workerTimeoutMs,
   }).then(report => {
     console.log("\n=== Phase 5 Execution Report ===");
     console.log(`Status: ${report.status.toUpperCase()} (${report.durationMs}ms)`);

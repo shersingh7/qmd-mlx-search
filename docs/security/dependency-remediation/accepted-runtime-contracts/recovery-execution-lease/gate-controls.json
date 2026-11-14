@@ -1,0 +1,40 @@
+{
+  "sourceSha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+  "cases": [
+    {
+      "mode": "live-empty",
+      "allowed": true,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "EOF",
+      "allowed": false,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "K",
+      "allowed": false,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "T",
+      "allowed": false,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "unexpected",
+      "allowed": false,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "EBADF",
+      "allowed": false,
+      "CLOEXEC": true
+    },
+    {
+      "mode": "expired",
+      "allowed": false,
+      "CLOEXEC": true
+    }
+  ]
+}

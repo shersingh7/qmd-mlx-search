@@ -25,16 +25,20 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "prepare": "[ -d .git ] && ./scripts/install-hooks.sh || true",
-    "build": "tsc -p tsconfig.build.json && printf '#!/usr/bin/env node\n' | cat - dist/cli/qmd.js > dist/cli/qmd.tmp && mv dist/cli/qmd.tmp dist/cli/qmd.js && chmod +x dist/cli/qmd.js",
-    "test": "vitest run --reporter=verbose test/",
-    "qmd": "tsx src/cli/qmd.ts",
-    "index": "tsx src/cli/qmd.ts index",
-    "vector": "tsx src/cli/qmd.ts vector",
-    "search": "tsx src/cli/qmd.ts search",
-    "vsearch": "tsx src/cli/qmd.ts vsearch",
-    "rerank": "tsx src/cli/qmd.ts rerank",
-    "inspector": "npx @modelcontextprotocol/inspector tsx src/cli/qmd.ts mcp",
+    "prepare": "node scripts/prepare.mjs",
+    "prepack": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs",
+    "hooks:install": "bash scripts/install-hooks.sh",
+    "test:launcher": "bash test/launcher-detection.test.sh",
+    "test:package": "bash test/smoke-install.sh",
+    "test": "node node_modules/vitest/vitest.mjs run --reporter=verbose test/",
+    "qmd": "node --import tsx src/cli/qmd.ts",
+    "index": "node --import tsx src/cli/qmd.ts index",
+    "vector": "node --import tsx src/cli/qmd.ts vector",
+    "search": "node --import tsx src/cli/qmd.ts search",
+    "vsearch": "node --import tsx src/cli/qmd.ts vsearch",
+    "rerank": "node --import tsx src/cli/qmd.ts rerank",
+    "inspector": "npx @modelcontextprotocol/inspector node --import tsx src/cli/qmd.ts mcp",
     "release": "./scripts/release.sh"
   },
   "publishConfig": {
@@ -42,17 +46,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tobi/qmd.git"
+    "url": "git+https://github.com/shersingh7/qmd-mlx-search.git"
   },
-  "homepage": "https://github.com/tobi/qmd#readme",
+  "homepage": "https://github.com/shersingh7/qmd-mlx-search#readme",
   "bugs": {
-    "url": "https://github.com/tobi/qmd/issues"
+    "url": "https://github.com/shersingh7/qmd-mlx-search/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
     "better-sqlite3": "12.8.0",
     "fast-glob": "3.3.3",
-    "node-llama-cpp": "3.18.1",
+    "node-llama-cpp": "3.22.3",
     "picomatch": "4.0.4",
     "sqlite-vec": "0.1.9",
     "web-tree-sitter": "0.26.7",
@@ -72,8 +76,13 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "7.6.13",
-    "tsx": "4.21.0",
-    "vitest": "3.2.4"
+    "@types/bun": "1.3.8",
+    "@types/node": "24.10.1",
+    "@types/picomatch": "4.0.3",
+    "typescript": "5.9.3",
+    "tsx": "4.23.15",
+    "vite": "7.3.8",
+    "vitest": "4.1.12"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -111,5 +120,8 @@
     "llm"
   ],
   "author": "Tobi Lutke <tobi@lutke.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "allowScripts": {
+    "better-sqlite3": true
+  }
 }

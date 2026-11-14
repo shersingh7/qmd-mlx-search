@@ -1,0 +1,23 @@
+{
+  "scope": "Fresh local frozen candidate7-file replay; not independent review, pristine CI, full workspace or type-proposal integration",
+  "exit_code": 0,
+  "files": 7,
+  "counts": {
+    "passed": 114
+  },
+  "source_inputs_unchanged": true,
+  "live_candidate_hashes_unchanged": true,
+  "actual_system_fork_clock": {
+    "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]",
+    "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+    "parentPid": 7309,
+    "parentBefore": 0.040614166,
+    "parentAfter": 0.041677125,
+    "childPid": 7310,
+    "childClock": 0.041364083,
+    "inheritedEpochVerified": true
+  },
+  "invocation": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/invocation.json",
+  "report": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/focused.json",
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/focused.log"
+}

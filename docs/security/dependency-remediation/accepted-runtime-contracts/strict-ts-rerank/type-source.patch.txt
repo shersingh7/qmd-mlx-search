@@ -1,0 +1,372 @@
+--- a/scripts/phase5_e2e_runner.ts
++++ b/scripts/phase5_e2e_runner.ts
+@@ -497,6 +497,12 @@
+   for (let i = 0; i < pre.queryDetails.length; i++) {
+     const qPre = pre.queryDetails[i];
+     const qPost = post.queryDetails[i];
++    if (!qPre || !qPost) {
++      return {
++        identical: false,
++        details: [{ queryId: "all", docOrderMatch: false, scoreToleranceMatch: false, diff: `Missing query detail at index ${i}` }],
++      };
++    }
+     const docOrderMatch = JSON.stringify(qPre.topDocIds) === JSON.stringify(qPost.topDocIds);
+     const hitMatch = qPre.hitAt5 === qPost.hitAt5 && qPre.rank1 === qPost.rank1;
+ 
+@@ -504,7 +510,11 @@
+       && qPre.scores.length > 0 && qPre.scores.length === qPost.scores.length
+       && qPre.scores.length === qPre.topDocIds.length
+       && qPost.scores.length === qPost.topDocIds.length
+-      && qPre.scores.every((score, j) => Number.isFinite(score) && Number.isFinite(qPost.scores[j]) && Math.abs(score - qPost.scores[j]) <= tolerance);
++      && qPre.scores.every((score, j) => {
++        const postScore = qPost.scores[j];
++        return Number.isFinite(score) && typeof postScore === "number" && Number.isFinite(postScore)
++          && Math.abs(score - postScore) <= tolerance;
++      });
+     if (!docOrderMatch || !hitMatch || !scoreToleranceMatch || qPre.queryId !== qPost.queryId) {
+       allMatch = false;
+       details.push({
+@@ -602,6 +612,7 @@
+   const avg = sorted.reduce((sum, v) => sum + v, 0) / sorted.length;
+   const p50 = sorted[Math.floor(sorted.length * 0.5)];
+   const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
++  if (p50 === undefined || p95 === undefined) throw new Error("Missing latency percentile sample");
+   return {
+     avg: Math.round(avg * 100) / 100,
+     p50: Math.round(p50 * 100) / 100,
+@@ -669,8 +680,8 @@
+ 
+     const relSet = new Set(q.relevantDocIds);
+     let rank1: number | null = null;
+-    for (let i = 0; i < topIds.length; i++) {
+-      if (relSet.has(topIds[i])) {
++    for (const [i, id] of topIds.entries()) {
++      if (relSet.has(id)) {
+         rank1 = i + 1;
+         break;
+       }
+@@ -1311,7 +1322,8 @@
+   const skipGguf = args.includes("--skip-gguf");
+   const skipMlx = args.includes("--skip-mlx");
+   const mlxPortIdx = args.indexOf("--mlx-port");
+-  const mlxPort = mlxPortIdx !== -1 && args[mlxPortIdx + 1] ? parseInt(args[mlxPortIdx + 1], 10) : 8797;
++  const mlxPortArg = mlxPortIdx !== -1 ? args[mlxPortIdx + 1] : undefined;
++  const mlxPort = mlxPortArg ? parseInt(mlxPortArg, 10) : 8797;
+   const modelIdx = args.indexOf("--mlx-model-path");
+   const mlxModelPath = modelIdx !== -1 ? args[modelIdx + 1] : undefined;
+   const workerTimeoutIdx = args.indexOf("--worker-timeout-ms");
+--- a/src/bench-rerank.ts
++++ b/src/bench-rerank.ts
+@@ -87,7 +87,7 @@
+ interface BenchResult {
+   parallelism: number;
+   contextSize: number;
+-  flashAttention: boolean;
++  flashAttention: boolean | "auto";
+   times: number[];       // ms per run
+   medianMs: number;
+   docsPerSec: number;
+@@ -101,7 +101,6 @@
+   llama: Llama,
+   docs: string[],
+   parallelism: number,
+-  flash: boolean,
+ ): Promise<BenchResult> {
+   // Measure VRAM before
+   const vramBefore = llama.gpu ? await llama.getVramState() : null;
+@@ -109,17 +108,18 @@
+ 
+   // Create contexts. On CPU, split threads evenly across contexts.
+   const cpuThreads = !llama.gpu ? Math.floor(llama.cpuMathCores / parallelism) : 0;
+-  const contexts = [];
++  const contexts: Awaited<ReturnType<LlamaModel["createRankingContext"]>>[] = [];
+   for (let i = 0; i < parallelism; i++) {
+     try {
+       contexts.push(await model.createRankingContext({
+         contextSize: CONTEXT_SIZE,
+-        flashAttention: flash,
++        // Ranking contexts inherit the model's defaultContextFlashAttention;
++        // node-llama-cpp 3.22.3 has no per-ranking-context flash option.
+         ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
+       }));
+     } catch {
+       if (contexts.length === 0) {
+-        // Try without flash
++        // Retry the first context once with the same supported options.
+         contexts.push(await model.createRankingContext({
+           contextSize: CONTEXT_SIZE,
+           ...(cpuThreads > 0 ? { threads: cpuThreads } : {}),
+@@ -129,6 +129,8 @@
+     }
+   }
+   const actualParallelism = contexts.length;
++  const firstContext = contexts[0];
++  if (!firstContext) throw new Error("No ranking contexts created");
+ 
+   // Measure VRAM after context creation
+   const vramAfter = llama.gpu ? await llama.getVramState() : null;
+@@ -136,7 +138,7 @@
+   const vramPerCtx = actualParallelism > 0 ? vramUsed / actualParallelism : 0;
+ 
+   // Warm up
+-  await contexts[0]!.rankAll(QUERY, docs.slice(0, 2));
++  await firstContext.rankAll(QUERY, docs.slice(0, 2));
+ 
+   // Benchmark iterations
+   const times: number[] = [];
+@@ -147,9 +149,9 @@
+ 
+     const t0 = performance.now();
+     const allScores = await Promise.all(
+-      Array.from({ length: actualParallelism }, (_, i) => {
++      contexts.map((context, i) => {
+         const chunk = docs.slice(i * chunkSize, (i + 1) * chunkSize);
+-        return chunk.length > 0 ? contexts[i]!.rankAll(QUERY, chunk) : Promise.resolve([]);
++        return chunk.length > 0 ? context.rankAll(QUERY, chunk) : Promise.resolve([]);
+       })
+     );
+     const elapsed = performance.now() - t0;
+@@ -172,7 +174,7 @@
+   return {
+     parallelism: actualParallelism,
+     contextSize: CONTEXT_SIZE,
+-    flashAttention: flash,
++    flashAttention: model.defaultContextFlashAttention,
+     times,
+     medianMs: med,
+     docsPerSec: (docs.length / med) * 1000,
+@@ -254,23 +256,15 @@
+       }
+     }
+ 
+-    // Test with flash attention
+-    process.stdout.write(`\n  [${p} ctx, flash] running...`);
++    // The public ranking API uses the model default; do not label an ignored
++    // per-context option as a flash/no-flash comparison.
++    process.stdout.write(`\n  [${p} ctx, flash=${model.defaultContextFlashAttention}] running...`);
+     try {
+-      const r = await benchmarkConfig(model, llama, docs, p, true);
++      const r = await benchmarkConfig(model, llama, docs, p);
+       results.push(r);
+       process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
+     } catch (e: any) {
+       process.stdout.write(` failed: ${e.message}\n`);
+-      // Try without flash
+-      process.stdout.write(`  [${p} ctx, no flash] running...`);
+-      try {
+-        const r = await benchmarkConfig(model, llama, docs, p, false);
+-        results.push(r);
+-        process.stdout.write(` ${r.medianMs.toFixed(0)}ms (${r.docsPerSec.toFixed(1)} docs/s)\n`);
+-      } catch (e2: any) {
+-        process.stdout.write(` failed: ${e2.message}\n`);
+-      }
+     }
+   }
+ 
+@@ -290,7 +284,7 @@
+     const speedupStr = r === results[0] ? "      " : `(${speedup.toFixed(1)}×)`;
+     console.log(
+       `  ${String(r.parallelism).padStart(3)}  ` +
+-      `${r.flashAttention ? " yes " : "  no "}  ` +
++      `${r.flashAttention === "auto" ? "auto " : r.flashAttention ? " yes " : "  no "}  ` +
+       `${r.medianMs.toFixed(0).padStart(5)}ms  ` +
+       `${r.docsPerSec.toFixed(1).padStart(6)}  ` +
+       `${formatBytes(r.vramPerContext).padStart(8)}  ` +
+--- a/src/llm/mlx-identity.ts
++++ b/src/llm/mlx-identity.ts
+@@ -1,4 +1,5 @@
+ import { createHash } from "node:crypto";
++import type { ReadableStreamDefaultReader } from "node:stream/web";
+ import { abortable, linkSignals, throwIfAborted } from "./lifecycle.js";
+ 
+ export type MlxStage = "rerank" | "expand";
+--- a/src/mcp/server.ts
++++ b/src/mcp/server.ts
+@@ -1263,7 +1263,7 @@
+       for (const [key, value] of Object.entries(nodeReq.headers)) {
+         if (typeof value === "string") headers.set(key, key === "host" ? value.toLowerCase() : value);
+       }
+-      const request = new Request(requestUrl, {
++      const request = new Request(requestUrl.href, {
+         method: nodeReq.method, headers, signal, ...(rawBody !== undefined ? { body: rawBody } : {}),
+       });
+       const responseTask = session.transport.handleRequest(request, { parsedBody: body });
+--- a/src/test-preload.ts
++++ b/src/test-preload.ts
+@@ -5,7 +5,7 @@
+  * resources before the process exits, avoiding GGML_ASSERT failures.
+  */
+ import { afterAll } from "bun:test";
+-import { disposeDefaultLlamaCpp } from "./llm";
++import { disposeDefaultLlamaCpp } from "./llm.js";
+ 
+ // Global afterAll runs after all test files complete
+ afterAll(async () => {
+--- a/test/cli.test.ts
++++ b/test/cli.test.ts
+@@ -6,6 +6,7 @@
+  */
+ 
+ import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
++import { z } from "zod";
+ import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
+ import { existsSync, lstatSync, readFileSync, symlinkSync, writeFileSync, unlinkSync } from "fs";
+ import { tmpdir } from "os";
+@@ -14,7 +15,7 @@
+ import { spawn } from "child_process";
+ import { sourceCliCommand } from "./helpers/source-cli.js";
+ import { setTimeout as sleep } from "timers/promises";
+-import { buildEditorUri, termLink } from "../src/cli/qmd.ts";
++import { buildEditorUri, termLink } from "../src/cli/qmd.js";
+ 
+ // Test fixtures directory and database path
+ let testDir: string;
+@@ -1335,6 +1336,12 @@
+   let daemonConfigDir: string;
+ 
+   type DaemonRecord = { version: 1; pid: number; port: number; instanceToken: string };
++  const healthSchema = z.object({
++    status: z.literal("ok"),
++    uptime: z.number().int().nonnegative(),
++    pid: z.number().int().positive(),
++    instanceToken: z.string().uuid(),
++  });
+   const spawnedRecords: DaemonRecord[] = [];
+   const foregroundProcesses: import("child_process").ChildProcess[] = [];
+ 
+@@ -1360,7 +1367,7 @@
+   async function stopOwnedFixture(record: DaemonRecord): Promise<void> {
+     if (!pidAlive(record.pid)) return;
+     const response = await fetch(`http://localhost:${record.port}/health`, { signal: AbortSignal.timeout(2000) });
+-    const health = await response.json();
++    const health = healthSchema.parse(await response.json());
+     // Never signal a bare/stale PID from a test record without listener identity.
+     expect(health.pid).toBe(record.pid);
+     expect(health.instanceToken).toBe(record.instanceToken);
+@@ -1464,7 +1471,7 @@
+ 
+       const res = await fetch(`http://localhost:${port}/health`);
+       expect(res.status).toBe(200);
+-      const body = await res.json();
++      const body = healthSchema.parse(await res.json());
+       expect(body.status).toBe("ok");
+     } finally {
+       proc.kill("SIGTERM");
+--- a/test/eval-bm25.test.ts
++++ b/test/eval-bm25.test.ts
+@@ -17,7 +17,7 @@
+   searchFTS,
+   insertDocument,
+   insertContent,
+-} from "../src/store";
++} from "../src/store.js";
+ 
+ // Set INDEX_PATH before importing store to prevent using global index
+ const tempDir = mkdtempSync(join(tmpdir(), "qmd-eval-unit-"));
+--- a/test/eval.test.ts
++++ b/test/eval.test.ts
+@@ -35,8 +35,8 @@
+   reciprocalRankFusion,
+   DEFAULT_EMBED_MODEL,
+   type RankedResult,
+-} from "../src/store";
+-import { getDefaultLlamaCpp, formatDocForEmbedding, disposeDefaultLlamaCpp } from "../src/llm";
++} from "../src/store.js";
++import { getDefaultLlamaCpp, formatDocForEmbedding, disposeDefaultLlamaCpp } from "../src/llm.js";
+ 
+ // Eval queries with expected documents
+ const evalQueries: {
+--- a/test/fixtures/public_eval_dataset.ts
++++ b/test/fixtures/public_eval_dataset.ts
+@@ -218,14 +218,15 @@
+     const ranked = rankedDocIdsList[q] || [];
+     const relSet = new Set(relevantDocIdsList[q] || []);
+ 
+-    if (ranked.length > 0 && relSet.has(ranked[0])) hits1++;
++    const first = ranked[0];
++    if (first !== undefined && relSet.has(first)) hits1++;
+     if (ranked.slice(0, 3).some(id => relSet.has(id))) hits3++;
+     if (ranked.slice(0, 5).some(id => relSet.has(id))) hits5++;
+ 
+     // Reciprocal Rank (MRR)
+     let rr = 0;
+-    for (let r = 0; r < ranked.length; r++) {
+-      if (relSet.has(ranked[r])) {
++    for (const [r, id] of ranked.entries()) {
++      if (relSet.has(id)) {
+         rr = 1 / (r + 1);
+         break;
+       }
+@@ -235,7 +236,8 @@
+     // nDCG@k
+     let dcg = 0;
+     for (let i = 0; i < Math.min(ranked.length, k); i++) {
+-      if (relSet.has(ranked[i])) {
++      const id = ranked[i];
++      if (id !== undefined && relSet.has(id)) {
+         dcg += 1.0 / Math.log2(i + 2);
+       }
+     }
+--- a/test/llm.test.ts
++++ b/test/llm.test.ts
+@@ -176,7 +176,7 @@
+       detokenize: (tokens: string[]) => tokens.join(""),
+     });
+ 
+-    const result = await llm.rerank("query", [
++    const result: Awaited<ReturnType<LlamaCpp["rerank"]>> = await llm.rerank("query", [
+       { file: "a.md", text: "shared chunk" },
+       { file: "b.md", text: "shared chunk" },
+       { file: "c.md", text: "different chunk" },
+--- a/test/multi-collection-filter.test.ts
++++ b/test/multi-collection-filter.test.ts
+@@ -78,7 +78,7 @@
+     const filtered = filterByCollections(mixedResults, ["docs", "notes"]);
+     expect(filtered).toHaveLength(1);
+     // Should match via filepath (docs), not file (notes)
+-    expect(filtered[0].filepath).toBe("qmd://docs/readme.md");
++    expect(filtered[0]?.filepath).toBe("qmd://docs/readme.md");
+   });
+ });
+ 
+--- a/test/phase5-recovery.test.ts
++++ b/test/phase5-recovery.test.ts
+@@ -185,5 +185,18 @@
+       expect(verifyRetrievalEquivalence(pre, post).identical).toBe(false);
+       expect(verifyRetrievalEquivalence(post, post).identical).toBe(false);
+     });
++
++    it("refuses missing query slots in either retrieval report without throwing", () => {
++      for (const missingSide of ["pre", "post", "both"]) {
++        const pre = stage();
++        const post = stage();
++        if (missingSide !== "post") pre.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
++        if (missingSide !== "pre") post.queryDetails = new Array<StageMetrics["queryDetails"][number]>(1);
++        expect(verifyRetrievalEquivalence(pre, post)).toMatchObject({
++          identical: false,
++          details: [{ docOrderMatch: false, scoreToleranceMatch: false }],
++        });
++      }
++    });
+   });
+ });
+--- a/test/rrf-trace.test.ts
++++ b/test/rrf-trace.test.ts
+@@ -1,5 +1,5 @@
+ import { describe, expect, test } from "vitest";
+-import { buildRrfTrace, reciprocalRankFusion, type RankedResult } from "../src/store";
++import { buildRrfTrace, reciprocalRankFusion, type RankedResult } from "../src/store.js";
+ 
+ describe("buildRrfTrace", () => {
+   test("matches reciprocalRankFusion totals and records per-list contributions", () => {
+--- a/test/store.helpers.unit.test.ts
++++ b/test/store.helpers.unit.test.ts
+@@ -18,7 +18,7 @@
+   handelize,
+   cleanupOrphanedVectors,
+   sanitizeFTS5Term,
+-} from "../src/store";
++} from "../src/store.js";
+ 
+ // =============================================================================
+ // Path Utilities

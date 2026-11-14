@@ -1,0 +1,67 @@
+{
+  "SPEC": "PASS",
+  "QUALITY": "PASS",
+  "findings": [],
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7",
+  "report": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/REPORT.md",
+  "source_manifest": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/source-manifest.json",
+  "spec_sha256": "8c044157f5cfff3f3bb1685481a3405929e6b0c72d7061fa934b62ebacb7c145",
+  "quality_sha256": "db422dfaf03624ff4231b7abe8dc47450798553de4e601fab895f82382df7b83",
+  "source_hashes": [
+    {
+      "path": ".github/workflows/gguf-native-image-qualification.yml",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/.github/workflows/gguf-native-image-qualification.yml",
+      "sha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+      "bytes": 25847,
+      "lines": 418
+    },
+    {
+      "path": "test/security/test_gguf_workflow_controller.py",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/test/security/test_gguf_workflow_controller.py",
+      "sha256": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+      "bytes": 19338,
+      "lines": 371
+    },
+    {
+      "path": "test/security/fixtures/gguf_workflow_fake_cli.py",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/test/security/fixtures/gguf_workflow_fake_cli.py",
+      "sha256": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78",
+      "bytes": 4697,
+      "lines": 109
+    }
+  ],
+  "primary_runs": [
+    {
+      "suite": "permanent",
+      "cases": 26,
+      "passed": 26,
+      "raw_exit": 0
+    },
+    {
+      "suite": "supplied",
+      "cases": 74,
+      "passed": 74,
+      "raw_exit": 0
+    },
+    {
+      "suite": "positive",
+      "cases": 34,
+      "passed": 34,
+      "raw_exit": 0
+    },
+    {
+      "suite": "independent-heldouts",
+      "cases": 20,
+      "passed": 20,
+      "raw_exit": 0
+    }
+  ],
+  "characterization": {
+    "cases": 34,
+    "passed": 33,
+    "fixture_errors": 1,
+    "raw_exit": 1
+  },
+  "native_docker_CI_execution": false,
+  "live_edits": false
+}

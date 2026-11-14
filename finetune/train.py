@@ -1,19 +1,49 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "torch",
-#     "trl>=0.12.0",
-#     "peft>=0.7.0",
-#     "transformers>=4.45.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "trackio",
+#     "torch>=2.13.0,<3",
+#     "trl>=1.17.1,<1.18",
+#     "peft>=0.21.3,<0.22",
+#     "transformers>=5.22.2,<5.23",
+#     "accelerate==1.15.0+qmd.2",
+#     "huggingface_hub>=2.4.0,<3",
+#     "trackio>=0.45.1,<0.46",
 #     "nvidia-ml-py",
-#     "datasets",
-#     "bitsandbytes",
-#     "pyyaml",
+#     "datasets>=5.2.0,<5.3",
+#     "bitsandbytes>=0.50.2,<0.51; sys_platform == 'linux'",
+#     "pyyaml>=6.0.3,<7",
 #     "gguf",
 # ]
+# [tool]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate==1.15.0+qmd.2",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.17.0",
+#     "urllib3>=2.8.0",
+# ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Unified training script for QMD query expansion models.
@@ -40,121 +70,26 @@ from transformers import TrainerCallback
 
 
 def export_gguf(model, tokenizer, output_dir: str, model_name: str):
-    """Export model to GGUF at Q4_K_M, Q6_K, Q8_0 quantizations."""
-    import shutil
+    """Export a complete Q4_K_M/Q6_K/Q8_0 set without installing dependencies."""
     import tempfile
+    from gguf_toolchain import convert_model, prepare_toolchain
 
     output_path = Path(output_dir)
-    gguf_dir = output_path / "gguf"
-    gguf_dir.mkdir(exist_ok=True)
-
-    # Save merged model to temp dir
-    print("Saving merged model for GGUF conversion...")
-    with tempfile.TemporaryDirectory() as tmp:
-        merged_path = Path(tmp) / "merged"
+    output_path.mkdir(parents=True, exist_ok=True)
+    # Both tools and artifacts are fresh, private to this call, and cleaned on
+    # failure. Never replace previous exports until every process succeeded.
+    with tempfile.TemporaryDirectory(prefix=".gguf-convert-", dir=output_path) as tmp:
+        work = Path(tmp)
+        tools = prepare_toolchain(work / "tools")
+        merged_path = work / "merged"
+        print("Saving merged model for GGUF conversion...")
         model.save_pretrained(merged_path, safe_serialization=True)
         tokenizer.save_pretrained(merged_path)
-
-        # Setup llama.cpp
-        llama_cpp = Path("/tmp/llama.cpp")
-        if not llama_cpp.exists():
-            print("Cloning llama.cpp...")
-            subprocess.run(
-                [
-                    "git",
-                    "clone",
-                    "--depth",
-                    "1",
-                    "https://github.com/ggerganov/llama.cpp.git",
-                    str(llama_cpp),
-                ],
-                capture_output=True,
-            )
-            subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "install",
-                    "-q",
-                    "-r",
-                    str(llama_cpp / "requirements.txt"),
-                ],
-                capture_output=True,
-            )
-
-        # Build quantize tool if needed
-        quantize_bin = llama_cpp / "build" / "bin" / "llama-quantize"
-        if not quantize_bin.exists():
-            print("Building llama-quantize...")
-            build_dir = llama_cpp / "build"
-            build_dir.mkdir(exist_ok=True)
-            subprocess.run(
-                [
-                    "cmake",
-                    "-B",
-                    str(build_dir),
-                    "-S",
-                    str(llama_cpp),
-                    "-DGGML_CUDA=OFF",
-                ],
-                capture_output=True,
-            )
-            subprocess.run(
-                [
-                    "cmake",
-                    "--build",
-                    str(build_dir),
-                    "--target",
-                    "llama-quantize",
-                    "-j",
-                    "4",
-                ],
-                capture_output=True,
-            )
-
-        # Convert to FP16 first
-        fp16_file = gguf_dir / f"{model_name}-f16.gguf"
-        print(f"Converting to FP16: {fp16_file}")
-        log_out = Path("/tmp/qmd-gguf-convert.log")
-        log_err = Path("/tmp/qmd-gguf-convert.err")
-        with log_out.open("w") as out_f, log_err.open("w") as err_f:
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(llama_cpp / "convert_hf_to_gguf.py"),
-                    str(merged_path),
-                    "--outfile",
-                    str(fp16_file),
-                    "--outtype",
-                    "f16",
-                ],
-                stdout=out_f,
-                stderr=err_f,
-                text=True,
-            )
-        if result.returncode != 0:
-            print("GGUF conversion failed.")
-            print(f"stdout: {log_out}")
-            print(f"stderr: {log_err}")
-            return
-
-        # Quantize to 4, 6, 8 bit
-        for quant_type in ["Q4_K_M", "Q6_K", "Q8_0"]:
-            out_file = gguf_dir / f"{model_name}-{quant_type.lower()}.gguf"
-            print(f"Quantizing {quant_type}: {out_file}")
-            subprocess.run(
-                [str(quantize_bin), str(fp16_file), str(out_file), quant_type],
-                capture_output=True,
-            )
-            if out_file.exists():
-                size_mb = out_file.stat().st_size / (1024 * 1024)
-                print(f"  {quant_type}: {size_mb:.1f} MB")
-
-        # Remove FP16 to save space
-        if fp16_file.exists():
-            fp16_file.unlink()
-
+        files = convert_model(tools, merged_path, model_name)
+        gguf_dir = output_path / "gguf"
+        gguf_dir.mkdir(exist_ok=True)
+        for path in files:
+            path.replace(gguf_dir / path.name)
     print(f"GGUF files saved to: {gguf_dir}")
 
 
@@ -205,8 +140,54 @@ def run_eval(model_path: str) -> float | None:
     return avg
 
 
+def build_sft_config(cfg, **overrides):
+    """Build current TRL arguments while preserving the existing YAML schema."""
+    from trl import SFTConfig
+
+    training = cfg["training"]
+    kwargs = dict(
+        output_dir=cfg["model"]["output"],
+        num_train_epochs=training["epochs"],
+        per_device_train_batch_size=training["batch_size"],
+        gradient_accumulation_steps=training["gradient_accumulation_steps"],
+        # PyYAML treats values such as 2e-4 as strings.
+        learning_rate=float(training["learning_rate"]),
+        max_length=training["max_length"],
+        logging_steps=10,
+        save_strategy="steps",
+        save_steps=training.get("save_steps", 200),
+        save_total_limit=training.get("save_total_limit", 2),
+        eval_strategy="steps",
+        eval_steps=training.get("eval_steps", 200),
+        # Fractional warmup_steps replaces warmup_ratio in Transformers 5.22.
+        warmup_steps=float(training["warmup_ratio"]),
+        lr_scheduler_type=training["lr_scheduler"],
+        ddp_find_unused_parameters=training.get("ddp_find_unused_parameters", False),
+        dataset_text_field=cfg["dataset"].get("text_field", "text"),
+        project=cfg.get("tracking", {}).get("project", "huggingface"),
+        bf16=True,
+        report_to="none",
+    )
+    kwargs.update(overrides)
+    return SFTConfig(**kwargs)
+
+
 def cmd_sft(args):
     """Run supervised fine-tuning."""
+    with open(args.config) as f:
+        cfg = yaml.safe_load(f)
+
+    # Configuration previews must not import GPU extensions, authenticate, or
+    # touch the Hub/model/dataset cache.
+    if args.dry_run:
+        print("SFT Training Configuration:")
+        print(yaml.dump(cfg, default_flow_style=False))
+        return
+
+    # Validate the locked Python/native prerequisites before any data/model work.
+    from gguf_toolchain import check_prerequisites
+    check_prerequisites()
+
     import torch
     from datasets import load_dataset
     import torch.distributed as dist
@@ -215,17 +196,9 @@ def cmd_sft(args):
     from transformers.utils import logging as hf_logging
 
     hf_logging.set_verbosity_error()
-    from trl import SFTTrainer, SFTConfig
-
-    with open(args.config) as f:
-        cfg = yaml.safe_load(f)
+    from trl import SFTTrainer
 
     os.environ.setdefault("HF_LOG_CUDA_MEMORY", "0")
-
-    if args.dry_run:
-        print("SFT Training Configuration:")
-        print(yaml.dump(cfg, default_flow_style=False))
-        return
 
     dataset_name = cfg["dataset"]["name"]
     print(f"Loading dataset: {dataset_name}...")
@@ -310,28 +283,14 @@ def cmd_sft(args):
         if interval_value and interval_value > 0:
             callbacks.append(TimedSaveCallback(interval_value))
 
-    config = SFTConfig(
+    config = build_sft_config(
+        cfg,
         output_dir=output_dir,
         push_to_hub=push_to_hub,
         hub_model_id=output_name if push_to_hub else None,
         hub_strategy="every_save" if push_to_hub else "end",
-        num_train_epochs=cfg["training"]["epochs"],
-        per_device_train_batch_size=cfg["training"]["batch_size"],
-        gradient_accumulation_steps=cfg["training"]["gradient_accumulation_steps"],
-        learning_rate=cfg["training"]["learning_rate"],
-        max_length=cfg["training"]["max_length"],
-        logging_steps=10,
-        save_strategy="steps",
         save_steps=save_steps,
         save_total_limit=save_total_limit,
-        eval_strategy="steps",
-        eval_steps=cfg["training"].get("eval_steps", 200),
-        warmup_ratio=cfg["training"]["warmup_ratio"],
-        lr_scheduler_type=cfg["training"]["lr_scheduler"],
-        ddp_find_unused_parameters=cfg["training"].get(
-            "ddp_find_unused_parameters", False
-        ),
-        bf16=True,
         report_to=report_to,
         run_name=run_name if report_to == "trackio" else None,
     )
@@ -391,7 +350,7 @@ def cmd_sft(args):
     from peft import PeftModel
 
     base = AutoModelForCausalLM.from_pretrained(
-        base_model, torch_dtype=torch.bfloat16, device_map="auto"
+        base_model, dtype=torch.bfloat16, device_map="auto"
     )
     base.config.tie_word_embeddings = False
     model = PeftModel.from_pretrained(base, output_dir, local_files_only=True)

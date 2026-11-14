@@ -1,0 +1,7 @@
+import { defineConfig, mergeConfig } from './mirror/node_modules/vitest/dist/config.js';
+import original from './mirror/vitest.config.ts';
+export default mergeConfig(original, defineConfig({
+ root: new URL('./mirror/', import.meta.url).pathname,
+ cacheDir: new URL('./cache/vite/', import.meta.url).pathname,
+ test: { maxWorkers: 2 },
+}));

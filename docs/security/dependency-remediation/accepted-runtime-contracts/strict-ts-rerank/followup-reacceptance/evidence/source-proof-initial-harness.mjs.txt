@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+import ts from 'typescript';
+const R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const baseRoot=path.join(R,'base-replay'),root=path.join(R,'mirror');
+const source=p=>fs.readFileSync(p,'utf8');
+const before=source(path.join(baseRoot,'src/bench-rerank.ts')),after=source(path.join(root,'src/bench-rerank.ts'));
+const parse=s=>ts.createSourceFile('bench.ts',s,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
+const b=parse(before),a=parse(after);
+const funcs=(s,t)=>s.statements.filter(ts.isFunctionDeclaration).map(n=>({name:n.name.text,body:n.getText(s)}));
+assert.deepEqual(funcs(a,after),funcs(b,before));
+const mainGuard=s=>s.statements.filter(n=>ts.isIfStatement(n)&&n.expression.getText(s).includes('import.meta.main'));
+assert.equal(mainGuard(a).length,1);assert.equal(mainGuard(b).length,1);
+const unchanged=s=>s.statements.filter(n=>!ts.isImportDeclaration(n)&&!mainGuard(s).includes(n)).map(n=>n.getText(s));
+assert.deepEqual(unchanged(a),unchanged(b));
+assert.equal(mainGuard(a)[0].thenStatement.getText(a),mainGuard(b)[0].thenStatement.getText(b));
+// Evaluate the exact emitted guard expression with throwing fallback bindings.
+// This is an extra guard-expression unit control, not complete-module evidence.
+const emit=ts.transpileModule(after,{compilerOptions:{target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.ESNext},reportDiagnostics:true});
+assert.deepEqual(emit.diagnostics,[]);
+const emitted=ts.createSourceFile('bench.mjs',emit.outputText,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
+const condition=mainGuard(emitted)[0].expression.getText(emitted);
+const isolatedCondition=condition.replaceAll('import.meta.main','meta.main').replaceAll('import.meta.url','meta.url');
+let argvReads=0,fsCalls=0,urlCalls=0;
+const processBoundary={get argv(){argvReads++;throw Error('fallback argv must not be read');}};
+const guard=Function('meta','process','realpathSync','fileURLToPath',`return (${isolatedCondition});`);
+const fsBoundary=()=>{fsCalls++;throw Error('fallback fs must not be reached');};
+const urlBoundary=()=>{urlCalls++;throw Error('fallback url must not be reached');};
+assert.equal(guard({main:true,url:'file:///never'},processBoundary,fsBoundary,urlBoundary),true);
+assert.equal(guard({main:false,url:'file:///never'},processBoundary,fsBoundary,urlBoundary),false);
+assert.deepEqual([argvReads,fsCalls,urlCalls],[0,0,0]);
+const configFor=dir=>{
+  const config=ts.readConfigFile(path.join(dir,'tsconfig.json'),ts.sys.readFile);assert.equal(config.error,undefined);
+  const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,dir);assert.deepEqual(parsed.errors,[]);
+  assert.equal(parsed.options.strict,true);assert.equal(parsed.options.noUncheckedIndexedAccess,true);assert.equal(parsed.options.noEmit,true);
+  return {options:parsed.options,files:parsed.fileNames.map(p=>path.relative(dir,p)).sort()};
+};
+const old=configFor(baseRoot),current=configFor(root);
+const removed=old.files.filter(p=>!current.files.includes(p)),added=current.files.filter(p=>!old.files.includes(p));
+assert.deepEqual(removed,[]);assert.deepEqual(added,['test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts']);
+assert.deepEqual(current.options,old.options);
+const hashing=text=>createHash('sha256').update(text).digest('hex');
+console.log(JSON.stringify({execPath:process.execPath,versions:process.versions,typescript:ts.version,beforeSha256:hashing(before),afterSha256:hashing(after),allFunctionsUnchanged:true,functionNames:funcs(a).map(v=>v.name),nonImportNonGuardStatementsUnchanged:true,catchBodyUnchanged:true,nativeBooleanGuardControls:{checks:2,argvReads,fsCalls,urlCalls,exactEmittedCondition:true},compilerRoots:{base:old.files.length,composed:current.files.length,removed,added,files:current.files},strict:current.options.strict,noUncheckedIndexedAccess:current.options.noUncheckedIndexedAccess,noEmit:current.options.noEmit},null,2));

@@ -1,0 +1,14 @@
+import { it, expect } from 'vitest';
+import { z } from 'zod/v3';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { nativeConvert, converterPath } from 'review-converter-native';
+import { appendFileSync } from 'node:fs';
+it('characterizes real Vitest string-prefix inlining without masking converter behavior',()=>{
+ const sameConverter=zodToJsonSchema===nativeConvert;
+ expect(sameConverter).toBe(!process.versions.bun);
+ const schema=z.object({limit:z.number().int().min(1).max(100)});
+ const converted=zodToJsonSchema(schema);
+ expect(converted.type).toBe('object');expect(converted.properties.limit).toEqual({type:'integer',minimum:1,maximum:100});
+ expect(schema.safeParse({limit:1}).success).toBe(true);expect(schema.safeParse({limit:'1'}).success).toBe(false);
+ appendFileSync(process.env.QMD_REVIEW_HOST_RECEIPT,JSON.stringify({kind:'zod-prefix-scope',execPath:process.execPath,versions:process.versions,sameConverter,converterPath,converterAndNonCoercionPass:true,boundaryAttempts:globalThis.__sdkReviewBoundaryAttempts})+'\n');
+});

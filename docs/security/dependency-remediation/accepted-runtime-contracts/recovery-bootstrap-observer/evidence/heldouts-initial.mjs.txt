@@ -1,0 +1,88 @@
+import assert from 'node:assert/strict';
+import { spawn, ChildProcess } from 'node:child_process';
+import { channel } from 'node:diagnostics_channel';
+import { errorMonitor } from 'node:events';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import { tmpdir } from 'node:os';
+import { test } from 'node:test';
+import { beginRecoveryBootstrapDiagnostics, observeOwnedChild, readCheckoutHead } from '../mirror/test/helpers/recovery-bootstrap-diagnostics.mjs';
+const relevant=['spawn','exit','end','close','error',errorMonitor,'data','readable'];
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+const launch=()=>spawn(process.execPath,['-e','setTimeout(()=>{},1500)'],{env:{...process.env},stdio:['ignore','pipe','pipe','pipe']});
+const counts=targets=>targets.map(t=>relevant.map(e=>t.rawListeners(e)));
+async function release(c){
+ if(c.exitCode===null&&c.signalCode===null)c.kill('SIGKILL');
+ const stop=performance.now()+3000;
+ while(c.exitCode===null&&c.signalCode===null&&performance.now()<stop)await delay(5);
+ assert.ok(c.exitCode!==null||c.signalCode!==null,'owned fixture reaped');
+ for(const s of c.stdio)s?.destroy();
+}
+function restored(targets,before){targets.forEach((t,i)=>relevant.forEach((e,j)=>assert.deepEqual(t.rawListeners(e),before[i][j],String(e))));}
+test('active errorMonitor never handles ordinary errors; exact raw listeners and methods restore',async()=>{
+ const c=launch();const targets=[c,...c.stdio.slice(1)];const before=counts(targets);
+ const methods={spawn:ChildProcess.prototype.spawn,kill:c.kill,streams:c.stdio.slice(1).map(s=>({read:s.read,resume:s.resume,pause:s.pause,destroy:s.destroy,write:s.write,flow:s.readableFlowing}))};
+ const trace=observeOwnedChild(c);
+ try{
+  targets.forEach((t,i)=>{
+   assert.equal(t.listenerCount('error'),0);
+   const err=Object.assign(new Error('HELDOUT_PRIVATE_ERROR_'+i),{code:'EIO'});
+   assert.throws(()=>t.emit('error',err),actual=>actual===err);
+  });
+  const report=trace.finish({launch:{state:'unconfirmed'},stdout:'HELDOUT_PRIVATE_STDOUT',stderr:'HELDOUT_PRIVATE_STDERR',error:'HELDOUT_PRIVATE_RECEIPT_ERROR',env:{secret:'HELDOUT_PRIVATE_ENV'},command:['HELDOUT_PRIVATE_ARGV']});
+  assert.equal(report.events.filter(e=>e.event.endsWith('.error')).length,4);
+  for(const word of ['HELDOUT_PRIVATE_ERROR','HELDOUT_PRIVATE_STDOUT','HELDOUT_PRIVATE_STDERR','HELDOUT_PRIVATE_RECEIPT_ERROR','HELDOUT_PRIVATE_ENV','HELDOUT_PRIVATE_ARGV'])assert.ok(!JSON.stringify(report).includes(word));
+  restored(targets,before);assert.equal(ChildProcess.prototype.spawn,methods.spawn);assert.equal(c.kill,methods.kill);
+  c.stdio.slice(1).forEach((s,i)=>{for(const m of ['read','resume','pause','destroy','write'])assert.equal(s[m],methods.streams[i][m]);assert.equal(s.readableFlowing,methods.streams[i].flow);});
+  console.log(JSON.stringify({evidence:'independent-active-errors',ordinaryErrorsRemainUnhandled:true,recordedErrors:4,rawListenersRestored:true,noSensitiveReceiptFields:true}));
+ }finally{trace.dispose();await release(c);}
+});
+test('snapshot projection exception disposes exact already-attached listeners',async()=>{
+ const c=launch();const targets=[c,...c.stdio.slice(1)];const before=counts(targets);const trace=observeOwnedChild(c);
+ const sentinel=new Error('authored getter failure');const receipt=Object.defineProperty({},'cleanup',{get(){throw sentinel;}});
+ try{assert.throws(()=>trace.finish(receipt),e=>e===sentinel);restored(targets,before);trace.dispose();restored(targets,before);console.log(JSON.stringify({evidence:'independent-finish-projection-exception',rawListenersRestored:true,primaryExceptionPreserved:true}));}
+ finally{trace.dispose();await release(c);}
+});
+test('write failure cannot replace caller assertion; existing constructor subscriber survives',()=>{
+ const root=mkdtempSync(path.join(tmpdir(),'independent-io-'));const notDir=path.join(root,'not-directory');writeFileSync(notDir,'fixture');
+ const dc=channel('child_process');let pings=0;const witness=m=>{if(m?.independentPing)pings++;};dc.subscribe(witness);
+ const before=dc.hasSubscribers;const primary=new Error('authored caller assertion');let caught;
+ try{
+  const observer=beginRecoveryBootstrapDiagnostics({enabled:true,directory:notDir});
+  try{throw primary;}catch(e){caught=e;}finally{observer.finish({stdout:'HELDOUT_IO_PRIVATE_CONTENT'});}
+  assert.equal(caught,primary);assert.equal(dc.hasSubscribers,before);dc.publish({independentPing:true});assert.equal(pings,1);
+  assert.equal(readFileSync(notDir,'utf8'),'fixture');assert.deepEqual(readdirSync(root),['not-directory']);
+  dc.unsubscribe(witness);assert.equal(dc.hasSubscribers,false);
+  console.log(JSON.stringify({evidence:'independent-write-failure',primaryAssertionPreserved:true,existingSubscriberPreserved:true,observerSubscriberRemoved:true,noArtifact:true}));
+ }finally{dc.unsubscribe(witness);rmSync(root,{recursive:true,force:true});}
+});
+test('disabled mode does not subscribe, attach, read a receipt getter, or create artifact',()=>{
+ const root=mkdtempSync(path.join(tmpdir(),'independent-disabled-'));const dc=channel('child_process');const before=dc.hasSubscribers;
+ try{
+  const observer=beginRecoveryBootstrapDiagnostics({enabled:false,directory:path.join(root,'missing','artifact')});
+  observer.attachAfterLaunch();observer.finish(Object.defineProperty({},'cleanup',{get(){throw new Error('disabled getter must not run');}}));observer.dispose();
+  assert.equal(dc.hasSubscribers,before);assert.deepEqual(readdirSync(root),[]);
+  console.log(JSON.stringify({evidence:'independent-disabled',noSubscription:true,noReceiptRead:true,noArtifactIO:true}));
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+test('constructor event precedes spawn fields; unmatched launch immediately releases observer channel',async()=>{
+ const root=mkdtempSync(path.join(tmpdir(),'independent-constructor-'));const dc=channel('child_process');const seen=[];
+ const witness=m=>{if(m?.process)seen.push({child:m.process,spawnfile:m.process.spawnfile,spawnargs:m.process.spawnargs,pid:m.process.pid,stdout:m.process.stdout});};
+ dc.subscribe(witness);const observer=beginRecoveryBootstrapDiagnostics({enabled:true,directory:root});const c=launch();
+ try{
+  assert.equal(seen.length,1);assert.equal(seen[0].child,c);assert.equal(seen[0].spawnfile,undefined);assert.equal(seen[0].spawnargs,undefined);assert.equal(seen[0].pid,undefined);assert.equal(seen[0].stdout,null);
+  observer.attachAfterLaunch();dc.unsubscribe(witness);assert.equal(dc.hasSubscribers,false);
+  observer.finish();const artifact=JSON.parse(readFileSync(path.join(root,readdirSync(root)[0]),'utf8'));
+  assert.equal(artifact.status,'no-matching-node-supervisor-observed');assert.deepEqual(artifact.restoration,{channelUnsubscribed:true,listenersRemoved:true});assert.equal(c.listenerCount(errorMonitor),0);
+  console.log(JSON.stringify({evidence:'independent-constructor-channel',actualRuntime:process.versions.node,notificationBeforeSpawnFields:true,actualChildObject:true,unmatchedRefused:true,promptUnsubscribe:true}));
+ }finally{observer.dispose();dc.unsubscribe(witness);await release(c);rmSync(root,{recursive:true,force:true});}
+});
+test('checkout reader treats malformed/path traversal refs as unavailable, never repaired',()=>{
+ const root=mkdtempSync(path.join(tmpdir(),'independent-checkout-'));mkdirSync(path.join(root,'.git'));
+ try{
+  for(const head of ['ref: refs/heads/../../private','ref: refs//heads/test','ref: refs/heads/./test','ref: refs/heads/valid\nsecond-line','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA']){
+   writeFileSync(path.join(root,'.git','HEAD'),head+'\n');assert.equal(readCheckoutHead(root),null,head);
+  }
+  console.log(JSON.stringify({evidence:'independent-checkout-ref-refusals',cases:6,noGitInvocation:true}));
+ }finally{rmSync(root,{recursive:true,force:true});}
+});

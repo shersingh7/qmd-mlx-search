@@ -1,0 +1,600 @@
+{
+  "closure_case_count": 8,
+  "closure": [
+    {
+      "label": "node-fast-exact",
+      "exit_code": 0,
+      "elapsedMs": 268.153125,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 89658
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          89662
+        ],
+        "processGroupId": 89662,
+        "sessionId": 89658
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 89657
+        }
+      ]
+    },
+    {
+      "label": "bun-fast-exact",
+      "exit_code": 0,
+      "elapsedMs": 291.342041,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 89671
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          89672
+        ],
+        "processGroupId": 89672,
+        "sessionId": 89671
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 89669
+        }
+      ]
+    },
+    {
+      "label": "node-fast-observed",
+      "exit_code": 0,
+      "elapsedMs": 286.165709,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 90342
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          90343
+        ],
+        "processGroupId": 90343,
+        "sessionId": 90342
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90341
+        }
+      ]
+    },
+    {
+      "label": "bun-fast-observed",
+      "exit_code": 0,
+      "elapsedMs": 243.141083,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 90346
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          90347
+        ],
+        "processGroupId": 90347,
+        "sessionId": 90346
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90345
+        }
+      ]
+    },
+    {
+      "label": "node-missing-observed",
+      "exit_code": 0,
+      "elapsedMs": 82.70675,
+      "launch": {
+        "state": "not-started",
+        "admissionGranted": false,
+        "supervisorReaped": true,
+        "supervisorPid": 90350
+      },
+      "cleanup": {
+        "childReaped": false,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": []
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90349
+        }
+      ]
+    },
+    {
+      "label": "bun-missing-observed",
+      "exit_code": 0,
+      "elapsedMs": 79.001542,
+      "launch": {
+        "state": "not-started",
+        "admissionGranted": false,
+        "supervisorReaped": true,
+        "supervisorPid": 90353
+      },
+      "cleanup": {
+        "childReaped": false,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": []
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90352
+        }
+      ]
+    },
+    {
+      "label": "node-valid-observed",
+      "exit_code": 0,
+      "elapsedMs": 155.184708,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 90356
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          90357
+        ],
+        "processGroupId": 90357,
+        "sessionId": 90356
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90355
+        }
+      ]
+    },
+    {
+      "label": "bun-valid-observed",
+      "exit_code": 0,
+      "elapsedMs": 119.713792,
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": true,
+        "supervisorPid": 90360
+      },
+      "cleanup": {
+        "childReaped": true,
+        "groupTerminated": true,
+        "pipesClosed": true,
+        "forcedPipeClose": false,
+        "sigkillUsed": false,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "processGroups": [
+          90361
+        ],
+        "processGroupId": 90361,
+        "sessionId": 90360
+      },
+      "all_assertions_true": true,
+      "outer_kills": [],
+      "fixture_finally_kills": [
+        {
+          "kind": "sentinel",
+          "pid": 90359
+        }
+      ]
+    }
+  ],
+  "ci_jobs": {
+    "132155679594": {
+      "fast": [
+        {
+          "line": 730,
+          "timestamp": "2026-11-13T20:41:14.8720140Z",
+          "record": {
+            "evidence": "recovery-fast-timeout-before-finally",
+            "timeoutMs": 200,
+            "elapsedMs": 245,
+            "supervisorAbsent": true,
+            "sentinelAlive": true,
+            "guardFired": false,
+            "result": {
+              "exitCode": null,
+              "signal": null,
+              "timedOut": true,
+              "stdout": "",
+              "stderr": "",
+              "launch": {
+                "state": "not-started",
+                "admissionGranted": false,
+                "supervisorReaped": true,
+                "supervisorPid": 1641
+              },
+              "cleanup": {
+                "childReaped": false,
+                "groupTerminated": true,
+                "pipesClosed": true,
+                "forcedPipeClose": false,
+                "sigkillUsed": true,
+                "sessionTerminated": true,
+                "containmentVerified": false,
+                "processGroups": []
+              },
+              "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+            }
+          }
+        },
+        {
+          "line": 1847,
+          "timestamp": "2026-11-13T20:43:37.2332080Z",
+          "record": {
+            "evidence": "recovery-fast-timeout-before-finally",
+            "timeoutMs": 200,
+            "elapsedMs": 250,
+            "supervisorAbsent": true,
+            "sentinelAlive": true,
+            "guardFired": false,
+            "result": {
+              "exitCode": null,
+              "signal": null,
+              "timedOut": true,
+              "stdout": "",
+              "stderr": "",
+              "launch": {
+                "state": "not-started",
+                "admissionGranted": false,
+                "supervisorReaped": true,
+                "supervisorPid": 3207
+              },
+              "cleanup": {
+                "childReaped": false,
+                "groupTerminated": true,
+                "pipesClosed": true,
+                "forcedPipeClose": false,
+                "sigkillUsed": true,
+                "sessionTerminated": true,
+                "containmentVerified": false,
+                "processGroups": []
+              },
+              "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+            }
+          }
+        }
+      ],
+      "runtime_receipt": [
+        {
+          "line": 1258,
+          "timestamp": "2026-11-13T20:41:56.4880030Z",
+          "record": {
+            "evidence": "W13-integrated-synthetic",
+            "status": "passed",
+            "mcpHttpRuntimeSupported": true,
+            "workers": [
+              {
+                "pid": 2043,
+                "exitCode": null,
+                "signal": "SIGKILL",
+                "timedOut": false
+              },
+              {
+                "pid": 2049,
+                "exitCode": 0,
+                "signal": null,
+                "timedOut": false
+              }
+            ],
+            "restoredDocuments": 16,
+            "restoredVectors": 16
+          }
+        }
+      ]
+    },
+    "132155679910": {
+      "fast": [
+        {
+          "line": 727,
+          "timestamp": "2026-11-13T20:40:58.2167420Z",
+          "record": {
+            "evidence": "recovery-fast-timeout-before-finally",
+            "timeoutMs": 200,
+            "elapsedMs": 1007,
+            "supervisorAbsent": true,
+            "sentinelAlive": true,
+            "guardFired": false,
+            "result": {
+              "exitCode": null,
+              "signal": null,
+              "timedOut": true,
+              "stdout": "",
+              "stderr": "",
+              "launch": {
+                "state": "unconfirmed",
+                "admissionGranted": false,
+                "supervisorReaped": true,
+                "supervisorPid": 1616
+              },
+              "cleanup": {
+                "childReaped": false,
+                "groupTerminated": false,
+                "pipesClosed": true,
+                "forcedPipeClose": true,
+                "sigkillUsed": true,
+                "sessionTerminated": false,
+                "containmentVerified": false,
+                "processGroups": []
+              },
+              "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+            }
+          }
+        },
+        {
+          "line": 1849,
+          "timestamp": "2026-11-13T20:42:54.1858800Z",
+          "record": {
+            "evidence": "recovery-fast-timeout-before-finally",
+            "timeoutMs": 200,
+            "elapsedMs": 206,
+            "supervisorAbsent": true,
+            "sentinelAlive": true,
+            "guardFired": false,
+            "result": {
+              "exitCode": null,
+              "signal": null,
+              "timedOut": true,
+              "stdout": "",
+              "stderr": "",
+              "launch": {
+                "state": "not-started",
+                "admissionGranted": false,
+                "supervisorReaped": true,
+                "supervisorPid": 3052
+              },
+              "cleanup": {
+                "childReaped": false,
+                "groupTerminated": true,
+                "pipesClosed": true,
+                "forcedPipeClose": false,
+                "sigkillUsed": true,
+                "sessionTerminated": true,
+                "containmentVerified": false,
+                "processGroups": []
+              },
+              "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+            }
+          }
+        }
+      ],
+      "runtime_receipt": [
+        {
+          "line": 1255,
+          "timestamp": "2026-11-13T20:41:32.7059200Z",
+          "record": {
+            "evidence": "W13-integrated-synthetic",
+            "status": "passed",
+            "mcpHttpRuntimeSupported": true,
+            "workers": [
+              {
+                "pid": 1980,
+                "exitCode": null,
+                "signal": "SIGKILL",
+                "timedOut": false
+              },
+              {
+                "pid": 1985,
+                "exitCode": 0,
+                "signal": null,
+                "timedOut": false
+              }
+            ],
+            "restoredDocuments": 16,
+            "restoredVectors": 16
+          }
+        }
+      ]
+    }
+  },
+  "additional_frozen_source": {
+    "source": "test/audit-recovery.test.ts",
+    "head_sha256": "40f92203082b1f443b95bbc107d8174d5b1e171b1a75a3a565992834ca593400",
+    "merge_sha256": "40f92203082b1f443b95bbc107d8174d5b1e171b1a75a3a565992834ca593400",
+    "merge_bytes_equal": true
+  },
+  "raw_v1_instrumentation_error": "NOTE_TRACK registration errno45 unsupported; raw-kqueue exit1 preserved. Initial v1 registration preceded fixture try/finally; EOF closes its pre-exec gate on orchestrator exit, but no independent native-handle exit receipt was captured. Do not probe or signal its historical PID.",
+  "raw_v2_fixture_error": "The two supervisor cases specified nonexistent /bin/true, so their positive preflight refusal is NOT evidence for waiting admission. Corrected distinct v3 receipts use /usr/bin/true; originals retained.",
+  "raw_v3": [
+    {
+      "case": {
+        "label": "system-supervisor-hold-200",
+        "executable": "/usr/bin/python3",
+        "kind": "supervisor",
+        "kill_ms": 200
+      },
+      "elapsedMs": 204.92287498200312,
+      "allStreamsNaturallyEOF": true,
+      "fork_events": 0,
+      "tracking_supported": false
+    },
+    {
+      "case": {
+        "label": "direct-clt-supervisor-hold-200",
+        "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "kind": "supervisor",
+        "kill_ms": 200
+      },
+      "elapsedMs": 206.15612500114366,
+      "allStreamsNaturallyEOF": true,
+      "fork_events": 0,
+      "tracking_supported": false
+    },
+    {
+      "case": {
+        "label": "kernel-fork-positive",
+        "executable": "/usr/bin/python3",
+        "kind": "fork-positive",
+        "kill_ms": null
+      },
+      "elapsedMs": 428.4760419977829,
+      "allStreamsNaturallyEOF": true,
+      "fork_events": 1,
+      "tracking_supported": false
+    },
+    {
+      "case": {
+        "label": "system-clock-complete",
+        "executable": "/usr/bin/python3",
+        "kind": "minimal",
+        "kill_ms": null
+      },
+      "elapsedMs": 68.22891696356237,
+      "allStreamsNaturallyEOF": true,
+      "fork_events": 0,
+      "tracking_supported": false
+    }
+  ],
+  "pipe_positive_controls": [
+    {
+      "evidence": "real-pipe-mechanism-before-finally",
+      "label": "no-retained-writer-positive",
+      "rootOwnedPid": 91279,
+      "retainedWriterOwnedPid": null,
+      "elapsedMs": 217.6844589994289,
+      "rootExitUnreaped": -9,
+      "holderStillAlive": false,
+      "streamEOF": {
+        "stdout": true,
+        "stderr": true,
+        "control": true
+      },
+      "allEOF": true,
+      "originalProofWouldPass": true,
+      "events": [
+        {
+          "tMs": 208.16275000106543,
+          "event": "owned-root-kill"
+        },
+        {
+          "tMs": 217.49062498565763,
+          "event": "stdout.EOF"
+        },
+        {
+          "tMs": 217.49062498565763,
+          "event": "stderr.EOF"
+        },
+        {
+          "tMs": 217.49062498565763,
+          "event": "control.EOF"
+        },
+        {
+          "tMs": 217.49062498565763,
+          "event": "root-exit-WNOWAIT",
+          "code": -9
+        }
+      ],
+      "CI_causality_claim": false
+    },
+    {
+      "evidence": "real-pipe-mechanism-before-finally",
+      "label": "retained-writer-positive",
+      "rootOwnedPid": 91280,
+      "retainedWriterOwnedPid": 91281,
+      "elapsedMs": 1001.3488749973476,
+      "rootExitUnreaped": -9,
+      "holderStillAlive": true,
+      "streamEOF": {
+        "stdout": false,
+        "stderr": false,
+        "control": false
+      },
+      "allEOF": false,
+      "originalProofWouldPass": false,
+      "events": [
+        {
+          "tMs": 204.80337500339374,
+          "event": "owned-root-kill"
+        },
+        {
+          "tMs": 212.73620903957635,
+          "event": "root-exit-WNOWAIT",
+          "code": -9
+        }
+      ],
+      "CI_causality_claim": false
+    }
+  ],
+  "ci_root_cause_confidence": "Unresolved: exact-job proof of aggregate stream-close failure; no original per-stream EOF or kernel fork telemetry. Local tested launch used same-PID exec, no root NOTE_FORK, and natural EOF. Retained-writer reproduction demonstrates mechanism, not CI attribution.",
+  "production_edits": false,
+  "release_acceptance": false
+}

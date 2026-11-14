@@ -1,0 +1,8 @@
+# Model-free dependency-graph verification; no MLX, Torch or training packages.
+-c mlx_server_constraints.txt
+json5==0.17.3
+semantic-version==2.10.0
+packaging==26.3
+PyYAML==6.0.3
+requests==2.34.2
+pytest==9.2.0

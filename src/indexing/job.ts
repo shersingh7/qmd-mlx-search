@@ -6,15 +6,19 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type { Database } from "../db.js";
+import { createSavepoint, withExclusiveDatabaseOperation, withoutDatabaseOperation, bindDatabaseOperation } from "../db.js";
 import type { Store, EmbedResult, ChunkStrategy, EmbedProgress } from "../store.js";
-import { generateEmbeddings } from "../store.js";
+import { generateEmbeddings, emptyEmbedResult } from "../store.js";
 import {
   type IndexingJobCheckpoint,
   type IndexingFingerprint,
   computeDescriptorSignature,
   getActiveCheckpoint,
   saveCheckpoint,
+  getCompletedFingerprint,
+  saveCompletedFingerprint,
 } from "./checkpoint.js";
+import { getStoredChunkStrategy } from "./pending.js";
 import type { EmbeddingDescriptor } from "../embedding/contract.js";
 
 export interface IndexingJobOptions {
@@ -141,39 +145,80 @@ export async function runDurableIndexingJob(
   store: Store,
   options?: IndexingJobOptions,
 ): Promise<EmbedResult & { checkpoint: IndexingJobCheckpoint }> {
+  return withExclusiveDatabaseOperation(store.db, "durable indexing", () => runDurableIndexingJobInternal(store, options));
+}
+
+async function runDurableIndexingJobInternal(
+  store: Store,
+  options?: IndexingJobOptions,
+): Promise<EmbedResult & { checkpoint: IndexingJobCheckpoint }> {
   const db = store.db;
   const jobId = options?.jobId || randomUUID();
   const startedAt = new Date().toISOString();
 
   let descriptor: EmbeddingDescriptor | undefined = undefined;
-  if (typeof store.getEmbeddingDescriptor === "function") {
-    const d = await store.getEmbeddingDescriptor();
-    descriptor = d ?? undefined;
-  } else if (typeof (store as any).getDescriptor === "function") {
-    const d = await (store as any).getDescriptor();
-    descriptor = d ?? undefined;
+  const newCheckpoint = (status: "in_progress" | "cancelled" = "in_progress"): IndexingJobCheckpoint => ({
+    jobId,
+    fingerprint: {
+      model: options?.model || descriptor?.model || store.llm?.embedModelName || "embeddinggemma",
+      dimensions: descriptor?.outputDimensions || 0,
+      chunkStrategy: options?.chunkStrategy ?? "regex",
+      descriptorSignature: computeDescriptorSignature(descriptor),
+      revision: descriptor?.revision || undefined,
+      quantization: descriptor?.quantization || undefined,
+    },
+    startedAt, updatedAt: startedAt, status,
+    docsTotal: 0, docsCompleted: 0, chunksTotal: 0, chunksCommitted: 0,
+  });
+  const cancelled = () => ({ ...emptyEmbedResult("cancelled"), checkpoint: newCheckpoint("cancelled") });
+  // Do not create/update even an empty job checkpoint for a preflight abort.
+  if (options?.signal?.aborted) return cancelled();
+  try {
+    if (typeof store.getEmbeddingDescriptor === "function") {
+      const d = await withoutDatabaseOperation(db, () => store.getEmbeddingDescriptor!({ signal: options?.signal }));
+      descriptor = d ?? undefined;
+    } else if (typeof (store as any).getDescriptor === "function") {
+      const d = await withoutDatabaseOperation(db, () => (store as any).getDescriptor({ signal: options?.signal }));
+      descriptor = d ?? undefined;
+    }
+  } catch (error) {
+    if (options?.signal?.aborted) return cancelled();
+    throw error;
   }
+  if (options?.signal?.aborted) return cancelled();
 
   const currentSig = computeDescriptorSignature(descriptor);
-  const effectiveModel = options?.model || descriptor?.model || "default";
+  const effectiveModel = options?.model || descriptor?.model || store.llm?.embedModelName || "embeddinggemma";
   const targetStrategy: ChunkStrategy = options?.chunkStrategy ?? "regex";
 
-  let existing = getActiveCheckpoint(db);
-  if (existing && !options?.force) {
-    const existingStrategy = existing.fingerprint.chunkStrategy ?? "regex";
-    const existingModel = existing.fingerprint.model || "default";
-    const sigMismatch = existing.fingerprint.descriptorSignature !== currentSig;
-    const modelMismatch = existingModel !== effectiveModel;
+  const existing = getActiveCheckpoint(db);
+  const completed = getCompletedFingerprint(db);
+  const storedStrategy = getStoredChunkStrategy(db);
+  const differentModel = db.prepare(`SELECT model FROM content_vectors WHERE model != ? LIMIT 1`).get(effectiveModel) as { model: string } | undefined;
+  const storedSpace = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_space_id'`).get() as { value: string } | undefined;
+  const vectorTable = db.prepare(`SELECT sql FROM sqlite_master WHERE name='vectors_vec'`).get() as { sql: string } | undefined;
+  const storedDimensions = Number(vectorTable?.sql.match(/float\[(\d+)\]/)?.[1] ?? 0);
+  const fingerprint = existing?.fingerprint ?? completed ?? (storedStrategy ? {
+    model: differentModel?.model ?? effectiveModel,
+    dimensions: storedDimensions || descriptor?.outputDimensions || 0,
+    descriptorSignature: storedSpace?.value ?? currentSig,
+    chunkStrategy: storedStrategy as ChunkStrategy,
+  } : null);
+  if (fingerprint && !options?.force) {
+    const existingStrategy = fingerprint.chunkStrategy ?? "regex";
+    const existingModel = fingerprint.model || "default";
+    const sigMismatch = fingerprint.descriptorSignature !== currentSig;
+    const modelMismatch = existingModel !== effectiveModel || Boolean(differentModel);
     const strategyMismatch = existingStrategy !== targetStrategy;
     const dimMismatch =
       descriptor?.outputDimensions !== undefined &&
-      existing.fingerprint.dimensions > 0 &&
-      existing.fingerprint.dimensions !== descriptor.outputDimensions;
+      fingerprint.dimensions > 0 &&
+      fingerprint.dimensions !== descriptor.outputDimensions;
 
     if (sigMismatch || modelMismatch || strategyMismatch || dimMismatch) {
       throw new IndexingFingerprintMismatchError(
         `Checkpoint fingerprint mismatch detected (descriptor: ${sigMismatch}, model: ${modelMismatch}, chunkStrategy: ${strategyMismatch}, dims: ${dimMismatch}). Automatic destructive migration is prohibited to prevent vector loss. Actionable message: explicit rebuild on isolated shadow index required (or specify options.force: true to explicitly overwrite).`,
-        existing.fingerprint,
+        fingerprint,
         {
           model: effectiveModel,
           dimensions: descriptor?.outputDimensions || 0,
@@ -185,52 +230,52 @@ export async function runDurableIndexingJob(
     }
   }
 
-  const cp: IndexingJobCheckpoint = (existing && !options?.force) ? existing : {
-    jobId,
-    fingerprint: {
+  const cp: IndexingJobCheckpoint = (existing && !options?.force) ? existing : newCheckpoint();
+
+  const replacement = options?.force ? createSavepoint(db) : undefined;
+  try {
+    // Include checkpoint/fingerprint publication in the replacement boundary.
+    if (!options?.force) saveCheckpoint(db, cp);
+
+    let result = await generateEmbeddings(store, {
+      force: Boolean(options?.force),
       model: effectiveModel,
-      dimensions: descriptor?.outputDimensions || 0,
-      chunkStrategy: targetStrategy,
-      descriptorSignature: currentSig,
-      revision: descriptor?.revision || undefined,
-      quantization: descriptor?.quantization || undefined,
-    },
-    startedAt,
-    updatedAt: startedAt,
-    status: "in_progress",
-    docsTotal: 0,
-    docsCompleted: 0,
-    chunksTotal: 0,
-    chunksCommitted: 0,
-  };
+      chunkStrategy: options?.chunkStrategy ?? "regex",
+      maxDocsPerBatch: options?.maxDocsPerBatch,
+      maxBatchBytes: options?.maxBatchBytes,
+      maxDuration: options?.maxDuration,
+      signal: options?.signal,
+      onProgress: bindDatabaseOperation((info: EmbedProgress) => {
+        cp.chunksTotal = info.totalChunks;
+        cp.chunksCommitted = info.chunksEmbedded;
+        cp.updatedAt = new Date().toISOString();
+        if (!options?.force) saveCheckpoint(db, cp);
+        withoutDatabaseOperation(db, () => options?.onProgress?.(info, cp));
+      }),
+    });
 
-  saveCheckpoint(db, cp);
+    // Cancellation may arrive between the generator's final await and durable
+    // publication, including the empty replacement path.
+    if (options?.signal?.aborted && result.status === "complete") {
+      result = {
+        ...result, status: "cancelled", firstFailureReason: "Embedding aborted by signal",
+        ...(options?.force ? { docsProcessed: 0, chunksCommitted: 0, chunksEmbedded: 0, chunksPending: result.chunksAttempted } : {}),
+      };
+    }
 
-  const result = await generateEmbeddings(store, {
-    force: Boolean(options?.force),
-    model: options?.model,
-    chunkStrategy: options?.chunkStrategy ?? "regex",
-    maxDocsPerBatch: options?.maxDocsPerBatch,
-    maxBatchBytes: options?.maxBatchBytes,
-    maxDuration: options?.maxDuration,
-    signal: options?.signal,
-    onProgress: (info) => {
-      cp.chunksTotal = info.totalChunks;
-      cp.chunksCommitted = info.chunksEmbedded;
-      cp.updatedAt = new Date().toISOString();
-      saveCheckpoint(db, cp);
-      options?.onProgress?.(info, cp);
-    },
-  });
+    cp.status = result.status === "complete" ? "completed" : result.status === "cancelled" ? "cancelled" : "failed";
+    cp.docsCompleted = result.docsProcessed;
+    cp.docsTotal = result.docsSelected;
+    cp.chunksCommitted = result.chunksCommitted;
+    cp.updatedAt = new Date().toISOString();
+    if (!options?.force || result.status === "complete") saveCheckpoint(db, cp);
+    if (result.status === "complete") saveCompletedFingerprint(db, cp.fingerprint);
+    if (result.status === "complete") replacement?.commit();
+    else replacement?.rollback();
 
-  cp.status = result.status === "complete" ? "completed" : result.status === "cancelled" ? "cancelled" : "failed";
-  cp.docsCompleted = result.docsProcessed;
-  cp.chunksCommitted = result.chunksCommitted;
-  cp.updatedAt = new Date().toISOString();
-  saveCheckpoint(db, cp);
-
-  return {
-    ...result,
-    checkpoint: cp,
-  };
+    return { ...result, checkpoint: cp };
+  } catch (error) {
+    replacement?.rollback();
+    throw error;
+  }
 }

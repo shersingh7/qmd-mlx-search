@@ -1,0 +1,46 @@
+{
+  "R1": "CLOSED_BY_SOURCE_BOUND_FRESH_POSITIVE_EXECUTION",
+  "all_live_original_test_bytes_preserved_as_prefix": true,
+  "blocking_findings": [],
+  "cloud_executed": false,
+  "composition_replay_exact_all_42_inputs": true,
+  "image_executed": false,
+  "launcher_bytes_identical_outside_seven_exact_scoped_replacements": true,
+  "nonblocking_findings": [
+    {
+      "current_evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/evidence/heldout-grammar-0.json",
+      "effect": "Exit 1, no receipt or build; unchanged from original qualifier and does not reopen R1",
+      "file": "finetune/tools/qualify_gguf_image.py",
+      "id": "Q1",
+      "lines": [
+        54,
+        84
+      ],
+      "old_source_evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/evidence/old-probe-empty-banner.json",
+      "recommendation": "Optional follow-up: explicitly reject an empty first-line result with RuntimeError; add clean refusal coverage. No repair applied here.",
+      "reproduction": "Synthetic uv --version exits 0 with empty stdout; other four version tools succeed",
+      "severity": "P3",
+      "summary": "Empty successful --version stdout fails closed via uncaught IndexError rather than the intended bounded diagnostic"
+    }
+  ],
+  "prior_85_heldouts_and_7_mutations": "retained unchanged launcher binding; NOT rerun or counted as fresh",
+  "quality_verdict": "PASS_WITH_NONBLOCKING_NIT",
+  "real_source_closure_cases_freshly_executed": [
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/convert_gguf.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train_unsloth.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/convert_gguf.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train_unsloth.py]"
+  ],
+  "repair_delta_exactly_two_files": true,
+  "retained_public_source_verified_count": 8,
+  "reviewed_scope": [
+    "launcher closure/image selection and unaffected accepted safety contracts",
+    "qualifier release grammar/exact identity/real CPU smoke build and receipt semantics",
+    "append-only regression tests and related documentation",
+    "affected actual callers as source data only"
+  ],
+  "spec_verdict": "PASS_FOR_EXACT_COMPOSED_FOUR_FILE_SOURCE_PROPOSAL",
+  "workflow": "separate unsettled proposal not reviewed or touched"
+}

@@ -1,0 +1,48 @@
+{
+  "name": "positive",
+  "grant": "E-open",
+  "held": false,
+  "executionDeadlineMs": 200,
+  "guardMs": 1800,
+  "guardFired": false,
+  "elapsedMs": 118.70420800000001,
+  "supervisorPid": 12071,
+  "supervisorAbsent": true,
+  "workersAbsent": true,
+  "sentinelAlive": true,
+  "work": "actual-user-work",
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 12071,
+      "sessionId": 12071
+    },
+    {
+      "type": "ready",
+      "pid": 12072,
+      "sessionId": 12071,
+      "processGroupId": 12072
+    },
+    {
+      "type": "exit",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": false,
+      "processGroups": [
+        12072
+      ],
+      "timedOut": false,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified"
+      ]
+    }
+  ],
+  "stderr": ""
+}

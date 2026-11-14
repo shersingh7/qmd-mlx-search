@@ -1,0 +1,1 @@
+{"name": "review-native-zod", "private": true, "type": "module", "exports": "./index.mjs"}

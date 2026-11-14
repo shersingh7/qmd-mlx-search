@@ -1,0 +1,6 @@
+# Offline/model-free safety tests. Portable CPython 3.12 (no MLX/Metal/Torch).
+# On macOS arm64, install this and mlx_server_requirements.txt for the full suite.
+-c mlx_server_constraints.txt
+numpy==2.5.4
+pytest==9.2.0
+requests==2.34.2

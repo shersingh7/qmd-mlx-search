@@ -1,0 +1,111 @@
+{
+  "name": "queued-K-reader-handoff",
+  "guardFired": false,
+  "elapsedMs": 1630.1876249999996,
+  "exitCode": 0,
+  "supervisorPid": 12526,
+  "supervisorAbsent": true,
+  "workers": [
+    12527
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    12527
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 12526,
+      "sessionId": 12526
+    },
+    {
+      "type": "ready",
+      "pid": 12527,
+      "sessionId": 12526,
+      "processGroupId": 12527
+    },
+    {
+      "type": "exit",
+      "exitCode": 125,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        12527
+      ],
+      "timedOut": false,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery runner control channel closed or cancelled before execution",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 12527,
+      "owner": 12526,
+      "at": 0.269378791,
+      "allowed": false,
+      "remainingMs": 14.668375000000067,
+      "deadline": 0.28395800000000004
+    }
+  ],
+  "groupSignals": [
+    {
+      "kind": "group-signal",
+      "pid": 12527,
+      "owner": 12526,
+      "at": 0.272011125,
+      "group": 12526,
+      "signal": 15,
+      "pinned": true,
+      "currentSession": 12526,
+      "termBlocked": true
+    },
+    {
+      "kind": "group-signal",
+      "pid": 12527,
+      "owner": 12526,
+      "at": 0.272555583,
+      "group": 12526,
+      "signal": 19,
+      "pinned": true,
+      "currentSession": 12526,
+      "termBlocked": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 111.32166700000035
+    },
+    {
+      "action": "queued-byte",
+      "dataHex": "4b",
+      "elapsedMs": 119.92449999999977
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 111.33104199999977
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 112.90554200000003
+    }
+  ],
+  "stderr": "",
+  "eventCount": 17
+}

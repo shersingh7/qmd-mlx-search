@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/.github/workflows/build-docker.yml",
+    "sha256": "8b4a81273a325cffd2a69ca1398c5f829578975015cf6738b602cf8c6362b7db",
+    "size": 21070,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/.github/workflows/build-docker.yml"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/.github/workflows/release.yml",
+    "sha256": "10171ed6f7cf58678a75c38c5ed0deb6f93c44fcdfd39aa44723ae33d5cb5168",
+    "size": 16201,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/.github/workflows/release.yml"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/Dockerfile",
+    "sha256": "a2357bda769575d9caf2b4bfc78e2fca76a9338e1cb10daff8df32335ac114ed",
+    "size": 2370,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/Dockerfile"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/crates/uv/build.rs",
+    "sha256": "7c74961d6211becf33c5a03606131b686438f8f9fa66f00b344dc922ed37ab50",
+    "size": 2204,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/crates/uv/build.rs"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/crates/uv-cli/src/lib.rs",
+    "sha256": "010670a14c107ea60fc69ce077cd75bb2d1588abe25ee1eaac46960cf4bb72af",
+    "size": 324787,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/crates/uv-cli/src/lib.rs"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/crates/uv-cli/src/version.rs",
+    "sha256": "ca007f902018f3ae93d7a984caec91c75749eacddf04d0e2799b1ce21e0dabda",
+    "size": 7607,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/crates/uv-cli/src/version.rs"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/crates/uv-build-backend/src/lib.rs",
+    "sha256": "cb4c15a790b4767e98194b34c3dabc1dd83084d0dd1560c94ff290498a855b1b",
+    "size": 80226,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/crates/uv-build-backend/src/lib.rs"
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/public-source/crates/uv-version/src/lib.rs",
+    "sha256": "56244bd779ca7895cc41f4e0dd12ec8d298f3fa34d4553e776f2c8aa050c88ae",
+    "size": 355,
+    "url": "https://raw.githubusercontent.com/astral-sh/uv/e32666915e7fd99bbd0f167f5c381f4fb4198486/crates/uv-version/src/lib.rs"
+  }
+]

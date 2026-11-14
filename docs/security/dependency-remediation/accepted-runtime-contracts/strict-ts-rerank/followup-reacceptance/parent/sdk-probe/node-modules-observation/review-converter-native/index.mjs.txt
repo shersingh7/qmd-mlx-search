@@ -1,0 +1,3 @@
+import { zodToJsonSchema } from 'zod-to-json-schema';
+export const nativeConvert=zodToJsonSchema;
+export const converterPath=import.meta.resolve('zod-to-json-schema');

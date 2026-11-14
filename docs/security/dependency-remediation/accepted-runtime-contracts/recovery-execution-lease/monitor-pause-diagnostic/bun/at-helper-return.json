@@ -1,0 +1,68 @@
+{
+  "helper": {
+    "elapsedMs": 926.373459,
+    "result": {
+      "exitCode": null,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "",
+      "stderr": "",
+      "launch": {
+        "state": "started",
+        "admissionGranted": true,
+        "supervisorReaped": false,
+        "supervisorPid": 13379
+      },
+      "cleanup": {
+        "childReaped": false,
+        "groupTerminated": false,
+        "pipesClosed": false,
+        "forcedPipeClose": true,
+        "sigkillUsed": false,
+        "sessionTerminated": false,
+        "containmentVerified": false,
+        "processGroups": [],
+        "processGroupId": 13382,
+        "sessionId": 13379
+      },
+      "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker interrupted by parent SIGTERM; Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report",
+      "pid": 13382,
+      "transportFailure": {
+        "prepared": true,
+        "supervisorExited": false,
+        "supervisorCloseObserved": false,
+        "stdout": {
+          "bytes": 0,
+          "ended": false,
+          "closed": false,
+          "destroyed": false
+        },
+        "stderr": {
+          "bytes": 0,
+          "ended": false,
+          "closed": false,
+          "destroyed": false
+        },
+        "proof": {
+          "bytes": 130,
+          "ended": false,
+          "closed": false,
+          "destroyed": false
+        }
+      }
+    }
+  },
+  "forks": [
+    [
+      13379,
+      13382
+    ]
+  ],
+  "supervisorsAlive": [
+    13379
+  ],
+  "workersAlive": [
+    13382
+  ],
+  "work": null
+}

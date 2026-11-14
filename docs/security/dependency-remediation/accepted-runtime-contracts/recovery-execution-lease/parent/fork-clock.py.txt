@@ -1,0 +1,10 @@
+import json,os,sys,time
+before=time.monotonic()
+r,w=os.pipe()
+pid=os.fork()
+if pid==0:
+ os.close(r);os.write(w,json.dumps(dict(childPid=os.getpid(),value=time.monotonic())).encode());os._exit(0)
+os.close(w);child=json.loads(os.read(r,4096));after=time.monotonic();os.waitpid(pid,0)
+result=dict(parentPid=os.getpid(),before=before,after=after,child=child,executable=sys.executable,version=sys.version,clock=str(time.get_clock_info('monotonic')))
+result['sameInheritedEpoch']=before<=child['value']<=after
+print(json.dumps(result));assert result['sameInheritedEpoch']

@@ -1,0 +1,107 @@
+{
+  "artifact": {
+    "filename": "accelerate-1.15.0+qmd.1-py3-none-any.whl",
+    "sha256": "9b778265a3952140fa4b64b97a022b11f288bd56627b64e71c7fd556dabdeadd",
+    "size": 1585179,
+    "version": "1.15.0+qmd.1"
+  },
+  "direct_url": {
+    "archive_info": {},
+    "url": "file:///Users/shersingh/github/qmd-mlx-search/finetune/vendor/accelerate/accelerate-1.15.0+qmd.1-py3-none-any.whl"
+  },
+  "installed_path": "/Users/shersingh/.hermes/cache/scratch/qmd-finetune-venv/lib/python3.12/site-packages/accelerate/__init__.py",
+  "installed_source_sha256": {
+    "accelerate/__init__.py": "2e9d5d6578a546717c436f876114398e4b4df1c3ab0de95f811ee71deb0ca0d9",
+    "accelerate/utils/checkpoint_security.py": "2e9f08c1d9b02d545e1f457f562141b928ac9a96c9f298631397647cafba716f",
+    "accelerate/utils/modeling.py": "ab238e26594d723b8ef6c26260b9fd0380c1ce0656d495c40da5b250dabec0ee"
+  },
+  "linux_validation": {
+    "blocker": "Docker client present, daemon unavailable: Cannot connect to the Docker daemon at unix:///var/run/docker.sock",
+    "executed": false
+  },
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "publication_and_runner_integration": "not performed; parent-owned second stage",
+  "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "python_executable": "/Users/shersingh/.hermes/cache/scratch/qmd-finetune-venv/bin/python",
+  "source_test_sha256": "796e60c24bb70bdcb14f41037a2e0fa52cf4586870f4d6c2dd718d15c819e03c",
+  "test_results": {
+    "baseline-old-wheel.xml": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 48,
+      "passed_categories": {
+        "test_baseline_old_wheel_passes_unsafe_shards": 48
+      },
+      "sha256": "23869f9b87c9a59339bbac9da0b66e0f318dff278d42b2fd4c2e17d1cd05764b",
+      "skipped": 0,
+      "total": 48
+    },
+    "patched-wheel-macos.xml": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 1139,
+      "passed_categories": {
+        "test_all_shards_validated_before_first_deserializer": 18,
+        "test_approved_cache_whole_model_links": 24,
+        "test_atomic_pin_race_does_not_data_open_rejected_inode": 3,
+        "test_builder_rejects_wrong_upstream_hash": 1,
+        "test_builder_reproduces_exact_wheel_and_provenance": 1,
+        "test_cache_exception_is_not_arbitrary_symlink_permission": 36,
+        "test_deserializer_oserror_not_mislabeled_as_security_error": 6,
+        "test_device_map_none_preserves_upstream_loading": 12,
+        "test_dtype_and_cpu_state_dict_offload_are_preserved": 12,
+        "test_explicitly_approved_hf_cache_blob_links": 48,
+        "test_final_load_state_dict_boundary": 5,
+        "test_final_load_state_dict_real_weights_and_devices": 6,
+        "test_handles_are_closed_after_success_and_rejection": 1,
+        "test_held_handle_survives_path_replacement_after_pin": 4,
+        "test_held_root_survives_ancestor_directory_replacement": 6,
+        "test_installed_wheel_source_record_and_public_aliases": 1,
+        "test_macos_cross_device_failure_does_not_fallback_to_unsafe_open": 1,
+        "test_mutation_after_preflight_is_rechecked_at_final_boundary": 72,
+        "test_nested_directory_swap_during_walk_does_not_follow_escape": 1,
+        "test_nonreading_broadcast_rank_preserves_index_only_compatibility": 12,
+        "test_peft_trl_indirect_runtime_and_retained_aliases": 1,
+        "test_real_sharded_weights_compatibility": 96,
+        "test_real_whole_checkpoint_compatibility": 24,
+        "test_reject_index_schema_before_any_shard_read": 192,
+        "test_reject_malformed_or_duplicate_index": 18,
+        "test_reject_path_forms_before_any_shard_read": 252,
+        "test_reject_special_shards_before_open": 84,
+        "test_reject_symlink_escapes": 48,
+        "test_root_swap_while_establishing_capability_is_rejected": 6,
+        "test_safetensors_uses_held_descriptor_mmap_not_whole_file_copy": 1,
+        "test_special_whole_checkpoint_and_index_discovery": 144,
+        "test_symlink_target_mutation_while_resolving_is_contained": 1,
+        "test_unsupported_platform_fails_closed": 1,
+        "test_upstream_model_device_offload_loop_is_ast_identical": 1
+      },
+      "sha256": "39ad6961e6aeeb23ed284cac38ae6bb054d4aaa130717c0e993c51ea2beb66b6",
+      "skipped": 48,
+      "total": 1187
+    }
+  },
+  "unmodified_installed_baseline": {
+    "installed_path": "/Users/shersingh/.hermes/cache/scratch/qmd-accelerate-baseline/site-packages/accelerate/__init__.py",
+    "modeling_sha256": "e341cb326d09833424816b484031c71113afdac6d95418531ae30256066a8478",
+    "version": "1.15.0"
+  },
+  "upstream": {
+    "filename": "accelerate-1.15.0-py3-none-any.whl",
+    "sha256": "97eacca0b73e45cb867dbf8c5d5d4dc32219544300e0c8992c7334dc2ef33cec",
+    "url": "https://files.pythonhosted.org/packages/8a/4c/34f0450479d01195027260da68d8a3880683f1640c3ca5adf64acb3185f1/accelerate-1.15.0-py3-none-any.whl",
+    "version": "1.15.0"
+  },
+  "upstream_license_preserved": true,
+  "verified_at_utc": "2026-11-13T15:15:17.366069+00:00",
+  "versions": {
+    "accelerate": "1.15.0+qmd.1",
+    "peft": "0.21.3",
+    "pytest": "9.2.0",
+    "safetensors": "0.8.0",
+    "torch": "2.15.0",
+    "transformers": "5.22.2",
+    "trl": "1.17.1"
+  },
+  "wheel_record_entries_verified": 91
+}

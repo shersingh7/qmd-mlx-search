@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "accelerate==1.15.0+qmd.2",
+#     "huggingface_hub>=2.4.0,<3",
+#     "sentencepiece>=0.2.1",
+#     "protobuf>=3.20.0",
+#     "numpy",
+#     "gguf",
+# ]
+# [tool]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate==1.15.0+qmd.2",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.17.0",
+#     "urllib3>=2.8.0",
+# ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
+# ///
+"""
+Convert QMD query expansion model to GGUF format.
+
+Loads the base model, merges SFT and GRPO adapters, then converts to
+GGUF with multiple quantizations for use with Ollama/llama.cpp/LM Studio.
+
+Usage:
+    uv run convert_gguf.py --size 1.7B
+    uv run convert_gguf.py --size 4B --skip-quantize
+    uv run convert_gguf.py --base Qwen/Qwen3-1.7B \
+                           --sft tobil/qmd-query-expansion-1.7B-sft \
+                           --grpo tobil/qmd-query-expansion-1.7B-grpo \
+                           --output tobil/qmd-query-expansion-1.7B-gguf
+"""
+
+import argparse
+import os
+from pathlib import Path
+import tempfile
+
+from gguf_toolchain import convert_model, prepare_toolchain
+
+import torch
+from huggingface_hub import HfApi, login
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Preset configurations for each model size
+PRESETS = {
+    "1.7B": {
+        "base": "Qwen/Qwen3-1.7B",
+        "sft": "tobil/qmd-query-expansion-1.7B-sft",
+        "grpo": "tobil/qmd-query-expansion-1.7B-grpo",
+        "output": "tobil/qmd-query-expansion-1.7B-gguf",
+        "ollama_name": "qmd-expand",
+    },
+    "4B": {
+        "base": "Qwen/Qwen3-4B",
+        "sft": "tobil/qmd-query-expansion-4B-sft",
+        "grpo": "tobil/qmd-query-expansion-4B-grpo",
+        "output": "tobil/qmd-query-expansion-4B-gguf",
+        "ollama_name": "qmd-expand-4b",
+    },
+}
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Convert QMD model to GGUF")
+    parser.add_argument("--size", choices=PRESETS.keys(), help="Use preset config for model size")
+    parser.add_argument("--base", help="Base model (overrides preset)")
+    parser.add_argument("--sft", help="SFT adapter (overrides preset)")
+    parser.add_argument("--grpo", help="GRPO adapter (overrides preset)")
+    parser.add_argument("--output", help="Output HF repo (overrides preset)")
+    parser.add_argument("--skip-quantize", action="store_true", help="Only produce FP16 GGUF")
+    parser.add_argument("--no-upload", action="store_true", help="Don't upload to HF Hub")
+    args = parser.parse_args()
+
+    # Resolve config
+    if args.size:
+        preset = PRESETS[args.size]
+        base_model = args.base or preset["base"]
+        sft_model = args.sft or preset["sft"]
+        grpo_model = args.grpo or preset["grpo"]
+        output_repo = args.output or preset["output"]
+    elif args.base and args.sft and args.grpo and args.output:
+        base_model = args.base
+        sft_model = args.sft
+        grpo_model = args.grpo
+        output_repo = args.output
+    else:
+        parser.error("Either --size or all of --base/--sft/--grpo/--output are required")
+
+    model_name = output_repo.split("/")[-1].replace("-gguf", "")
+    print(f"QMD GGUF Conversion: {model_name}")
+    print("=" * 60)
+
+    # Source checkout, dependency import check and (unless skipped) native build
+    # all succeed before model loading/merging. No apt/pip environment mutation.
+    with tempfile.TemporaryDirectory(prefix="qmd-gguf-convert-") as tmp:
+        work = Path(tmp)
+        tools = prepare_toolchain(work / "tools", quantize=not args.skip_quantize)
+        hf_token = os.environ.get("HF_TOKEN")
+        if hf_token:
+            print("Logging in to HuggingFace...")
+            login(token=hf_token)
+        print(f"Loading base model {base_model}...")
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model, dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
+        )
+        print(f"Merging SFT adapter {sft_model}...")
+        model = PeftModel.from_pretrained(model, sft_model).merge_and_unload()
+        print(f"Merging GRPO adapter {grpo_model}...")
+        model = PeftModel.from_pretrained(model, grpo_model).merge_and_unload()
+        tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+        merged_dir = work / "merged"
+        model.save_pretrained(merged_dir, safe_serialization=True)
+        tokenizer.save_pretrained(merged_dir)
+        files = convert_model(tools, merged_dir, model_name,
+                              quantize=not args.skip_quantize, keep_f16=True)
+        # Preserve the CLI's local output, but publish only a fully successful
+        # fresh set, never an output from a failed process or an earlier run.
+        # A unique private destination also avoids symlink/stale-file reuse in
+        # a shared system temporary directory. Its path is reported below.
+        gguf_dir = Path(tempfile.mkdtemp(prefix="qmd-gguf-output-"))
+        for path in files:
+            path.replace(gguf_dir / path.name)
+    gguf_file = str(gguf_dir / f"{model_name}-f16.gguf")
+    quantized_files = [(str(gguf_dir / f"{model_name}-{quant.lower()}.gguf"), quant)
+                       for quant in ("Q4_K_M", "Q6_K", "Q8_0")] if not args.skip_quantize else []
+
+    # Step 6: Upload
+    if not args.no_upload:
+        print(f"\nStep 9: Uploading to {output_repo}...")
+        api = HfApi()
+        api.create_repo(repo_id=output_repo, repo_type="model", exist_ok=True)
+
+        api.upload_file(path_or_fileobj=gguf_file,
+                        path_in_repo=f"{model_name}-f16.gguf", repo_id=output_repo)
+        for qfile, qtype in quantized_files:
+            api.upload_file(path_or_fileobj=qfile,
+                            path_in_repo=f"{model_name}-{qtype.lower()}.gguf", repo_id=output_repo)
+
+        # Upload README
+        readme = f"""---
+base_model: {base_model}
+tags: [gguf, llama.cpp, quantized, query-expansion, qmd]
+---
+# {model_name} (GGUF)
+
+GGUF conversion of the QMD Query Expansion model.
+
+## Details
+- **Base:** {base_model}
+- **SFT:** {sft_model}
+- **GRPO:** {grpo_model}
+- **Task:** Query expansion (lex/vec/hyde format)
+
+## Prompt Format
+```
+<|im_start|>user
+/no_think Expand this search query: your query here<|im_end|>
+<|im_start|>assistant
+```
+"""
+        api.upload_file(path_or_fileobj=readme.encode(),
+                        path_in_repo="README.md", repo_id=output_repo)
+
+    print(f"\nGGUF files saved to: {gguf_dir}")
+    if not args.no_upload:
+        print(f"Done! Repository: https://huggingface.co/{output_repo}")
+
+
+if __name__ == "__main__":
+    main()

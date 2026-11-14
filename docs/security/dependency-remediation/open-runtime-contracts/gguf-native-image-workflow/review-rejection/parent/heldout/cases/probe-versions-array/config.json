@@ -1,0 +1,12 @@
+{
+  "probe_update": {
+    "versions": [
+      "git",
+      "cc",
+      "c++",
+      "make",
+      "uv"
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/probe-versions-array/workspace"
+}

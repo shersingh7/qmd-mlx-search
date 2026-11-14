@@ -1,0 +1,16 @@
+{
+  "originalReviewRoot": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7",
+  "reviewManifestSha256": "40d3b0cec481a2697a6a8bcd67b9de0154d5a59e3e2512c773c2253b843a1820",
+  "reviewResultSha256": "e0df7e9cf964736faa506b325b3d47966aa12bee47477c4d31158543d158f921",
+  "copiedSourceSha256": {
+    "independent_heldouts.py": "f5454ba62f94f472f654e3ce9774aeac6efe1f07f0259256775c1d0b06e66753",
+    "independent_driver.py": "f06fa623a7db4ba7411f5def2ec089f5133ad5f16e27984db6ab3aba748f0164",
+    "inputs/source/candidate/mirror/.github/workflows/gguf-native-image-qualification.yml": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+    "inputs/source/candidate/mirror/test/security/test_gguf_workflow_controller.py": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+    "inputs/source/candidate/mirror/test/security/fixtures/gguf_workflow_fake_cli.py": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78",
+    "inputs/current-public-inputs/finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "inputs/current-public-inputs/finetune/tools/qualify_gguf_image.py": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2"
+  },
+  "sourceAdapters": [],
+  "scope": "Independent20-case replay, unchanged source/test bytes; actual integration remainsseparate"
+}

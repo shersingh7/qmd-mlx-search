@@ -1,0 +1,20 @@
+{
+  "PATH": "/usr/bin:/bin",
+  "CI": "1",
+  "QMD_LLAMA_GPU": "false",
+  "HF_HUB_OFFLINE": "1",
+  "TRANSFORMERS_OFFLINE": "1",
+  "HF_DATASETS_OFFLINE": "1",
+  "PYTHONDONTWRITEBYTECODE": "1",
+  "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+  "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/home",
+  "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/hermes",
+  "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/hermes",
+  "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/knowledge",
+  "KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/knowledge",
+  "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/cache",
+  "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/config",
+  "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/data",
+  "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/hf",
+  "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/tmp"
+}

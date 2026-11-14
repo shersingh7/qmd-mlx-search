@@ -1,0 +1,94 @@
+{"command": ["/Users/shersingh/github/qmd-mlx-search/.venv/bin/python", "scripts/verify_local_stack.py", "--model", "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf", "--dtype", "float32", "--output", "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/rc-real-stack-float32.json"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o"}
+W1111 23:05:50.931000 31971 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 7985.75it/s]
+[mlx-runtime] Running GPU warmup...
+[mlx-runtime] GPU warmup complete in 0.04s
+[mlx-server] Server ready (primary='/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf') on http://127.0.0.1:0 (control: http://127.0.0.1:61761)
+[mlx-manager] Unloaded stage 'embed' (active: 0.0MB)
+[mlx-manager] Unloaded stage 'embed' (active: 0.0MB)
+[mlx-manager] Unloaded stage 'embed' (active: 0.0MB)
+{
+  "passed": true,
+  "scope": "Real cached MLX model -> JSON/binary -> SDK SQLite -> REST/MCP, authored public fixture only",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "dtype_requested": "float32",
+  "source_sha256": "282941577d8d37d53259b8a721063c0bf5c290a01140a135812220a3bf29de93",
+  "integration_source_sha256": "a97733cb3df8524aad6a758957aad131ab89efab257816d22d49a0b7728ff43f",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp/qmd-real-vza2tab4",
+  "sdk_report": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/rc-real-stack-float32-sdk.json",
+  "ready_seconds": 3.543330499989679,
+  "url": "http://127.0.0.1:61760",
+  "control_port": 61761,
+  "instance_token": "5e04db542b3245a3baeac68fd5b478c8",
+  "command": [
+    "/Users/shersingh/.local/bin/node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/github/qmd-mlx-search/scripts/verify_local_stack.ts",
+    "--url",
+    "http://127.0.0.1:61760",
+    "--root",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp/qmd-real-vza2tab4",
+    "--output",
+    "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/rc-real-stack-float32-sdk.json"
+  ],
+  "child_pid": 31980,
+  "child_cleanup": {
+    "cleaned": true,
+    "sigkill_used": false
+  },
+  "child_exit_code": 0,
+  "node_log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/rc-real-stack-float32-xqgu387o/tmp/qmd-real-vza2tab4/node.log",
+  "checks": {
+    "documents": 8,
+    "jsonBinaryMaxAbs": 0,
+    "restoredRankingsIdentical": true,
+    "mcpGetVerified": true,
+    "sseStreamVerified": true,
+    "foreignOriginRejected": true,
+    "noopEmbed": {
+      "status": "complete",
+      "docsProcessed": 0,
+      "docsSelected": 0,
+      "chunksAttempted": 0,
+      "chunksCommitted": 0,
+      "chunksEmbedded": 0,
+      "chunksFailed": 0,
+      "chunksSkipped": 0,
+      "chunksPending": 0,
+      "errors": 0,
+      "durationMs": 0,
+      "checkpoint": {
+        "jobId": "3878ce94-739c-4f01-92ec-ca16cf96fd9a",
+        "fingerprint": {
+          "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "dimensions": 384,
+          "chunkStrategy": "regex",
+          "descriptorSignature": "4fab69da12d510bc6082b95a",
+          "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "quantization": "none"
+        },
+        "startedAt": "2026-11-12T04:05:52.662Z",
+        "updatedAt": "2026-11-12T04:05:52.663Z",
+        "status": "completed",
+        "docsTotal": 0,
+        "docsCompleted": 0,
+        "chunksTotal": 0,
+        "chunksCommitted": 0
+      }
+    }
+  },
+  "memory_before_stop": {
+    "active_mb": 86.7,
+    "peak_mb": 158.0,
+    "model_mb": 86.7,
+    "residency_budget_mb": 16384.0,
+    "notes": "Resident weight budgets are not total activation memory guarantees."
+  },
+  "server_stopped": true,
+  "worker_alive_after_stop": false,
+  "http_threads_alive": false,
+  "metal_active_immediate_after_stop": 0,
+  "metal_active_after_stop": 0,
+  "metal_cache_after_stop": 0
+}

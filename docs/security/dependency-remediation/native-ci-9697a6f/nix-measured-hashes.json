@@ -1,0 +1,26 @@
+{
+  "run": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43587714131",
+  "candidate": "9697a6fd9707a2787ab417cd72213d3fa7d7be66",
+  "actualCheckouts": {
+    "x86_64-linux": "3f74eaffbe4edc6044ab8d09ca20c95b64e26529",
+    "aarch64-darwin": "3f74eaffbe4edc6044ab8d09ca20c95b64e26529"
+  },
+  "exactInputsMatched": {
+    "package.json": "7607a98a802ec455328ce0452fb2e43fb6c955e774d30e17cc49befac5e7ef1a",
+    "bun.lock": "c1dca7fd35ac82ef213872fc997d023218028d51b9fffb92b0e12b0ac070d329",
+    "flake.lock": "7edc1e51b4229b9e33d636ae47c67b2aa4551bebae621ab437fe16a4871912f2",
+    "flake.nix": "71d40a36e4d80c3080ff8ef42dda14d441fcb52cab31967920ba9c6452abaaea"
+  },
+  "nativeMeasuredHashes": {
+    "x86_64-linux": {
+      "specified": "sha256-lYii6J60m9lQmhDmCjP4lYmEdDxkExke+XIrRN7Vuho=",
+      "measured": "sha256-FShClrkZs1dqlIJD3ygyda018rRhYhMJWSPDsAyS+Vc="
+    },
+    "aarch64-darwin": {
+      "specified": "sha256-bF4vRAwHesw3dFXS7q4sFyRxFmgFpiUdfv/8TTOyBuY=",
+      "measured": "sha256-Hb23tGns07IbiyUyXXdTrVpAA9Qamqagd/iYMOW3qZ4="
+    }
+  },
+  "reason": "FOD integrity mismatch after3genuine development identities were added; integrity stayed enabled",
+  "rebuildAndInstalledChecksStillRequired": true
+}

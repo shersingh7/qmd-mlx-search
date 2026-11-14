@@ -1,0 +1,285 @@
+{
+  "repo": "Qwen/Qwen3.5-4B",
+  "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "private": false,
+  "gated": false,
+  "tokenizer_only_allowlist": [
+    "tokenizer.json",
+    "tokenizer_config.json",
+    "vocab.json",
+    "merges.txt"
+  ],
+  "anonymous": true,
+  "requests": [
+    {
+      "url": "https://huggingface.co/api/models/Qwen/Qwen3.5-4B/revision/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "final_url": "https://huggingface.co/api/models/Qwen/Qwen3.5-4B/revision/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "status": 200,
+      "bytes": 20854,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "20854",
+        "ETag": "W/\"5176-4TuAboybEqqq+XR4v7sPxUmTzP4\""
+      }
+    },
+    {
+      "url": "https://huggingface.co/api/models/Qwen/Qwen3.5-4B/tree/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a?expand=true&limit=100",
+      "final_url": "https://huggingface.co/api/models/Qwen/Qwen3.5-4B/tree/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a?expand=true&limit=100",
+      "status": 200,
+      "bytes": 13707,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "13707",
+        "ETag": "W/\"358b-YGzNHkUv7vQ7Ve3RaYm0IEg0AG0\""
+      }
+    },
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/tokenizer.json",
+      "final_url": "https://us.aws.cdn.hf.co/xet-bridge-us/69a1adef9060862380ddaff7/8f06040c24d0d6efc263cf398806debbf20d732031ba128349d086f6a7b8bab2?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27tokenizer.json%3B+filename%3D%22tokenizer.json%22%3B&user_id=public&response-content-type=application%2Fjson%3B+charset%3Dutf-8&xip=OF5bSbY4owA&X-Xet-Cas-Uid=public&Expires=1794610537&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly91cy5hd3MuY2RuLmhmLmNvL3hldC1icmlkZ2UtdXMvNjlhMWFkZWY5MDYwODYyMzgwZGRhZmY3LzhmMDYwNDBjMjRkMGQ2ZWZjMjYzY2YzOTg4MDZkZWJiZjIwZDczMjAzMWJhMTI4MzQ5ZDA4NmY2YTdiOGJhYjJcXD9yZXNwb25zZS1jb250ZW50LWRpc3Bvc2l0aW9uPWlubGluZSUzQitmaWxlbmFtZSUyQSUzRFVURi04JTI3JTI3dG9rZW5pemVyLmpzb24lM0IrZmlsZW5hbWUlM0QlMjJ0b2tlbml6ZXIuanNvbiUyMiUzQiZ1c2VyX2lkPXB1YmxpYyZyZXNwb25zZS1jb250ZW50LXR5cGU9YXBwbGljYXRpb24lMkZqc29uJTNCK2NoYXJzZXQlM0R1dGYtOCZ4aXA9T0Y1YlNiWTRvd0EmWC1YZXQtQ2FzLVVpZD1wdWJsaWMiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkVwb2NoVGltZSI6MTc5NDYxMDUzN319fV19&Signature=MEUCICED-LdKc6NOLcplVOuP2tXJA5Q1284AIuWFpFqdjKMEAiEA2AIAmAdgXdzmiUE2js4jsI4Jz4uP2oApoN2LTYjEs-w_&Key-Pair-Id=01KXEF4KZ1B6FV465MAWR4M21F&Hash-Algorithm=SHA256",
+      "status": 200,
+      "bytes": 12807982,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "content-type": "application/json; charset=utf-8",
+        "etag": "\"8f06040c24d0d6efc263cf398806debbf20d732031ba128349d086f6a7b8bab2\"",
+        "content-length": "12807982"
+      }
+    },
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/tokenizer_config.json",
+      "final_url": "https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/tokenizer_config.json?%2FQwen%2FQwen3.5-4B%2Fresolve%2F851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a%2Ftokenizer_config.json=&etag=%22eda48d3e75a8e59a8479ee4ec8b37f76e711d9c1%22",
+      "status": 200,
+      "bytes": 16710,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Length": "16710",
+        "ETag": "\"eda48d3e75a8e59a8479ee4ec8b37f76e711d9c1\"",
+        "X-Repo-Commit": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+      }
+    },
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/vocab.json",
+      "final_url": "https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/vocab.json?%2FQwen%2FQwen3.5-4B%2Fresolve%2F851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a%2Fvocab.json=&etag=%220aa0ce0658d60ac4a5d609f4eadb0e8e43514176%22",
+      "status": 200,
+      "bytes": 6722759,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Length": "6722759",
+        "ETag": "\"0aa0ce0658d60ac4a5d609f4eadb0e8e43514176\"",
+        "X-Repo-Commit": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+      }
+    },
+    {
+      "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/merges.txt",
+      "final_url": "https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/merges.txt?%2FQwen%2FQwen3.5-4B%2Fresolve%2F851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a%2Fmerges.txt=&etag=%22a494e019ca1502219fd0128658b979e5f05ae8e8%22",
+      "status": 200,
+      "bytes": 3353259,
+      "request_header_names": [
+        "Accept",
+        "User-agent"
+      ],
+      "response_headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Length": "3353259",
+        "ETag": "\"a494e019ca1502219fd0128658b979e5f05ae8e8\"",
+        "X-Repo-Commit": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "file": "tokenizer.json",
+      "bytes": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "computed_git_blob_sha1": "3db80ca5ce55ecec79ba2de55e6bce256d32bc78",
+      "hub_tree_entry": {
+        "type": "file",
+        "oid": "a73a846725794819aa6e1c9e97d8dc9671c2006d",
+        "size": 12807982,
+        "lfs": {
+          "oid": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+          "size": 12807982,
+          "pointerSize": 133
+        },
+        "xetHash": "8f06040c24d0d6efc263cf398806debbf20d732031ba128349d086f6a7b8bab2",
+        "path": "tokenizer.json",
+        "lastCommit": {
+          "id": "1eef1f4e0bc57dec8f814d1e4c714c8e0065d261",
+          "title": "Upload folder using huggingface_hub",
+          "date": "2026-02-27T14:47:27.000Z"
+        },
+        "securityFileStatus": {
+          "status": "safe",
+          "protectAiScan": {
+            "status": "safe",
+            "message": "This file has no security findings.",
+            "reportLink": "https://insights-db.paloaltonetworks.com/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/files?blob-id=a73a846725794819aa6e1c9e97d8dc9671c2006d&utm_source=huggingface"
+          },
+          "avScan": {
+            "status": "safe",
+            "message": "No security issues detected",
+            "reportLink": "https://fdtn.ai/ai-supply-chain/hugging-face?utm_source=huggingface"
+          },
+          "pickleImportScan": {
+            "status": "unscanned",
+            "pickleImports": [],
+            "version": "0.0.0"
+          },
+          "virusTotalScan": {
+            "status": "safe",
+            "message": "0/76 engines detect it as malicious.",
+            "reportLink": "https://www.virustotal.com/gui/file/5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42?utm_source=huggingface"
+          },
+          "jFrogScan": {
+            "status": "unscanned",
+            "message": "Not a machine-learning model"
+          }
+        }
+      }
+    },
+    {
+      "file": "tokenizer_config.json",
+      "bytes": 16710,
+      "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+      "computed_git_blob_sha1": "eda48d3e75a8e59a8479ee4ec8b37f76e711d9c1",
+      "hub_tree_entry": {
+        "type": "file",
+        "oid": "eda48d3e75a8e59a8479ee4ec8b37f76e711d9c1",
+        "size": 16710,
+        "path": "tokenizer_config.json",
+        "lastCommit": {
+          "id": "bbaaae1f57d79c7bf696d619ffbbb0c2c8e5ef98",
+          "title": "Upload 6 files",
+          "date": "2026-03-01T14:56:56.000Z"
+        },
+        "securityFileStatus": {
+          "status": "safe",
+          "protectAiScan": {
+            "status": "safe",
+            "message": "This file has no security findings.",
+            "reportLink": "https://insights-db.paloaltonetworks.com/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/files?blob-id=eda48d3e75a8e59a8479ee4ec8b37f76e711d9c1&utm_source=huggingface"
+          },
+          "avScan": {
+            "status": "safe",
+            "message": "No security issues detected",
+            "reportLink": "https://fdtn.ai/ai-supply-chain/hugging-face?utm_source=huggingface"
+          },
+          "pickleImportScan": {
+            "status": "unscanned",
+            "pickleImports": [],
+            "version": "0.0.0"
+          },
+          "virusTotalScan": {
+            "status": "unscanned"
+          },
+          "jFrogScan": {
+            "status": "unscanned",
+            "message": "Not a machine-learning model"
+          }
+        }
+      }
+    },
+    {
+      "file": "vocab.json",
+      "bytes": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+      "computed_git_blob_sha1": "0aa0ce0658d60ac4a5d609f4eadb0e8e43514176",
+      "hub_tree_entry": {
+        "type": "file",
+        "oid": "0aa0ce0658d60ac4a5d609f4eadb0e8e43514176",
+        "size": 6722759,
+        "path": "vocab.json",
+        "lastCommit": {
+          "id": "1eef1f4e0bc57dec8f814d1e4c714c8e0065d261",
+          "title": "Upload folder using huggingface_hub",
+          "date": "2026-02-27T14:47:27.000Z"
+        },
+        "securityFileStatus": {
+          "status": "safe",
+          "protectAiScan": {
+            "status": "safe",
+            "message": "This file has no security findings.",
+            "reportLink": "https://insights-db.paloaltonetworks.com/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/files?blob-id=0aa0ce0658d60ac4a5d609f4eadb0e8e43514176&utm_source=huggingface"
+          },
+          "avScan": {
+            "status": "safe",
+            "message": "No security issues detected",
+            "reportLink": "https://fdtn.ai/ai-supply-chain/hugging-face?utm_source=huggingface"
+          },
+          "pickleImportScan": {
+            "status": "unscanned",
+            "pickleImports": [],
+            "version": "0.0.0"
+          },
+          "virusTotalScan": {
+            "status": "unscanned"
+          },
+          "jFrogScan": {
+            "status": "unscanned",
+            "message": "Not a machine-learning model"
+          }
+        }
+      }
+    },
+    {
+      "file": "merges.txt",
+      "bytes": 3353259,
+      "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+      "computed_git_blob_sha1": "a494e019ca1502219fd0128658b979e5f05ae8e8",
+      "hub_tree_entry": {
+        "type": "file",
+        "oid": "a494e019ca1502219fd0128658b979e5f05ae8e8",
+        "size": 3353259,
+        "path": "merges.txt",
+        "lastCommit": {
+          "id": "1eef1f4e0bc57dec8f814d1e4c714c8e0065d261",
+          "title": "Upload folder using huggingface_hub",
+          "date": "2026-02-27T14:47:27.000Z"
+        },
+        "securityFileStatus": {
+          "status": "safe",
+          "protectAiScan": {
+            "status": "unscanned",
+            "reportLink": "https://insights-db.paloaltonetworks.com/models/Qwen/Qwen3.5-4B/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/files?blob-id=a494e019ca1502219fd0128658b979e5f05ae8e8&utm_source=huggingface"
+          },
+          "avScan": {
+            "status": "safe",
+            "message": "No security issues detected",
+            "reportLink": "https://fdtn.ai/ai-supply-chain/hugging-face?utm_source=huggingface"
+          },
+          "pickleImportScan": {
+            "status": "unscanned",
+            "pickleImports": [],
+            "version": "0.0.0"
+          },
+          "virusTotalScan": {
+            "status": "unscanned"
+          },
+          "jFrogScan": {
+            "status": "unscanned",
+            "message": "Not a machine-learning model"
+          }
+        }
+      }
+    }
+  ]
+}

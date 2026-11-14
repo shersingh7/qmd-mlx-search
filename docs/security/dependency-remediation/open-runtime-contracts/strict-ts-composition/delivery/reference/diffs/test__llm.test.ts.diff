@@ -1,0 +1,157 @@
+--- baseline/test/llm.test.ts
++++ accepted19/test/llm.test.ts
+@@ -8,6 +8,11 @@
+  */
+ 
+ import { describe, test, expect, beforeAll, afterAll, vi } from "vitest";
++import { readFileSync } from "node:fs";
++import { createRequire } from "node:module";
++import { dirname, join } from "node:path";
++import type { LlamaModel } from "node-llama-cpp";
++import * as ts from "typescript";
+ import {
+   LlamaCpp,
+   getDefaultLlamaCpp,
+@@ -176,7 +181,7 @@
+       detokenize: (tokens: string[]) => tokens.join(""),
+     });
+ 
+-    const result = await llm.rerank("query", [
++    const result: Awaited<ReturnType<LlamaCpp["rerank"]>> = await llm.rerank("query", [
+       { file: "a.md", text: "shared chunk" },
+       { file: "b.md", text: "shared chunk" },
+       { file: "c.md", text: "different chunk" },
+@@ -190,6 +195,133 @@
+     expect(scoreByFile.get("a.md")).toBe(0.9);
+     expect(scoreByFile.get("b.md")).toBe(0.9);
+     expect(scoreByFile.get("c.md")).toBe(0.2);
++  });
++});
++
++describe("LlamaCpp supported ranking-context options and bounded creation", () => {
++  type RankingOptions = NonNullable<Parameters<LlamaModel["createRankingContext"]>[0]>;
++  const dependencyRoot = dirname(createRequire(import.meta.url).resolve("node-llama-cpp"));
++  const declarations = ts.createSourceFile("ranking.d.ts", readFileSync(join(dependencyRoot, "evaluator/LlamaRankingContext.d.ts"), "utf8"), ts.ScriptTarget.Latest, true);
++  const optionsType = declarations.statements.find(node => ts.isTypeAliasDeclaration(node) && node.name.text === "LlamaRankingContextOptions");
++  if (!optionsType || !ts.isTypeAliasDeclaration(optionsType) || !ts.isTypeLiteralNode(optionsType.type)) throw new Error("Installed ranking options declaration not found");
++  const supported = optionsType.type.members.map(node => node.name?.getText(declarations));
++  const context = () => ({ dispose: vi.fn(async () => {}) });
++  function setup(threads = 8, count = 7) {
++    const llm = new LlamaCpp({ embedBackend: "gguf", inactivityTimeoutMs: 0 }) as any;
++    const createRankingContext = vi.fn(async (_options: RankingOptions) => context());
++    llm.ensureRerankModel = vi.fn(async () => ({ createRankingContext }));
++    llm.computeParallelism = vi.fn(async () => count);
++    llm.threadsPerContext = vi.fn(async () => threads);
++    return { llm, createRankingContext };
++  }
++  function assertSupported(options: RankingOptions) {
++    expect(Object.keys(options).filter(key => !supported.includes(key))).toEqual([]);
++    expect(options).not.toHaveProperty("flashAttention");
++    expect(options.createSignal).toBeInstanceOf(AbortSignal);
++    expect(options.createSignal!.aborted).toBe(false);
++  }
++  test("installed declarations and runtime agree: no per-ranking-context flash option", () => {
++    expect(supported).toEqual(["contextSize", "batchSize", "threads", "createSignal", "template", "ignoreMemorySafetyChecks"]);
++    const runtime = ts.createSourceFile("ranking.js", readFileSync(join(dependencyRoot, "evaluator/LlamaRankingContext.js"), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
++    const ranking = runtime.statements.find(ts.isClassDeclaration);
++    const create = ranking?.members.find(node => ts.isMethodDeclaration(node) && node.name.getText(runtime) === "_create");
++    expect(create && ts.isMethodDeclaration(create) && create.parameters[1]?.name.getText(runtime)).toBe("{ contextSize, batchSize, threads, createSignal, template, ignoreMemorySafetyChecks }");
++    expect(create?.getText(runtime)).not.toContain("flashAttention");
++  });
++  test.each([0, 8])("only forwards supported options, preserving threads=%s and the four-context cap", async threads => {
++    const { llm, createRankingContext } = setup(threads);
++    try {
++      const contexts = await llm.ensureRerankContexts();
++      expect(contexts).toHaveLength(4);
++      expect(createRankingContext).toHaveBeenCalledTimes(4);
++      expect(llm.computeParallelism).toHaveBeenCalledWith(1000);
++      expect(llm.threadsPerContext).toHaveBeenCalledWith(4);
++      for (const [options] of createRankingContext.mock.calls) {
++        assertSupported(options);
++        expect(options.contextSize).toBe((LlamaCpp as any).RERANK_CONTEXT_SIZE);
++        expect(Object.keys(options).sort()).toEqual(threads > 0 ? ["contextSize", "createSignal", "threads"] : ["contextSize", "createSignal"]);
++        if (threads > 0) expect(options.threads).toBe(threads);
++      }
++      expect(await llm.ensureRerankContexts()).toBe(contexts);
++    } finally { await llm.dispose(); }
++  });
++  test("retry is once with the same supported options and signal, not a flash fallback", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    const ctx = context();
++    createRankingContext.mockRejectedValueOnce(new Error("transient")).mockResolvedValueOnce(ctx);
++    try {
++      expect(await llm.ensureRerankContexts()).toEqual([ctx]);
++      expect(createRankingContext).toHaveBeenCalledTimes(2);
++      const options = createRankingContext.mock.calls.map(call => call[0]);
++      options.forEach(assertSupported);
++      expect(options[0]).toEqual(options[1]);
++      expect(options[0]!.createSignal).toBe(options[1]!.createSignal);
++    } finally { await llm.dispose(); }
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++  });
++  test("exhausted retry cleans earlier owned contexts and does not publish a partial pool", async () => {
++    const { llm, createRankingContext } = setup(8, 2);
++    const ctx = context();
++    const fault = new Error("capacity");
++    createRankingContext.mockResolvedValueOnce(ctx).mockRejectedValue(fault);
++    try {
++      await expect(llm.ensureRerankContexts()).rejects.toBe(fault);
++      expect(createRankingContext).toHaveBeenCalledTimes(3);
++      expect(llm.rerankContexts).toEqual([]);
++      expect(ctx.dispose).toHaveBeenCalledTimes(1);
++    } finally { await llm.dispose(); }
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++  });
++  test("close cancellation aborts createSignal and prevents the retry", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    let started!: () => void;
++    const began = new Promise<void>(resolve => { started = resolve; });
++    let signal!: AbortSignal;
++    createRankingContext.mockImplementationOnce(options => {
++      signal = options.createSignal!;
++      started();
++      return new Promise((_, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true }));
++    });
++    const work = llm.ensureRerankContexts();
++    const rejected = expect(work).rejects.toThrow(/clos|dispos/i);
++    await began;
++    await llm.dispose();
++    await rejected;
++    expect(signal.aborted).toBe(true);
++    expect(createRankingContext).toHaveBeenCalledTimes(1);
++    expect(llm.rerankContexts).toEqual([]);
++  });
++  test("a context arriving after close remains owned and is released, not published", async () => {
++    const { llm, createRankingContext } = setup(8, 1);
++    let release!: (ctx: ReturnType<typeof context>) => void;
++    let started!: () => void;
++    const began = new Promise<void>(resolve => { started = resolve; });
++    createRankingContext.mockImplementationOnce(() => { started(); return new Promise(resolve => { release = resolve; }); });
++    const ctx = context();
++    const work = llm.ensureRerankContexts();
++    const rejected = expect(work).rejects.toThrow(/clos|dispos/i);
++    await began;
++    const closing = llm.dispose();
++    release(ctx);
++    await rejected;
++    await closing;
++    expect(ctx.dispose).toHaveBeenCalledTimes(1);
++    expect(createRankingContext).toHaveBeenCalledTimes(1);
++    expect(llm.rerankContexts).toEqual([]);
++  });
++  test("model loading still forwards only modelPath and lifecycle loadSignal", async () => {
++    const llm = new LlamaCpp({ embedBackend: "gguf", inactivityTimeoutMs: 0 }) as any;
++    const model = { dispose: vi.fn(async () => {}) };
++    const llama = { loadModel: vi.fn(async (_options: object) => model), dispose: vi.fn(async () => {}) };
++    llm.llama = llama;
++    llm.ensureLlama = vi.fn(async () => llama);
++    llm.resolveModel = vi.fn(async () => "/synthetic/model.gguf");
++    try {
++      expect(await llm.ensureRerankModel()).toBe(model);
++      const options = llama.loadModel.mock.calls[0]![0];
++      expect(Object.keys(options).sort()).toEqual(["loadSignal", "modelPath"]);
++      expect(options).toMatchObject({ modelPath: "/synthetic/model.gguf", loadSignal: expect.any(AbortSignal) });
++    } finally { await llm.dispose(); }
+   });
+ });
+ 

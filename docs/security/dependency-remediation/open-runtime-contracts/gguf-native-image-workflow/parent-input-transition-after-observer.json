@@ -1,0 +1,30 @@
+{
+  "scope": "Later parent-owned transitions, not worker mutations; earlier9-input intake evidence stays historical",
+  "stillIdentical": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.yml.proposed",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/mirror/finetune/tools/submit_locked_job.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/mirror/finetune/tools/qualify_gguf_image.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/manifest.json",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/receipt.json",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/finetune/tools/submit_locked_job.py",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/finetune/tools/qualify_gguf_image.py"
+  ],
+  "authorizedTransitions": [
+    {
+      "path": "/Users/shersingh/github/qmd-mlx-search/docs/plans/gguf-image-qualification.md",
+      "workerInputSha256": "be37fc5d96af167b87fb396561c4791d511d95f3affdae5327d0a6f372b6ed58",
+      "currentSha256": "e3cf95aacdfd5a394774596d55113ee2df92a2a0987e56e298491e302ede581d",
+      "classification": "Authorized parent section1b addition; exact old bytes reconstruct after removing this span"
+    },
+    {
+      "path": "/Users/shersingh/github/qmd-mlx-search/.github/workflows/ci.yml",
+      "workerInputSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "currentSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+      "classification": "Authorized parent application of independently accepted observer workflow; deleg_eb890b44, receipt0592bee5"
+    }
+  ],
+  "proposedWorkflowUnchangedSha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+  "emptyVersionReview": "deleg_659bea40 SPEC/QUALITY PASS at292f01ce; pair now integrated; no native Linuximage claim",
+  "workflowReviewDelivery": "No live child at roster check; result handoff not yet consumed; no transcript/artifact polling"
+}

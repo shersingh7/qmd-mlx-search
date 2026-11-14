@@ -8,6 +8,7 @@ import os
 import sys
 import threading
 import time
+from numbers import Integral
 from typing import Any, Callable, List, Optional
 import numpy as np
 
@@ -85,17 +86,54 @@ class BatchPlanner:
         model_params_b: float = 0.6,
         system_ram_gb_fn: Optional[Callable[[], float]] = None,
     ):
-        self._explicit_budget = max_batch_tokens or 0
+        self._explicit_budget = self._validate_token_budget(
+            "max_batch_tokens", 0 if max_batch_tokens is None else max_batch_tokens,
+            allow_auto=True,
+        )
         self._ram_fn = system_ram_gb_fn
         self._oom_halvings: int = 0
         self._tuned_model_params_b: Optional[float] = None
         self.max_bulk_microbatch_tokens = max_bulk_microbatch_tokens
-        self.max_batch_tokens = max_batch_tokens or calculate_default_max_batch_tokens(
+        self.max_batch_tokens = self._explicit_budget or calculate_default_max_batch_tokens(
             model_params_b=model_params_b,
             system_ram_gb_fn=self._ram_fn,
         )
         if not self._explicit_budget:
-            self._tuned_model_params_b = float(model_params_b)
+            self._tuned_model_params_b = float(model_params_b or 0.6)
+
+    @staticmethod
+    def _validate_token_budget(name: str, value: int, *, allow_auto: bool = False) -> int:
+        minimum = 0 if allow_auto else 1
+        if isinstance(value, bool) or not isinstance(value, Integral) or value < minimum:
+            raise ValueError(f"{name} must be an integer >= {minimum}")
+        # Preserve small explicit budgets used for tight scheduling; cap excessive
+        # operator values at the same ceiling as the automatic budget helper.
+        return min(int(value), 65536)
+
+    @property
+    def max_batch_tokens(self) -> int:
+        """Validated model/hardware or explicit operator budget, adapted after OOM."""
+        return self._max_batch_tokens
+
+    @max_batch_tokens.setter
+    def max_batch_tokens(self, value: int):
+        self._max_batch_tokens = self._validate_token_budget("max_batch_tokens", value)
+
+    @property
+    def max_bulk_microbatch_tokens(self) -> int:
+        """Requested bulk fairness target, independently of the memory budget."""
+        return self._max_bulk_microbatch_tokens
+
+    @max_bulk_microbatch_tokens.setter
+    def max_bulk_microbatch_tokens(self, value: int):
+        self._max_bulk_microbatch_tokens = self._validate_token_budget(
+            "max_bulk_microbatch_tokens", value,
+        )
+
+    @property
+    def effective_bulk_microbatch_tokens(self) -> int:
+        """Bulk scheduling target clamped to the current validated batch budget."""
+        return min(self.max_batch_tokens, self.max_bulk_microbatch_tokens)
 
     def tune_for_model(self, model_params_b: float) -> int:
         """
@@ -131,11 +169,18 @@ class BatchPlanner:
         max_tokens_override: Optional[int] = None,
     ) -> tuple[list[TokenizedBatch], list[list[int]]]:
         """
-        Groups tokenized sequences by length into micro-batches bounded by effective token budget.
-        For WorkClass.BULK (or not is_query), bounds micro-batch size conservatively
-        to keep nonpreemptible Metal GPU execution intervals short and allow interactive interleaving.
+        Groups sequences by length under the effective padded-token budget.
+        The conservative default bulk target keeps nonpreemptible GPU intervals
+        short. Higher targets are an explicit latency/memory tradeoff, not a
+        guarantee of better throughput.
+        A single sequence may exceed this scheduling target and is never truncated
+        here. Tokenization must still enforce the adapter's supported context.
         Returns (list of TokenizedBatch sub-batches, list of original index positions).
         """
+        if max_tokens_override is not None:
+            max_tokens_override = self._validate_token_budget(
+                "max_tokens_override", max_tokens_override, allow_auto=True,
+            )
         total_items = len(tokenized_batch)
         if total_items == 0:
             return [], []
@@ -143,10 +188,10 @@ class BatchPlanner:
         if total_items == 1:
             return [tokenized_batch], [[0]]
 
-        if max_tokens_override is not None and max_tokens_override > 0:
-            effective_budget = max_tokens_override
+        if max_tokens_override:
+            effective_budget = min(self.max_batch_tokens, max_tokens_override)
         elif work_class == WorkClass.BULK or (work_class is None and not is_query):
-            effective_budget = min(self.max_batch_tokens, self.max_bulk_microbatch_tokens)
+            effective_budget = self.effective_bulk_microbatch_tokens
         else:
             effective_budget = self.max_batch_tokens
 
@@ -185,19 +230,54 @@ class BatchPlanner:
         micro_batches_indices: list[list[int]],
         total_items: int,
     ) -> np.ndarray:
-        """Restores the original input order from micro-batch results."""
-        if total_items == 0:
+        """Validate a full permutation, then scatter once into the final output.
+
+        No concatenated intermediate is needed. A correctly ordered single
+        NumPy batch already is the requested output and can be returned as-is.
+        """
+        if isinstance(total_items, bool) or not isinstance(total_items, Integral) or total_items < 0:
+            raise ValueError("total_items must be a non-negative integer")
+        if len(results) != len(micro_batches_indices):
+            raise ValueError("Result batch count does not match index batch count")
+        if not results:
+            if total_items:
+                raise ValueError("Missing embedding results")
             return np.empty((0, 0), dtype=np.float32)
-        sorted_embeddings = np.concatenate(results, axis=0) if len(results) > 1 else results[0]
-        dims = sorted_embeddings.shape[1]
-        reordered = np.empty((total_items, dims), dtype=sorted_embeddings.dtype)
 
-        current_row = 0
-        for batch_indices in micro_batches_indices:
-            for orig_pos in batch_indices:
-                reordered[orig_pos] = sorted_embeddings[current_row]
-                current_row += 1
+        dims: Optional[int] = None
+        seen: set[int] = set()
+        positions: list[list[int]] = []
+        for batch_result, batch_indices in zip(results, micro_batches_indices):
+            if not isinstance(batch_result, np.ndarray) or batch_result.ndim != 2:
+                raise ValueError("Each embedding result must be a 2D NumPy array")
+            if batch_result.shape[0] != len(batch_indices):
+                raise ValueError("Embedding result row count does not match its indices")
+            if dims is None:
+                dims = batch_result.shape[1]
+            elif batch_result.shape[1] != dims:
+                raise ValueError("Embedding result dimensions differ between batches")
 
+            batch_positions: list[int] = []
+            for position in batch_indices:
+                if isinstance(position, bool) or not isinstance(position, Integral):
+                    raise ValueError("Embedding result indices must be integers")
+                position = int(position)
+                if not 0 <= position < total_items or position in seen:
+                    raise ValueError("Embedding result indices must be a permutation of the input")
+                seen.add(position)
+                batch_positions.append(position)
+            positions.append(batch_positions)
+
+        if len(seen) != total_items:
+            raise ValueError("Embedding results do not cover all input items")
+        if len(results) == 1 and positions[0] == list(range(total_items)):
+            return results[0]
+
+        assert dims is not None  # Every nonempty results list was validated above.
+        dtype = np.result_type(*(result.dtype for result in results))
+        reordered = np.empty((int(total_items), dims), dtype=dtype)
+        for batch_result, batch_positions in zip(results, positions):
+            reordered[batch_positions] = batch_result
         return reordered
 
     def plan_and_execute_tokenized(
@@ -265,36 +345,52 @@ class BatchPlanner:
         embed_fn: Callable[[TokenizedBatch], np.ndarray],
         depth: int = 0,
     ) -> np.ndarray:
-        """
-        Executes a sub-batch. If a memory allocation failure occurs, bisects the batch
-        up to max depth 3 (halves batch size) and retries.
+        """Bisect genuine allocation failures, after releasing failed forward frames.
+
+        Retry depth is capped at three. Keeping only the error text across the
+        handler boundary prevents the failed forward's activation arrays from
+        staying resident through its traceback while the smaller forwards run.
         """
         try:
             return embed_fn(batch)
-        except Exception as e:
-            if isinstance(e, OutOfMemoryError):
-                is_oom = True
-            else:
-                err_msg = str(e).lower()
-                is_oom = (
-                    "metal buffer allocation failed" in err_msg
-                    or ("metal" in err_msg and "out of memory" in err_msg)
-                    or ("[metal]" in err_msg and ("allocation" in err_msg or "memory" in err_msg))
-                    or ("mlx" in err_msg and "out of memory" in err_msg)
-                )
-            if is_oom:
-                # Reduce future batch token budget on OOM to prevent future failures
-                self._oom_halvings += 1
-                self.max_batch_tokens = max(512, self.max_batch_tokens // 2)
-                if len(batch) > 1 and depth < 3:
-                    mid = len(batch) // 2
-                    sub1 = batch.slice(list(range(0, mid)))
-                    sub2 = batch.slice(list(range(mid, len(batch))))
-                    res1 = self.execute_sub_batch_with_retry(sub1, embed_fn, depth=depth + 1)
-                    res2 = self.execute_sub_batch_with_retry(sub2, embed_fn, depth=depth + 1)
-                    return np.concatenate([res1, res2], axis=0)
-                raise OutOfMemoryError(f"Metal allocation failed during embedding forward pass: {e}")
-            raise
+        except Exception as exc:
+            if not self._is_allocation_failure(exc):
+                raise
+            error_text = str(exc)
+            exc.__traceback__ = None
+
+        # Do not move retries into the except block: sys.exception() itself
+        # retains the handled exception (and thus its failed forward frames).
+        self._oom_halvings += 1
+        self.max_batch_tokens = min(self.max_batch_tokens, max(512, self.max_batch_tokens // 2))
+        if len(batch) <= 1 or depth >= 3:
+            raise OutOfMemoryError(
+                f"Metal allocation failed during embedding forward pass: {error_text}"
+            ) from None
+
+        mid = len(batch) // 2
+        first = batch.slice(list(range(mid)))
+        second = batch.slice(list(range(mid, len(batch))))
+        first_result = self.execute_sub_batch_with_retry(first, embed_fn, depth=depth + 1)
+        second_result = self.execute_sub_batch_with_retry(second, embed_fn, depth=depth + 1)
+        return np.concatenate([first_result, second_result], axis=0)
+
+    @staticmethod
+    def _is_allocation_failure(exc: Exception) -> bool:
+        if isinstance(exc, (OutOfMemoryError, MemoryError)):
+            return True
+        # Native MLX allocation failures are RuntimeErrors. Validation, protocol,
+        # cancellation and deadline errors must not become retries based on text.
+        if not isinstance(exc, RuntimeError):
+            return False
+        message = str(exc).lower()
+        native_backend = "metal" in message or "mlx" in message
+        return native_backend and (
+            "out of memory" in message
+            or "buffer allocation failed" in message
+            or "failed to allocate" in message
+            or "unable to allocate" in message
+        )
 
     # Backwards compatible alias
     _execute_with_retry = execute_sub_batch_with_retry

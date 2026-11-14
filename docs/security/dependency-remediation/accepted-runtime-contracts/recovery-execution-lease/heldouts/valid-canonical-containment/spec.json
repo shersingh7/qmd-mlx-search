@@ -1,0 +1,8 @@
+{
+  "name": "valid-canonical-containment",
+  "positive": true,
+  "timeout": 5000,
+  "contained": true,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts/valid-canonical-containment",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py"
+}

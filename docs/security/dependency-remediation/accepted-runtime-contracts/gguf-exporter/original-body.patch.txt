@@ -1,0 +1,955 @@
+--- a/finetune/train.py
++++ b/finetune/train.py
+@@ -70,127 +70,26 @@
+ 
+ 
+ def export_gguf(model, tokenizer, output_dir: str, model_name: str):
+-    """Export model to GGUF at Q4_K_M, Q6_K, Q8_0 quantizations."""
+-    import shutil
++    """Export a complete Q4_K_M/Q6_K/Q8_0 set without installing dependencies."""
+     import tempfile
+-
+-    def run_checked(command, stage, **kwargs):
+-        result = subprocess.run(command, **kwargs)
+-        if result.returncode != 0:
+-            raise RuntimeError(f"GGUF export failed: {stage} exited with status {result.returncode}")
++    from gguf_toolchain import convert_model, prepare_toolchain
+ 
+     output_path = Path(output_dir)
+-    gguf_dir = output_path / "gguf"
+-    gguf_dir.mkdir(exist_ok=True)
+-
+-    # Save merged model to temp dir
+-    print("Saving merged model for GGUF conversion...")
+-    with tempfile.TemporaryDirectory() as tmp:
+-        merged_path = Path(tmp) / "merged"
++    output_path.mkdir(parents=True, exist_ok=True)
++    # Both tools and artifacts are fresh, private to this call, and cleaned on
++    # failure. Never replace previous exports until every process succeeded.
++    with tempfile.TemporaryDirectory(prefix=".gguf-convert-", dir=output_path) as tmp:
++        work = Path(tmp)
++        tools = prepare_toolchain(work / "tools")
++        merged_path = work / "merged"
++        print("Saving merged model for GGUF conversion...")
+         model.save_pretrained(merged_path, safe_serialization=True)
+         tokenizer.save_pretrained(merged_path)
+-
+-        # Setup llama.cpp
+-        llama_cpp = Path("/tmp/llama.cpp")
+-        if not llama_cpp.exists():
+-            print("Cloning llama.cpp...")
+-            run_checked(
+-                [
+-                    "git",
+-                    "clone",
+-                    "--depth",
+-                    "1",
+-                    "https://github.com/ggerganov/llama.cpp.git",
+-                    str(llama_cpp),
+-                ],
+-                "llama.cpp clone",
+-                capture_output=True,
+-            )
+-            run_checked(
+-                [
+-                    sys.executable,
+-                    "-m",
+-                    "pip",
+-                    "install",
+-                    "-q",
+-                    "-r",
+-                    str(llama_cpp / "requirements.txt"),
+-                ],
+-                "converter requirements installation",
+-                capture_output=True,
+-            )
+-
+-        # Build quantize tool if needed
+-        quantize_bin = llama_cpp / "build" / "bin" / "llama-quantize"
+-        if not quantize_bin.exists():
+-            print("Building llama-quantize...")
+-            build_dir = llama_cpp / "build"
+-            build_dir.mkdir(exist_ok=True)
+-            run_checked(
+-                [
+-                    "cmake",
+-                    "-B",
+-                    str(build_dir),
+-                    "-S",
+-                    str(llama_cpp),
+-                    "-DGGML_CUDA=OFF",
+-                ],
+-                "llama-quantize CMake configuration",
+-                capture_output=True,
+-            )
+-            run_checked(
+-                [
+-                    "cmake",
+-                    "--build",
+-                    str(build_dir),
+-                    "--target",
+-                    "llama-quantize",
+-                    "-j",
+-                    "4",
+-                ],
+-                "llama-quantize build",
+-                capture_output=True,
+-            )
+-
+-        # Convert to FP16 first
+-        fp16_file = gguf_dir / f"{model_name}-f16.gguf"
+-        print(f"Converting to FP16: {fp16_file}")
+-        log_out = Path("/tmp/qmd-gguf-convert.log")
+-        log_err = Path("/tmp/qmd-gguf-convert.err")
+-        with log_out.open("w") as out_f, log_err.open("w") as err_f:
+-            run_checked(
+-                [
+-                    sys.executable,
+-                    str(llama_cpp / "convert_hf_to_gguf.py"),
+-                    str(merged_path),
+-                    "--outfile",
+-                    str(fp16_file),
+-                    "--outtype",
+-                    "f16",
+-                ],
+-                f"HF-to-GGUF conversion (stdout: {log_out}; stderr: {log_err})",
+-                stdout=out_f,
+-                stderr=err_f,
+-                text=True,
+-            )
+-
+-        # Quantize to 4, 6, 8 bit
+-        for quant_type in ["Q4_K_M", "Q6_K", "Q8_0"]:
+-            out_file = gguf_dir / f"{model_name}-{quant_type.lower()}.gguf"
+-            print(f"Quantizing {quant_type}: {out_file}")
+-            run_checked(
+-                [str(quantize_bin), str(fp16_file), str(out_file), quant_type],
+-                f"{quant_type} quantization",
+-                capture_output=True,
+-            )
+-            if out_file.exists():
+-                size_mb = out_file.stat().st_size / (1024 * 1024)
+-                print(f"  {quant_type}: {size_mb:.1f} MB")
+-
+-        # Remove FP16 to save space
+-        if fp16_file.exists():
+-            fp16_file.unlink()
+-
++        files = convert_model(tools, merged_path, model_name)
++        gguf_dir = output_path / "gguf"
++        gguf_dir.mkdir(exist_ok=True)
++        for path in files:
++            path.replace(gguf_dir / path.name)
+     print(f"GGUF files saved to: {gguf_dir}")
+ 
+ 
+@@ -284,6 +183,10 @@
+         print("SFT Training Configuration:")
+         print(yaml.dump(cfg, default_flow_style=False))
+         return
++
++    # Validate the locked Python/native prerequisites before any data/model work.
++    from gguf_toolchain import check_prerequisites
++    check_prerequisites()
+ 
+     import torch
+     from datasets import load_dataset
+--- a/finetune/train_unsloth.py
++++ b/finetune/train_unsloth.py
+@@ -156,6 +156,9 @@
+         parser.error("--device cuda requires an available CUDA device")
+     if not use_cpu and not is_bitsandbytes_available():
+         parser.error("CUDA adamw_8bit requires bitsandbytes. Install the project Linux dependencies (or the standalone runner dependencies) before loading a model; use --device cpu only for intentional CPU runs.")
++    if not args.no_gguf:
++        from gguf_toolchain import check_prerequisites
++        check_prerequisites()
+     tokenizer = AutoTokenizer.from_pretrained(model_name)
+     if tokenizer.pad_token is None:
+         tokenizer.pad_token = tokenizer.eos_token
+--- a/finetune/convert_gguf.py
++++ b/finetune/convert_gguf.py
+@@ -60,8 +60,10 @@
+ 
+ import argparse
+ import os
+-import subprocess
+-import sys
++from pathlib import Path
++import tempfile
++
++from gguf_toolchain import convert_model, prepare_toolchain
+ 
+ import torch
+ from huggingface_hub import HfApi, login
+@@ -85,22 +87,6 @@
+         "ollama_name": "qmd-expand-4b",
+     },
+ }
+-
+-
+-def run_cmd(cmd, description):
+-    """Run a shell command with error handling."""
+-    print(f"  {description}...")
+-    try:
+-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+-        return True
+-    except subprocess.CalledProcessError as e:
+-        print(f"  FAILED: {' '.join(cmd)}")
+-        if e.stderr:
+-            print(f"  {e.stderr[:500]}")
+-        return False
+-    except FileNotFoundError:
+-        print(f"  Command not found: {cmd[0]}")
+-        return False
+ 
+ 
+ def main():
+@@ -133,79 +119,39 @@
+     print(f"QMD GGUF Conversion: {model_name}")
+     print("=" * 60)
+ 
+-    # Install build tools (for Colab/cloud environments)
+-    print("\nInstalling build dependencies...")
+-    subprocess.run(["apt-get", "update", "-qq"], capture_output=True)
+-    subprocess.run(["apt-get", "install", "-y", "-qq", "build-essential", "cmake", "git"], capture_output=True)
+-
+-    # Login
+-    hf_token = os.environ.get("HF_TOKEN")
+-    if hf_token:
+-        print("Logging in to HuggingFace...")
+-        login(token=hf_token)
+-
+-    # Step 1: Load and merge
+-    print(f"\nStep 1: Loading base model {base_model}...")
+-    model = AutoModelForCausalLM.from_pretrained(
+-        base_model, torch_dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
+-    )
+-
+-    print(f"Step 2: Merging SFT adapter {sft_model}...")
+-    model = PeftModel.from_pretrained(model, sft_model)
+-    model = model.merge_and_unload()
+-
+-    print(f"Step 3: Merging GRPO adapter {grpo_model}...")
+-    model = PeftModel.from_pretrained(model, grpo_model)
+-    model = model.merge_and_unload()
+-
+-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+-
+-    # Step 2: Save merged model
+-    merged_dir = "/tmp/merged_model"
+-    print(f"\nStep 4: Saving merged model to {merged_dir}...")
+-    model.save_pretrained(merged_dir, safe_serialization=True)
+-    tokenizer.save_pretrained(merged_dir)
+-
+-    # Step 3: Setup llama.cpp
+-    print("\nStep 5: Setting up llama.cpp...")
+-    if not os.path.exists("/tmp/llama.cpp"):
+-        run_cmd(["git", "clone", "--depth", "1", "https://github.com/ggerganov/llama.cpp.git", "/tmp/llama.cpp"],
+-                "Cloning llama.cpp")
+-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "/tmp/llama.cpp/requirements.txt"],
+-                   capture_output=True)
+-
+-    # Step 4: Convert to FP16 GGUF
+-    gguf_dir = "/tmp/gguf_output"
+-    os.makedirs(gguf_dir, exist_ok=True)
+-    gguf_file = f"{gguf_dir}/{model_name}-f16.gguf"
+-
+-    print(f"\nStep 6: Converting to FP16 GGUF...")
+-    if not run_cmd([sys.executable, "/tmp/llama.cpp/convert_hf_to_gguf.py",
+-                    merged_dir, "--outfile", gguf_file, "--outtype", "f16"],
+-                   "Converting"):
+-        sys.exit(1)
+-
+-    size_mb = os.path.getsize(gguf_file) / (1024 * 1024)
+-    print(f"  FP16: {size_mb:.1f} MB")
+-
+-    # Step 5: Quantize
+-    quantized_files = []
+-    if not args.skip_quantize:
+-        print("\nStep 7: Building quantize tool...")
+-        os.makedirs("/tmp/llama.cpp/build", exist_ok=True)
+-        run_cmd(["cmake", "-B", "/tmp/llama.cpp/build", "-S", "/tmp/llama.cpp", "-DGGML_CUDA=OFF"],
+-                "CMake configure")
+-        run_cmd(["cmake", "--build", "/tmp/llama.cpp/build", "--target", "llama-quantize", "-j", "4"],
+-                "Building llama-quantize")
+-        quantize_bin = "/tmp/llama.cpp/build/bin/llama-quantize"
+-
+-        print("\nStep 8: Quantizing...")
+-        for quant_type, desc in [("Q4_K_M", "4-bit"), ("Q5_K_M", "5-bit"), ("Q8_0", "8-bit")]:
+-            qfile = f"{gguf_dir}/{model_name}-{quant_type.lower()}.gguf"
+-            if run_cmd([quantize_bin, gguf_file, qfile, quant_type], f"{quant_type} ({desc})"):
+-                qsize = os.path.getsize(qfile) / (1024 * 1024)
+-                print(f"  {quant_type}: {qsize:.1f} MB")
+-                quantized_files.append((qfile, quant_type))
++    # Source checkout, dependency import check and (unless skipped) native build
++    # all succeed before model loading/merging. No apt/pip environment mutation.
++    with tempfile.TemporaryDirectory(prefix="qmd-gguf-convert-") as tmp:
++        work = Path(tmp)
++        tools = prepare_toolchain(work / "tools", quantize=not args.skip_quantize)
++        hf_token = os.environ.get("HF_TOKEN")
++        if hf_token:
++            print("Logging in to HuggingFace...")
++            login(token=hf_token)
++        print(f"Loading base model {base_model}...")
++        model = AutoModelForCausalLM.from_pretrained(
++            base_model, dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
++        )
++        print(f"Merging SFT adapter {sft_model}...")
++        model = PeftModel.from_pretrained(model, sft_model).merge_and_unload()
++        print(f"Merging GRPO adapter {grpo_model}...")
++        model = PeftModel.from_pretrained(model, grpo_model).merge_and_unload()
++        tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
++        merged_dir = work / "merged"
++        model.save_pretrained(merged_dir, safe_serialization=True)
++        tokenizer.save_pretrained(merged_dir)
++        files = convert_model(tools, merged_dir, model_name,
++                              quantize=not args.skip_quantize, keep_f16=True)
++        # Preserve the CLI's local output, but publish only a fully successful
++        # fresh set, never an output from a failed process or an earlier run.
++        # A unique private destination also avoids symlink/stale-file reuse in
++        # a shared system temporary directory. Its path is reported below.
++        gguf_dir = Path(tempfile.mkdtemp(prefix="qmd-gguf-output-"))
++        for path in files:
++            path.replace(gguf_dir / path.name)
++    gguf_file = str(gguf_dir / f"{model_name}-f16.gguf")
++    quantized_files = [(str(gguf_dir / f"{model_name}-{quant.lower()}.gguf"), quant)
++                       for quant in ("Q4_K_M", "Q6_K", "Q8_0")] if not args.skip_quantize else []
+ 
+     # Step 6: Upload
+     if not args.no_upload:
+@@ -244,7 +190,9 @@
+         api.upload_file(path_or_fileobj=readme.encode(),
+                         path_in_repo="README.md", repo_id=output_repo)
+ 
+-    print(f"\nDone! Repository: https://huggingface.co/{output_repo}")
++    print(f"\nGGUF files saved to: {gguf_dir}")
++    if not args.no_upload:
++        print(f"Done! Repository: https://huggingface.co/{output_repo}")
+ 
+ 
+ if __name__ == "__main__":
+--- /dev/null
++++ b/finetune/gguf_toolchain.py
+@@ -0,0 +1,187 @@
++"""Pinned llama.cpp tooling; never install into the caller's Python environment.
++
++The project/PEP 723 lock provisions the converter's Python dependencies. Upstream
++requirements pin an older training stack and MUST NOT be installed at runtime.
++Only an immutable, fresh, call-owned source checkout is executed or compiled.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++import importlib
++import os
++from pathlib import Path
++import shutil
++import subprocess
++import sys
++
++SOURCE_URL = "https://github.com/ggml-org/llama.cpp.git"
++SOURCE_REVISION = "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
++QUANTIZATIONS = ("Q4_K_M", "Q6_K", "Q8_0")
++
++
++def check_prerequisites(*, quantize: bool = True) -> dict[str, str]:
++    """Fail before model/dataset loading, without an installer or environment edits."""
++    for name in ("torch", "transformers", "numpy", "gguf", "yaml", "tqdm",
++                 "safetensors", "sentencepiece", "sentencepiece.sentencepiece_model_pb2"):
++        try:
++            importlib.import_module(name)
++        except ImportError as exc:
++            raise RuntimeError(
++                f"GGUF export prerequisite missing: {name}. Provision the reviewed "
++                "project/script lock before starting; runtime package installation is disabled."
++            ) from exc
++    required = ("git", "cmake", "cc", "c++", "make") if quantize else ("git",)
++    tools = {}
++    for name in required:
++        path = shutil.which(name)
++        if path is None:
++            raise RuntimeError(
++                f"GGUF export prerequisite missing: {name}. Provision native build tools "
++                "(and the lock's cmake package) before starting; no apt/pip bootstrap is performed."
++            )
++        tools[name] = path
++    return tools
++
++
++def run_checked(command, stage, **kwargs):
++    """Status is authoritative even if a failed process leaves an output file."""
++    result = subprocess.run(command, **kwargs)
++    if result.returncode != 0:
++        detail = getattr(result, "stderr", "") or getattr(result, "stdout", "") or ""
++        if isinstance(detail, bytes):
++            detail = detail.decode("utf-8", errors="replace")
++        raise RuntimeError(f"GGUF export failed: {stage} exited with status {result.returncode}\n{detail[-2000:]}")
++    return result
++
++
++@dataclass(frozen=True)
++class Toolchain:
++    work: Path
++    source: Path
++    quantizer: Path | None
++    env: dict[str, str]
++
++
++def prepare_toolchain(work: Path, *, quantize: bool = True) -> Toolchain:
++    """Fetch a pinned revision and build CPU-only tools in a new owned directory.
++
++    The caller owns/cleans `work`; it must not already exist. In particular, no
++    shared /tmp/llama.cpp checkout, unverified binary or mutable branch is reused.
++    """
++    commands = check_prerequisites(quantize=quantize)
++    work = Path(work)
++    work.mkdir()
++    source = work / "llama.cpp"
++    source.mkdir()
++    git_env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
++    git_env.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0")
++    git = [commands["git"], "-c", f"core.hooksPath={os.devnull}", "-c", "credential.helper="]
++    common = dict(capture_output=True, text=True, env=git_env, timeout=600)
++    run_checked([*git, "init", str(source)], "source initialization", **common)
++    run_checked([*git, "-C", str(source), "fetch", "--depth", "1", SOURCE_URL, SOURCE_REVISION],
++                "pinned source fetch", **common)
++    run_checked([*git, "-C", str(source), "checkout", "--detach", SOURCE_REVISION],
++                "pinned source checkout", **common)
++    revision = run_checked([*git, "-C", str(source), "rev-parse", "HEAD"],
++                           "source revision verification", **common)
++    if revision.stdout.strip() != SOURCE_REVISION:
++        raise RuntimeError("GGUF export failed: source revision does not match the reviewed pin")
++
++    # Force the pinned checkout's matching gguf-py, not a caller override or an
++    # unrelated installed version. Do not load user-site modules in the child.
++    env = {key: value for key, value in os.environ.items()
++           if key not in {"NO_LOCAL_GGUF", "PYTHONPATH", "PYTHONHOME"}}
++    env.update(PYTHONNOUSERSITE="1", PYTHONDONTWRITEBYTECODE="1")
++    run_checked([sys.executable, "-s", str(source / "convert_hf_to_gguf.py"), "--help"],
++                "converter import/API preflight", capture_output=True, text=True, env=env, timeout=180)
++    quantizer = None
++    if quantize:
++        build = work / "build"
++        run_checked([
++            commands["cmake"], "-B", str(build), "-S", str(source), "-G", "Unix Makefiles",
++            f"-DCMAKE_C_COMPILER={commands['cc']}", f"-DCMAKE_CXX_COMPILER={commands['c++']}",
++            f"-DCMAKE_MAKE_PROGRAM={commands['make']}",
++            "-DCMAKE_BUILD_TYPE=Release", "-DGGML_CUDA=OFF", "-DGGML_METAL=OFF",
++            "-DGGML_OPENMP=OFF", "-DLLAMA_OPENSSL=OFF", "-DLLAMA_BUILD_TESTS=OFF",
++            "-DLLAMA_BUILD_EXAMPLES=OFF", "-DLLAMA_BUILD_SERVER=OFF", "-DLLAMA_BUILD_APP=OFF",
++            "-DLLAMA_BUILD_UI=OFF", "-DLLAMA_CONNECT=OFF",
++        ], "llama-quantize CMake configuration", capture_output=True, text=True, env=env, timeout=300)
++        run_checked([commands["cmake"], "--build", str(build), "--target", "llama-quantize", "-j", "2"],
++                    "llama-quantize build", capture_output=True, text=True, env=env, timeout=1800)
++        quantizer = build / "bin" / "llama-quantize"
++        if not quantizer.is_file():
++            raise RuntimeError("GGUF export failed: build did not produce llama-quantize")
++    return Toolchain(work, source, quantizer, env)
++
++
++def validate_gguf(path: Path) -> None:
++    if not path.is_file() or path.stat().st_size <= 4:
++        raise RuntimeError(f"GGUF export failed: missing or empty artifact {path.name}")
++    with path.open("rb") as stream:
++        if stream.read(4) != b"GGUF":
++            raise RuntimeError(f"GGUF export failed: invalid GGUF artifact {path.name}")
++
++
++def conversion_flags(merged: Path) -> list[str]:
++    """Use the pinned converter's target-only API for Qwen3.5 without MTP.
++
++    Transformers' text CausalLM save may contain no speculative MTP tensors.
++    The pinned upstream otherwise asserts when inferring zero MTP layers. Read
++    only safetensors key metadata; never invent MTP weights or discard real ones.
++    """
++    import json
++    from safetensors import safe_open
++
++    config_path = merged / "config.json"
++    if not config_path.is_file():
++        return []  # The converter remains authoritative for an invalid model.
++    config = json.loads(config_path.read_text())
++    if not set(config.get("architectures", ())) & {"Qwen3_5ForCausalLM", "Qwen3_5ForConditionalGeneration"}:
++        return []
++    shards = list(merged.glob("*.safetensors"))
++    if not shards:
++        return []
++    for shard in shards:
++        with safe_open(shard, framework="pt", device="cpu") as tensors:
++            if any(name.startswith(("mtp.", "model.mtp.")) for name in tensors.keys()):
++                return []
++    print("No Qwen3.5 MTP tensors saved; exporting the standard text target (--no-mtp).")
++    return ["--no-mtp"]
++
++
++def convert_model(toolchain: Toolchain, merged: Path, model_name: str, *,
++                  quantize: bool = True, keep_f16: bool = False) -> list[Path]:
++    """Return only a complete fresh artifact set; never publish partial outputs."""
++    if Path(model_name).name != model_name or model_name in {"", ".", ".."}:
++        raise ValueError("GGUF model_name must be a filename component")
++    output = toolchain.work / "gguf"
++    output.mkdir()
++    fp16 = output / f"{model_name}-f16.gguf"
++    log_out, log_err = toolchain.work / "converter.stdout", toolchain.work / "converter.stderr"
++    try:
++        with log_out.open("w") as out, log_err.open("w") as err:
++            run_checked([sys.executable, "-s", str(toolchain.source / "convert_hf_to_gguf.py"),
++                         str(merged), "--outfile", str(fp16), "--outtype", "f16", *conversion_flags(merged)],
++                        "HF-to-GGUF conversion", stdout=out, stderr=err, text=True,
++                        env=toolchain.env)
++    except RuntimeError as exc:
++        # Logs are call-owned and may be cleaned on exception; preserve a bounded
++        # diagnostic in the exception rather than pointing at deleted log files.
++        with log_err.open("rb") as stream:
++            stream.seek(max(0, log_err.stat().st_size - 2000))
++            detail = stream.read().decode("utf-8", errors="replace")
++        raise RuntimeError(f"{exc}\n{detail}") from exc
++    validate_gguf(fp16)
++    files = [fp16] if keep_f16 or not quantize else []
++    if quantize:
++        if toolchain.quantizer is None:
++            raise RuntimeError("GGUF export failed: quantizer was not prepared")
++        for quant in QUANTIZATIONS:
++            target = output / f"{model_name}-{quant.lower()}.gguf"
++            run_checked([str(toolchain.quantizer), str(fp16), str(target), quant],
++                        f"{quant} quantization", capture_output=True, text=True, env=toolchain.env)
++            validate_gguf(target)
++            files.append(target)
++    if fp16 not in files:
++        fp16.unlink()
++    return files
+--- a/finetune/tests/test_finetune_correctness.py
++++ b/finetune/tests/test_finetune_correctness.py
+@@ -20,7 +20,7 @@
+ FAKE_GGUF = b"GGUF\x00EXPLICIT FAKE successful conversion; not model weights"
+ FAKE_PARTIAL = b"GGUF\x00EXPLICIT FAKE partial output from a FAILED process"
+ FAKE_STALE = b"GGUF\x00EXPLICIT FAKE previous export; must survive failed export"
+-STAGES = ("clone", "requirements", "configure", "build", "converter", *QUANTS)
++STAGES = ("init", "fetch", "checkout", "revision", "probe", "configure", "build", "converter", *QUANTS)
+ 
+ 
+ def load_module(name):
+@@ -97,47 +97,55 @@
+     import transformers as tf
+     import trl
+ 
++    import gguf_toolchain as tools
+     events = []
+-    llama = tmp_path / "EXPLICIT-FAKE-llama.cpp"
+-    quantize = llama / "build/bin/llama-quantize"
+-    log_out = tmp_path / "EXPLICIT-FAKE-converter.stdout"
+-    log_err = tmp_path / "EXPLICIT-FAKE-converter.stderr"
++    llama = quantize = None
+     original_upload = inspect.signature(hub.HfApi.upload_file)
+-
+-    def mapped_path(*parts):
+-        path = Path(*parts)
+-        return {
+-            "/tmp/llama.cpp": llama,
+-            "/tmp/qmd-gguf-convert.log": log_out,
+-            "/tmp/qmd-gguf-convert.err": log_err,
+-        }.get(str(path), path)
++    monkeypatch.setattr(tools, "check_prerequisites", lambda **kwargs: {
++        "git": "git", "cmake": "cmake", "cc": "cc", "c++": "c++", "make": "make",
++    })
+ 
+     def process(argv, **kwargs):
++        nonlocal llama, quantize
+         argv = list(map(str, argv))
+         artifact = None
++        stdout = ""
+         if argv[0] == "git":
+-            assert argv == ["git", "clone", "--depth", "1", "https://github.com/ggerganov/llama.cpp.git", str(llama)]
+-            stage = "clone"
+-            # A failed clone may still leave a directory; status is authoritative.
+-            llama.mkdir()
+-        elif argv[:4] == [sys.executable, "-m", "pip", "install"]:
+-            assert argv[4:] == ["-q", "-r", str(llama / "requirements.txt")]
+-            stage = "requirements"
++            if "init" in argv:
++                stage = "init"
++                llama = Path(argv[-1])
++                assert llama.is_dir() and llama.parent.name == "tools"
++            elif "fetch" in argv:
++                stage = "fetch"
++                assert argv[-4:] == ["--depth", "1", tools.SOURCE_URL, tools.SOURCE_REVISION]
++            elif "checkout" in argv:
++                stage = "checkout"
++                assert argv[-2:] == ["--detach", tools.SOURCE_REVISION]
++                (llama / "convert_hf_to_gguf.py").write_text("EXPLICIT FAKE; never executed")
++            else:
++                assert argv[-2:] == ["rev-parse", "HEAD"]
++                stage = "revision"
++                stdout = tools.SOURCE_REVISION + "\n"
+         elif argv[:2] == ["cmake", "-B"]:
+-            assert argv == ["cmake", "-B", str(llama / "build"), "-S", str(llama), "-DGGML_CUDA=OFF"]
+             stage = "configure"
++            assert "-DGGML_CUDA=OFF" in argv and "-DGGML_METAL=OFF" in argv
++            quantize = Path(argv[2]) / "bin/llama-quantize"
+         elif argv[:2] == ["cmake", "--build"]:
+-            assert argv == ["cmake", "--build", str(llama / "build"), "--target", "llama-quantize", "-j", "4"]
++            assert argv[-4:] == ["--target", "llama-quantize", "-j", "2"]
+             stage = "build"
+             quantize.parent.mkdir(parents=True, exist_ok=True)
+             quantize.write_text("EXPLICIT FAKE executable placeholder; NEVER EXECUTED")
+-        elif len(argv) > 1 and argv[1] == str(llama / "convert_hf_to_gguf.py"):
+-            assert argv[0] == sys.executable
+-            assert Path(argv[2]).name == "merged" and Path(argv[2]).is_dir()
+-            assert kwargs["stdout"].name == str(log_out) and kwargs["stderr"].name == str(log_err)
+-            stage = "converter"
+-            artifact = Path(argv[argv.index("--outfile") + 1])
+-        elif argv[0] == str(quantize):
++        elif llama is not None and len(argv) > 2 and argv[2] == str(llama / "convert_hf_to_gguf.py"):
++            assert argv[:2] == [sys.executable, "-s"]
++            if argv[-1] == "--help":
++                stage = "probe"
++            else:
++                assert Path(argv[3]).name == "merged" and Path(argv[3]).is_dir()
++                assert Path(kwargs["stdout"].name).name == "converter.stdout"
++                assert Path(kwargs["stderr"].name).name == "converter.stderr"
++                stage = "converter"
++                artifact = Path(argv[argv.index("--outfile") + 1])
++        elif quantize is not None and argv[0] == str(quantize):
+             assert argv[-1].lower() in QUANTS and Path(argv[1]).read_bytes() == FAKE_GGUF
+             stage = argv[-1].lower()
+             artifact = Path(argv[2])
+@@ -155,7 +163,7 @@
+             raise process_error
+         # Explicit returncode checks must work even with a process fake that
+         # does not implement subprocess.run(check=True) on the caller's behalf.
+-        return NS(returncode=rc)
++        return NS(returncode=rc, stdout=stdout, stderr="EXPLICIT FAKE process failure" if rc else "")
+ 
+     def save(where, **kwargs):
+         events.append(("FAKE model/tokenizer save", str(where)))
+@@ -192,7 +200,6 @@
+             events.append(("FAKE GGUF upload", kwargs["path_in_repo"]))
+             return NS(oid="EXPLICIT-FAKE-no-remote-commit")
+ 
+-    monkeypatch.setattr(train, "Path", mapped_path)
+     monkeypatch.setattr(subprocess, "run", process)
+     monkeypatch.setattr(tf.AutoModelForCausalLM, "from_pretrained", lambda *a, **k: model)
+     monkeypatch.setattr(tf.AutoTokenizer, "from_pretrained", lambda *a, **k: tokenizer)
+@@ -213,8 +220,8 @@
+ 
+ 
+ @pytest.mark.parametrize("stage,partial", [
+-    *((stage, False) for stage in STAGES[:4]),
+-    *((stage, partial) for stage in STAGES[4:] for partial in (False, True)),
++    *((stage, False) for stage in STAGES[:7]),
++    *((stage, partial) for stage in STAGES[7:] for partial in (False, True)),
+ ])
+ def test_failed_export_process_never_moves_uploads_evaluates_or_reports_done(
+     tmp_path, monkeypatch, capsys, stage, partial
+--- /dev/null
++++ b/finetune/tests/test_gguf_toolchain.py
+@@ -0,0 +1,309 @@
++"""GGUF cold-start contracts; process outputs here are explicit routing fakes.
++
++Real offline synthetic-model conversion is qualified separately, not simulated
++by the GGUF-prefixed fake bytes in these portable failure-routing tests.
++"""
++from __future__ import annotations
++
++import importlib.util
++from pathlib import Path
++import subprocess
++import sys
++from types import SimpleNamespace as NS
++
++import pytest
++
++import gguf_toolchain as tools
++
++ROOT = Path(__file__).resolve().parents[1]
++FAKE_GGUF = b"GGUF\x00EXPLICIT FAKE process output; not a usable model"
++STAGES = ("init", "fetch", "checkout", "revision", "probe", "configure", "build",
++          "converter", "q4_k_m", "q6_k", "q8_0")
++
++
++def fake_processes(monkeypatch, *, failure=None, partial=False):
++    events = []
++    monkeypatch.setattr(tools, "check_prerequisites", lambda **kwargs: {
++        "git": "git", "cmake": "cmake", "cc": "cc", "c++": "c++", "make": "make",
++    })
++
++    def run(argv, **kwargs):
++        argv = list(map(str, argv))
++        artifact = None
++        stdout = ""
++        if argv[0] == "git":
++            if "init" in argv:
++                stage = "init"
++            elif "fetch" in argv:
++                stage = "fetch"
++                assert argv[-2:] == [tools.SOURCE_URL, tools.SOURCE_REVISION]
++            elif "checkout" in argv:
++                stage = "checkout"
++                assert argv[-1] == tools.SOURCE_REVISION
++                source = Path(argv[argv.index("-C") + 1])
++                (source / "convert_hf_to_gguf.py").write_text("EXPLICIT FAKE; never executed")
++            else:
++                assert argv[-2:] == ["rev-parse", "HEAD"]
++                stage = "revision"
++                stdout = tools.SOURCE_REVISION + "\n"
++            assert kwargs["env"]["GIT_TERMINAL_PROMPT"] == "0"
++            assert kwargs["env"]["GIT_CONFIG_GLOBAL"] == tools.os.devnull
++        elif "convert_hf_to_gguf.py" in " ".join(argv):
++            assert argv[:2] == [sys.executable, "-s"]
++            assert "NO_LOCAL_GGUF" not in kwargs["env"]
++            assert "PYTHONPATH" not in kwargs["env"]
++            stage = "probe" if argv[-1] == "--help" else "converter"
++            if stage == "converter":
++                artifact = Path(argv[argv.index("--outfile") + 1])
++        elif argv[:2] == ["cmake", "-B"]:
++            stage = "configure"
++            assert "-DGGML_CUDA=OFF" in argv and "-DGGML_METAL=OFF" in argv
++            assert "-DLLAMA_BUILD_SERVER=OFF" in argv and "-DLLAMA_BUILD_APP=OFF" in argv
++            assert "-DLLAMA_OPENSSL=OFF" in argv
++        elif argv[:2] == ["cmake", "--build"]:
++            stage = "build"
++            assert argv[-2:] == ["-j", "2"]
++            binary = Path(argv[2]) / "bin/llama-quantize"
++            binary.parent.mkdir(parents=True)
++            binary.write_text("EXPLICIT FAKE; never executed")
++        elif argv[0].endswith("llama-quantize"):
++            stage = argv[-1].lower()
++            assert Path(argv[1]).read_bytes() == FAKE_GGUF
++            artifact = Path(argv[2])
++        else:
++            raise AssertionError(f"Unexpected external command {argv}")
++        events.append(stage)
++        code = 17 if stage == failure else 0
++        if artifact is not None and (not code or partial):
++            artifact.write_bytes(FAKE_GGUF)
++        return NS(returncode=code, stdout=stdout, stderr="EXPLICIT FAKE process failure" if code else "")
++
++    monkeypatch.setattr(subprocess, "run", run)
++    return events
++
++
++@pytest.mark.parametrize("stage", STAGES)
++@pytest.mark.parametrize("partial", [False, True])
++def test_every_toolchain_stage_is_authoritative_before_publication(tmp_path, monkeypatch, stage, partial):
++    events = fake_processes(monkeypatch, failure=stage, partial=partial)
++    merged = tmp_path / "merged"
++    merged.mkdir()
++    with pytest.raises(RuntimeError, match="GGUF export failed:.*17"):
++        toolchain = tools.prepare_toolchain(tmp_path / "owned-tools")
++        tools.convert_model(toolchain, merged, "fixture")
++    assert events == list(STAGES[:STAGES.index(stage) + 1])
++
++
++def test_no_pip_install_mutable_head_or_inherited_python_override(tmp_path, monkeypatch):
++    monkeypatch.setenv("PYTHONPATH", str(tmp_path / "untrusted"))
++    monkeypatch.setenv("NO_LOCAL_GGUF", "1")
++    events = fake_processes(monkeypatch)
++    merged = tmp_path / "merged"
++    merged.mkdir()
++    toolchain = tools.prepare_toolchain(tmp_path / "owned-tools")
++    files = tools.convert_model(toolchain, merged, "fixture")
++    assert events == list(STAGES)
++    assert [path.name for path in files] == [f"fixture-{q.lower()}.gguf" for q in tools.QUANTIZATIONS]
++    assert all(path.read_bytes() == FAKE_GGUF for path in files)
++    assert not (toolchain.work / "gguf/fixture-f16.gguf").exists()
++
++
++def test_wrong_source_identity_cannot_reach_converter_or_build(tmp_path, monkeypatch):
++    events = fake_processes(monkeypatch)
++    original = subprocess.run
++
++    def wrong_revision(argv, **kwargs):
++        result = original(argv, **kwargs)
++        if "rev-parse" in argv:
++            result.stdout = "0" * 40 + "\n"
++        return result
++
++    monkeypatch.setattr(subprocess, "run", wrong_revision)
++    with pytest.raises(RuntimeError, match="source revision"):
++        tools.prepare_toolchain(tmp_path / "owned-tools")
++    assert events == list(STAGES[:4])
++
++
++def test_skip_quantize_needs_no_native_build_and_keeps_f16(tmp_path, monkeypatch):
++    events = fake_processes(monkeypatch)
++    merged = tmp_path / "merged"
++    merged.mkdir()
++    toolchain = tools.prepare_toolchain(tmp_path / "owned-tools", quantize=False)
++    files = tools.convert_model(toolchain, merged, "fixture", quantize=False, keep_f16=True)
++    assert events == ["init", "fetch", "checkout", "revision", "probe", "converter"]
++    assert [path.name for path in files] == ["fixture-f16.gguf"]
++
++
++def test_existing_tool_directory_is_not_reused(tmp_path, monkeypatch):
++    fake_processes(monkeypatch)
++    owned = tmp_path / "owned-tools"
++    owned.mkdir()
++    with pytest.raises(FileExistsError):
++        tools.prepare_toolchain(owned)
++
++
++@pytest.mark.parametrize("missing", ["sentencepiece.sentencepiece_model_pb2", "numpy"])
++def test_missing_python_dependency_fails_without_install_or_model_work(monkeypatch, missing):
++    real_import = tools.importlib.import_module
++
++    def import_module(name):
++        if name == missing:
++            raise ImportError("EXPLICIT missing package")
++        return real_import(name)
++
++    monkeypatch.setattr(tools, "importlib", NS(import_module=import_module))
++    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail("Must not run an installer"))
++    with pytest.raises(RuntimeError, match="GGUF.*prerequisite"):
++        tools.check_prerequisites()
++
++
++@pytest.mark.parametrize("missing", ["git", "cmake", "cc", "c++", "make"])
++def test_missing_native_prerequisite_fails_without_installer(monkeypatch, missing):
++    monkeypatch.setattr(tools.shutil, "which", lambda name: None if name == missing else "/EXPLICIT/" + name)
++    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail("Must not install system packages"))
++    with pytest.raises(RuntimeError, match="GGUF.*prerequisite"):
++        tools.check_prerequisites()
++
++
++def test_missing_prerequisite_is_before_native_model_load(tmp_path, monkeypatch):
++    import transformers
++    failure = RuntimeError("GGUF prerequisite missing: EXPLICIT FAKE cmake")
++    monkeypatch.setattr(tools, "check_prerequisites", lambda **k: (_ for _ in ()).throw(failure))
++    monkeypatch.setattr(transformers.AutoTokenizer, "from_pretrained", lambda *a, **k: pytest.fail("Tokenizer was loaded"))
++    monkeypatch.setattr(transformers.AutoModelForCausalLM, "from_pretrained", lambda *a, **k: pytest.fail("Model was loaded"))
++    spec = importlib.util.spec_from_file_location("cold_native", ROOT / "train_unsloth.py")
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    monkeypatch.setattr(sys, "argv", ["train_unsloth.py", "--model", "0.8B", "--device", "cpu"])
++    with pytest.raises(RuntimeError) as caught:
++        module.main()
++    assert caught.value is failure
++
++
++def test_missing_prerequisite_is_before_yaml_trainer_or_dataset(tmp_path, monkeypatch):
++    import train
++    import datasets
++    cfg = tmp_path / "config.yaml"
++    cfg.write_text("model: {base: EXPLICIT-FAKE, output: outputs/fixture}\n")
++    failure = RuntimeError("GGUF prerequisite missing: EXPLICIT FAKE cmake")
++    monkeypatch.setattr(tools, "check_prerequisites", lambda **k: (_ for _ in ()).throw(failure))
++    monkeypatch.setattr(datasets, "load_dataset", lambda *a, **k: pytest.fail("Dataset was loaded"))
++    with pytest.raises(RuntimeError) as caught:
++        train.cmd_sft(NS(config=str(cfg), dry_run=False))
++    assert caught.value is failure
++
++
++@pytest.mark.parametrize("stage", STAGES)
++@pytest.mark.parametrize("partial", [False, True])
++def test_standalone_failure_never_uploads_reports_success_or_replaces_old_outputs(
++    tmp_path, monkeypatch, capsys, stage, partial
++):
++    import convert_gguf as cli
++    events = fake_processes(monkeypatch, failure=stage, partial=partial)
++    model_events = []
++
++    def save(path, **kwargs):
++        Path(path).mkdir(parents=True, exist_ok=True)
++
++    model = NS(save_pretrained=save)
++    model.merge_and_unload = lambda: model
++    tokenizer = NS(save_pretrained=save)
++    monkeypatch.setattr(cli.AutoModelForCausalLM, "from_pretrained", lambda *a, **k: (model_events.append("model") or model))
++    monkeypatch.setattr(cli.AutoTokenizer, "from_pretrained", lambda *a, **k: tokenizer)
++    monkeypatch.setattr(cli.PeftModel, "from_pretrained", lambda *a, **k: model)
++    monkeypatch.setattr(cli, "HfApi", lambda: pytest.fail("Must not upload any artifact after a failed process"))
++    monkeypatch.setattr(cli, "login", lambda **k: pytest.fail("Must not authenticate in offline test"))
++    monkeypatch.setattr(cli.tempfile, "gettempdir", lambda: str(tmp_path))
++    monkeypatch.setattr(sys, "argv", ["convert_gguf.py", "--size", "1.7B", "--output", "fixture/NEVER-WRITTEN-gguf"])
++    old = tmp_path / "gguf_output"
++    old.mkdir()
++    for quant in ("f16", "q4_k_m", "q6_k", "q8_0"):
++        (old / f"NEVER-WRITTEN-{quant}.gguf").write_bytes(b"EXPLICIT STALE output; must survive failure")
++    with pytest.raises(RuntimeError, match="GGUF export failed:.*17"):
++        cli.main()
++    assert events == list(STAGES[:STAGES.index(stage) + 1])
++    assert model_events == ([] if STAGES.index(stage) < 7 else ["model"])
++    assert all(path.read_bytes() == b"EXPLICIT STALE output; must survive failure" for path in old.iterdir())
++    assert not list(tmp_path.glob("qmd-gguf-convert-*"))
++    assert "Done!" not in capsys.readouterr().out
++
++
++@pytest.mark.parametrize("skip", [False, True])
++def test_standalone_success_uploads_only_complete_current_q4_q6_q8_or_f16(tmp_path, monkeypatch, skip):
++    import convert_gguf as cli
++    events = fake_processes(monkeypatch)
++    uploads = []
++
++    def save(path, **kwargs):
++        Path(path).mkdir(parents=True, exist_ok=True)
++
++    model = NS(save_pretrained=save)
++    model.merge_and_unload = lambda: model
++    tokenizer = NS(save_pretrained=save)
++    monkeypatch.setattr(cli.AutoModelForCausalLM, "from_pretrained", lambda *a, **k: model)
++    monkeypatch.setattr(cli.AutoTokenizer, "from_pretrained", lambda *a, **k: tokenizer)
++    monkeypatch.setattr(cli.PeftModel, "from_pretrained", lambda *a, **k: model)
++
++    class FakeApi:
++        def create_repo(self, **kwargs):
++            assert kwargs["repo_id"] == "fixture/NEVER-WRITTEN-gguf" and kwargs["repo_type"] == "model"
++
++        def upload_file(self, **kwargs):
++            if kwargs["path_in_repo"] != "README.md":
++                assert Path(kwargs["path_or_fileobj"]).read_bytes() == FAKE_GGUF
++                uploads.append(kwargs["path_in_repo"])
++
++    monkeypatch.setattr(cli, "HfApi", FakeApi)
++    monkeypatch.setattr(cli.tempfile, "gettempdir", lambda: str(tmp_path))
++    monkeypatch.setattr(sys, "argv", ["convert_gguf.py", "--size", "1.7B", "--output", "fixture/NEVER-WRITTEN-gguf",
++                                      *(["--skip-quantize"] if skip else [])])
++    cli.main()
++    quants = ("f16",) if skip else ("f16", "q4_k_m", "q6_k", "q8_0")
++    assert uploads == [f"NEVER-WRITTEN-{q}.gguf" for q in quants]
++    assert not list(tmp_path.glob("qmd-gguf-convert-*"))
++    assert events == (["init", "fetch", "checkout", "revision", "probe", "converter"] if skip else list(STAGES))
++
++
++@pytest.mark.parametrize("stage", ["converter", "q4_k_m", "q6_k", "q8_0"])
++@pytest.mark.parametrize("contents", [None, b"", b"BAD not GGUF"])
++def test_zero_exit_missing_empty_or_invalid_artifacts_are_not_success(tmp_path, monkeypatch, stage, contents):
++    fake_processes(monkeypatch)
++    original = subprocess.run
++
++    def invalid_output(argv, **kwargs):
++        proc = original(argv, **kwargs)
++        argv = list(map(str, argv))
++        artifact = None
++        if stage == "converter" and "--outfile" in argv:
++            artifact = Path(argv[argv.index("--outfile") + 1])
++        elif argv[0].endswith("llama-quantize") and argv[-1].lower() == stage:
++            artifact = Path(argv[2])
++        if artifact is not None:
++            if contents is None:
++                artifact.unlink()
++            else:
++                artifact.write_bytes(contents)
++        return proc
++
++    monkeypatch.setattr(subprocess, "run", invalid_output)
++    toolchain = tools.prepare_toolchain(tmp_path / "owned-tools")
++    merged = tmp_path / "merged"
++    merged.mkdir()
++    with pytest.raises(RuntimeError, match="GGUF export failed:"):
++        tools.convert_model(toolchain, merged, "fixture")
++
++
++@pytest.mark.parametrize("arch,mtp,expected", [
++    ("Qwen3ForCausalLM", False, []),
++    ("Qwen3_5ForCausalLM", False, ["--no-mtp"]),
++    ("Qwen3_5ForConditionalGeneration", True, []),
++])
++def test_qwen35_saved_without_mtp_uses_upstream_target_only_api(tmp_path, arch, mtp, expected):
++    """Genuine tiny tensor metadata, not a converter/model-success simulation."""
++    import json
++    import torch
++    from safetensors.torch import save_file
++    (tmp_path / "config.json").write_text(json.dumps({"architectures": [arch]}))
++    name = "mtp.layers.0.fixture.weight" if mtp else "model.layers.0.fixture.weight"
++    save_file({name: torch.zeros((2, 2))}, tmp_path / "model.safetensors")
++    assert tools.conversion_flags(tmp_path) == expected

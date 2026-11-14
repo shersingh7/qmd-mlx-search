@@ -32,19 +32,47 @@ These feed into QMD's three search backends:
 - **`vec:`** lines go to vector similarity search (natural language phrases)
 - **`hyde:`** is a hypothetical document passage for embedding-based retrieval ([HyDE](https://arxiv.org/abs/2212.10496) technique)
 
+## Dependency compatibility
+
+Use **Python 3.11+** and the committed `uv.lock` for local runs:
+
+```bash
+cd finetune
+uv sync --locked
+uv run --locked python train.py sft --config configs/sft.yaml --dry-run
+```
+
+All 15 dependency-bearing standalone PEP 723 runners carry the same security
+constraints and a checked-in adjacent `.py.lock`; use `uv run --locked` to reject
+stale graphs and enforce the locked wheel hashes. Plain `hf jobs uv run` does
+not carry those lockfiles automatically. Use the opt-in
+[locked Jobs launcher](LOCKED-JOBS.md) for remote submission; its default preview
+does not authenticate, upload files, or allocate paid compute. See
+[DEPENDENCIES.md](DEPENDENCIES.md) for the validated release matrix, offline API
+tests, outstanding advisory reviews, and unqualified GPU hardware paths.
+`train_unsloth.py` now explicitly uses the native Transformers/PEFT/TRL backend:
+current Unsloth releases cap datasets below the required security floor. ONNX
+conversion uses the native PyTorch exporter rather than downgrading Transformers
+to satisfy Optimum's old cap.
+
 ## Quick Start
 
 ### Cloud training via HuggingFace Jobs (no GPU needed)
 
+The following previews the exact code/lock upload set. Follow
+[LOCKED-JOBS.md](LOCKED-JOBS.md) to explicitly authorize a submission and training;
+the preview is not a cloud execution or GPU-compatibility qualification.
+
 ```bash
-# 1. SFT: teach the model the output format (~45 min on A10G, ~$1.50)
-hf jobs uv run --flavor a10g-large --secrets HF_TOKEN --timeout 2h jobs/sft.py
+# 1. Preview a lock-qualified SFT job from finetune/ (no upload or compute).
+python tools/submit_locked_job.py --runner finetune/jobs/sft.py \
+  --namespace YOUR_NAMESPACE --flavor a10g-large --timeout 2h -- --dry-run
 
 # 2. Evaluate against test queries (needs local GPU or use eval job)
-uv run eval.py tobil/qmd-query-expansion-1.7B
+uv run --locked --script eval.py tobil/qmd-query-expansion-1.7B
 
 # 3. Convert to GGUF for local deployment (Ollama, llama.cpp)
-uv run convert_gguf.py --size 1.7B
+uv run --locked --script convert_gguf.py --size 1.7B
 
 # NOTE: GRPO is currently experimental and moved to finetune/experiments/grpo
 # if you want to run it manually, use:

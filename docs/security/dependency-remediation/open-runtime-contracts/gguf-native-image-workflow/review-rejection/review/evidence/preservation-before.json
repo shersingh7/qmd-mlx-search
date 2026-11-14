@@ -1,0 +1,63 @@
+[
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/qualification-workflow.yml.proposed",
+    "expected_sha256": "2c145115e53c2948249ee36d2593c7e9419bdaacbd7fe8555f2da01f323cb23e",
+    "actual_sha256": "2c145115e53c2948249ee36d2593c7e9419bdaacbd7fe8555f2da01f323cb23e",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/mirror/finetune/tools/submit_locked_job.py",
+    "expected_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "actual_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/mirror/finetune/tools/qualify_gguf_image.py",
+    "expected_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "actual_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/manifest.json",
+    "expected_sha256": "eecd4e15341edff4c62b6c1c4750bad3a0d9e79eb88f46cb1b06b39467dbbb5c",
+    "actual_sha256": "eecd4e15341edff4c62b6c1c4750bad3a0d9e79eb88f46cb1b06b39467dbbb5c",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/github/qmd-mlx-search/docs/plans/gguf-image-qualification.md",
+    "expected_sha256": "be37fc5d96af167b87fb396561c4791d511d95f3affdae5327d0a6f372b6ed58",
+    "actual_sha256": "e3cf95aacdfd5a394774596d55113ee2df92a2a0987e56e298491e302ede581d",
+    "unchanged": false,
+    "authorized_parent_section_1b_delta_only": true
+  },
+  {
+    "path": "/Users/shersingh/github/qmd-mlx-search/.github/workflows/ci.yml",
+    "expected_sha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+    "actual_sha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+    "expected_sha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388",
+    "actual_sha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/receipt.json",
+    "expected_sha256": "28ff335cf03405aea74fb98dcc91146a2c353ebbd7e2d29505846e106f180d80",
+    "actual_sha256": "28ff335cf03405aea74fb98dcc91146a2c353ebbd7e2d29505846e106f180d80",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/finetune/tools/submit_locked_job.py",
+    "expected_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "actual_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/finetune/tools/qualify_gguf_image.py",
+    "expected_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "actual_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "unchanged": true
+  }
+]

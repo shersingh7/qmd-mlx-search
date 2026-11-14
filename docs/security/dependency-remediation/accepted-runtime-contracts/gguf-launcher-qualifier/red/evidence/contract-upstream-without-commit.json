@@ -1,0 +1,9 @@
+{
+  "actual_exit": 2,
+  "expected_exit": 0,
+  "label": "upstream-without-commit",
+  "scope": "HOST probe with real compiler/make and synthetic uv --version; NOT image execution",
+  "stderr": "Native prerequisite probe failed: image probe requires uv 0.11.18\n",
+  "stdout": "",
+  "synthetic_uv_display": "uv 0.11.18 (x86_64-unknown-linux-musl)"
+}

@@ -1,0 +1,60 @@
+"""Fresh source-bound replay of the retained queued-cancellation RED."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+WORKER = Path('/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo')
+ENV = json.loads((ROOT / 'environment.json').read_text())
+BASE = ROOT / 'queued-cancel-red'
+MIRROR = BASE / 'snapshot'
+MIRROR.mkdir(parents=True)
+public = json.loads((ROOT / 'source-binding.json').read_text())['publicSnapshot']
+for relative, digest in public.items():
+    source = ROOT / 'mirror' / relative
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
+    target = MIRROR / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+red = json.loads((WORKER / 'revocation-red-receipt.json').read_text())
+for relative, digest in red['sourceSha256'].items():
+    source = WORKER / 'revocation-red-source' / relative
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
+    shutil.copy2(source, MIRROR / relative)
+modules = MIRROR / 'node_modules'
+modules.mkdir()
+links = json.loads((ROOT / 'dependency-links.json').read_text())
+for relative, target in links.items():
+    link = modules / relative
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(target, target_is_directory=Path(target).is_dir())
+for name in ['.vite', '.cache', '.bun']:
+    (modules / name).mkdir()
+config = BASE / 'vitest.config.mjs'
+config.write_text("import {defineConfig,mergeConfig} from './snapshot/node_modules/vitest/dist/config.js';\n"
+    "import original from './snapshot/vitest.config.ts';\n"
+    "export default mergeConfig(original,defineConfig({root:new URL('./snapshot/',import.meta.url).pathname,cacheDir:new URL('./cache/',import.meta.url).pathname,test:{maxWorkers:2}}));\n")
+args = ['/Users/shersingh/.hermes/node/bin/node', 'node_modules/vitest/vitest.mjs', 'run', '--config', str(config),
+    '--configLoader', 'runner', '--cache=false', '--maxWorkers=2', '--reporter=verbose', '--reporter=json',
+    '--outputFile.json=' + str(BASE / 'tests.json'), 'test/audit-recovery-execution-admission.test.ts',
+    '-t', "does not erase queued cancellation before the child's last gate"]
+(BASE / 'invocation.json').write_text(json.dumps({'argv': args, 'cwd': str(MIRROR), 'env': ENV}, indent=2) + '\n')
+with (BASE / 'run.log').open('w') as log:
+    result = subprocess.run(args, cwd=MIRROR, env=ENV, stdout=log, stderr=subprocess.STDOUT, timeout=15)
+report = json.loads((BASE / 'tests.json').read_text())
+records = [json.loads(line) for line in (BASE / 'run.log').read_text().splitlines() if line.startswith('{"evidence":')]
+observation = next(item for item in records if item['evidence'] == 'recovery-execution-admission-before-finally')
+finally_record = next(item for item in records if item['evidence'] == 'recovery-execution-admission-finally')
+receipt = {'exitCode': result.returncode, 'selectedFailures': report['numFailedTests'], 'selectedPasses': report['numPassedTests'],
+    'unselectedPending': report['numPendingTests'], 'sourceSha256': red['sourceSha256'], 'observation': observation, 'finally': finally_record}
+(BASE / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+print(json.dumps({'exitCode': result.returncode, 'failed': report['numFailedTests'], 'unselectedPending': report['numPendingTests'],
+    'actualWork': observation['work'], 'validation': observation.get('validation'), 'controlReads': observation.get('controlReads'),
+    'supervisorAbsent': observation['supervisorAbsent'], 'workerAbsent': observation['workerAbsent'],
+    'sentinelAlive': observation['sentinelAlive'], 'guardFired': observation['guardFired'], 'finallyKilled': finally_record['finallyKilled']}, indent=2))
+assert result.returncode == 1 and report['numFailedTests'] == 1
+assert observation['work'] == 'actual-user-work' and observation['validation']['allowed'] and observation['validation']['remainingMs'] > 0
+assert not observation['guardFired'] and observation['supervisorAbsent'] and observation['workerAbsent'] and observation['sentinelAlive']
+assert not finally_record['finallyKilled']

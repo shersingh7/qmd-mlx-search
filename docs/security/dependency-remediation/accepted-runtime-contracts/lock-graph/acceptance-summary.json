@@ -1,0 +1,93 @@
+{
+  "status": "ACCEPTED_COMPONENT_ONLY",
+  "scope": "Declared/recorded uv graph consistency and reviewed-artifact binding order at recorded source/input hashes",
+  "source_sha256": {
+    "scripts/verify_patched_dependencies.py": "3925f9ae6602688848530aa37f59d015c6230b1562a78d7a2ed64f67059706ea",
+    "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596",
+    "test/security/test_patched_dependencies.py": "5a6b7df95337a05a7393c5576eeeae32b150b71b81711add23cbbffe50515dcb",
+    "test/security/test_uv_lock_graph.py": "578b385e3940d17b9807793bc4acc9bf11275d64de7de89c1921aa7aa57da432"
+  },
+  "parent_replayed_testcases": 214,
+  "independent_junit": {
+    "testcase_elements": 671,
+    "declared_including_subtests": 714
+  },
+  "independent_cli_matrix": {
+    "total": 51,
+    "refused_no_proof": 24,
+    "successful": 27
+  },
+  "graph_snapshot": {
+    "count": 16,
+    "python_instances": 931,
+    "runner_headers": 15
+  },
+  "fresh_baseline_audit": {
+    "exit_code": 0,
+    "alerts_checked": 262,
+    "affected_alerts": 0,
+    "graph_instances": 1772,
+    "source_proofs": 11
+  },
+  "original_red_and_parent_fixture_failure_preserved": true,
+  "release_accepted": false,
+  "default_branch_alerts_closed": false,
+  "files": {
+    "independent-review.md": {
+      "sha256": "27ad8ebbe963c8a255213985bc09c656869b0963caff7c62fbf0e957810b22d8",
+      "bytes": 10562
+    },
+    "independent-review-evidence.json": {
+      "sha256": "324c72e7bc7129147d0c75784120c98028232ef36a7f3d93e7880a267bcfd675",
+      "bytes": 17094
+    },
+    "independent-full-targeted.xml": {
+      "sha256": "4dc54c94b3060114db96e5b8c18f74696fd51db03e1227532e6ea7100c006430",
+      "bytes": 69682
+    },
+    "independent-original-and-new-r2.xml": {
+      "sha256": "937550783d327066793bd521435d6be1a2ae69e6b8fb7687c2f56cd7c477e5e9",
+      "bytes": 26515
+    },
+    "independent-quality-contracts.xml": {
+      "sha256": "3bdf2dc3453babd3f28e551389c55b19389a8ed2762213f07824cb80c7cd3f98",
+      "bytes": 8780
+    },
+    "independent-cli-matrix.json": {
+      "sha256": "80e9721ee4d9983ed47898101ff80859039726e7224ad15e8d1d6d1b59470e52",
+      "bytes": 174770
+    },
+    "independent-all-graphs.json": {
+      "sha256": "734b49c4cb4f99259eb77de5d1c7463e5052968f9513e4f9424b38150c923b8a",
+      "bytes": 15003
+    },
+    "independent-production-delta.patch": {
+      "sha256": "f3e9773b9413978c659c1539ab44f96e6bdac769db1770d6d82a10bb82b51727",
+      "bytes": 930
+    },
+    "parent-acceptance.json": {
+      "sha256": "2d19d4f70b2e59bcefa4ea1b3bc19126dd16e75e62e2d456186d27ff905f2caa",
+      "bytes": 3666
+    },
+    "parent-replay.xml": {
+      "sha256": "db334adf9712e172eab0333cda8358c31579dfd083f97eae26868f9aacc9051b",
+      "bytes": 34493
+    },
+    "parent-fixture-layout-issue.xml": {
+      "sha256": "f997a261733b10f3ba6020039c0f37794db25f46c576de6fd2946a81821b1d9f",
+      "bytes": 36941
+    },
+    "parent-fixture-layout-disposition.json": {
+      "sha256": "144107e44847c400eb97c754fd94ca1441aa92adfacdf8c6aa88ef2045ac71eb",
+      "bytes": 366
+    }
+  },
+  "limits": [
+    "declared/recorded static graph consistency, not a full resolver",
+    "does not reconstruct absent upstream metadata or authenticate ordinary registry artifacts",
+    "does not prove platform-wheel availability or application compatibility",
+    "dimension/input budgets are not a global operation-count or wall-clock SLA",
+    "repository reads are bounded per-file, not an atomic concurrent whole-repository snapshot",
+    "native CI, final integration/default-branch closure remain parent-owned"
+  ]
+}

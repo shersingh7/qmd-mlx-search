@@ -1,3 +1,12 @@
 
 # Use bd merge for beads JSONL files
 .beads/issues.jsonl merge=beads
+
+# Unified-diff blank context lines require a literal space. Preserve the exact
+# hash-pinned vendor patch; this exception does not apply to source/code files.
+finetune/vendor/accelerate/source.patch whitespace=-blank-at-eol
+
+# Preserve verbatim negative-control JUnit traces, including pytest's trailing
+# spaces. These two evidence-only exceptions do not alter any source checks.
+docs/security/dependency-remediation/candidate-integration/locked-job-parent-red.xml whitespace=-blank-at-eol
+finetune/vendor/accelerate/evidence/qmd2-independent/independent-positive-qmd2-macos-initial.xml whitespace=-blank-at-eol

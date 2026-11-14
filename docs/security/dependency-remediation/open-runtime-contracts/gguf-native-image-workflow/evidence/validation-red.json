@@ -1,0 +1,7 @@
+{
+  "phase": "red",
+  "image_execution": false,
+  "checks": [],
+  "passed": false,
+  "error": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/.github/workflows/gguf-native-image-qualification.yml'"
+}

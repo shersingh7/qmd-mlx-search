@@ -1,0 +1,13 @@
+{
+  "sourceSha256": {
+    "heldout/heldout_tests.py": "8f1fe9bb77b205061ac0f8f31bc8d687ed1e3d8dc68ac192b7a2182db29848ba",
+    "heldout/fake_cli.py": "c26574eda5fd33302c909f17c94ccf4c86ebdaaf53135e4ef33c60d57370bd4e",
+    "heldout/descendant_worker.py": "bedd7949b7843d4634776fd3487d3dbf0e4b1c9d84efc64fe95d7f22719d3d57",
+    "evidence/generated-step.bash": "138ccd871697dcd4a103aa6bb71d35e5e4f69fe45d4400b05864928c3178bfba",
+    "evidence/generated-controller.py": "606e0ea2d8389f1cb57cc3f5360f411e7ed047c00cb2c83a797f5a0f93c51d98",
+    "evidence/fixture_adapter.py": "93bd0c61d18c6c63b5091f0711ff709eca65384a4c1fa6c4ddf23211bdbd45c6",
+    "mirror/finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "mirror/finetune/tools/qualify_gguf_image.py": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf"
+  },
+  "scope": "Unchanged original synthetic RED characterization only; no Docker/probe/compiler execution"
+}

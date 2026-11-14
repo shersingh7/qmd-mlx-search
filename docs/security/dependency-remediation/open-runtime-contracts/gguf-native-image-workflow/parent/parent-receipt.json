@@ -1,0 +1,15 @@
+{
+  "pytest": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "syntheticCases": 74,
+  "expectedNonzeroControls": 66,
+  "controllerUnchanged": true,
+  "controllerSha256": "b0cc257ab4ede6c2e6ea9e887e4a4e5747edea9ba43d5ed52a86f19590606df4",
+  "actionlint": "pass",
+  "bashAndInlinePythonSyntax": "pass",
+  "realDockerOrImageExecuted": false
+}

@@ -1,0 +1,128 @@
+{
+  "reviewSourceCountsReadback": [
+    {
+      "source": "supplied/evidence/synthetic-independent/summary.json",
+      "cases": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "positive/heldout/summary.json",
+      "cases": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "characterization/heldout/summary.json",
+      "cases": 34,
+      "passed": 33,
+      "failed": 1,
+      "skipped": 0
+    },
+    {
+      "source": "independent-heldouts/summary.json",
+      "cases": 20,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "integrated26": {
+    "exitCode": 0,
+    "passed": 26,
+    "failed": 0,
+    "errors": 0
+  },
+  "lifetimes": [
+    {
+      "case": "test_controller_killed_pipe_revocation",
+      "terminatedAtReturn": false,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.5705678340164013,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_failure_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.062839000020176,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_success_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.085134208027739,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_interrupt_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.229557582992129,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_repeated_signals_during_registration",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.18649049999658,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.1280029169865884,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_with_failed_docker_cleanup",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.12401695799781,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    }
+  ],
+  "protected292Unchanged": true,
+  "reviewedPostimagesStillMatch": true,
+  "actionlintOnActualIntegratedWorkflowExit": 0,
+  "limits": "Syntheticonly; noall-descendantreap/unconditionalcleanup/realDocker/nativeCI guarantee"
+}

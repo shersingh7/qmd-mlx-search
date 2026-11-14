@@ -1,0 +1,6 @@
+{
+  "classification": "own-harness-only",
+  "initial_failure_receipt": "evidence/node-source-proof.json",
+  "cause": "Patch reconstruction contains source snapshot, not 48 pre-existing generated dist compiler roots; test mirror retained those roots.",
+  "correction": "Copied identical owned baseline/dist into owned base-replay before comparing root inventories; no candidate/config/test bytes changed."
+}

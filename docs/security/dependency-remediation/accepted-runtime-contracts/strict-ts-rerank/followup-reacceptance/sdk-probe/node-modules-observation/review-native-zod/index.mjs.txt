@@ -1,0 +1,7 @@
+import * as nativeZod from 'zod';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+// Observation bridge only: these are actual native external imports, no replacements.
+export const nativeZodObjectFactory=nativeZod.z.object;
+export const nativeZodObjectClass=nativeZod.z.ZodObject;
+export const NativeMcpServer=McpServer;
+export const identityPaths={bridge:import.meta.url,zod:import.meta.resolve('zod'),sdk:import.meta.resolve('@modelcontextprotocol/sdk/server/mcp.js')};

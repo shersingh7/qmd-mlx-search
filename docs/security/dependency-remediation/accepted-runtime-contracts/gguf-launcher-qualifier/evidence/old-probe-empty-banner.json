@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-S",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo/finetune/tools/qualify_gguf_image.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/pytest-tmp/repair-heldouts-final/test_full_cli_refuses_unpinned10",
+  "name": "old-probe-empty-banner",
+  "returncode": 1,
+  "seconds": 0.06292941700667143,
+  "stderr": "Traceback (most recent call last):\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo/finetune/tools/qualify_gguf_image.py\", line 83, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo/finetune/tools/qualify_gguf_image.py\", line 74, in main\n    receipt = qualify(native_only=args.native_only)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/red/repo/finetune/tools/qualify_gguf_image.py\", line 45, in qualify\n    versions = {name: run([path, \"--version\"], work, env, timeout=10).splitlines()[0]\n                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "stdout": ""
+}

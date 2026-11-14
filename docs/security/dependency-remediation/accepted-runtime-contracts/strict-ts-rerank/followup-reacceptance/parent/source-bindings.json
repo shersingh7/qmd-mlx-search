@@ -1,0 +1,17 @@
+{
+  "source_root": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo",
+  "copied_sha256": {
+    "mirror/vitest.config.ts": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67",
+    "sdk-isolated.config.mjs": "aad5fab114f47a2c998374c3d03cf2cee79df5647526873c772a308cf8401f57",
+    "probes/host-setup.mjs": "bccd9e291b3b2d1744ca96361ad36c8417dd2443a0ded8375c0dc1d415fa3c32",
+    "probes/sdk-network-guard.mjs": "5f129e3ee41369fd4b4f906abd9ad93ab0a2d7c0c91d501799b2dd460eeadaae",
+    "sdk-probe/test/sdk-inlined-zod.test.ts": "6ff470094431d6692a57a49188c1067389125a1107eee92099eecab3c22c73e6",
+    "sdk-probe/test/zod-prefix-scope.test.ts": "5be0ce5c94206633d16dfd159f05b91e777a3646fa1c5b36f587e7cd506d243e",
+    "package.json": "a8d4532a59c504cf36092c20527f4fb2c50047a46a9372fe47fe76cdd6c94b69",
+    "sdk-probe/node_modules/review-converter-native/package.json": "eadda4fd26d0d5016905d129c794e2e46390096ca2a4c8f2dd5dd053277b70bd",
+    "sdk-probe/node_modules/review-converter-native/index.mjs": "078e36cb7a8d91cb00525aea7ffb754ea6a60b2fc9c20d6fa6b176c0f3ec134c",
+    "sdk-probe/node_modules/review-native-zod/package.json": "ed0f68df17354cdd9bf706c1d21027739a2ac20a5a8068768e106d7b30887a8e",
+    "sdk-probe/node_modules/review-native-zod/index.mjs": "adf52db581c3b85028a1de663ad82bfa6da052fb662892457c6d86dce5b43d88"
+  },
+  "qualification_scope": "Actual SDK schema/instance boundary and documented prefix breadth; no production/recovery/full-suite qualification"
+}

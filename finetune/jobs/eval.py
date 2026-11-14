@@ -1,12 +1,42 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "transformers>=4.45.0",
-#     "peft>=0.7.0",
-#     "torch",
-#     "huggingface_hub>=0.20.0",
-#     "accelerate",
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "huggingface_hub>=2.4.0,<3",
+#     "accelerate==1.15.0+qmd.2",
 # ]
+# [tool]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate==1.15.0+qmd.2",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.17.0",
+#     "urllib3>=2.8.0",
+# ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Evaluate QMD query expansion models on HuggingFace Jobs.
@@ -317,7 +347,7 @@ def load_model(base, sft=None, grpo=None):
 
     print(f"Loading base model {base}...")
     model = AutoModelForCausalLM.from_pretrained(
-        base, torch_dtype=torch.bfloat16, device_map="auto",
+        base, dtype=torch.bfloat16, device_map="auto",
     )
 
     if sft:
@@ -437,9 +467,14 @@ def evaluate_model(model, tokenizer, label):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sft-only", action="store_true", help="Only evaluate SFT model")
+    parser.add_argument("--dry-run", action="store_true", help="Print the plan without authentication, downloads, or uploads")
     parser.add_argument("--upload-repo", default="tobil/qmd-query-expansion-evals",
                         help="HF repo to upload CSV results")
     args = parser.parse_args()
+
+    if args.dry_run:
+        print({"base_model": BASE_MODEL, "sft_model": SFT_MODEL, "grpo_model": None if args.sft_only else GRPO_MODEL, "upload_repo": args.upload_repo})
+        return
 
     hf_token = os.environ.get("HF_TOKEN")
     if hf_token:

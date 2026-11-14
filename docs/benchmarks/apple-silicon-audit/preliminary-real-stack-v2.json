@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "scope": "Real cached MLX model -> JSON/binary -> SDK SQLite -> REST/MCP, authored public fixture only",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "source_sha256": "af914ce9a66dca560be819d89bfdf77872a034341ede344be98ee059a17f5ebf",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-v2-467bgd6i/tmp/qmd-real-l9uike9l",
+  "sdk_report": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/preliminary-real-stack-v2-sdk.json",
+  "ready_seconds": 2.8165294589998666,
+  "url": "http://127.0.0.1:54336",
+  "control_port": 54337,
+  "instance_token": "a39f295564324f318ba23a9a8a0c49f3",
+  "command": [
+    "/Users/shersingh/.local/bin/node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/local-stack-snapshot-v2/scripts/verify_local_stack.ts",
+    "--url",
+    "http://127.0.0.1:54336",
+    "--root",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-v2-467bgd6i/tmp/qmd-real-l9uike9l",
+    "--output",
+    "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/preliminary-real-stack-v2-sdk.json"
+  ],
+  "child_pid": 32427,
+  "child_exit_code": 0,
+  "node_log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/preliminary-real-stack-v2-467bgd6i/tmp/qmd-real-l9uike9l/node.log",
+  "checks": {
+    "documents": 8,
+    "jsonBinaryMaxAbs": 0,
+    "restoredRankingsIdentical": true,
+    "mcpGetVerified": true,
+    "sseStreamVerified": true,
+    "foreignOriginRejected": true,
+    "noopEmbed": {
+      "status": "complete",
+      "docsProcessed": 0,
+      "docsSelected": 0,
+      "chunksAttempted": 0,
+      "chunksCommitted": 0,
+      "chunksEmbedded": 0,
+      "chunksFailed": 0,
+      "chunksSkipped": 0,
+      "chunksPending": 0,
+      "errors": 0,
+      "durationMs": 0,
+      "checkpoint": {
+        "jobId": "1b6a5a7b-bb93-4997-b988-6a7c884ed86a",
+        "fingerprint": {
+          "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "dimensions": 384,
+          "chunkStrategy": "regex",
+          "descriptorSignature": "4fab69da12d510bc6082b95a",
+          "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+          "quantization": "none"
+        },
+        "startedAt": "2026-11-11T23:42:26.178Z",
+        "updatedAt": "2026-11-11T23:42:26.180Z",
+        "status": "completed",
+        "docsTotal": 0,
+        "docsCompleted": 0,
+        "chunksTotal": 0,
+        "chunksCommitted": 0
+      }
+    }
+  },
+  "memory_before_stop": {
+    "active_mb": 86.7,
+    "peak_mb": 158.0,
+    "model_mb": 86.7,
+    "residency_budget_mb": 16384.0,
+    "notes": "Resident weight budgets are not total activation memory guarantees."
+  },
+  "server_stopped": true,
+  "worker_alive_after_stop": false,
+  "http_threads_alive": false,
+  "metal_active_after_stop": 0,
+  "metal_cache_after_stop": 0
+}

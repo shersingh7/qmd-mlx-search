@@ -1,0 +1,184 @@
+{
+  "label": "cleanup-20-with-reference",
+  "repo": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/request-bound-python",
+  "source_sha256": "1cebbaf8facd29820b5223d3efb9133c5a0248ef913b99a6f333ce0cfcab4b19",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "dtype_requested": "float16",
+  "bulk_microbatch_tokens": 512,
+  "scope": "real MLX runtime; public synthetic workload; not HTTP/retrieval-quality/long-soak qualification",
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "versions": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "numpy": "2.5.4",
+    "transformers": "5.22.2"
+  },
+  "metal_available": true,
+  "passed": true,
+  "samples": {
+    "singleton": {
+      "samples_ms": [
+        2.7546659985091537,
+        2.2314999951049685,
+        2.127167012076825,
+        2.6110420003533363,
+        2.630750008393079,
+        2.1998340089339763,
+        2.421625016722828,
+        2.301291999174282,
+        2.1836250089108944,
+        2.1305829868651927,
+        2.581375010777265,
+        2.1594580030068755,
+        2.1031249780207872,
+        2.5739999837242067,
+        2.2162079985719174,
+        2.1703329985029995,
+        2.425499988021329,
+        2.3069159942679107,
+        2.2613749897573143,
+        2.254624996567145
+      ],
+      "requests": 20,
+      "texts_processed": 20,
+      "p50_ms": 2.2579999931622297,
+      "p95_ms": 2.6369458078988828,
+      "texts_per_second": 428.77050999996874,
+      "actual_tokens_per_second": 28727.624169997904,
+      "memory": {
+        "metal_active_bytes": 45431054,
+        "metal_cache_bytes": 193746264,
+        "metal_peak_bytes": 136293128,
+        "current_rss_bytes": 629702656,
+        "peak_rss_bytes": 629702656
+      }
+    },
+    "bulk_64_mixed": {
+      "samples_ms": [
+        79.08379199216142,
+        77.25595799274743,
+        77.1619169972837,
+        77.45479201548733,
+        77.16020799125545,
+        77.48591699055396,
+        78.01087500411086,
+        78.97100000991486
+      ],
+      "requests": 8,
+      "texts_processed": 512,
+      "p50_ms": 77.47035450302064,
+      "p95_ms": 79.04431479837513,
+      "texts_per_second": 822.3783819270265,
+      "actual_tokens_per_second": 73191.67599150536,
+      "memory": {
+        "metal_active_bytes": 45431054,
+        "metal_cache_bytes": 316424882,
+        "metal_peak_bytes": 136293128,
+        "current_rss_bytes": 631422976,
+        "peak_rss_bytes": 631422976
+      }
+    },
+    "repeated_batch_4": {
+      "samples_ms": [
+        8.356832986464724,
+        8.120708022033796,
+        7.797625003149733,
+        7.467124989489093,
+        7.333667017519474,
+        7.4802080052904785,
+        7.931416999781504,
+        7.897708012023941,
+        8.077625010628253,
+        8.127625013003126,
+        8.162874990375713,
+        8.213666005758569,
+        8.486458013067022,
+        8.34729100461118,
+        7.957207999425009,
+        7.961374998558313,
+        7.9200000036507845,
+        7.883707992732525,
+        7.81325000571087,
+        7.9007919994182885
+      ],
+      "requests": 20,
+      "texts_processed": 80,
+      "p50_ms": 7.944312499603257,
+      "p95_ms": 8.363314237794839,
+      "texts_per_second": 502.39528231914306,
+      "actual_tokens_per_second": 44713.180126403735,
+      "memory": {
+        "metal_active_bytes": 45431054,
+        "metal_cache_bytes": 316424882,
+        "metal_peak_bytes": 136293128,
+        "current_rss_bytes": 631439360,
+        "peak_rss_bytes": 631439360
+      }
+    }
+  },
+  "limits": {
+    "metal_memory_bytes": 2147483648,
+    "metal_cache_bytes": 536870912
+  },
+  "before_load_memory": {
+    "metal_active_bytes": 0,
+    "metal_cache_bytes": 0,
+    "metal_peak_bytes": 0,
+    "current_rss_bytes": 54673408,
+    "peak_rss_bytes": 54673408
+  },
+  "load_seconds": 2.5978849589882884,
+  "descriptor": {
+    "version": 1,
+    "backend": "mlx",
+    "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+    "revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+    "pooling": "mean",
+    "nativeDimensions": 384,
+    "outputDimensions": 384,
+    "maxTokens": 256,
+    "normalized": true,
+    "dtype": "float16",
+    "quantization": "none"
+  },
+  "fixture_token_counts": [
+    12,
+    67,
+    242,
+    35
+  ],
+  "mixed_singleton_min_cosine": 0.9999997019767761,
+  "mixed_singleton_max_abs": 0.00013945996761322021,
+  "reference_min_cosine": 0.9999990463256836,
+  "reference_max_abs": 0.00027686357498168945,
+  "vectors_artifact": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/cleanup-20-with-reference.npz",
+  "repeat_start_memory": {
+    "metal_active_bytes": 45431054,
+    "metal_cache_bytes": 316424882,
+    "metal_peak_bytes": 136293128,
+    "current_rss_bytes": 631422976,
+    "peak_rss_bytes": 631422976
+  },
+  "repeat_end_memory": {
+    "metal_active_bytes": 45431054,
+    "metal_cache_bytes": 316424882,
+    "metal_peak_bytes": 136293128,
+    "current_rss_bytes": 631439360,
+    "peak_rss_bytes": 631439360
+  },
+  "after_shutdown_memory": {
+    "metal_active_bytes": 0,
+    "metal_cache_bytes": 0,
+    "metal_peak_bytes": 136293128,
+    "current_rss_bytes": 585924608,
+    "peak_rss_bytes": 631439360
+  },
+  "new_live_threads_after_shutdown": [
+    {
+      "name": "tqdm_monitor",
+      "daemon": true
+    }
+  ],
+  "owned_executor_alive_after_shutdown": false
+}

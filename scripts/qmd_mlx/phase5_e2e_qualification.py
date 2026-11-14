@@ -16,9 +16,12 @@ import dataclasses
 import json
 import math
 import os
+from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -39,6 +42,48 @@ from scripts.qmd_mlx.supervisor import (
 from scripts.qmd_mlx.watchdog import SystemMemorySampler, SystemMetricsError
 
 
+def node_typescript_command(script: str, *, deadline: float, env: dict[str, str]) -> list[str]:
+    """Use the supported HTTP runtime and local public loader, never the tsx CLI/Bun."""
+    required = "Phase 5 MCP HTTP requires local Node.js >=22 and the local tsx loader; no Bun, installation or remote fallback is allowed"
+    node = shutil.which("node", path=env.get("PATH", os.defpath))
+    if not node:
+        raise RuntimeError(required)
+    node = os.path.abspath(node)
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise RuntimeError(f"{required}: execution deadline expired before runtime validation")
+    package_root = Path(repo_root, "node_modules", "tsx")
+    if not package_root.is_dir():
+        raise RuntimeError(f"{required}: repository-local tsx development dependency is missing")
+    # Resolve the package's public export from this repository, not the caller's
+    # cwd. Importing this absolute loader avoids tsx CLI IPC sockets under TMPDIR.
+    probe = """
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+const require = createRequire(pathToFileURL(process.cwd() + '/package.json'));
+if (process.versions.bun || Number(process.versions.node?.split('.')[0]) < 22) {
+  throw new Error('Node.js >=22 is required');
+}
+process.stdout.write(JSON.stringify({node: process.versions.node, bun: process.versions.bun ?? null,
+  loader: require.resolve('tsx')}));
+"""
+    try:
+        result = subprocess.run([node, "--input-type=module", "-e", probe], cwd=repo_root, env=env,
+                                capture_output=True, text=True, timeout=min(2.0, remaining), check=True)
+        data = json.loads(result.stdout)
+        version = data.get("node") if isinstance(data, dict) else None
+        if (not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version)
+                or int(version.split(".")[0]) < 22 or data.get("bun") is not None):
+            raise ValueError("unsupported or unverified Node runtime")
+        loader = Path(data["loader"])
+        if (not loader.is_absolute() or not loader.is_file()
+                or not loader.resolve().is_relative_to(package_root.resolve())):
+            raise ValueError("local public tsx loader is missing or not an absolute file")
+    except (OSError, subprocess.SubprocessError, ValueError, TypeError, KeyError) as error:
+        raise RuntimeError(f"{required}: {error}") from error
+    return [node, "--import", loader.as_uri(), os.path.abspath(script)]
+
+
 @dataclasses.dataclass
 class Phase5SupervisorConfig:
     mlx_model: str = os.path.expanduser("~/.cache/qmd/models/qwen3-embedding-4b-mlx-4bit-affine")
@@ -53,6 +98,41 @@ class Phase5SupervisorConfig:
     use_fake_child: bool = False
     skip_mlx: bool = False
     skip_gguf: bool = True
+
+
+def _telemetry_number(value: Any, field: str, *, minimum: float = 0.0,
+                      maximum: Optional[float] = None, integer: bool = False) -> None:
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or value < minimum
+            or (maximum is not None and value > maximum)
+            or (integer and not isinstance(value, int))):
+        kind = "integer" if integer else "number"
+        raise ValueError(f"{field} must be a finite {kind} >= {minimum}"
+                         + (f" and <= {maximum}" if maximum is not None else ""))
+
+
+def fresh_process_recovery_verified(recovery: Any) -> bool:
+    """Require receipts for an interrupted child and a distinct completed child."""
+    if not isinstance(recovery, dict) or recovery.get("mode") != "fresh_process_recovery":
+        return False
+    workers = recovery.get("workers")
+    if not isinstance(workers, list) or len(workers) != 2 or not all(isinstance(w, dict) for w in workers):
+        return False
+    first, resumed = workers
+    if any(not {"pid", "exitCode", "signal", "timedOut"}.issubset(worker) for worker in workers):
+        return False
+    pids = [worker.get("pid") for worker in workers]
+    return (
+        all(isinstance(pid, int) and not isinstance(pid, bool) and pid > 0 for pid in pids)
+        and pids[0] != pids[1]
+        and first.get("exitCode") is None and first.get("signal") == "SIGKILL"
+        and first.get("timedOut") is False
+        and type(resumed.get("exitCode")) is int and resumed["exitCode"] == 0
+        and resumed.get("signal") is None and resumed.get("timedOut") is False
+        and recovery.get("freshProcessRecovery") == "passed"
+        and recovery.get("consecutiveSequenceVerified") is True
+        and recovery.get("logicalStateInvariantOnMismatch") is True
+    )
 
 
 class Phase5Supervisor:
@@ -99,7 +179,11 @@ class Phase5Supervisor:
             headroom = self.sampler.get_memory_headroom_mb()
             swap_used = self.sampler.get_swap_used_mb()
             free_pct = self.sampler.get_memory_free_pct()
-        except SystemMetricsError as e:
+            _telemetry_number(installed_ram, "installed_ram_mb", minimum=0.001)
+            _telemetry_number(headroom, "headroom_mb", maximum=installed_ram)
+            _telemetry_number(swap_used, "swap_used_mb")
+            _telemetry_number(free_pct, "memory_free_pct", maximum=100.0)
+        except (SystemMetricsError, ValueError) as e:
             raise SystemMetricsError(f"Preflight memory sampling failed: {e}")
 
         print(
@@ -127,7 +211,53 @@ class Phase5Supervisor:
             with open(out_file, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2)
         except Exception as e:
+            report["status"] = "failed"
             report.setdefault("errors", []).append(f"Failed to write report to {out_file}: {e}")
+
+    def _required_json(self, ctx: Any, route: str) -> dict[str, Any]:
+        status, data = ctx.client.get_json(f"{ctx.ctrl_url}{route}", deadline=ctx.deadline, timeout_s=2.0)
+        if type(status) is not int or status != 200 or not isinstance(data, dict):
+            raise RuntimeError(f"Required telemetry {route} failed: HTTP {status}; expected a JSON object")
+        if data.get("error") is not None:
+            raise RuntimeError(f"Required telemetry {route} failed: HTTP {status}; payload contains an error")
+        return data
+
+    def _check_health(self, ctx: Any, *, final: bool) -> dict[str, Any]:
+        health = self._required_json(ctx, "/health")
+        label = "Final /health" if final else "Initial /health"
+        pid = health.get("pid")
+        if (type(pid) is not int or pid <= 0 or pid != ctx.child.pid
+                or not ctx.instance_token or health.get("instance_token") != ctx.instance_token):
+            raise RuntimeError(f"{label} owned server identity mismatch")
+        if (health.get("status") != "ok" or health.get("state") != "ready"
+                or health.get("ready") is not True or health.get("worker_alive") is not True
+                or health.get("error") is not None):
+            raise RuntimeError(f"{label} server must be ready with a live inference worker and no error")
+        for field in ("queue_depth", "in_flight_requests", "completed_sequence"):
+            _telemetry_number(health.get(field), f"{label}.{field}", integer=True)
+        _telemetry_number(health.get("uptime_s"), f"{label}.uptime_s")
+        if final and (health.get("worker_idle") is not True or health["queue_depth"] != 0
+                      or health["in_flight_requests"] != 0 or health["completed_sequence"] < 1
+                      or "active_job_age_s" not in health or health["active_job_age_s"] is not None
+                      or health.get("active_job_description") is not None):
+            raise RuntimeError(f"{label} must show completed work and an idle, drained inference worker")
+        return health
+
+    def _final_telemetry(self, ctx: Any) -> dict[str, Any]:
+        memory = self._required_json(ctx, "/memory")
+        for field in ("active_mb", "peak_mb", "model_mb"):
+            _telemetry_number(memory.get(field), f"/memory.{field}")
+        if memory["peak_mb"] < memory["active_mb"]:
+            raise ValueError("/memory.peak_mb must be >= active_mb")
+        stats = self._required_json(ctx, "/stats")
+        _telemetry_number(stats.get("total_requests"), "/stats.total_requests", minimum=1, integer=True)
+        _telemetry_number(stats.get("compiled_shapes"), "/stats.compiled_shapes", integer=True)
+        for field in ("avg_ms", "uptime_sec"):
+            _telemetry_number(stats.get(field), f"/stats.{field}")
+        # /memory and /stats do not carry identity. Bracket this run with
+        # control /health receipts from the exact supervisor-owned instance.
+        health = self._check_health(ctx, final=True)
+        return {"memory_metrics": memory, "stats_metrics": stats, "final_health": health}
 
     def run(self) -> dict[str, Any]:
         overall_t0 = time.time()
@@ -228,7 +358,7 @@ class Phase5Supervisor:
                 },
             },
             "unfulfilled_release_gates": [
-                "MLX 4B concurrent interactive latency under bulk load (642.06ms) violates <=200.0ms target; hardware/driver bounds remain unproven.",
+                "Representative large-model interactive latency under bulk load is not established by this small public-fixture smoke.",
                 "1000-batch sustained load memory test unfulfilled for live promotion.",
                 "Full-corpus evaluation (MS MARCO/BEIR) pending; small public fixture results labeled as Preliminary Release Smoke.",
                 "GGUF stage explicitly BLOCKED pending supervised integration.",
@@ -237,10 +367,40 @@ class Phase5Supervisor:
         }
 
         ctx = None
+        ts_temp_dir = None
         try:
+            # Validate the host runtime before managed_stage can spawn/preload any model.
+            # The resolver itself has a bounded (at most two-second) process probe.
+            ts_runner_script = os.path.join(repo_root, "scripts", "phase5_e2e_runner.ts")
+            ts_temp_dir = tempfile.TemporaryDirectory(prefix="qmd-phase5-ts-", dir=os.environ.get("TMPDIR"))
+            tmp_ts_report = os.path.join(ts_temp_dir.name, "report.json")
+            for name in ("home", "tmp", "cache", "config", "hermes"):
+                os.makedirs(os.path.join(ts_temp_dir.name, name))
+            ts_env = {key: value for key, value in os.environ.items() if key in {
+                "PATH", "LANG", "LC_ALL", "DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH",
+            }}
+            ts_env.update({
+                "HOME": os.path.join(ts_temp_dir.name, "home"),
+                "TMPDIR": os.path.join(ts_temp_dir.name, "tmp"),
+                "TMP": os.path.join(ts_temp_dir.name, "tmp"),
+                "TEMP": os.path.join(ts_temp_dir.name, "tmp"),
+                "XDG_CACHE_HOME": os.path.join(ts_temp_dir.name, "cache"),
+                "XDG_CONFIG_HOME": os.path.join(ts_temp_dir.name, "config"),
+                "HERMES_HOME": os.path.join(ts_temp_dir.name, "hermes"),
+                "CI": "true",
+            })
+            ts_env["QMD_PHASE5_LAUNCH_TOKEN"] = launch_token
+            ts_env["QMD_EMBED_BACKEND"] = "mlx"
+            ts_env["QMD_MLX_FALLBACK"] = "0"
+            ts_env["HF_HUB_OFFLINE"] = "1"
+            ts_env["TRANSFORMERS_OFFLINE"] = "1"
+            ts_env["HF_DATASETS_OFFLINE"] = "1"
+
+            ts_cmd = node_typescript_command(ts_runner_script, deadline=time.monotonic() + self.config.timeout_s, env=ts_env)
             with supervisor.managed_stage() as ctx:
                 # 3. Check supervisor health before invoking TS child
                 ctx.check_breach("server_ready_preflight")
+                report["initial_health"] = self._check_health(ctx, final=False)
 
                 # Verify descriptor
                 desc_status, desc = ctx.client.get_json(
@@ -251,31 +411,19 @@ class Phase5Supervisor:
                 if desc_status != 200 or not isinstance(desc, dict):
                     raise RuntimeError(f"Descriptor check on {ctx.ctrl_url}/descriptor failed: HTTP {desc_status} {desc}")
 
-                # 4. Execute TS runner child under strict bounded deadline and launch token approval
-                ts_runner_script = os.path.join(repo_root, "scripts", "phase5_e2e_runner.ts")
-                tmp_ts_report = f"/tmp/qmd-phase5-ts-{uuid.uuid4().hex[:8]}.json"
-
-                bun_path = shutil.which("bun") or "bun"
-                ts_cmd = [
-                    bun_path,
-                    ts_runner_script,
-                    "--launch-token",
-                    launch_token,
-                    "--skip-gguf",  # GGUF stage explicitly BLOCKED pending supervised integration
-                    "--mlx-port",
-                    str(self.config.mlx_port),
-                    "--output-json",
-                    tmp_ts_report,
-                ]
-
-                ts_env = os.environ.copy()
-                ts_env["QMD_PHASE5_LAUNCH_TOKEN"] = launch_token
-                ts_env["QMD_EMBED_BACKEND"] = "mlx"
                 ts_env["QMD_MLX_EMBED_URL"] = ctx.base_url
-                ts_env["QMD_MLX_FALLBACK"] = "0"
-                ts_env["HF_HUB_OFFLINE"] = "1"
-                ts_env["TRANSFORMERS_OFFLINE"] = "1"
-                ts_env["HF_DATASETS_OFFLINE"] = "1"
+                # Leave room for worker-group teardown after runtime validation.
+                worker_budget_s = min(self.config.timeout_s, ctx.deadline - time.monotonic()) - 1.0
+                if worker_budget_s <= 0:
+                    raise RuntimeError("Insufficient remaining execution budget for TypeScript recovery and bounded teardown")
+                ts_cmd.extend([
+                    "--launch-token", launch_token,
+                    "--skip-gguf",  # GGUF stage explicitly BLOCKED pending supervised integration
+                    "--mlx-port", str(self.config.mlx_port),
+                    "--mlx-model-path", expanded_mlx_path,
+                    "--worker-timeout-ms", str(max(1, int(worker_budget_s * 1000))),
+                    "--output-json", tmp_ts_report,
+                ])
 
                 ts_res = run_subordinate_process(
                     cmd=ts_cmd,
@@ -288,6 +436,12 @@ class Phase5Supervisor:
 
                 ctx.check_breach("ts_runner_completed")
 
+                # Cleanup/log errors are failures even when the process exited
+                # zero and its own qualification report says passed.
+                if ts_res.error is not None:
+                    err_msg = f"TypeScript Phase 5 runner error: {ts_res.error or 'unspecified subordinate error'}"
+                    errors.append(err_msg)
+                    ctx.add_error(err_msg)
                 if ts_res.timed_out:
                     err_msg = f"TypeScript Phase 5 runner timed out after {ts_res.duration_s}s (PID {ts_res.pid})"
                     errors.append(err_msg)
@@ -296,13 +450,15 @@ class Phase5Supervisor:
                     err_msg = f"Supervisor watchdog breach during TypeScript runner execution: {ts_res.error}"
                     errors.append(err_msg)
                     ctx.add_error(err_msg)
-                elif ts_res.exit_code != 0:
+                elif type(ts_res.exit_code) is not int or ts_res.exit_code != 0:
                     err_msg = f"TypeScript Phase 5 runner failed with exit code {ts_res.exit_code}:\n{ts_res.captured_logs}"
                     errors.append(err_msg)
                     ctx.add_error(err_msg)
 
                 ts_report_data: dict[str, Any] = {}
-                if os.path.exists(tmp_ts_report):
+                if not os.path.exists(tmp_ts_report):
+                    raise RuntimeError("TypeScript Phase 5 runner produced no report")
+                else:
                     try:
                         with open(tmp_ts_report, "r", encoding="utf-8") as f:
                             ts_report_data = json.load(f)
@@ -313,7 +469,12 @@ class Phase5Supervisor:
                             pass
 
                 # Consolidate TS checks and recovery results
-                ts_checks = ts_report_data.get("checks", {})
+                if not isinstance(ts_report_data, dict) or not isinstance(ts_report_data.get("checks"), dict):
+                    raise ValueError("TypeScript Phase 5 report/checks must be JSON objects")
+                ts_errors = ts_report_data.get("errors")
+                if not isinstance(ts_errors, list) or not all(isinstance(error, str) and error for error in ts_errors):
+                    raise ValueError("TypeScript Phase 5 report.errors must be an array of nonempty strings")
+                ts_checks = ts_report_data["checks"]
                 report["checks"] = {
                     "shadow_target_safety": ts_checks.get("shadowTargetSafety", False),
                     "durable_indexing_cancellation": ts_checks.get("durableIndexingCancellation", False),
@@ -325,25 +486,32 @@ class Phase5Supervisor:
                     "mcp_transport_probe_passed": ts_checks.get("mcpTransportProbePassed", False),
                     "mlx4b_retrieval_complete": ts_checks.get("mlx4bRetrievalComplete", False),
                     "gguf06b_stage_blocked": True,
+                    "fresh_process_recovery": fresh_process_recovery_verified(ts_report_data.get("recovery")),
                 }
                 report["corpus"] = ts_report_data.get("corpus", {})
                 report["recovery"] = ts_report_data.get("recovery", {})
+                if report["checks"]["fresh_process_recovery"]:
+                    report["unfulfilled_release_gates"] = [gate for gate in report["unfulfilled_release_gates"]
+                        if not gate.startswith("Fresh-process crash recovery")]
+                errors.extend(ts_errors)
+                failed_checks = [name for name, passed in report["checks"].items() if passed is not True]
+                if failed_checks:
+                    errors.append(f"TypeScript Phase 5 required checks failed: {', '.join(failed_checks)}")
+                if ts_report_data.get("status") != "passed":
+                    errors.append(f"TypeScript Phase 5 report status is not passed: {ts_report_data.get('status')}")
                 report["retrieval_comparison"]["mlx_4b"] = ts_report_data.get("retrieval", {}).get("mlx4b", {
                     "status": "completed" if ts_checks.get("mlx4bRetrievalComplete") else "failed",
                 })
                 report["mcp_probe"] = ts_report_data.get("mcpProbe", {})
 
-                # Read final telemetry metrics
-                st_mem, r_mem = ctx.client.get_json(f"{ctx.ctrl_url}/memory", deadline=ctx.deadline, timeout_s=2.0)
-                if st_mem == 200 and isinstance(r_mem, dict):
-                    report["memory_metrics"] = r_mem
-
-                st_stats, r_stats = ctx.client.get_json(f"{ctx.ctrl_url}/stats", deadline=ctx.deadline, timeout_s=2.0)
-                if st_stats == 200 and isinstance(r_stats, dict):
-                    report["stats_metrics"] = r_stats
+                # Final telemetry is an acceptance gate, not optional context.
+                report.update(self._final_telemetry(ctx))
+                ctx.check_breach("phase5_final_telemetry")
 
                 all_passed = (
-                    all(report["checks"].values())
+                    all(value is True for value in report["checks"].values())
+                    and ts_report_data.get("status") == "passed"
+                    and ts_res.error is None
                     and ts_res.exit_code == 0
                     and not ts_res.timed_out
                     and not ts_res.breached
@@ -356,12 +524,34 @@ class Phase5Supervisor:
             errors.append(str(e))
             report["errors"] = errors
         finally:
+            if ts_temp_dir is not None:
+                try:
+                    ts_temp_dir.cleanup()
+                except Exception as cleanup_error:
+                    errors.append(f"TypeScript scratch cleanup failed: {cleanup_error}")
             report["duration_s"] = round(time.time() - overall_t0, 3)
             report["errors"] = errors
             if ctx is not None:
                 report["supervision"] = ctx.report
-                if ctx.report.get("errors"):
-                    report["status"] = "failed"
+                # managed_stage finalizes status and teardown AFTER the body.
+                # A green TS report cannot override its failed/missing cleanup.
+                for field in ("errors", "cleanup_errors"):
+                    stage_errors = ctx.report.get(field, [])
+                    if not isinstance(stage_errors, list):
+                        errors.append(f"Stage supervision {field} is malformed")
+                    else:
+                        for error in stage_errors:
+                            message = f"Stage supervision {field}: {error}"
+                            if error not in errors:
+                                errors.append(message)
+                cleanup = ctx.report.get("child_cleanup")
+                if (not isinstance(cleanup, dict) or cleanup.get("cleaned") is not True
+                        or type(cleanup.get("pid")) is not int or cleanup["pid"] != ctx.child.pid):
+                    errors.append("Stage supervision did not verify cleanup of the exact owned child")
+                if ctx.report.get("status") != "passed":
+                    errors.append(f"Stage supervision final status is not passed: {ctx.report.get('status')}")
+            if errors:
+                report["status"] = "failed"
             self._save_report(report)
             self.last_report = report
 

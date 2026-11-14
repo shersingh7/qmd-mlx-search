@@ -15,28 +15,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.3'
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify tag matches package version
+        run: node --input-type=module -e 'import fs from "node:fs"; const version = JSON.parse(fs.readFileSync("package.json", "utf8")).version; if (process.env.GITHUB_REF_NAME !== `v${version}`) throw new Error("Tag does not match package version");'
+
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: '1.3.8'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Install SQLite
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
 
       - name: Verify lockfile is up-to-date
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
-      - run: bun test --timeout 60000 --preload ./src/test-preload.ts test/
+      - name: Build the explicitly approved Node SQLite addon
+        run: npm rebuild better-sqlite3 --ignore-scripts=false
+
+      # Vitest runs under Node; native Bun is verified by CI's installed-runtime smoke.
+      - run: python scripts/run-offline.py bun run test --maxWorkers=2 --testTimeout 60000
         env:
           CI: true
           LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-
-      - run: npm run build
-      - run: npm publish --provenance --access public
+      - name: Build and pack the exact release artifact
+        run: |
+          npm run build
+          npm pack --json --pack-destination "$RUNNER_TEMP" > "$RUNNER_TEMP/qmd-pack.json"
+          FILENAME="$(node scripts/pack-result.mjs "$RUNNER_TEMP/qmd-pack.json")"
+          printf 'QMD_RELEASE_TARBALL=%s/%s\n' "$RUNNER_TEMP" "$FILENAME" >> "$GITHUB_ENV"
+      - name: Verify the exact tarball before publishing
+        run: python scripts/run-offline.py bash test/smoke-install.sh --package "$QMD_RELEASE_TARBALL" --runtime node
+      - run: npm publish "$QMD_RELEASE_TARBALL" --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -46,12 +64,12 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           NOTES=$(./scripts/extract-changelog.sh "$VERSION")
           # Write to file for gh release (avoids quoting issues)
-          echo "$NOTES" > /tmp/release-notes.md
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/release-notes.md"
 
       - name: Create GitHub release
         run: |
           gh release create "$GITHUB_REF_NAME" \
             --title "$GITHUB_REF_NAME" \
-            --notes-file /tmp/release-notes.md
+            --notes-file "$RUNNER_TEMP/release-notes.md"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

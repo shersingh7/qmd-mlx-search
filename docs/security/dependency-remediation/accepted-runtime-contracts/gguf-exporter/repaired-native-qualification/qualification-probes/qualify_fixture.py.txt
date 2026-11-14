@@ -1,0 +1,79 @@
+"""Qualify copied genuine random CPU fixtures; no new weights or downloads."""
+from qual_common import *
+import gc
+q = Qualification('fixture')
+error = None
+try:
+    torch = q.initialize_ml()
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from safetensors import safe_open
+    copy_manifest = json.loads((ROOT / 'fixture-input-copy-manifest.json').read_text())
+    for entry in copy_manifest['files']:
+        assert Path(entry['destination']).is_relative_to(ROOT)
+        assert sha256(entry['destination']) == entry['sha256']
+    provenance = json.loads((ROOT / 'tokenizer-provenance.json').read_text())
+    assert len(provenance['assets']) == 4
+    assert all(sha256(ROOT / 'public-tokenizer' / entry['file']) == entry['sha256'] for entry in provenance['assets'])
+    fixture = ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
+    tokenizer = AutoTokenizer.from_pretrained(ROOT / 'public-tokenizer', local_files_only=True, trust_remote_code=False)
+    reload = AutoTokenizer.from_pretrained(fixture, local_files_only=True, trust_remote_code=False)
+    assert type(tokenizer).__module__.startswith('transformers.')
+    assert type(reload).__module__.startswith('transformers.')
+    vocabulary = tokenizer.get_vocab()
+    ids = set(vocabulary.values())
+    assert vocabulary == reload.get_vocab()
+    assert ids == set(range(248077)) and len(tokenizer) == len(reload) == 248077
+    assert tokenizer.all_special_ids == reload.all_special_ids
+    assert tokenizer.chat_template == reload.chat_template
+    test_texts = ['Synthetic CPU qualification: lexical vector query.', '世界 résumé العربية हिन्दी 0123',
+                  '<|im_start|>user\nTest<|im_end|>', '</think>']
+    assert [tokenizer.encode(text) for text in test_texts] == [reload.encode(text) for text in test_texts]
+    assert not list(fixture.glob('*.py'))
+    config = json.loads((fixture / 'config.json').read_text())
+    assert 'auto_map' not in config
+    assert config['hidden_size'] == 256 and config['num_hidden_layers'] == 2 and config['vocab_size'] == 248077
+    model = AutoModelForCausalLM.from_pretrained(fixture, local_files_only=True, trust_remote_code=False,
+                                               dtype=torch.bfloat16, device_map={'': 'cpu'})
+    q.model_cpu('copied_random_fixture_actual_reload', model)
+    input_ids = torch.tensor([tokenizer.encode('Synthetic CPU test.') + [max(ids)]], dtype=torch.long, device='cpu')
+    with torch.no_grad():
+        output = model(input_ids=input_ids, use_cache=False)
+    assert output.logits.device.type == 'cpu' and torch.isfinite(output.logits).all()
+    q.receipt['forward'] = {'input_device': str(input_ids.device), 'logits_device': str(output.logits.device),
+                            'shape': list(output.logits.shape), 'finite': True, 'input_ids': input_ids.tolist(),
+                            'included_maximum_token_id': max(ids)}
+    del output, model
+    gc.collect()
+    adapters = []
+    for label in ('sft', 'grpo'):
+        adapter_path = ROOT / ('RANDOM-NOT-TRAINED-' + label + '-adapter')
+        adapter_config = json.loads((adapter_path / 'adapter_config.json').read_text())
+        assert adapter_config['r'] == adapter_config['lora_alpha'] == 2
+        assert adapter_config['target_modules'] == ['v_proj']
+        with safe_open(adapter_path / 'adapter_model.safetensors', framework='pt', device='cpu') as handle:
+            keys = list(handle.keys())
+            assert len(keys) == 2
+            a = handle.get_tensor(next(k for k in keys if '.lora_A.' in k))
+            b = handle.get_tensor(next(k for k in keys if '.lora_B.' in k))
+            assert a.device.type == b.device.type == 'cpu'
+            assert torch.count_nonzero(a) > 0 and torch.count_nonzero(b) > 0
+            delta = b.float() @ a.float() * (adapter_config['lora_alpha'] / adapter_config['r'])
+            assert torch.count_nonzero(delta) > 0
+            adapters.append({'label': label, 'path': str(adapter_path), 'nonzero_A': int(torch.count_nonzero(a)),
+                             'nonzero_B': int(torch.count_nonzero(b)), 'delta_nonzero': int(torch.count_nonzero(delta)),
+                             'delta_max_abs': float(delta.abs().max()), 'device': str(delta.device),
+                             'files': {p.name: sha256(p) for p in adapter_path.iterdir() if p.is_file()}})
+    q.receipt['fixture'] = {'path': str(fixture), 'input_provenance': 'Hash-qualified copy of prior genuine locally random CPU fixture',
+                            'random_seed': 982451653, 'not_pretrained': True, 'no_optimizer_or_training': True,
+                            'tokenizer_type': type(tokenizer).__module__ + '.' + type(tokenizer).__name__,
+                            'vocab_size': len(tokenizer), 'max_id': max(ids), 'all_ids_covered': True,
+                            'special_ids': tokenizer.all_special_ids, 'stock_save_reload_equal': True,
+                            'config': config, 'files': {p.name: sha256(p) for p in fixture.iterdir() if p.is_file()},
+                            'adapters': adapters}
+except BaseException as exc:
+    error = exc
+    raise
+finally:
+    receipt = q.finish(error)
+    print(json.dumps({key: receipt.get(key) for key in ('success', 'environment_unchanged', 'source_unchanged',
+                     'forward', 'fixture', 'dispatch_tensor_devices', 'dispatch_operations', 'error')}, indent=2))

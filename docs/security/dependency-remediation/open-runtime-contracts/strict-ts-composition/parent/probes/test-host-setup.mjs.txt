@@ -1,0 +1,32 @@
+import { appendFileSync } from 'node:fs';
+import { afterAll, expect, vi } from 'vitest';
+import net from 'node:net';
+import tls from 'node:tls';
+import http from 'node:http';
+import https from 'node:https';
+const attempts=[];
+const deny=name=>function(){attempts.push(name);throw new Error('Composition offline/model boundary forbids '+name);};
+// The product's native factory/resolver are mocked at the actual package
+// boundary. Individual existing tests may install their own synthetic factory.
+vi.mock('node-llama-cpp',async importOriginal=>{
+  const mod=await importOriginal();
+  return {...mod,getLlama:vi.fn(()=>{throw new Error('Composition forbids native llama initialization');}),resolveModelFile:vi.fn(()=>{throw new Error('Composition forbids model resolution/materialization');})};
+});
+net.Socket.prototype.connect=deny('net.Socket.connect');
+net.Server.prototype.listen=deny('net.Server.listen');
+tls.connect=deny('tls.connect');
+http.request=deny('http.request');http.get=deny('http.get');
+https.request=deny('https.request');https.get=deny('https.get');
+globalThis.fetch=deny('fetch');
+const realDlopen=process.dlopen;
+process.dlopen=function(module,filename,...args){
+  const text=String(filename);
+  const leaf=text.split(/[\\/]/).pop() ?? '';
+  if(/llama|ggml|metal|mlx/i.test(leaf)||/[\\/]@?node-llama-cpp[\\/]/i.test(text))return deny('model-native-dlopen:'+text)();
+  return realDlopen.call(this,module,filename,...args);
+};
+if(process.env.QMD_REVIEW_HOST_RECEIPT)appendFileSync(process.env.QMD_REVIEW_HOST_RECEIPT,JSON.stringify({kind:'host',execPath:process.execPath,versions:process.versions,home:process.env.HOME,tmpdir:process.env.TMPDIR})+'\n');
+afterAll(()=>{
+  if(process.env.QMD_REVIEW_HOST_RECEIPT)appendFileSync(process.env.QMD_REVIEW_HOST_RECEIPT,JSON.stringify({kind:'composition-boundaries',execPath:process.execPath,versions:process.versions,attempts})+'\n');
+  expect(attempts).toEqual([]);
+});

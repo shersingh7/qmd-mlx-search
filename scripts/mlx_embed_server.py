@@ -3,7 +3,7 @@
 QMD MLX Embedding Server — Metal-Native Apple Silicon GPU Acceleration
 
 Usage:
-    python scripts/mlx_embed_server.py --model mlx-community/nomic-embed-text-v1.5 --port 8787 --control-port 8788 --preload
+    python scripts/mlx_embed_server.py --model sentence-transformers/all-MiniLM-L6-v2 --port 8787 --control-port 8788 --preload
     python scripts/mlx_embed_server.py --model mlx-community/Qwen3-Embedding-0.6B-4bit-DWQ --preload
     python scripts/mlx_embed_server.py --model sentence-transformers/all-MiniLM-L6-v2 --preload
 
@@ -13,7 +13,7 @@ Environment:
     MLX_CONTROL_PORT      — control port (default: auto port+1)
     MLX_INSTANCE_TOKEN    — unique server instance token for watchdog binding
     MLX_EMBED_MAX_LENGTH  — max tokens per input (default 2048)
-    MLX_EMBED_QUANT       — quantization: bf16, fp16, q8_0, q4_0 (default bf16)
+    MLX_EMBED_QUANT       — storage quantization: auto, none, 4bit, 8bit (default auto)
     MLX_EMBED_DTYPE       — compute dtype: float32, float16, bfloat16 (default float32)
     MLX_MAX_BATCH_TOKENS  — max total tokens per GPU pass (default: auto from VRAM)
 
@@ -53,12 +53,22 @@ if current_dir not in sys.path:
 from qmd_mlx.server import start_server
 
 
+def _positive_int(value: str) -> int:
+    try:
+        result = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a positive integer") from exc
+    if result <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return result
+
+
 def main():
-    default_model = os.getenv("MLX_EMBED_MODEL", "mlx-community/nomic-embed-text-v1.5")
+    default_model = os.getenv("MLX_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     default_port = int(os.getenv("MLX_EMBED_PORT", "8787"))
     default_control_port = int(os.getenv("MLX_CONTROL_PORT", "0")) if os.getenv("MLX_CONTROL_PORT") else None
     default_max_length = int(os.getenv("MLX_EMBED_MAX_LENGTH", "2048"))
-    default_quant = os.getenv("MLX_EMBED_QUANT", "bf16")
+    default_quant = os.getenv("MLX_EMBED_QUANT", "auto")
     default_dtype = os.getenv("MLX_EMBED_DTYPE", "float32")
     default_max_tokens = int(os.getenv("MLX_MAX_BATCH_TOKENS", "0"))
     default_rerank = os.getenv("MLX_RERANK_MODEL", "")
@@ -71,12 +81,13 @@ def main():
     parser.add_argument("--control-port", type=int, default=default_control_port, help="Dedicated loopback control port (default: auto port+1)")
     parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind (default: 127.0.0.1)")
     parser.add_argument("--max-length", type=int, default=default_max_length, help="Max tokens per sequence")
-    parser.add_argument("--quantization", default=default_quant, choices=["bf16", "fp16", "q8_0", "q4_0", "q8", "q4"])
+    parser.add_argument("--quantization", default=default_quant, choices=["auto", "none", "4bit", "8bit"], help="Verify stored weight quantization (auto: inspect checkpoint); compute precision uses --dtype")
     parser.add_argument("--dtype", default=default_dtype, choices=["float32", "float16", "bfloat16"])
     parser.add_argument("--preload", action="store_true", default=True, help="Preload model at startup")
     parser.add_argument("--no-preload", action="store_false", dest="preload", help="Lazy load model on first request")
     parser.add_argument("--no-warmup", action="store_true", help="Skip Metal GPU warmup passes")
     parser.add_argument("--max-batch-tokens", type=int, default=default_max_tokens, help="Max tokens per GPU micro-batch")
+    parser.add_argument("--max-bulk-microbatch-tokens", type=_positive_int, default=512, help="Bulk scheduling target in padded tokens (default: 512; one sequence may exceed this target)")
     parser.add_argument("--rerank-model", default=default_rerank, help="Optional rerank model (HF repo or local path); enables /rerank")
     parser.add_argument("--generate-model", default=default_generate, help="Optional generation model (HF repo or local path); enables /generate")
 
@@ -88,12 +99,13 @@ def main():
         port=args.port,
         bind_host=args.host,
         control_port=args.control_port,
-        quantization=args.quantization,
+        quantization=None if args.quantization == "auto" else args.quantization,
         dtype_str=args.dtype,
         max_length=args.max_length,
         preload=args.preload,
         warmup=not args.no_warmup,
         max_batch_tokens=args.max_batch_tokens,
+        max_bulk_microbatch_tokens=args.max_bulk_microbatch_tokens,
         rerank_model=args.rerank_model or None,
         generate_model=args.generate_model or None,
     )
