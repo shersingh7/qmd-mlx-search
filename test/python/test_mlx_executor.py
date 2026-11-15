@@ -5,7 +5,9 @@ monotonic deadlines, fair interleaving, starvation prevention, safe callback loc
 
 import threading
 import time
+from types import SimpleNamespace
 import pytest
+from scripts.qmd_mlx import executor as executor_module
 from scripts.qmd_mlx.executor import GPUExecutor
 from scripts.qmd_mlx.protocol import (
     DeadlineExceededError,
@@ -256,27 +258,41 @@ def test_executor_worker_loop_guard_keeps_serving():
     executor.shutdown()
 
 
-def test_executor_submit_cancellation_on_exception():
-    """Verify that submit sets cancel_event if waiting on future raises an exception."""
+def test_executor_submit_cancellation_on_exception(monkeypatch):
+    """Expire a running job deterministically; do not race worker scheduling."""
+    clock = SimpleNamespace(now=0.0)
+    monkeypatch.setattr(executor_module, "time", SimpleNamespace(monotonic=lambda: clock.now))
     executor = GPUExecutor(max_queue_size=10)
     cancel_evt = threading.Event()
-
-    # Job that checks cancel_evt
+    started = threading.Event()
+    finished = threading.Event()
     was_cancelled = []
 
     def long_job():
-        for _ in range(20):
-            if cancel_evt.is_set():
+        started.set()
+        try:
+            if cancel_evt.wait(2.0):
                 was_cancelled.append(True)
                 return "cancelled"
-            time.sleep(0.02)
-        return "completed"
+            raise AssertionError("running job did not observe cancellation")
+        finally:
+            finished.set()
 
-    # Submit with very short timeout to trigger exception
-    with pytest.raises(DeadlineExceededError):
-        executor.submit(long_job, timeout_s=0.05, cancel_event=cancel_evt)
+    original_submit_async = executor.submit_async
 
-    assert cancel_evt.is_set()
-    time.sleep(0.1)
-    assert True in was_cancelled
-    executor.shutdown()
+    def admitted(*args, **kwargs):
+        receipt = original_submit_async(*args, **kwargs)
+        assert started.wait(2.0), "worker must start before its clock advances"
+        clock.now = 1.0
+        return receipt
+
+    monkeypatch.setattr(executor, "submit_async", admitted)
+    try:
+        with pytest.raises(DeadlineExceededError):
+            executor.submit(long_job, timeout_s=0.05, cancel_event=cancel_evt)
+        assert cancel_evt.is_set()
+        assert finished.wait(2.0)
+        assert was_cancelled == [True]
+    finally:
+        cancel_evt.set()
+        executor.shutdown()

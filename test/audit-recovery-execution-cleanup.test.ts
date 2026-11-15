@@ -38,7 +38,7 @@ const variants: Record<string, string | null> = {
 type Kind = "hostCase" | "rawCase" | "invalidBudgetFrame";
 // Whole-caller lifecycle controls below use real local streams and asynchronous
 // dispatch; these older protocol controls intentionally retain authored clocks.
-type Options = { variant?: string; primary?: unknown; bodySuccess?: boolean; setupFailure?: string; releaseFailure?: string; reportFailure?: boolean; liveDescendant?: boolean; rootFailure?: boolean; hard?: boolean; listenerFailure?: string; timerFailure?: boolean; mutateAtRelease?: string; readFailureAtRelease?: boolean; rawStage?: string; rawFault?: string };
+type Options = { variant?: string; primary?: unknown; bodySuccess?: boolean; setupFailure?: string; releaseFailure?: string; reportFailure?: boolean; liveDescendant?: boolean; rootFailure?: boolean; hard?: boolean; listenerFailure?: string; timerFailure?: boolean; mutateAtRelease?: string; readFailureAtRelease?: boolean; rawStage?: string; rawGrant?: "open" | "eof" | "none"; rawFault?: string };
 async function exercise(kind: Kind, options: Options = {}) {
   const area = fs.mkdtempSync(path.join(tmpdir(), "ea-cleanup-control-"));
   const evidence = output ? path.join(output, String(++sequence).padStart(3, "0")) : path.join(area, "evidence");
@@ -176,7 +176,7 @@ async function exercise(kind: Kind, options: Options = {}) {
   const whole = new Function(...Object.keys(bindings), compile(functions[kind]!) + ";return " + kind + ";")(...Object.values(bindings));
   let thrown: unknown, threw = false;
   try {
-    try { await (kind === "hostCase" ? whole("node", "supervisor-consumed", "delay", options.hard ? "hard" : options.bodySuccess ? "valid" : "alive") : kind === "rawCase" ? whole(options.rawStage ?? "none", "delay", "open", options.rawFault) : whole("Sbad\nK")); }
+    try { await (kind === "hostCase" ? whole("node", "supervisor-consumed", "delay", options.hard ? "hard" : options.bodySuccess ? "valid" : "alive") : kind === "rawCase" ? whole(options.rawStage ?? "none", "delay", options.rawGrant ?? "open", options.rawFault) : whole("Sbad\nK")); }
     catch (error) { threw = true; thrown = error; }
     const snapshot = {
       kind, options, scope: "source-extracted WHOLE case, actual cleanEnv/instrument/template generation and real cleanup helper; synthetic process/reap/alive/clock and authored sidecars; real owned FS and collector; generated subjects NEVER executed; NO native/custody proof",
@@ -277,7 +277,7 @@ describe("source-bound fixture lifecycle (NO native subjects)", () => {
     expect(result.owners[0].outcomes.some((o: any) => o.label === "listener-data" && o.status === "failed")).toBe(true);
   });
   it("both raw intervals and guard are independently cleared after a body failure", async () => {
-    const result = await exercise("rawCase", { rawStage: "child-validation", rawFault: "cancel-read-hold" });
+    const result = await exercise("rawCase", { rawStage: "child-validation", rawGrant: "eof", rawFault: "cancel-read-hold" });
     expect(result.primaryRetained).toBe(true); released(result, ["controller", "sentinel"]);
     expect(result.events.filter(e => e === "interval-clear")).toHaveLength(2); expect(result.syntheticTimersRemaining).toEqual([]);
   });

@@ -84,8 +84,11 @@ def hold(label):
     global paused
     if paused: return
     paused = True
-    with open(${JSON.stringify(stageFile)}, 'w') as record:
+    stage_path = ${JSON.stringify(stageFile)}
+    stage_temp = stage_path + '.' + str(os.getpid()) + '.tmp'
+    with open(stage_temp, 'x') as record:
         json.dump(dict(stage=label, pid=os.getpid()), record)
+    os.replace(stage_temp, stage_path)
     ${pause === "stop" ? "os.kill(os.getpid(), signal.SIGSTOP)" : "time.sleep(1.300)"}
 original_send = scope['send']
 def observed_send(message):

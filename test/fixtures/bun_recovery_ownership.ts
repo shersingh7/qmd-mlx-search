@@ -5,6 +5,7 @@ import { closeSync, existsSync, fstatSync, mkdtempSync, openSync, readFileSync, 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { executeRecoveryWorker, type RecoveryProcessResult } from "../../scripts/phase5_e2e_runner.js";
+import { changedPipes, pipeSnapshot } from "../helpers/recovery-fd-observation.js";
 
 const bunVersion = (process.versions as Record<string, string>).bun;
 assert.ok(bunVersion, "This regression must execute in native Bun, not a Node-hosted runner");
@@ -33,12 +34,7 @@ async function stopSentinel(child: ChildProcess): Promise<void> {
 
 // Observe real parent-side descriptors without replacing/intercepting spawn.
 function pipes(): number[] {
-  const result: number[] = [];
-  for (let fd = 3; fd < 512; fd++) {
-    try { const stat = fstatSync(fd); if (stat.isFIFO() || stat.isSocket()) result.push(fd); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code !== "EBADF") throw error; }
-  }
-  return result;
+  return [...pipeSnapshot().keys()];
 }
 
 type Identity = { pid: number; pgid: number; sid: number };
@@ -63,7 +59,8 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
     json.dump(dict(status='completed', pid=os.getpid(), dbPath=${JSON.stringify(dbPath)}, action='resume', docsCompleted=1, chunksCommitted=1, totalVectors=1, checkpointStatus=None, consecutiveSequenceVerified=True, hashes=[]), report)`}
 `;
   const started = performance.now();
-  const beforeFDs = new Set(pipes());
+  const beforePipes = pipeSnapshot();
+  const beforeFDs = new Set(beforePipes.keys());
   let identity: Identity | undefined;
   let guard: ReturnType<typeof setTimeout> | undefined;
   let guardFired = false;
@@ -93,7 +90,10 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
         identity = JSON.parse(readFileSync(readyPath, "utf8")) as Identity;
         assert.equal(alive(identity.pid), true);
         assert.equal(alive(sentinel.pid!), true);
-        activeFDs = pipes().filter(fd => !beforeFDs.has(fd));
+        // A previous call's resource can still exist at the baseline and then
+        // be replaced at the SAME descriptor number before this sample.
+        // BigInt fstat identity observes that replacement without warming GC.
+        activeFDs = changedPipes(beforePipes, pipeSnapshot());
         assert.ok(activeFDs.length > 0, "Must observe real active recovery pipes");
         reusedFDs = activeFDs.filter(fd => priorFDs.has(fd));
         for (const fd of activeFDs) priorFDs.add(fd);

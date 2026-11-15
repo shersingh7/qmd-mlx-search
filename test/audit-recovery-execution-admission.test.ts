@@ -196,7 +196,7 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
   const positive = !fault && stage === "none" && grant === "open";
   const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
   fixture.ownedHandle(sentinel, "sentinel", observation => reap(sentinel, [], observation));
-  const child = spawn("/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({
+  const child = spawn(env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({
     command: ["/bin/sh", "-c", 'printf actual-user-work > "$1"', "owned-shell", work], timeoutMs: positive ? 5_000 : 200, contained: false,
   })], { env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
   const controller = fixture.controller(child);
@@ -221,7 +221,7 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
   // Child-boundary probes first prove that the actual child reached the held
   // boundary. Otherwise a fast supervisor EOF cleanup could miss that boundary.
   let stageAtEOF: string | null = null;
-  const closeAfterAdmission = stage.startsWith("child-") ? setInterval(fixture.callback(() => {
+  const closeAfterAdmission = stage.startsWith("child-") && grant !== "open" ? setInterval(fixture.callback(() => {
     if (stageAtEOF === null && existsSync(path.join(root, "stage.json"))) {
       stageAtEOF = read(path.join(root, "stage.json")); child.stdin!.end();
     }
@@ -279,7 +279,10 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
       expect(validation, JSON.stringify(observation)).not.toBeNull();
       expect(validation!.allowed).toBe(false); expect(validation!.remainingMs).toBeLessThan(0);
     }
-    if (stage !== "none" && grant === "open") expect(messages.at(-1).timedOut).toBe(true);
+    if (stage !== "none" && grant === "open") {
+      expect(stageAtEOF, "an open-parent scenario must not close its control channel").toBeNull();
+      expect(messages.at(-1).timedOut).toBe(true);
+    }
     if (fault === "cancel-read-hold") {
       expect(cancelSent).toBe(true);
       expect(observation.stageRecord, "supervisor must not erase pre-admission K").toBeNull();
@@ -454,6 +457,9 @@ async function invalidBudgetFrame(frame: string) {
 }
 
 describe.skipIf(process.platform === "win32")("execution authority cannot replay after the caller dies", () => {
+  it("keeps the parent channel open while a child-consumed lease expires", async () => {
+    await rawCase("child-consumed", "delay", "open");
+  });
   for (const enabled of [false, true]) {
     it(`keeps missing-stage diagnostics ${enabled ? "enabled" : "disabled"} before real host cleanup`, async () => {
       const saved = process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS;

@@ -92,3 +92,18 @@ The Bun package script explicitly invokes Node/Vitest; it is **not** 1,959 tests
 Both canonical JavaScript invocations produced a real Node supervisor observation for the selected interpreter, with admission, supervisor/child reap, closed pipes, and no forced pipe closure in the existing fast-timeout case. Native Bun's missing low-level observer remains explicitly labelled unsupported rather than fabricated.
 
 The retained 262-advisory baseline reports zero affected instances in the candidate. This does not close default-branch alerts before merge, and remote exact-head CI is a separate post-push observation. Independent agent review and new GPU/retrieval benchmarks were not performed in this pass. The latest user authorization covers commit, push and merge after exact-head CI passes; deployment, live-index operations and global installation remain outside scope.
+
+## Exact-head CI follow-up
+
+The first published candidate (`b96a156`) failed three macOS jobs in [CI run 43757070634](https://github.com/shersingh7/qmd-mlx-search/actions/runs/43757070634). The failure logs are retained; previous local passes are not substituted for this failed remote run.
+
+The follow-up changes only test infrastructure:
+
+- Observe pipe identity with BigInt device/inode values. A pipe can be replaced at the same descriptor number after the baseline snapshot, so subtracting descriptor-number sets incorrectly misses genuine reuse. The real active-GC and reuse assertions remain mandatory; observations never authorize cleanup actions.
+- Publish transition records atomically. A regression control interrupts a real writer and verifies that partial JSON is never exposed as a completed stage receipt.
+- Keep the control channel open in open-parent scenarios. Add a real child-consumed lease-expiry case and explicitly select EOF in the synthetic cleanup case that requires both interval acquisitions.
+- Retain the selected interpreter in raw admission and standalone Python ownership fixtures as well as the public wrapper.
+- Synchronize the executor cancellation unit test with events and a controlled clock; preserve the 50 ms logical deadline and guarantee owner cleanup instead of relying on short scheduling sleeps.
+- Separate real-kernel recovery files from concurrent application files. The application pool retains two workers; real execution/teardown budgets are unchanged, and coverage checks assign every test file exactly once. This resource-contention mitigation is not a causal explanation of every historical startup miss or the original macOS `EPERM` spawn refusal.
+
+The new regression controls were observed failing before repair (six failures), then all seven passed. The first full local rerun passed 1,965 tests and exposed one synthetic fixture still selecting an open channel while expecting an EOF interval; that case was corrected rather than weakening its two-release assertion. The final focused rerun passed 272 TypeScript tests and 35 Python tests plus 11 subtests; canonical build and strict TypeScript checks passed. Complete final-suite and remote results remain separate exact-head publication gates.

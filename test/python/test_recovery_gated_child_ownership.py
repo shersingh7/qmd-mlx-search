@@ -178,7 +178,7 @@ def run_case(source: Path, scenario: str, root: Path) -> dict:
     try:
         root.mkdir(parents=True, exist_ok=False)
         read_fd, write_fd = os.pipe()
-        command = ["/usr/bin/python3", "-S", "-u", str(Path(__file__).resolve()), "--supervisor",
+        command = [sys.executable, "-S", "-u", str(Path(__file__).resolve()), "--supervisor",
                    str(source), scenario, str(root), str(write_fd), json.dumps(dict(
                        command=["/usr/bin/python3", "-S", "-c", "raise RuntimeError('Gated work escaped')"],
                        timeoutMs=200, contained=False))]
