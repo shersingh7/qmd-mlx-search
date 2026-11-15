@@ -12,6 +12,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { executeRecoveryWorker, type RecoveryProcessResult } from "../scripts/phase5_e2e_runner.js";
 import { beginRecoveryBootstrapDiagnostics } from "./helpers/recovery-bootstrap-diagnostics.mjs";
+import { readRecoveryFixturePids } from "./helpers/recovery-readiness-diagnostics.js";
 
 function alive(pid: number): boolean {
   try { process.kill(pid, 0); return true; }
@@ -346,7 +347,8 @@ with open(${JSON.stringify(outputJson)}, 'w') as report:
     })]);
     clearTimeout(guard);
     const elapsedMs = performance.now() - started;
-    pids = JSON.parse(readFileSync(pidFile, "utf8"));
+    pids = readRecoveryFixturePids(() => JSON.parse(readFileSync(pidFile, "utf8")),
+      () => ({ mode, elapsedMs, guardFired, result, pidFile, outputJson }));
     expect(result.pid).toBe(pids!.parent);
     expect(result.cleanup.sessionId).toBe(pids!.parentSID);
     expect(pids!.childPGID).toBe(pids!.grandchild);

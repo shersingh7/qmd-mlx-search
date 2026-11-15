@@ -178,13 +178,14 @@ import {PassThrough} from 'node:stream';
 import {readFileSync,existsSync} from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),source=path.join(root,'scripts/phase5_recovery_process.py');
+const python=process.env.QMD_RECOVERY_PYTHON??'/usr/bin/python3';
 const originalSpawn=childProcess.spawn,environment=process.env;
 const result={launch:{state:'started',supervisorReaped:true},timedOut:false,exitCode:0,signal:null,
  cleanup:{containmentVerified:false,childReaped:true,groupTerminated:true,sessionTerminated:true,pipesClosed:true,forcedPipeClose:false}};
 const failure=new Error('authored caller/finish failure');
 let mode,calls,children;
 const fakeSpawn=function(exe,args){
- assert.equal(exe,'/usr/bin/python3');assert.deepEqual(args.slice(0,2),['-S','-u']);assert.ok(args[2].endsWith('/self-observing-supervisor.py'));
+ assert.equal(exe,python);assert.deepEqual(args.slice(0,2),['-S','-u']);assert.ok(args[2].endsWith('/self-observing-supervisor.py'));
  const child=new EventEmitter();Object.assign(child,{pid:123,exitCode:null,signalCode:null,stdout:new PassThrough(),stderr:new PassThrough()});
  child.stdio=[null,child.stdout,child.stderr,new PassThrough()];
  child.kill=()=>{throw Error('fixture must never signal subject');};
@@ -205,7 +206,7 @@ const fakeSpawn=function(exe,args){
 childProcess.spawn=fakeSpawn;syncBuiltinESMExports();
 const replacement=mock.module(new URL('./scripts/phase5_e2e_runner.ts', 'file://'+root+'/').href,{namedExports:{executeRecoveryWorker(){
  calls++;
- if(!mode.startsWith('no-observer'))namedSpawn('/usr/bin/python3',['-S','-u',source,JSON.stringify({timeoutMs:200,contained:false})],{detached:true,stdio:['pipe','pipe','pipe','pipe']});
+ if(!mode.startsWith('no-observer'))namedSpawn(python,['-S','-u',source,JSON.stringify({timeoutMs:200,contained:false})],{detached:true,stdio:['pipe','pipe','pipe','pipe']});
  if(mode==='sync-throw')throw failure;
  if(mode==='reject'||mode==='no-observer-reject')return Promise.reject(failure);
  if(mode==='finish-throw')children.at(-1).fail();
@@ -306,6 +307,14 @@ test("override changes exactly the script pathname, never interpreter, original 
   assert.ok(!wrapper.includes("sys.settrace")); assert.ok(!wrapper.includes("time.monotonic ="));
 });
 
+test("override retains a configured interpreter literally and refuses an interpreter mismatch", () => {
+  const python = "/qualified/../runtime/python with spaces";
+  const argv = [python, "-S", "-u", source, '{"timeoutMs":200}'];
+  assert.deepEqual(replaceSupervisorArgv(argv, source, "/owned/wrapper.py", python), [python, "-S", "-u", "/owned/wrapper.py", argv[4]]);
+  assert.throws(() => replaceSupervisorArgv(argv, source, "/owned/wrapper.py", "/different/python"), /supervisor argv/);
+  assert.throws(() => replaceSupervisorArgv(argv, source, "/owned/wrapper.py", "relative-python"), /supervisor argv/);
+});
+
 test("classification keeps failure/no-work/incomplete cleanup distinct from real injected work, never product qualification", () => {
   const result = { launch: { state: "started", admissionGranted: true, supervisorReaped: true }, pid: 12345,
     timedOut: false, exitCode: 0, signal: null, report: { status: "completed", pid: 12345 },
@@ -347,7 +356,7 @@ test("optional actual-host evidence requires both valid positive controls and pr
     assert.deepEqual(report.cases.map(item => item.timeoutMs), [200, 5000]);
     for (const item of report.cases) {
       assert.equal(item.productQualified, false); assert.equal(item.result.cleanup.containmentVerified, false);
-      assert.deepEqual(item.invocation.originalArgv.slice(0, 4), ["/usr/bin/python3", "-S", "-u", source]);
+      assert.deepEqual(item.invocation.originalArgv.slice(0, 4), [process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3", "-S", "-u", source]);
       assert.equal(JSON.parse(item.invocation.actualArgv[4]).timeoutMs, item.timeoutMs);
       assert.equal(item.unsupportedCallerMilestones.preparedReceiptMs, null);
       assert.equal(item.unsupportedCallerMilestones.remainingBudgetMs, null);

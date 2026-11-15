@@ -139,6 +139,7 @@ export function isolatedEnvironment(directory: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { PATH: process.env.PATH ?? "/usr/bin:/bin", LANG: "C.UTF-8", CI: "1", REQUIRE_BUN: "1", QMD_LLAMA_GPU: "false",
     HF_HUB_OFFLINE: "1", TRANSFORMERS_OFFLINE: "1", HF_DATASETS_OFFLINE: "1", UV_OFFLINE: "1", PYTHONDONTWRITEBYTECODE: "1", PYTHONNOUSERSITE: "1",
     TOKENIZERS_PARALLELISM: "false", npm_config_offline: "true" };
+  if (process.env.QMD_RECOVERY_PYTHON !== undefined) env.QMD_RECOVERY_PYTHON = process.env.QMD_RECOVERY_PYTHON;
   const folders = { HOME: "home", HERMES_HOME: "hermes", HERMES_DIR: "hermes", HERMES_KNOWLEDGE_DIR: "knowledge", KNOWLEDGE_DIR: "knowledge",
     XDG_CONFIG_HOME: "config", XDG_CACHE_HOME: "cache", XDG_DATA_HOME: "data", XDG_STATE_HOME: "state", HF_HOME: "hf", HF_HUB_CACHE: "hf/hub",
     TRANSFORMERS_CACHE: "hf/transformers", TMPDIR: "tmp", TMP: "tmp", TEMP: "tmp", BUN_INSTALL_CACHE_DIR: "bun", npm_config_cache: "npm", UV_CACHE_DIR: "uv" };
@@ -146,12 +147,12 @@ export function isolatedEnvironment(directory: string): NodeJS.ProcessEnv {
   return env;
 }
 
-/** The current caller has no public override option: use its existing fixture
- * seam, a synchronous, exact-launch-only argv replacement; restore immediately.
+/** Use the existing wrapper fixture seam, a synchronous, exact-launch-only argv
+ * replacement; preserve the explicitly configured interpreter and restore immediately.
  * No flags/config/stdio/owner methods are replaced, and no protocol bytes added.
  */
-export function replaceSupervisorArgv(argv: readonly string[], source: string, wrapper: string): string[] {
-  if (argv.length !== 5 || argv[0] !== "/usr/bin/python3" || argv[1] !== "-S" || argv[2] !== "-u" || argv[3] !== source
+export function replaceSupervisorArgv(argv: readonly string[], source: string, wrapper: string, python = "/usr/bin/python3"): string[] {
+  if (!path.isAbsolute(python) || argv.length !== 5 || argv[0] !== python || argv[1] !== "-S" || argv[2] !== "-u" || argv[3] !== source
     || !path.isAbsolute(wrapper)) throw new Error("unexpected supervisor argv");
   return [...argv.slice(0, 3), wrapper, argv[4]!];
 }
@@ -251,6 +252,7 @@ function launchWithOverride(wrapper: string, start: () => Promise<RecoveryProces
   result: Promise<RecoveryProcessResult>; invocation: Invocation; finishNode: (result: RecoveryProcessResult) => NodeObservation | null; releaseNode: () => void;
 } {
   const invocation: Invocation = { originalArgv: [], actualArgv: [], restored: false };
+  const python = process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3";
   let trace: ReturnType<typeof observeOwnedChild> | undefined;
   // Transfer the call-local handle before releasing it: finish already disposes
   // in its own finally. The asynchronous finally must not release it twice.
@@ -258,7 +260,7 @@ function launchWithOverride(wrapper: string, start: () => Promise<RecoveryProces
   const finishNode = (result: RecoveryProcessResult) => { const owned = trace; trace = undefined; return owned?.finish(result) ?? null; };
   const capture = (argv: readonly string[]) => {
     if (invocation.originalArgv.length) throw new Error("more than one owned supervisor launch");
-    invocation.originalArgv = [...argv]; invocation.actualArgv = replaceSupervisorArgv(argv, SOURCE, wrapper);
+    invocation.originalArgv = [...argv]; invocation.actualArgv = replaceSupervisorArgv(argv, SOURCE, wrapper, python);
     return invocation.actualArgv;
   };
   let restore: () => void;
@@ -267,13 +269,13 @@ function launchWithOverride(wrapper: string, start: () => Promise<RecoveryProces
     const bun = (globalThis as unknown as { Bun: { spawn: (argv: string[], options: unknown) => unknown } }).Bun;
     const original = bun.spawn;
     bun.spawn = function(argv, options) {
-      return original.call(bun, argv[0] === "/usr/bin/python3" && argv[3] === SOURCE ? capture(argv) : argv, options);
+      return original.call(bun, argv[0] === python && argv[3] === SOURCE ? capture(argv) : argv, options);
     };
     restore = () => { bun.spawn = original; };
   } else {
     const original = childProcess.spawn;
     const replacement = (executable: string, args: readonly string[] | SpawnOptions = [], options?: SpawnOptions) => {
-      if (Array.isArray(args) && executable === "/usr/bin/python3" && args[2] === SOURCE) {
+      if (Array.isArray(args) && executable === python && args[2] === SOURCE) {
         const argv = capture([executable, ...args]);
         const child = original(argv[0]!, argv.slice(1), options!);
         trace = observeOwnedChild(child);

@@ -89,6 +89,8 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   stateRoot: string;
   timeoutMs?: number;
   terminateAtBarrier?: boolean;
+  /** Explicit compatible local interpreter; no PATH search or probe process. */
+  supervisorPython?: string;
   /** Explicit local command injection for non-model timeout/error fixtures. */
   command?: string[];
 }): Promise<RecoveryProcessResult> {
@@ -98,6 +100,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   }
   // Bootstrap/admission is part of the caller's budget, not startup grace.
   const executionDeadline = performance.now() + timeoutMs;
+  const supervisorPython = options.supervisorPython ?? process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3";
   const stateRoot = path.resolve(options.stateRoot);
   for (const name of ["home", "tmp", "cache", "config", "hermes"]) mkdirSync(path.join(stateRoot, name), { recursive: true });
   const env: NodeJS.ProcessEnv = {};
@@ -111,6 +114,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     HERMES_HOME: path.join(stateRoot, "hermes"), CI: "true",
     HF_HUB_OFFLINE: "1", TRANSFORMERS_OFFLINE: "1", HF_DATASETS_OFFLINE: "1",
     QMD_PHASE5_LAUNCH_TOKEN: options.launchToken || "",
+    QMD_RECOVERY_PYTHON: supervisorPython,
     QMD_EMBED_BACKEND: "mlx", QMD_MLX_EMBED_URL: `http://127.0.0.1:${options.mlxPort ?? 8797}`,
     QMD_MLX_FALLBACK: "0", QMD_MLX_BINARY: "0",
   });
@@ -137,6 +141,16 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
   try {
     if (!statSync(executable).isFile()) throw new Error("worker executable is not an executable regular file");
     accessSync(executable, fsConstants.X_OK);
+    if (typeof supervisorPython !== "string" || !path.isAbsolute(supervisorPython)) {
+      throw new Error("Recovery supervisor interpreter must be an explicit absolute path");
+    }
+    try {
+      if (!statSync(supervisorPython).isFile()) throw new Error("not a file");
+      accessSync(supervisorPython, fsConstants.X_OK);
+    } catch {
+      // Do not silently change interpreter, search PATH, or echo malformed input.
+      throw new Error("Recovery supervisor interpreter is unavailable or not executable");
+    }
   } catch (error) {
     return { exitCode: null, signal: null, timedOut: false, stdout: "", stderr: "",
       error: `Recovery worker spawn failed (executable preflight): ${String(error)}`,
@@ -159,7 +173,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
     // runtime's automatic reap grants post-exit numerical-PGID authority.
     const spawnSupervisor = () => {
       if (!(process.versions as Record<string, string>).bun) {
-        const child = spawn("/usr/bin/python3", supervisorArgs, supervisorOptions);
+        const child = spawn(supervisorPython, supervisorArgs, supervisorOptions);
         return { child, control: child.stdio[3] as Readable };
       }
       // Bun 1.3.8's node:child_process extra-stdio Socket can close a reused FD
@@ -178,7 +192,7 @@ export async function executeRecoveryWorker(options: RecoveryWorkerOptions & {
         spawn(command: string[], options: typeof supervisorOptions): NativeProcess;
         file(fd: number): { stream(): import("node:stream/web").ReadableStream<Uint8Array> };
       } }).Bun;
-      const native = bun.spawn(["/usr/bin/python3", ...supervisorArgs], supervisorOptions);
+      const native = bun.spawn([supervisorPython, ...supervisorArgs], supervisorOptions);
       let inputEnded = false;
       const endInput = async () => {
         if (inputEnded) return;

@@ -119,10 +119,11 @@ export function observeOwnedChild(child) {
   return { snapshot, finish, dispose };
 }
 
-/** Opt-in and lexical launch scope; never a global spawn wrapper. @param {{enabled?:boolean,directory?:string}} [options] */
+/** Opt-in and lexical launch scope; never a global spawn wrapper. @param {{enabled?:boolean,directory?:string,supervisorPython?:string}} [options] */
 export function beginRecoveryBootstrapDiagnostics(options = {}) {
   const enabled = options.enabled ?? process.env.QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS === "1";
   const directory = options.directory ?? process.env.QMD_RECOVERY_BOOTSTRAP_DIR;
+  const supervisorPython = options.supervisorPython ?? process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3";
   if (!enabled) return { attachAfterLaunch() {}, finish(/** @type {unknown} */ _receipt) {}, dispose() {} };
   const dc = channel("child_process");
   /** @type {import('node:child_process').ChildProcess[]} */
@@ -146,7 +147,7 @@ export function beginRecoveryBootstrapDiagnostics(options = {}) {
     if (attached || finished) return;
     attached = true;
     try {
-      const child = candidates.find(child => child.spawnfile === "/usr/bin/python3"
+      const child = candidates.find(child => child.spawnfile === supervisorPython
         && child.spawnargs[1] === "-S" && child.spawnargs[2] === "-u" && child.spawnargs[3] === SUPERVISOR);
       if (child) { trace = observeOwnedChild(child); status = "observed-node-supervisor"; }
     } finally { candidates.length = 0; unsubscribe(); }
@@ -159,6 +160,7 @@ export function beginRecoveryBootstrapDiagnostics(options = {}) {
     try {
       const observation = trace?.finish(receipt);
       const report = { ...(observation ?? { schemaVersion: 1, nativeBunOwnerDiagnostics: "not-implemented" }), status,
+        requestedSupervisorExecutable: typeof supervisorPython === "string" && path.isAbsolute(supervisorPython) && supervisorPython.length <= 4096 ? supervisorPython : null,
         invocation:"existing-fast-timeout-case-in-place; other canonical files may run concurrently; no global-first-supervisor claim",
         restoration: { channelUnsubscribed: true, listenersRemoved: true } };
       dispose();
@@ -220,7 +222,7 @@ export function writeStaticMetadata(directory) {
     runner: { os:value("RUNNER_OS"), arch:value("RUNNER_ARCH"), imageOS:value("ImageOS"), imageVersion:value("ImageVersion"), runId:value("GITHUB_RUN_ID"), runAttempt:value("GITHUB_RUN_ATTEMPT"), job:value("GITHUB_JOB") },
     host: { platform:process.platform, arch:process.arch, kernel:release(), osVersion:version(), swVers:process.platform === "darwin" ? query("/usr/bin/sw_vers", []) : null, cpuModel:cpus()[0]?.model ?? null },
     runtime: { metadataNode:process.versions.node, executable:process.execPath, uv:process.versions.uv, packageLauncher:value("QMD_DIAGNOSTIC_MATRIX_RUNTIME"), expectedMainSuiteHost:"Node (package.json test explicitly invokes node); actual observed host is in fast-timeout artifact" },
-    systemPython: { requested:"/usr/bin/python3", launcherIsRegularFile:lstatSync("/usr/bin/python3").isFile(), firstSelectedInterpreterVersion:"not-observed", versionQuery:"not-run; no Python/xcrun/xcode-select diagnostic warmup" },
+    systemPython: { requested:"/usr/bin/python3", scope:"legacy-fallback-only; offline command binds its already-selected Python", launcherIsRegularFile:lstatSync("/usr/bin/python3").isFile(), firstSelectedInterpreterVersion:"not-observed", versionQuery:"not-run; no Python/xcrun/xcode-select diagnostic warmup" },
     sourceSha256:hashes };
   writeFileSync(path.join(directory, "runner-metadata.json"), JSON.stringify(report, null, 2)+"\n", { flag:"wx", mode:0o600 });
   return report;

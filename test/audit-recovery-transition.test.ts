@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { executeRecoveryWorker, type RecoveryProcessResult } from "../scripts/phase5_e2e_runner.js";
+import { recoveryTransitionWrapper, type RecoveryTransitionStage } from "./helpers/recovery-transition-wrapper.js";
 
 const source = fileURLToPath(new URL("../scripts/phase5_recovery_process.py", import.meta.url));
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -45,55 +46,13 @@ function intercept(wrapper: string, observe: (pid: number, kill: () => void) => 
   return () => { childProcess.spawn = original; syncBuiltinESMExports(); };
 }
 
-type Stage = "before-fork" | "fork-return" | "registered" | "before-ready" | "after-ready";
-async function transitionCase(stage: Stage, pause: "delay" | "stop") {
+async function transitionCase(stage: RecoveryTransitionStage, pause: "delay" | "stop") {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-recovery-transition-"));
   const wrapper = path.join(root, "semantic-transition.py");
   const stageFile = path.join(root, "stage.json");
   const forkFile = path.join(root, "forks.jsonl");
   const workFile = path.join(root, "unexpected-work.json");
-  writeFileSync(wrapper, `import ast, json, os, signal, sys, time
-source = ${JSON.stringify(source)}
-code = open(source, 'rb').read()
-tree = ast.parse(code, source)
-# Select the real worker creation and ready emission, not joining-anchor forks.
-main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
-fork_line = next(node.lineno for node in ast.walk(main) if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'worker' for target in node.targets) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == 'fork')
-ready_line = min(node.lineno for node in ast.walk(main) if isinstance(node, ast.Expr) and node.lineno > fork_line and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'ready')
-sys.path.insert(0, os.path.dirname(source))
-scope = dict(__name__='semantic_transition_regression')
-exec(compile(code, source, 'exec'), scope)
-paused = False
-def hold(label):
-    global paused
-    if paused: return
-    paused = True
-    with open(${JSON.stringify(stageFile)}, 'w') as record:
-        json.dump(dict(stage=label, pid=os.getpid()), record)
-    ${pause === "stop" ? "os.kill(os.getpid(), signal.SIGSTOP)" : "time.sleep(1.300)"}
-original_send = scope['send']
-def observed_send(message):
-    original_send(message)
-    if message['type'] == 'ready' and ${stage === "after-ready" ? "True" : "False"}: hold('after-ready')
-scope['send'] = observed_send
-original_fork = os.fork
-def observed_fork():
-    pid = original_fork()
-    if pid:
-        with open(${JSON.stringify(forkFile)}, 'a') as record:
-            record.write(json.dumps(dict(parent=os.getpid(), pid=pid)) + '\\n')
-        if ${stage === "fork-return" ? "True" : "False"}: hold('fork-return')
-    return pid
-os.fork = observed_fork
-def trace(frame, event, arg):
-    if not paused and event == 'line' and frame.f_code.co_filename == source and frame.f_code.co_name == 'main':
-        if ${stage === "before-fork" ? "True" : "False"} and frame.f_lineno == fork_line: hold('before-fork')
-        if ${stage === "registered" ? "True" : "False"} and frame.f_lineno > fork_line and frame.f_locals.get('worker', 0) > 0: hold('registered')
-        if ${stage === "before-ready" ? "True" : "False"} and frame.f_lineno == ready_line: hold('before-ready')
-    return trace
-sys.settrace(trace)
-scope['main']()
-`);
+  writeFileSync(wrapper, recoveryTransitionWrapper({ source, stageFile, forkFile, stage, pause }));
   const sentinel = childProcess.spawn("/usr/bin/python3", ["-S", "-c", "import time; time.sleep(60)"], { detached: true, stdio: "ignore" });
   let supervisorPid: number | undefined;
   let killSupervisor: (() => void) | undefined;

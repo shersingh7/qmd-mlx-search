@@ -482,5 +482,6 @@ def test_offline_runner_scrubs_environment_and_preserves_failure(tmp_path):
     child = json.loads(result.stdout.splitlines()[-1])
     assert child["HOME"] != env["HOME"] and child["HOME"].startswith(env["TMPDIR"])
     assert child["PYTHONPATH"] == str(ROOT)
+    assert child["QMD_RECOVERY_PYTHON"] == sys.executable
     assert child["HF_HUB_OFFLINE"] == "1" and child["QMD_LLAMA_GPU"] == "false"
     assert "QMD_EMBED_MODEL" not in child and "UNRELATED_SECRET" not in child

@@ -229,15 +229,16 @@ test("disabled mode is a no-op; unmatched constructor subscription is restored e
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("constructor capture matches only the actual fixed supervisor, without reading command/config", async () => {
+test("constructor capture requires supervisor flags/source even for a configured executable, without reading command/config", async () => {
   const root = mkdtempSync(path.join(tmpdir(), "bootstrap-observer-capture-"));
-  const observer = beginRecoveryBootstrapDiagnostics({ enabled: true, directory: root });
+  const observer = beginRecoveryBootstrapDiagnostics({ enabled: true, directory: root, supervisorPython: process.execPath });
   const child = launch("setInterval(() => {}, 1000)");
   try {
     observer.attachAfterLaunch();
     observer.finish({ launch: { state: "unconfirmed" }, stdout: "must-not-log" });
     const report = JSON.parse(readFileSync(path.join(root, readdirSync(root)[0]), "utf8"));
     assert.equal(report.status, "no-matching-node-supervisor-observed");
+    assert.equal(report.requestedSupervisorExecutable, process.execPath);
     assert.equal(report.restoration.channelUnsubscribed, true);
     assert.ok(!JSON.stringify(report).includes("must-not-log"));
     assert.equal(child.listenerCount(errorMonitor), 0);

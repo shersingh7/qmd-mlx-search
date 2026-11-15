@@ -444,7 +444,10 @@ def main():
             if fd is not None:
                 os.close(fd)
 
-    if worker is None:
+    # Acquisition consumes the same teardown allowance as anchored cleanup;
+    # finding an identity later must never restart the cleanup clock.
+    recovery_started = time.monotonic() if worker is None else None
+    while worker is None:
         if launch_read is not None:
             owned_children = []
             for candidate in session_groups(session_id):
@@ -473,7 +476,14 @@ def main():
                 not_started("parent-interrupted")
                 return
             if not reaped:
-                raise RuntimeError("Recovery gated-child ownership could not be established")
+                # A snapshot may miss a still-live gated child. WNOHANG=0 is
+                # NOT ECHILD: closing its gate does not synchronously exit it.
+                # Retry actual ownership/exit acquisition without granting E
+                # or deriving signal authority from the membership snapshot.
+                if time.monotonic() >= recovery_started + TEARDOWN:
+                    raise RuntimeError("Recovery gated-child ownership could not be established")
+                time.sleep(0.001)
+                continue
             # If it exited before listing, waitpid itself supplies the exact
             # identity/reap proof. This gated child could not execute/fork; do
             # not acquire any numerical-group signal authority after its reap.
@@ -497,7 +507,7 @@ def main():
     exit_sent = False
     timed_out = startup_timed_out
     sigkill_used = False
-    stopped = None
+    stopped = recovery_started
     requested_kill = False
     anchors = {} if worker_was_reaped else {worker: worker}
     signalled_term = set()

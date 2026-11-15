@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { RecoveryProcessResult } from "../scripts/phase5_e2e_runner.js";
+import { captureRecoveryExecutionFailure } from "./helpers/recovery-execution-failure.js";
+import { RecoveryExecutionCleanup, recoveryForkRecords, releaseOwnedProcess } from "./helpers/recovery-execution-cleanup.js";
 
 const source = fileURLToPath(new URL("../scripts/phase5_recovery_process.py", import.meta.url));
 const runner = new URL("../scripts/phase5_e2e_runner.ts", import.meta.url).href;
@@ -18,6 +20,7 @@ function alive(pid: number): boolean {
 function cleanEnv(root: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { PATH: process.env.PATH, LANG: "en_US.UTF-8", CI: "1", QMD_LLAMA_GPU: "false",
     HF_HUB_OFFLINE: "1", TRANSFORMERS_OFFLINE: "1", HF_DATASETS_OFFLINE: "1", PYTHONDONTWRITEBYTECODE: "1" };
+  if (process.env.QMD_RECOVERY_PYTHON !== undefined) env.QMD_RECOVERY_PYTHON = process.env.QMD_RECOVERY_PYTHON;
   for (const [key, name] of Object.entries({ HOME: "home", HERMES_HOME: "hermes", XDG_CACHE_HOME: "cache",
     XDG_CONFIG_HOME: "config", TMPDIR: "tmp", TMP: "tmp", TEMP: "tmp" })) {
     mkdirSync(path.join(root, name), { recursive: true }); env[key] = path.join(root, name);
@@ -39,11 +42,8 @@ async function observeStageFailure(check: () => Promise<void>, snapshot: () => u
     throw primary;
   }
 }
-async function reap(child: ChildProcess, killed: number[]) {
-  if (child.exitCode === null && child.signalCode === null) {
-    killed.push(child.pid!);
-    const exited = new Promise<void>(resolve => child.once("exit", () => resolve())); child.kill("SIGKILL"); await exited;
-  }
+async function reap(child: ChildProcess, killed: number[], observation?: Parameters<typeof releaseOwnedProcess>[2]) {
+  await releaseOwnedProcess(child, killed, observation);
 }
 
 type Stage = "none" | "supervisor-consumed" | "supervisor-forwarded" | "child-consumed" | "child-validation" | "child-admitted";
@@ -180,22 +180,32 @@ scope['main']()
 }
 
 async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "eof" | "none", fault?: Fault, forwardDelayMs = 250, probe?: FixtureProbe) {
+  const fixture = new RecoveryExecutionCleanup();
+  const killed: number[] = [];
+  fixture.defer("unexpected-fixture-kills", () => { expect(killed).toEqual([]); });
+  fixture.report = () => console.log(JSON.stringify({ evidence: "recovery-execution-admission-finally", stage, pause, grant, fault, forwardDelayMs,
+    finallyKilled: killed, cleanup: fixture.diagnostics() }));
+  return fixture.run(async () => {
+  try {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-raw-"));
+  fixture.defer("scratch", () => rmSync(root, { recursive: true, force: true }));
+  fixture.note({ resource: "recovery-descendants", qualification: "unqualified", reason: "sidecars and direct handle release are not all-descendant custody" });
   const env = cleanEnv(root);
   const wrapper = instrument(root, stage, pause, true, fault, forwardDelayMs, probe);
   const work = path.join(root, "work");
   const positive = !fault && stage === "none" && grant === "open";
   const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
+  fixture.ownedHandle(sentinel, "sentinel", observation => reap(sentinel, [], observation));
   const child = spawn("/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({
     command: ["/bin/sh", "-c", 'printf actual-user-work > "$1"', "owned-shell", work], timeoutMs: positive ? 5_000 : 200, contained: false,
   })], { env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
+  const controller = fixture.controller(child);
+  const closed = controller.closed;
   const messages: any[] = [];
   let pending = "", stderr = "", worker: number | undefined;
   let guardFired = false;
-  const killed: number[] = [];
   const started = performance.now();
-  const closed = new Promise<void>(resolve => child.once("close", () => resolve()));
-  child.stdout!.on("data", chunk => {
+  fixture.listen(child.stdout!, "data", chunk => {
     pending += chunk.toString(); let newline: number;
     while ((newline = pending.indexOf("\n")) !== -1) {
       const message = JSON.parse(pending.slice(0, newline)); pending = pending.slice(newline + 1); messages.push(message);
@@ -207,26 +217,32 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
       }
     }
   });
-  child.stdin!.on("error", () => {});
-  child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
+  fixture.listen(child.stderr!, "data", chunk => { stderr += chunk.toString(); });
   // Child-boundary probes first prove that the actual child reached the held
   // boundary. Otherwise a fast supervisor EOF cleanup could miss that boundary.
   let stageAtEOF: string | null = null;
-  const closeAfterAdmission = stage.startsWith("child-") ? setInterval(() => {
+  const closeAfterAdmission = stage.startsWith("child-") ? setInterval(fixture.callback(() => {
     if (stageAtEOF === null && existsSync(path.join(root, "stage.json"))) {
       stageAtEOF = read(path.join(root, "stage.json")); child.stdin!.end();
     }
-  }, 2) : undefined;
+  }), 2) : undefined;
+  if (closeAfterAdmission) fixture.defer("close-after-admission-timer", () => clearInterval(closeAfterAdmission));
   let cancelSent = false;
-  const cancelAfterForward = fault === "cancel-read-hold" ? setInterval(() => {
+  const cancelAfterForward = fault === "cancel-read-hold" ? setInterval(fixture.callback(() => {
     if (!cancelSent && existsSync(path.join(root, "gate-forwarded.json"))) { cancelSent = true; child.stdin!.write("K"); }
-  }, 2) : undefined;
-  const guard = setTimeout(() => { guardFired = true; child.kill("SIGKILL"); }, positive ? 5_000 : 1_800);
-  try {
-    await closed; clearTimeout(guard);
+  }), 2) : undefined;
+  if (cancelAfterForward) fixture.defer("cancel-after-forward-timer", () => clearInterval(cancelAfterForward));
+  const guard = setTimeout(() => { guardFired = true; controller.refuse(new Error("fixture guard expired; controller custody unqualified")); }, positive ? 5_000 : 1_800);
+  fixture.defer("guard-timer", () => clearTimeout(guard));
+  fixture.defer("recovery-descendants", () => {
+    // The ready/fork sidecar number is an observation, never signal authority.
+    if (worker !== undefined && alive(worker)) throw new Error("observed recovery worker remains live; no retained descendant custody");
+  });
+    await closed; fixture.check(); clearTimeout(guard);
     const elapsedMs = performance.now() - started;
     // No assertion/finally cleanup before the original scheduling window ends.
     if (stage !== "none") await sleep(Math.max(0, 1_450 - elapsedMs));
+    fixture.check();
     const forkRecords = (read(path.join(root, "forks.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { pid: number });
     worker ??= forkRecords[0]?.pid;
     const reaps = (read(path.join(root, "reaps.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { pid: number });
@@ -269,18 +285,21 @@ async function rawCase(stage: Stage, pause: "delay" | "stop", grant: "open" | "e
       expect(observation.stageRecord, "supervisor must not erase pre-admission K").toBeNull();
       expect(controlReads.every(item => !item.preExec)).toBe(true);
     }
-  } finally {
-    clearTimeout(guard); if (closeAfterAdmission) clearInterval(closeAfterAdmission); if (cancelAfterForward) clearInterval(cancelAfterForward);
-    child.stdin!.end(); await reap(child, killed);
-    if (worker !== undefined && alive(worker)) { killed.push(worker); process.kill(worker, "SIGKILL"); }
-    const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
-    console.log(JSON.stringify({ evidence: "recovery-execution-admission-finally", stage, pause, grant, fault, forwardDelayMs, finallyKilled: killed }));
-    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
-  }
+  } catch (error) { fixture.capture(error); throw error; }
+  });
 }
 
 async function hostCase(runtime: "node" | "bun", stage: Stage, pause: "delay" | "stop", mode: "valid" | "alive" | "graceful" | "hard", probe?: FixtureProbe) {
+  const fixture = new RecoveryExecutionCleanup();
+  const killed: number[] = [];
+  fixture.defer("unexpected-fixture-kills", () => { expect(killed).toEqual([]); });
+  fixture.report = () => console.log(JSON.stringify({ evidence: "recovery-parent-death-finally", runtime, mode, stage, pause,
+    finallyKilled: killed, cleanup: fixture.diagnostics() }));
+  return fixture.run(async () => {
+  try {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-admission-host-"));
+  fixture.defer("scratch", () => rmSync(root, { recursive: true, force: true }));
+  fixture.note({ resource: "recovery-descendants", qualification: "unqualified", reason: "missing/partial sidecars and direct handle release cannot certify descendant cleanup" });
   const env = cleanEnv(root);
   const wrapper = instrument(root, stage, pause, false, undefined, 250, probe);
   const hostScript = path.join(root, "host.ts");
@@ -316,21 +335,34 @@ writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-st
   const executable = runtime === "node" ? process.execPath : process.env.BUN_EXECUTABLE || "bun";
   const args = runtime === "node" ? ["--import", loader, hostScript] : [hostScript];
   const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
+  fixture.ownedHandle(sentinel, "sentinel", observation => reap(sentinel, [], observation));
+  fixture.defer("recovery-descendants", () => {
+    const observed = recoveryForkRecords(read(path.join(root, "forks.jsonl")));
+    fixture.note({ resource: "fork-metadata", status: observed.status, qualification: "unqualified", records: observed.records.length,
+      reason: "numeric observations do not retain present destructive-signal authority" });
+    for (const item of observed.records) if (alive(item.parent) || alive(item.pid)) {
+      throw new Error("observed recovery descendants remain live; no retained descendant custody");
+    }
+  });
   const host = spawn(executable, args, { env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
+  fixture.ownedHandle(host, "host", observation => reap(host, killed, observation));
   let stdout = "", stderr = "";
-  host.stdout!.on("data", chunk => { stdout += chunk.toString(); }); host.stderr!.on("data", chunk => { stderr += chunk.toString(); });
-  const killed: number[] = [];
+  fixture.listen(host.stdout!, "data", chunk => { stdout += chunk.toString(); }); fixture.listen(host.stderr!, "data", chunk => { stderr += chunk.toString(); });
   const forks = () => (read(path.join(root, "forks.jsonl")) || "").trim().split("\n").filter(Boolean).map(line => JSON.parse(line) as { parent: number; pid: number });
   let guardFired = false;
-  try {
-    await until(() => existsSync(path.join(root, "started.json")) || host.exitCode !== null, performance.now() + 5_000, "host bootstrap");
+    await until(() => { fixture.check(); return existsSync(path.join(root, "started.json")) || host.exitCode !== null; }, performance.now() + 5_000, "host bootstrap");
+    fixture.check();
     expect(read(path.join(root, "started.json")), stderr).not.toBeNull();
     const started = performance.now();
     const deadline = started + (mode === "valid" ? 6_000 : 1_800);
     if (mode !== "valid") {
       await observeStageFailure(
-        () => until(() => existsSync(path.join(root, "stage.json")), deadline, `actual ${stage} must be reached: ${stderr}`),
+        () => until(() => { fixture.check(); return existsSync(path.join(root, "stage.json")); }, deadline, `actual ${stage} must be reached: ${stderr}`),
         () => {
+          captureRecoveryExecutionFailure({ root, runtime, mode, stage, pause, probe,
+            supervisorPython: env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3",
+            host: { pid: host.pid, exitCode: host.exitCode, signalCode: host.signalCode }, sentinelPid: sentinel.pid,
+            executable, args, fixtureElapsedMs: performance.now() - started, stdout, stderr });
           const text = read(path.join(root, "helper.json"));
           let parsed: { elapsedMs?: number; guardFired?: boolean; result?: RecoveryProcessResult } | null = null;
           try { parsed = text === null ? null : JSON.parse(text); } catch { /* retain incomplete-file evidence */ }
@@ -343,13 +375,16 @@ writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-st
               launch: parsed.result?.launch, cleanup: parsed.result?.cleanup, transportFailure: parsed.result?.transportFailure },
             stdoutBytes: Buffer.byteLength(stdout), stderrBytes: Buffer.byteLength(stderr), fixtureCleanupStarted: false };
         });
+      fixture.check();
       if (mode === "hard") host.kill("SIGKILL"); // An actual abrupt death, with NO JS exit hook.
     }
-    while (host.exitCode === null && host.signalCode === null && performance.now() < deadline) await sleep(2);
+    while (host.exitCode === null && host.signalCode === null && performance.now() < deadline) { fixture.check(); await sleep(2); }
+    fixture.check();
     guardFired = host.exitCode === null && host.signalCode === null;
     const atHostExit = { elapsedMs: performance.now() - started, exitCode: host.exitCode, signal: host.signalCode,
       recoveryAlive: forks().filter(item => alive(item.parent) || alive(item.pid)), work: read(path.join(root, "work")) };
     if (mode !== "valid") await sleep(Math.max(0, 1_500 - (performance.now() - started)));
+    fixture.check();
     const children = forks();
     const helperText = read(path.join(root, "helper.json"));
     const helper = helperText ? JSON.parse(helperText) as { elapsedMs: number; guardFired: boolean; hooksBefore: number[]; hooksAfter: number[]; result: RecoveryProcessResult } : null;
@@ -375,47 +410,47 @@ writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-st
       expect(helper).toBeNull();
       if (mode === "hard") expect(host.signalCode).toBe("SIGKILL"); else expect(host.exitCode).toBe(17);
     }
-  } finally {
-    await reap(host, killed);
-    for (const item of forks()) for (const pid of [item.parent, item.pid]) if (alive(pid)) { killed.push(pid); process.kill(pid, "SIGKILL"); }
-    const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
-    console.log(JSON.stringify({ evidence: "recovery-parent-death-finally", runtime, mode, stage, pause, finallyKilled: killed }));
-    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
-  }
+  } catch (error) { fixture.capture(error); throw error; }
+  });
 }
 
 async function invalidBudgetFrame(frame: string) {
+  const fixture = new RecoveryExecutionCleanup();
+  const killed: number[] = [];
+  fixture.defer("unexpected-fixture-kills", () => { expect(killed).toEqual([]); });
+  fixture.report = () => console.log(JSON.stringify({ evidence: "recovery-budget-frame-finally", frame, finallyKilled: killed, cleanup: fixture.diagnostics() }));
+  return fixture.run(async () => {
+  try {
   const root = mkdtempSync(path.join(tmpdir(), "qmd-execution-budget-frame-"));
+  fixture.defer("scratch", () => rmSync(root, { recursive: true, force: true }));
+  fixture.note({ resource: "recovery-descendants", qualification: "unqualified", reason: "absent fork metadata is not a no-child proof" });
   const env = cleanEnv(root);
   const wrapper = instrument(root, "none", "delay", true);
   const work = path.join(root, "work");
   const sentinel = spawn("/usr/bin/python3", ["-B", "-S", "-c", "import time;time.sleep(60)"], { env, detached: true, stdio: "ignore" });
+  fixture.ownedHandle(sentinel, "sentinel", observation => reap(sentinel, [], observation));
   const child = spawn("/usr/bin/python3", ["-B", "-S", "-u", wrapper, JSON.stringify({ command: ["/bin/sh", "-c",
     'printf actual-user-work > "$1"', "owned-shell", work], timeoutMs: 200, contained: false })],
   { env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
+  const controller = fixture.controller(child);
+  const closed = controller.closed;
   let protocol = "", stderr = "", sent = false, guardFired = false;
-  const killed: number[] = [];
-  child.stdout!.on("data", chunk => {
+  fixture.listen(child.stdout!, "data", chunk => {
     protocol += chunk.toString();
     if (!sent && protocol.includes('"prepared"')) { sent = true; child.stdin!.end(frame); }
   });
-  child.stdin!.on("error", () => {});
-  child.stderr!.on("data", chunk => { stderr += chunk.toString(); });
-  const closed = new Promise<void>(resolve => child.once("close", () => resolve()));
-  const guard = setTimeout(() => { guardFired = true; child.kill("SIGKILL"); }, 1_800);
-  try {
-    await closed; clearTimeout(guard);
+  fixture.listen(child.stderr!, "data", chunk => { stderr += chunk.toString(); });
+  const guard = setTimeout(() => { guardFired = true; controller.refuse(new Error("fixture guard expired; controller custody unqualified")); }, 1_800);
+  fixture.defer("guard-timer", () => clearTimeout(guard));
+    await closed; fixture.check(); clearTimeout(guard);
     const observation = { evidence: "recovery-budget-frame-before-finally", frame, protocol, stderr, guardFired,
       supervisorAbsent: !alive(child.pid!), forked: existsSync(path.join(root, "forks.jsonl")), work: read(work), sentinelAlive: alive(sentinel.pid!) };
     console.log(JSON.stringify(observation));
     expect(sent).toBe(true); expect(guardFired).toBe(false); expect(observation.supervisorAbsent).toBe(true);
     expect(observation.forked).toBe(false); expect(observation.work).toBeNull(); expect(observation.sentinelAlive).toBe(true);
     expect(protocol).not.toContain('"ready"');
-  } finally {
-    clearTimeout(guard); await reap(child, killed); const sentinelKills: number[] = []; await reap(sentinel, sentinelKills);
-    console.log(JSON.stringify({ evidence: "recovery-budget-frame-finally", frame, finallyKilled: killed }));
-    rmSync(root, { recursive: true, force: true }); expect(killed).toEqual([]);
-  }
+  } catch (error) { fixture.capture(error); throw error; }
+  });
 }
 
 describe.skipIf(process.platform === "win32")("execution authority cannot replay after the caller dies", () => {

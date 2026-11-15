@@ -26,7 +26,7 @@ function interceptSupervisor(wrapper: string, observe: (pid: number, kill: () =>
     const bun = (globalThis as any).Bun;
     const original = bun.spawn;
     bun.spawn = function(command: string[], options: unknown) {
-      if (command[0] === "/usr/bin/python3" && command[3] === supervisorScript) {
+      if (command[0] === (process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3") && command[3] === supervisorScript) {
         const child = original.call(bun, [...command.slice(0, 3), wrapper, ...command.slice(4)], options);
         observe(child.pid, () => child.kill("SIGKILL"));
         return child;
@@ -37,7 +37,7 @@ function interceptSupervisor(wrapper: string, observe: (pid: number, kill: () =>
   }
   const original = childProcess.spawn;
   (childProcess as any).spawn = function(executable: string, args: string[], options: unknown) {
-    if (executable === "/usr/bin/python3" && args[2] === supervisorScript) {
+    if (executable === (process.env.QMD_RECOVERY_PYTHON ?? "/usr/bin/python3") && args[2] === supervisorScript) {
       const child = original(executable, [...args.slice(0, 2), wrapper, ...args.slice(3)], options as any);
       observe(child.pid!, () => child.kill("SIGKILL"));
       return child;

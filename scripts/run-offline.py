@@ -21,7 +21,10 @@ def main() -> int:
         path = workspace / folder
         path.mkdir()
         env[key] = str(path)
-    env.update(TMP=env["TMPDIR"], TEMP=env["TMPDIR"], CI="true", HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", HF_DATASETS_OFFLINE="1", TOKENIZERS_PARALLELISM="false", PYTHONPATH=str(root), QMD_LLAMA_GPU="false")
+    # Bind recovery to the interpreter explicitly selected to launch this
+    # command, rather than an unrelated macOS /usr/bin Python with cold per-HOME
+    # bytecode caches. No extra probe or warm-up process is needed.
+    env.update(TMP=env["TMPDIR"], TEMP=env["TMPDIR"], CI="true", HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", HF_DATASETS_OFFLINE="1", TOKENIZERS_PARALLELISM="false", PYTHONPATH=str(root), QMD_LLAMA_GPU="false", QMD_RECOVERY_PYTHON=sys.executable)
     print(f"Offline fixture: {workspace}", flush=True)
     return subprocess.run(command, cwd=root, env=env).returncode
 
