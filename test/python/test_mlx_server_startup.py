@@ -12,6 +12,31 @@ from scripts.qmd_mlx.generate import MLXGenerateAdapter
 from scripts.qmd_mlx.server import start_server, ServerState
 
 
+def _complete_fake_load(adapter):
+    # A load stub must publish a genuinely complete state. The residency manager
+    # now verifies readiness rather than treating a no-op load as success.
+    adapter.model = object()
+    adapter.tokenizer = object()
+    adapter.raw_hf_tokenizer = object()
+    adapter.model_memory_mb = 10.0
+    if hasattr(adapter, "yes_token_id"):
+        adapter.yes_token_id = 1
+        adapter.no_token_id = 2
+
+
+def _fake_embed_adapter():
+    adapter = MagicMock()
+    adapter.model = None
+    adapter.model_memory_mb = 0.0
+    adapter.estimated_memory_mb = 10.0
+    adapter.is_loaded.side_effect = lambda: adapter.model is not None
+    adapter.load.side_effect = lambda: _complete_fake_load(adapter)
+    adapter.unload.side_effect = lambda: setattr(adapter, "model", None)
+    adapter.native_dims = 384
+    adapter.model_params_b = 0.5
+    return adapter
+
+
 def test_preload_three_models_registers_before_load():
     """
     Verify that 3-model preload does not call ensure_loaded before registering adapters.
@@ -22,20 +47,23 @@ def test_preload_three_models_registers_before_load():
     executor = GPUExecutor()
     manager = ModelResidencyManager(executor)
 
-    with patch.object(MLXRerankAdapter, "load") as mock_rerank_load:
-        mock_rerank_load.return_value = None
-        # Creating adapter with lazy_load=False and model_manager should not fail with ModelUnavailableError
-        adapter = MLXRerankAdapter(
-            model_name="test-rerank",
-            lazy_load=False,
-            executor=executor,
-            model_manager=manager,
-        )
-        # Register and ensure loaded
-        manager.register_adapter("rerank", adapter)
-        manager.ensure_loaded("rerank")
-        assert mock_rerank_load.called
-    executor.shutdown()
+    try:
+        with patch.object(MLXRerankAdapter, "load", autospec=True, side_effect=_complete_fake_load) as mock_rerank_load:
+            adapter = MLXRerankAdapter(
+                model_name="test-rerank",
+                lazy_load=False,
+                executor=executor,
+                model_manager=manager,
+            )
+            # No eager load may happen before registration; this is the contract
+            # under test, independent of the later readiness validation.
+            mock_rerank_load.assert_not_called()
+            manager.register_adapter("rerank", adapter)
+            manager.ensure_loaded("rerank")
+            mock_rerank_load.assert_called_once_with(adapter)
+            assert adapter.is_loaded()
+    finally:
+        executor.shutdown()
 
 
 def test_server_startup_three_model_preload_reaches_ready():
@@ -44,18 +72,10 @@ def test_server_startup_three_model_preload_reaches_ready():
     Should reach READY state without ModelUnavailableError.
     """
     with patch("scripts.qmd_mlx.runtime.resolve_embedding_adapter") as mock_embed, \
-         patch.object(MLXRerankAdapter, "load") as mock_rerank_load, \
-         patch.object(MLXGenerateAdapter, "load") as mock_gen_load:
+         patch.object(MLXRerankAdapter, "load", autospec=True, side_effect=_complete_fake_load), \
+         patch.object(MLXGenerateAdapter, "load", autospec=True, side_effect=_complete_fake_load):
 
-        mock_embed_inst = MagicMock()
-        mock_embed_inst.is_loaded.return_value = True
-        mock_embed_inst.native_dims = 384
-        mock_embed_inst.model_params_b = 0.5
-        mock_embed_inst.model_memory_mb = 500.0
-        mock_embed.return_value = mock_embed_inst
-
-        mock_rerank_load.return_value = None
-        mock_gen_load.return_value = None
+        mock_embed.return_value = _fake_embed_adapter()
 
         server, thread = start_server(
             model_name="test-embed",

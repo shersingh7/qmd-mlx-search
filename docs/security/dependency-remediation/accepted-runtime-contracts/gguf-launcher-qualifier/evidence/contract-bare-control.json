@@ -1,0 +1,9 @@
+{
+  "actual_exit": 0,
+  "expected_exit": 0,
+  "label": "bare-control",
+  "scope": "HOST probe with real compiler/make and synthetic uv --version; NOT image execution",
+  "stderr": "",
+  "stdout": "{\n  \"locked_python_converter_training_gpu_cloud_qualified\": false,\n  \"native_only\": false,\n  \"outputs\": [\n    \"qmd-c-ok\",\n    \"qmd-cxx-ok\"\n  ],\n  \"platform\": \"Darwin/arm64\",\n  \"probe_sha256\": \"72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc\",\n  \"python\": \"3.12.13\",\n  \"scope\": \"native CPU C/C++ prerequisites only\",\n  \"status\": \"pass\",\n  \"versions\": {\n    \"c++\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"cc\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"git\": \"git version 2.53.0\",\n    \"make\": \"GNU Make 3.81\",\n    \"uv\": \"uv 0.11.18\"\n  }\n}\n",
+  "synthetic_uv_display": "uv 0.11.18"
+}

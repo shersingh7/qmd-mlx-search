@@ -1,0 +1,24 @@
+{
+  "platform": "darwin",
+  "boundary": "private capability lifetime and injected macOS cleanup failure; NOT an untrusted-index exploit",
+  "expired_capability_fd_recycling": {
+    "old_root_fd": 3,
+    "old_root": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-security-review-6f4e3e2d/lifecycle-fixtures/first",
+    "recycled_directory": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-security-review-6f4e3e2d/lifecycle-fixtures/second",
+    "read_marker": 999.0,
+    "reproduced": true,
+    "scope": "requires possession/reuse of a private _CheckpointFile after checkpoint_files context exits; public loaders do not expose one"
+  },
+  "staging_cleanup_error_fd_leak": {
+    "error": "Unsafe checkpoint: final file validation failed ([Errno 5] injected staging unlink failure)",
+    "leaked_descriptors": [
+      {
+        "fd": 5,
+        "same_owned_fixture_inode": true
+      }
+    ],
+    "reproduced": true,
+    "scope": "one injected OS unlink(EIO) failure after successful regular-inode opening; no ordinary-success or deserializer-error leak"
+  },
+  "probe_leaked_descriptors_cleaned_up": true
+}

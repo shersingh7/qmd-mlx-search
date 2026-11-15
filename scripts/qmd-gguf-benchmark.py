@@ -2,8 +2,8 @@
 """
 qmd-gguf-benchmark.py — Bounded GGUF Embedding Qualification Runner
 
-Executes bounded pilot (<=30 requests, <=120s) and bounded soak (<=100 requests, <=180s)
-benchmarks for GGUF embedding models via node-llama-cpp under active Watchdog supervision
+Executes bounded pilot benchmarks only (<=30 measured requests, <=120s); no soak loop is implemented.
+Uses node-llama-cpp under active Watchdog supervision
 with strict process isolation, memory safety enforcement, and structured JSON reporting.
 
 Usage:
@@ -38,6 +38,7 @@ from scripts.qmd_gguf.benchmark import (
     GGUFBenchmarkConfig,
     GGUFBenchmarkRunner,
 )
+from scripts.qmd_mlx.sustained import format_metric, validate_benchmark_bounds
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -69,21 +70,21 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     parser.add_argument(
         "--mode",
-        choices=["pilot", "soak"],
+        choices=["pilot"],
         default="pilot",
-        help="Benchmark mode: 'pilot' (<=30 reqs, <=120s) or 'soak' (<=100 reqs, <=180s)",
+        help="Pilot only (<=30 measured requests, <=120s); GGUF soak is not implemented",
     )
     parser.add_argument(
         "--timeout-s",
         type=float,
         default=None,
-        help="Hard wall-clock execution ceiling (defaults to 120s for pilot, 180s for soak)",
+        help="Hard wall-clock execution ceiling, finite and >0, at most 120s",
     )
     parser.add_argument(
         "--max-requests",
         type=int,
         default=None,
-        help="Maximum request iterations (defaults to 30 for pilot, 100 for soak)",
+        help="Measured embedding/rejection request ceiling, 1..30; warmup, baseline and tokenizer probes excluded",
     )
     parser.add_argument(
         "--min-headroom-mb",
@@ -95,7 +96,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         "--contexts",
         type=int,
         default=2,
-        help="Number of parallel embedding contexts to allocate in node-llama-cpp",
+        help="Bounded parallel embedding contexts, 1 or 2",
     )
     parser.add_argument(
         "--rehearsal",
@@ -129,11 +130,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         return e.code if isinstance(e.code, int) else 2
 
     mode = args.mode
-    default_timeout = 120.0 if mode == "pilot" else 180.0
-    timeout_s = min(float(args.timeout_s or default_timeout), 180.0)
-
-    default_requests = 30 if mode == "pilot" else 100
-    max_requests = min(int(args.max_requests or default_requests), 100)
+    timeout_s = 120.0 if args.timeout_s is None else args.timeout_s
+    max_requests = 30 if args.max_requests is None else args.max_requests
+    try:
+        validate_benchmark_bounds(mode, timeout_s, max_requests, args.min_headroom_mb, pilot_only=True)
+        if not 1 <= args.contexts <= 2:
+            raise ValueError("Bounded GGUF pilot contexts must be 1 or 2")
+    except ValueError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 2
+    if args.rehearsal and args.real_model:
+        print("Error: --rehearsal and --real-model are mutually exclusive.", file=sys.stderr)
+        return 2
 
     resolved_model_path = os.path.expanduser(args.model_path) if args.model_path else None
     if not args.rehearsal and not args.real_model and not args.dry_run:
@@ -170,7 +178,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     exit_code = 0
     try:
         report = runner.run()
-        exit_code = 0 if report.get("status") in ("passed", "dry_run_completed") else 1
+        exit_code = 0 if report.get("status") in ("passed", "dry_run_completed", "rehearsal_completed") else 1
     except Exception as e:
         exit_code = 1
         report = getattr(runner, "last_report", None)
@@ -206,15 +214,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(f"Endpoints:          Inference http://{config.host}:{config.port} | Control http://{config.host}:{config.control_port}")
 
         pre = report.get("preflight", {})
-        print(f"Preflight Headroom: {pre.get('headroom_mb', 0):.1f} MB (min required: {config.min_headroom_mb:.1f} MB)")
+        print(f"Preflight Headroom: {format_metric(pre.get('headroom_mb'))} MB (min required: {config.min_headroom_mb:.1f} MB)")
 
         cold = report.get("cold_startup", {})
         if cold:
-            print(f"Cold Startup Time:  {cold.get('cold_startup_elapsed_s', 0):.3f}s")
+            print(f"Cold Startup Time:  {format_metric(cold.get('cold_startup_elapsed_s'), 3)}s")
 
         warm = report.get("warmup", {})
         if warm:
-            print(f"GPU Warmup:         {warm.get('warmup_elapsed_ms', 0):.2f}ms (excluded from metrics)")
+            print(f"GPU Warmup:         {format_metric(warm.get('warmup_elapsed_ms'), 2)}ms (excluded from metrics)")
 
         summary = report.get("metrics_summary", {})
         if summary:
@@ -222,8 +230,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"  Total Measured Requests:     {summary.get('total_measured_requests', 0)} / {config.max_requests}")
             print(f"  Successful Embed Requests:   {summary.get('successful_embedding_requests', 0)}")
             print(f"  Expected Rejections (400):   {summary.get('rejected_boundary_requests', 0)}")
-            print(f"  Successful Embedded Tokens:  {summary.get('total_successful_embedded_tokens', 0)}")
-            print(f"  True Token Throughput Rate:  {summary.get('overall_effective_tokens_per_sec', 0):.1f} tokens/s")
+            print(f"  Successful Embedded Tokens:  {summary.get('total_successful_embedded_tokens') if summary.get('total_successful_embedded_tokens') is not None else 'unavailable'}")
+            print(f"  Tokenizer Token Throughput:  {format_metric(summary.get('overall_effective_tokens_per_sec'))} tokens/s")
+            print(f"  Separate Word Throughput:   {format_metric(summary.get('overall_effective_words_per_sec'))} words/s")
+            print(f"  Throughput Denominator:     {summary.get('throughput_denominator', 'unavailable')}")
             print(f"  Partial Run Flag:            {summary.get('partial_run', False)}")
 
             wall = summary.get("cumulative_wall_accounting", {})
@@ -265,8 +275,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         mem = report.get("metal_memory_telemetry", {})
         if mem:
             print(f"\nUnified Memory Telemetry:")
-            print(f"  Peak Active:                 {mem.get('peak_active_mb', 0):.1f} MB")
-            print(f"  Active Delta:                {mem.get('delta_active_mb', 0):.1f} MB")
+            print(f"  Measurement Kind:            {mem.get('measurement_kind', 'unavailable')}")
+            print(f"  Metal Peak Active:           {format_metric(mem.get('peak_active_mb'))} MB")
+            print(f"  Metal Active Delta:          {format_metric(mem.get('delta_active_mb'))} MB")
+            if mem.get("limitations"):
+                print(f"  Limitation:                  {mem['limitations']}")
             stab = mem.get("provisional_stability_assessment", {})
             if stab:
                 print(f"  Stability Assessment:        {stab.get('verdict')} (Swap Growth: {stab.get('swap_growth_mb')} MB, RSS Growth: {stab.get('rss_growth_mb')} MB)")

@@ -1,0 +1,9 @@
+{
+  "image_update": {
+    "RepoDigests": [
+      "ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+      null
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/image-repodigests-nonstring-member/workspace"
+}

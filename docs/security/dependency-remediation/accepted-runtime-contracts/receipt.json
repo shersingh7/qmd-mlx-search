@@ -1,0 +1,96 @@
+{
+  "copied_evidence": {
+    "launcher/bounded-cli-final.xml": {
+      "bytes": 2755,
+      "sha256": "8dff0b23ae602a00d138760d3ea5fb5d32671a7307fdda0fdf82728477e9dc2f",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/bounded-cli-final/tests.xml"
+    },
+    "launcher/bounded.xml": {
+      "bytes": 9380,
+      "sha256": "7b0915869c57e8ed67729e9529d29514f3cfb2626a22af945681027d49fc496e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/bounded/tests.xml"
+    },
+    "launcher/final-evidence.json": {
+      "bytes": 4205,
+      "sha256": "da9fe468205f28760592547a2bd5d5554d25ba88023d6979dc90a8d7ebd542af",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/final-evidence.json"
+    },
+    "launcher/independent-report.md": {
+      "bytes": 7708,
+      "sha256": "65acd1578a4278e595ac5d27a4c4289cf8be75230fc8ca60ba9e307c09fda140",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/reacceptance-report.md"
+    },
+    "launcher/independent.xml": {
+      "bytes": 21932,
+      "sha256": "021808e2d4b08a75306d292c3c85e69f2f78c50fe2cce3c7ba166db91e32ecdd",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/independent/tests.xml"
+    },
+    "launcher/repository.xml": {
+      "bytes": 11499,
+      "sha256": "fdd4c338b4b349e414c8a10049ba6ba0e9f5e1b3f0bc31b3bd5b3b5f689e1baf",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-locked-secret-reacceptance/repository/tests.xml"
+    },
+    "raw-peft/acceptance-summary.json": {
+      "bytes": 12185,
+      "sha256": "9e9e5ccea543ed4d412fd46658baac5859c4ae930347bc7fc7906e8994936af0",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-raw-independent-lvabfdc5/acceptance-summary.json"
+    },
+    "raw-peft/core187.xml": {
+      "bytes": 56932,
+      "sha256": "2cb068c19e2120dcb6e1a3af1908fde5b4dd85a4c3f90d6caec8ca101f51a52f",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-raw-independent-lvabfdc5/core187.xml"
+    },
+    "raw-peft/heldout-gpt2-ownership.xml": {
+      "bytes": 50187,
+      "sha256": "521741cab3fad5053d2edc3f589fb52469af30cb79dff85d05da12e9d75dde68",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-raw-independent-lvabfdc5/heldout-gpt2-ownership.xml"
+    },
+    "raw-peft/independent-report.md": {
+      "bytes": 5880,
+      "sha256": "f60af26202ef6009811fa3c5026a15bc42d59ef0776c0bbae7747ae8d041d2f9",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-raw-independent-lvabfdc5/REPORT.md"
+    },
+    "raw-peft/original59.xml": {
+      "bytes": 19217,
+      "sha256": "dd5d1ae24aac7ebfec43ea27a833e3691e1f37bddcc58ddf0335e59f7ecfeaa7",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-raw-independent-lvabfdc5/original59.xml"
+    }
+  },
+  "launcher": {
+    "independent_test_records_verified": 233,
+    "quality": "PASS",
+    "source_sha256": {
+      "finetune/LOCKED-JOBS.md": "6b798d82f3f2a0624e182c248e3d85355ae031c49c9f751b8751ebdabc452d9b",
+      "finetune/tests/test_locked_job_submission.py": "4f37a131b666d723d22428551f354333e5aae4ab30e5fdfd49cb0b60dd6936ab",
+      "finetune/tools/submit_locked_job.py": "9f7333dec035129ec084fed14a5656552a29ea803e99b90740ec567815e51ae9"
+    },
+    "spec": "PASS"
+  },
+  "limits": "Scoped runtime contracts only. Original negative evidence remains negative. These receipts do not qualify remaining startup, graph, exporter, type/lifecycle, image, combined-release or default-branch gates.",
+  "raw_peft": {
+    "independent_tests_verified": 332,
+    "maxima_recomputed_from_xml": {
+      "embedding_max_abs_error": 0.0,
+      "head_max_abs_error": 0.0,
+      "max_abs_logit_error": 2.384185791015625e-07
+    },
+    "parent_separate_frozen_tests_passed": 187,
+    "quality": "PASS",
+    "section_hashes": {
+      "finetune/eval.py": {
+        "body_sha256": "375243edd3259b8314a9108a6f9eacd732eb0498f3d4a2c0a1a0ce94a0205534",
+        "header_sha256": "650081262095ac5506da34910da8fb7d8e4de4d795faa27f304a4de493fdb660"
+      },
+      "finetune/eval_retrieval.py": {
+        "body_sha256": "a02934221e18ad0c3565c3419914b9c050e9a56285e585ce7403a6f7881d2773",
+        "header_sha256": "650081262095ac5506da34910da8fb7d8e4de4d795faa27f304a4de493fdb660"
+      }
+    },
+    "source_sha256": {
+      "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "finetune/tests/test_raw_adapter_layers.py": "641e4d881e21d52741e1de47ff5c7192eca1776aaad58fc26618214b07e49e37"
+    },
+    "spec": "PASS"
+  }
+}

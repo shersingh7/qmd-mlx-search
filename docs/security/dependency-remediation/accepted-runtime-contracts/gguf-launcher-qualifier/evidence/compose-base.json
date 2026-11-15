@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1/delivery/proposal.patch"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/composition-replay",
+  "name": "compose-base",
+  "returncode": 0,
+  "seconds": 0.010404250002466142,
+  "stderr": "",
+  "stdout": ""
+}

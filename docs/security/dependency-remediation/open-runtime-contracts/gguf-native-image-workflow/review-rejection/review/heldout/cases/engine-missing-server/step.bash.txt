@@ -1,0 +1,252 @@
+set -euo pipefail
+umask 077
+owned="$(mktemp -d "$RUNNER_TEMP/qmd-native-image.XXXXXXXX")"
+mkdir "$owned/home" "$owned/cache" "$owned/config" "$owned/data" "$owned/tmp" \
+  "$owned/hf" "$owned/hermes" "$owned/knowledge" "$owned/docker"
+env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+  HOME="$owned/home" HERMES_HOME="$owned/hermes" KNOWLEDGE_DIR="$owned/knowledge" \
+  XDG_CACHE_HOME="$owned/cache" XDG_CONFIG_HOME="$owned/config" XDG_DATA_HOME="$owned/data" \
+  TMPDIR="$owned/tmp" HF_HOME="$owned/hf" DOCKER_CONFIG="$owned/docker" \
+  HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  QMD_LLAMA_GPU=false CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 \
+  GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0 GIT_OPTIONAL_LOCKS=0 \
+  QMD_WORKSPACE="$QMD_WORKSPACE" QMD_EVENT="$QMD_EVENT" QMD_CONTEXT_SHA="$QMD_CONTEXT_SHA" \
+  QMD_EVENT_HEAD_SHA="$QMD_EVENT_HEAD_SHA" QMD_RUNNER_OS="$RUNNER_OS" \
+  QMD_RUNNER_ARCH="$RUNNER_ARCH" QMD_RUNNER_NAME="$RUNNER_NAME" \
+  /Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python -I -B -S /Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/fixture_adapter.py /Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/engine-missing-server/config.json "$owned" <<'PY'
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import re
+import signal
+import stat
+import subprocess
+import sys
+
+owned = Path(sys.argv[1])
+workspace = Path(os.environ['QMD_WORKSPACE'])
+cidfile = owned / 'container.cid'
+owner = os.urandom(16).hex()
+label = 'qmd.native-qualification.owner'
+docker = ['docker', '--config', str(owned / 'docker'), '--host', 'unix:///var/run/docker.sock']
+report = {'schema': 1, 'status': 'not-qualified', 'scope': 'native Linux amd64 CPU C/C++ prerequisites only',
+          'event': os.environ['QMD_EVENT'], 'context_sha': os.environ['QMD_CONTEXT_SHA'],
+          'event_head_sha': os.environ['QMD_EVENT_HEAD_SHA'] or None,
+          'runner': {key: os.environ['QMD_RUNNER_' + key.upper()] for key in ('os', 'arch', 'name')},
+          'commands': [], 'probe_exit': None, 'cleanup': {'absence_verified': False},
+          'arm64_converter_training_gpu_cloud_qualified': False,
+          'hard_termination_limit': 'SIGKILL, runner loss or job hard timeout can prevent cleanup/readback; no absence proof then.'}
+print(json.dumps({'qualification_scope': report['scope'], 'hard_termination_limit': report['hard_termination_limit']}), flush=True)
+run_started = False
+primary = 1
+
+class Refused(Exception):
+    def __init__(self, message, code=1):
+        super().__init__(message)
+        self.code = (128 - code) if -127 <= code < 0 else (code if 0 < code < 256 else 1)
+
+def require(condition, message):
+    if not condition:
+        raise Refused(message)
+
+def read_regular(path):
+    # No symlink ancestors/final leaf, hardlinks or special files; bounded read.
+    require(path.is_absolute() and '..' not in path.parts, 'unsafe source path')
+    directory = os.open(path.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        for part in path.parts[1:-1]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+        with os.fdopen(fd, 'rb') as stream:
+            info = os.fstat(stream.fileno())
+            require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1048576,
+                    'unsafe/nonregular/oversize public file')
+            raw = stream.read(1048577)
+            require(len(raw) <= 1048576, 'oversize public file')
+            return raw
+    finally:
+        os.close(directory)
+
+def unique_object(pairs):
+    value = {}
+    for key, item in pairs:
+        require(key not in value, 'duplicate JSON key')
+        value[key] = item
+    return value
+
+def parse_json(text):
+    return json.loads(text, object_pairs_hook=unique_object)
+
+def invoke(name, argv, seconds, check=True):
+    # File-backed output avoids pipe/descendant EOF hangs. Every CLI gets a new process group.
+    print(json.dumps({'start': name, 'argv': argv, 'timeout_seconds': seconds}), flush=True)
+    interrupted = None
+    with (owned / (name + '.stdout')).open('xb') as out, (owned / (name + '.stderr')).open('xb') as err:
+        child = subprocess.Popen(argv, cwd=owned, stdout=out, stderr=err, start_new_session=True)
+        try:
+            code = child.wait(timeout=seconds)
+        except BaseException as exc:
+            for sig in (signal.SIGTERM, signal.SIGKILL):
+                try:
+                    os.killpg(child.pid, sig)
+                except ProcessLookupError:
+                    pass
+                try:
+                    child.wait(timeout=5)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
+            code = 124 if isinstance(exc, subprocess.TimeoutExpired) else (exc.code if isinstance(exc, Refused) else 1)
+            if not isinstance(exc, subprocess.TimeoutExpired):
+                interrupted = exc
+    stdout = (owned / (name + '.stdout')).read_text(errors='replace')
+    stderr = (owned / (name + '.stderr')).read_text(errors='replace')
+    record = {'name': name, 'argv': argv, 'timeout_seconds': seconds, 'exit': code,
+              'process_exit': child.returncode, 'stdout': stdout, 'stderr': stderr}
+    report['commands'].append(record)
+    # JSON escaping prevents command output becoming GitHub workflow commands.
+    print(json.dumps({'command_result': record}), flush=True)
+    if name == 'probe':
+        report['probe_exit'] = code
+    if interrupted is not None:
+        raise interrupted
+    if check and code != 0:
+        raise Refused(name + ' failed', code)
+    return code, stdout
+
+def container_ids(name):
+    _, raw = invoke(name, docker + ['container', 'ls', '--all', '--no-trunc', '--format', '{{json .ID}}'], 15)
+    ids = [parse_json(line) for line in raw.splitlines()]
+    require(all(isinstance(cid, str) and re.fullmatch('[0-9a-f]{64}', cid) for cid in ids),
+            'malformed container-list readback')
+    return ids
+
+def cleanup():
+    if not run_started:
+        report['cleanup'] = {'status': 'container-command-not-attempted', 'absence_verified': None}
+        return
+    raw = read_regular(cidfile).decode('ascii')
+    match = re.fullmatch(r'([0-9a-f]{64})\n?', raw)
+    require(match is not None, 'missing/invalid call-owned CID; absence unproven')
+    cid = match[1]
+    report['cleanup']['cid'] = cid
+    if cid not in container_ids('cleanup-before'):
+        report['cleanup'].update(status='already-absent', absence_verified=True)
+        return
+    code, raw = invoke('cleanup-identity', docker + ['container', 'inspect', '--format',
+                       '{"Id":{{json .Id}},"Labels":{{json .Config.Labels}}}', cid], 15, check=False)
+    if code == 0:
+        identity = parse_json(raw)
+        require(identity.get('Id') == cid and isinstance(identity.get('Labels'), dict)
+                and identity['Labels'].get(label) == owner, 'CID ownership readback mismatch; will not remove')
+        invoke('cleanup-remove', docker + ['container', 'rm', '--force', cid], 20, check=False)
+    # rm success OR an inspect failure is never absence proof; successful daemon readback is required.
+    require(cid not in container_ids('cleanup-after'), 'owned container still present')
+    report['cleanup'].update(status='absence-confirmed', absence_verified=True)
+
+def interrupted(signum, _frame):
+    raise Refused('interrupted by signal ' + str(signum), 128 + signum)
+
+signal.signal(signal.SIGTERM, interrupted)
+signal.signal(signal.SIGINT, interrupted)
+try:
+    (owned / 'docker/config.json').write_text('{"auths":{}}\n')
+    _, checkout = invoke('checkout', ['git', '-C', str(workspace), 'rev-parse', '--verify', 'HEAD'], 15)
+    checkout = checkout.removesuffix('\n')
+    require(re.fullmatch('[0-9a-f]{40}', checkout) is not None, 'invalid actual checkout SHA')
+    report['checkout_sha'] = checkout
+    for key in ('context_sha', 'event_head_sha'):
+        require(report[key] is None or re.fullmatch('[0-9a-f]{40}', report[key]) is not None, 'invalid event SHA')
+    # PR checkout may be a merge commit; event head is recorded separately, never assumed equal.
+    launcher = read_regular(workspace / 'finetune/tools/submit_locked_job.py')
+    probe = read_regular(workspace / 'finetune/tools/qualify_gguf_image.py')
+    report['sources'] = {'launcher_sha256': hashlib.sha256(launcher).hexdigest(),
+                         'probe_sha256': hashlib.sha256(probe).hexdigest()}
+    tree = ast.parse(launcher)
+    bindings = [node for node in ast.walk(tree) if
+                (isinstance(node, ast.Name) and node.id == 'GGUF_IMAGE' and isinstance(node.ctx, (ast.Store, ast.Del))) or
+                (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.arg))
+                 and getattr(node, 'name', getattr(node, 'arg', None)) == 'GGUF_IMAGE') or
+                (isinstance(node, ast.alias) and (node.asname or node.name.split('.')[0]) == 'GGUF_IMAGE') or
+                (isinstance(node, ast.ExceptHandler) and node.name == 'GGUF_IMAGE')]
+    definitions = [node for node in tree.body if isinstance(node, ast.Assign) and len(node.targets) == 1
+                   and isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'GGUF_IMAGE']
+    require(len(bindings) == len(definitions) == 1, 'ambiguous/missing top-level GGUF_IMAGE literal')
+    value = definitions[0].value
+    require(isinstance(value, ast.Constant) and isinstance(value.value, str), 'GGUF_IMAGE must be a string literal')
+    image = value.value
+    report['image_input'] = image
+    require(re.fullmatch(r'ghcr\.io/astral-sh/uv:[0-9]+\.[0-9]+\.[0-9]+-python3\.12-trixie@sha256:[0-9a-f]{64}', image)
+            is not None, 'GGUF_IMAGE must be an exact immutable public non-slim uv default')
+    tagged, digest = image.split('@')
+    expected_digest = tagged.rsplit(':', 1)[0] + '@' + digest
+    report['expected_repo_digest'] = expected_digest
+    # Freeze only checked public probe bytes for the one read-only mount.
+    snapshot = owned / 'probe.py'
+    with snapshot.open('xb') as stream:
+        stream.write(probe)
+    snapshot.chmod(0o444)
+    host = {'os': platform.system(), 'architecture': platform.machine(), 'python': platform.python_version()}
+    report['host'] = host
+    require(host['os'] == 'Linux' and host['architecture'] == 'x86_64'
+            and report['runner']['os'] == 'Linux' and report['runner']['arch'] == 'X64', 'runner/host is not native Linux amd64')
+    _, raw = invoke('engine', docker + ['version', '--format', '{{json .}}'], 20)
+    engine = parse_json(raw)
+    report['docker_version'] = engine
+    require(engine['Server']['Os'] == 'linux' and engine['Server']['Arch'] == 'amd64', 'daemon is not Linux amd64')
+    invoke('pull', docker + ['pull', '--platform', 'linux/amd64', image], 180)
+    _, raw = invoke('image', docker + ['image', 'inspect', '--format',
+                    '{"Id":{{json .Id}},"Os":{{json .Os}},"Architecture":{{json .Architecture}},"RepoDigests":{{json .RepoDigests}}}', image], 20)
+    identity = parse_json(raw)
+    report['image_readback'] = identity
+    require(identity['Os'] == 'linux' and identity['Architecture'] == 'amd64', 'image is not Linux amd64')
+    require(re.fullmatch('sha256:[0-9a-f]{64}', identity['Id']) is not None, 'invalid image content ID')
+    require(isinstance(identity['RepoDigests'], list) and all(isinstance(item, str) for item in identity['RepoDigests'])
+            and expected_digest in identity['RepoDigests'], 'selected immutable digest absent from exact JSON readback')
+    run_started = True
+    _, raw = invoke('probe', docker + ['run', '--rm', '--pull', 'never', '--cidfile', str(cidfile),
+                    '--label', label + '=' + owner, '--platform', 'linux/amd64', '--network', 'none', '--read-only',
+                    '--cpus', '2', '--memory', '1g', '--pids-limit', '64', '--user', '65534:65534',
+                    '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
+                    '--tmpfs', '/tmp:rw,exec,nosuid,nodev,size=128m,uid=65534,gid=65534,mode=0700',
+                    '--mount', 'type=bind,src=' + str(snapshot) + ',dst=/probe.py,readonly',
+                    '--env', 'HOME=/tmp', '--env', 'TMPDIR=/tmp', '--env', 'XDG_CACHE_HOME=/tmp/cache',
+                    '--env', 'HF_HOME=/tmp/hf', '--env', 'HERMES_HOME=/tmp/hermes', '--env', 'KNOWLEDGE_DIR=/tmp/knowledge',
+                    '--env', 'HF_HUB_OFFLINE=1', '--env', 'TRANSFORMERS_OFFLINE=1', '--env', 'HF_DATASETS_OFFLINE=1',
+                    '--env', 'QMD_LLAMA_GPU=false', '--env', 'CUDA_VISIBLE_DEVICES=', '--env', 'PYTHONDONTWRITEBYTECODE=1',
+                    '--entrypoint', 'python', image, '-I', '-B', '-S', '/probe.py'], 180)
+    result = parse_json(raw)
+    report['probe_receipt'] = result
+    require(result['status'] == 'pass' and result['native_only'] is False and result['platform'] == 'Linux/x86_64'
+            and re.fullmatch(r'3\.12\.[0-9]+', result['python']) is not None, 'invalid full native probe receipt')
+    require(result['outputs'] == ['qmd-c-ok', 'qmd-cxx-ok'] and result['probe_sha256'] == report['sources']['probe_sha256']
+            and all(isinstance(result['versions'][tool], str) and result['versions'][tool]
+                    for tool in ('git', 'cc', 'c++', 'make', 'uv')), 'native output/source/version receipt mismatch')
+    primary = 0
+except Exception as exc:
+    primary = exc.code if isinstance(exc, Refused) else 1
+    report['error'] = type(exc).__name__ + ': ' + str(exc)
+finally:
+    # Graceful cancellation gets bounded cleanup; SIGKILL/runner loss cannot be proved clean.
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    cleanup_ok = False
+    try:
+        cleanup()
+        cleanup_ok = True
+    except Exception as exc:
+        report['cleanup'].update(status='unproven-or-failed', error=type(exc).__name__ + ': ' + str(exc))
+    final = primary if primary else (0 if cleanup_ok else 1)
+    report.update(primary_exit=primary, final_exit=final)
+    if final == 0:
+        report['status'] = 'qualified-native-amd64-prerequisites'
+    # Receipt plus every command's stdout/stderr remains in CI logs even on nonzero exit.
+    print(json.dumps({'qualification_receipt': report}, sort_keys=True), flush=True)
+    (owned / 'receipt.json').write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
+raise SystemExit(final)
+PY

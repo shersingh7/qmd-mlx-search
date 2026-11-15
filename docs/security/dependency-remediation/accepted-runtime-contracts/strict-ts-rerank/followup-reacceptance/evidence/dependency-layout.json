@@ -1,0 +1,2772 @@
+[
+  {
+    "mirror": "mirror",
+    "package": "@esbuild/darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@esbuild/darwin-arm64"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@hono/node-server",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@hono/node-server"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@huggingface/jinja",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@huggingface/jinja"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@isaacs/fs-minipass",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@isaacs/fs-minipass"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@jridgewell/sourcemap-codec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@jridgewell/sourcemap-codec"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@kwsites/file-exists",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@kwsites/file-exists"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@kwsites/promise-deferred",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@kwsites/promise-deferred"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@modelcontextprotocol/sdk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@modelcontextprotocol/sdk"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@nodelib/fs.scandir",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.scandir"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@nodelib/fs.stat",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.stat"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@nodelib/fs.walk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.walk"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@rollup/rollup-darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@rollup/rollup-darwin-arm64"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@simple-git/args-pathspec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@simple-git/args-pathspec"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@simple-git/argv-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@simple-git/argv-parser"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@standard-schema/spec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@standard-schema/spec"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@tinyhttp/content-disposition",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@tinyhttp/content-disposition"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/better-sqlite3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/better-sqlite3"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/bun",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/bun"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/chai",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/chai"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/deep-eql",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/deep-eql"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/estree",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/estree"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/node",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/node"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@types/picomatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/picomatch"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/expect",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/expect"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/mocker",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/mocker"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/pretty-format",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/pretty-format"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/runner",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/runner"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/snapshot",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/snapshot"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/spy",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/spy"
+  },
+  {
+    "mirror": "mirror",
+    "package": "@vitest/utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/utils"
+  },
+  {
+    "mirror": "mirror",
+    "package": "accepts",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/accepts"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ajv",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ajv"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ajv-formats",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ajv-formats"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ansi-escapes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-escapes"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ansi-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-regex"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ansi-styles",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-styles"
+  },
+  {
+    "mirror": "mirror",
+    "package": "assertion-error",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/assertion-error"
+  },
+  {
+    "mirror": "mirror",
+    "package": "async-retry",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/async-retry"
+  },
+  {
+    "mirror": "mirror",
+    "package": "base64-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/base64-js"
+  },
+  {
+    "mirror": "mirror",
+    "package": "better-sqlite3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/better-sqlite3"
+  },
+  {
+    "mirror": "mirror",
+    "package": "bindings",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bindings"
+  },
+  {
+    "mirror": "mirror",
+    "package": "bl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bl"
+  },
+  {
+    "mirror": "mirror",
+    "package": "body-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/body-parser"
+  },
+  {
+    "mirror": "mirror",
+    "package": "braces",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/braces"
+  },
+  {
+    "mirror": "mirror",
+    "package": "buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/buffer"
+  },
+  {
+    "mirror": "mirror",
+    "package": "bun-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bun-types"
+  },
+  {
+    "mirror": "mirror",
+    "package": "bytes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bytes"
+  },
+  {
+    "mirror": "mirror",
+    "package": "call-bind-apply-helpers",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/call-bind-apply-helpers"
+  },
+  {
+    "mirror": "mirror",
+    "package": "call-bound",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/call-bound"
+  },
+  {
+    "mirror": "mirror",
+    "package": "chai",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chai"
+  },
+  {
+    "mirror": "mirror",
+    "package": "chalk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chalk"
+  },
+  {
+    "mirror": "mirror",
+    "package": "chmodrp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chmodrp"
+  },
+  {
+    "mirror": "mirror",
+    "package": "chownr",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chownr"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ci-info",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ci-info"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cli-cursor",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cli-cursor"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cli-spinners",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cli-spinners"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cliui",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cliui"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cmake-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cmake-js"
+  },
+  {
+    "mirror": "mirror",
+    "package": "color-convert",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/color-convert"
+  },
+  {
+    "mirror": "mirror",
+    "package": "color-name",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/color-name"
+  },
+  {
+    "mirror": "mirror",
+    "package": "commander",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/commander"
+  },
+  {
+    "mirror": "mirror",
+    "package": "content-disposition",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/content-disposition"
+  },
+  {
+    "mirror": "mirror",
+    "package": "content-type",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/content-type"
+  },
+  {
+    "mirror": "mirror",
+    "package": "convert-source-map",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/convert-source-map"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cookie",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cookie"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cookie-signature",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cookie-signature"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "cross-spawn",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cross-spawn"
+  },
+  {
+    "mirror": "mirror",
+    "package": "debug",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/debug"
+  },
+  {
+    "mirror": "mirror",
+    "package": "decompress-response",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/decompress-response"
+  },
+  {
+    "mirror": "mirror",
+    "package": "deep-extend",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/deep-extend"
+  },
+  {
+    "mirror": "mirror",
+    "package": "depd",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/depd"
+  },
+  {
+    "mirror": "mirror",
+    "package": "detect-libc",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/detect-libc"
+  },
+  {
+    "mirror": "mirror",
+    "package": "dunder-proto",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/dunder-proto"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ee-first",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ee-first"
+  },
+  {
+    "mirror": "mirror",
+    "package": "emoji-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/emoji-regex"
+  },
+  {
+    "mirror": "mirror",
+    "package": "encodeurl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/encodeurl"
+  },
+  {
+    "mirror": "mirror",
+    "package": "end-of-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/end-of-stream"
+  },
+  {
+    "mirror": "mirror",
+    "package": "env-var",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/env-var"
+  },
+  {
+    "mirror": "mirror",
+    "package": "es-define-property",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-define-property"
+  },
+  {
+    "mirror": "mirror",
+    "package": "es-errors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-errors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "es-module-lexer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-module-lexer"
+  },
+  {
+    "mirror": "mirror",
+    "package": "es-object-atoms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-object-atoms"
+  },
+  {
+    "mirror": "mirror",
+    "package": "esbuild",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/esbuild"
+  },
+  {
+    "mirror": "mirror",
+    "package": "escalade",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/escalade"
+  },
+  {
+    "mirror": "mirror",
+    "package": "escape-html",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/escape-html"
+  },
+  {
+    "mirror": "mirror",
+    "package": "estree-walker",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/estree-walker"
+  },
+  {
+    "mirror": "mirror",
+    "package": "etag",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/etag"
+  },
+  {
+    "mirror": "mirror",
+    "package": "eventemitter3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventemitter3"
+  },
+  {
+    "mirror": "mirror",
+    "package": "eventsource",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventsource"
+  },
+  {
+    "mirror": "mirror",
+    "package": "eventsource-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventsource-parser"
+  },
+  {
+    "mirror": "mirror",
+    "package": "expand-template",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/expand-template"
+  },
+  {
+    "mirror": "mirror",
+    "package": "expect-type",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/expect-type"
+  },
+  {
+    "mirror": "mirror",
+    "package": "express",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/express"
+  },
+  {
+    "mirror": "mirror",
+    "package": "express-rate-limit",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/express-rate-limit"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fast-deep-equal",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-deep-equal"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fast-glob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-glob"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fast-uri",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-uri"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fastq",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fastq"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fdir",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fdir"
+  },
+  {
+    "mirror": "mirror",
+    "package": "file-uri-to-path",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/file-uri-to-path"
+  },
+  {
+    "mirror": "mirror",
+    "package": "filename-reserved-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/filename-reserved-regex"
+  },
+  {
+    "mirror": "mirror",
+    "package": "filenamify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/filenamify"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fill-range",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fill-range"
+  },
+  {
+    "mirror": "mirror",
+    "package": "finalhandler",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/finalhandler"
+  },
+  {
+    "mirror": "mirror",
+    "package": "forwarded",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/forwarded"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fresh",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fresh"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fs-constants",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fs-constants"
+  },
+  {
+    "mirror": "mirror",
+    "package": "fs-extra",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fs-extra"
+  },
+  {
+    "mirror": "mirror",
+    "package": "function-bind",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/function-bind"
+  },
+  {
+    "mirror": "mirror",
+    "package": "get-caller-file",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-caller-file"
+  },
+  {
+    "mirror": "mirror",
+    "package": "get-east-asian-width",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-east-asian-width"
+  },
+  {
+    "mirror": "mirror",
+    "package": "get-intrinsic",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-intrinsic"
+  },
+  {
+    "mirror": "mirror",
+    "package": "get-proto",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-proto"
+  },
+  {
+    "mirror": "mirror",
+    "package": "github-from-package",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/github-from-package"
+  },
+  {
+    "mirror": "mirror",
+    "package": "glob-parent",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/glob-parent"
+  },
+  {
+    "mirror": "mirror",
+    "package": "gopd",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/gopd"
+  },
+  {
+    "mirror": "mirror",
+    "package": "graceful-fs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/graceful-fs"
+  },
+  {
+    "mirror": "mirror",
+    "package": "has-symbols",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/has-symbols"
+  },
+  {
+    "mirror": "mirror",
+    "package": "hasown",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/hasown"
+  },
+  {
+    "mirror": "mirror",
+    "package": "hono",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/hono"
+  },
+  {
+    "mirror": "mirror",
+    "package": "http-errors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/http-errors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "iconv-lite",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/iconv-lite"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ieee754",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ieee754"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ignore",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ignore"
+  },
+  {
+    "mirror": "mirror",
+    "package": "inherits",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/inherits"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ini",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ini"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ip-address",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ip-address"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ipaddr.js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ipaddr.js"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ipull",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ipull"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-extglob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-extglob"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-fullwidth-code-point",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-fullwidth-code-point"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-glob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-glob"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-interactive",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-interactive"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-number",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-number"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-promise",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-promise"
+  },
+  {
+    "mirror": "mirror",
+    "package": "is-unicode-supported",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-unicode-supported"
+  },
+  {
+    "mirror": "mirror",
+    "package": "isexe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/isexe"
+  },
+  {
+    "mirror": "mirror",
+    "package": "jose",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/jose"
+  },
+  {
+    "mirror": "mirror",
+    "package": "json-schema-traverse",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/json-schema-traverse"
+  },
+  {
+    "mirror": "mirror",
+    "package": "json-schema-typed",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/json-schema-typed"
+  },
+  {
+    "mirror": "mirror",
+    "package": "jsonfile",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/jsonfile"
+  },
+  {
+    "mirror": "mirror",
+    "package": "lifecycle-utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lifecycle-utils"
+  },
+  {
+    "mirror": "mirror",
+    "package": "lodash.debounce",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lodash.debounce"
+  },
+  {
+    "mirror": "mirror",
+    "package": "log-symbols",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/log-symbols"
+  },
+  {
+    "mirror": "mirror",
+    "package": "lowdb",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lowdb"
+  },
+  {
+    "mirror": "mirror",
+    "package": "magic-string",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/magic-string"
+  },
+  {
+    "mirror": "mirror",
+    "package": "math-intrinsics",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/math-intrinsics"
+  },
+  {
+    "mirror": "mirror",
+    "package": "media-typer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/media-typer"
+  },
+  {
+    "mirror": "mirror",
+    "package": "merge-descriptors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/merge-descriptors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "merge2",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/merge2"
+  },
+  {
+    "mirror": "mirror",
+    "package": "micromatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/micromatch"
+  },
+  {
+    "mirror": "mirror",
+    "package": "mime-db",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mime-db"
+  },
+  {
+    "mirror": "mirror",
+    "package": "mime-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mime-types"
+  },
+  {
+    "mirror": "mirror",
+    "package": "mimic-function",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mimic-function"
+  },
+  {
+    "mirror": "mirror",
+    "package": "mimic-response",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mimic-response"
+  },
+  {
+    "mirror": "mirror",
+    "package": "minimist",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minimist"
+  },
+  {
+    "mirror": "mirror",
+    "package": "minipass",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minipass"
+  },
+  {
+    "mirror": "mirror",
+    "package": "minizlib",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minizlib"
+  },
+  {
+    "mirror": "mirror",
+    "package": "mkdirp-classic",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mkdirp-classic"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ms"
+  },
+  {
+    "mirror": "mirror",
+    "package": "nanoid",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/nanoid"
+  },
+  {
+    "mirror": "mirror",
+    "package": "napi-build-utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/napi-build-utils"
+  },
+  {
+    "mirror": "mirror",
+    "package": "negotiator",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/negotiator"
+  },
+  {
+    "mirror": "mirror",
+    "package": "node-abi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-abi"
+  },
+  {
+    "mirror": "mirror",
+    "package": "node-addon-api",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-addon-api"
+  },
+  {
+    "mirror": "mirror",
+    "package": "node-api-headers",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-api-headers"
+  },
+  {
+    "mirror": "mirror",
+    "package": "node-gyp-build",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-gyp-build"
+  },
+  {
+    "mirror": "mirror",
+    "package": "node-llama-cpp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-llama-cpp"
+  },
+  {
+    "mirror": "mirror",
+    "package": "object-assign",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/object-assign"
+  },
+  {
+    "mirror": "mirror",
+    "package": "object-inspect",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/object-inspect"
+  },
+  {
+    "mirror": "mirror",
+    "package": "obug",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/obug"
+  },
+  {
+    "mirror": "mirror",
+    "package": "on-finished",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/on-finished"
+  },
+  {
+    "mirror": "mirror",
+    "package": "once",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/once"
+  },
+  {
+    "mirror": "mirror",
+    "package": "onetime",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/onetime"
+  },
+  {
+    "mirror": "mirror",
+    "package": "ora",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ora"
+  },
+  {
+    "mirror": "mirror",
+    "package": "parse-ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/parse-ms"
+  },
+  {
+    "mirror": "mirror",
+    "package": "parseurl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/parseurl"
+  },
+  {
+    "mirror": "mirror",
+    "package": "path-key",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/path-key"
+  },
+  {
+    "mirror": "mirror",
+    "package": "path-to-regexp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/path-to-regexp"
+  },
+  {
+    "mirror": "mirror",
+    "package": "pathe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pathe"
+  },
+  {
+    "mirror": "mirror",
+    "package": "picocolors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picocolors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "picomatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch"
+  },
+  {
+    "mirror": "mirror",
+    "package": "pkce-challenge",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pkce-challenge"
+  },
+  {
+    "mirror": "mirror",
+    "package": "postcss",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/postcss"
+  },
+  {
+    "mirror": "mirror",
+    "package": "prebuild-install",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/prebuild-install"
+  },
+  {
+    "mirror": "mirror",
+    "package": "pretty-bytes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pretty-bytes"
+  },
+  {
+    "mirror": "mirror",
+    "package": "pretty-ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pretty-ms"
+  },
+  {
+    "mirror": "mirror",
+    "package": "proper-lockfile",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/proper-lockfile"
+  },
+  {
+    "mirror": "mirror",
+    "package": "proxy-addr",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/proxy-addr"
+  },
+  {
+    "mirror": "mirror",
+    "package": "pump",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pump"
+  },
+  {
+    "mirror": "mirror",
+    "package": "qs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/qs"
+  },
+  {
+    "mirror": "mirror",
+    "package": "queue-microtask",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/queue-microtask"
+  },
+  {
+    "mirror": "mirror",
+    "package": "range-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/range-parser"
+  },
+  {
+    "mirror": "mirror",
+    "package": "raw-body",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/raw-body"
+  },
+  {
+    "mirror": "mirror",
+    "package": "rc",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/rc"
+  },
+  {
+    "mirror": "mirror",
+    "package": "readable-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/readable-stream"
+  },
+  {
+    "mirror": "mirror",
+    "package": "require-directory",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/require-directory"
+  },
+  {
+    "mirror": "mirror",
+    "package": "require-from-string",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/require-from-string"
+  },
+  {
+    "mirror": "mirror",
+    "package": "restore-cursor",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/restore-cursor"
+  },
+  {
+    "mirror": "mirror",
+    "package": "retry",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/retry"
+  },
+  {
+    "mirror": "mirror",
+    "package": "reusify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/reusify"
+  },
+  {
+    "mirror": "mirror",
+    "package": "rollup",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/rollup"
+  },
+  {
+    "mirror": "mirror",
+    "package": "router",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/router"
+  },
+  {
+    "mirror": "mirror",
+    "package": "run-parallel",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/run-parallel"
+  },
+  {
+    "mirror": "mirror",
+    "package": "safe-buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/safe-buffer"
+  },
+  {
+    "mirror": "mirror",
+    "package": "safer-buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/safer-buffer"
+  },
+  {
+    "mirror": "mirror",
+    "package": "semver",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/semver"
+  },
+  {
+    "mirror": "mirror",
+    "package": "send",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/send"
+  },
+  {
+    "mirror": "mirror",
+    "package": "serve-static",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/serve-static"
+  },
+  {
+    "mirror": "mirror",
+    "package": "setprototypeof",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/setprototypeof"
+  },
+  {
+    "mirror": "mirror",
+    "package": "shebang-command",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/shebang-command"
+  },
+  {
+    "mirror": "mirror",
+    "package": "shebang-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/shebang-regex"
+  },
+  {
+    "mirror": "mirror",
+    "package": "side-channel",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel"
+  },
+  {
+    "mirror": "mirror",
+    "package": "side-channel-list",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-list"
+  },
+  {
+    "mirror": "mirror",
+    "package": "side-channel-map",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-map"
+  },
+  {
+    "mirror": "mirror",
+    "package": "side-channel-weakmap",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-weakmap"
+  },
+  {
+    "mirror": "mirror",
+    "package": "siginfo",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/siginfo"
+  },
+  {
+    "mirror": "mirror",
+    "package": "signal-exit",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/signal-exit"
+  },
+  {
+    "mirror": "mirror",
+    "package": "simple-concat",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-concat"
+  },
+  {
+    "mirror": "mirror",
+    "package": "simple-get",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-get"
+  },
+  {
+    "mirror": "mirror",
+    "package": "simple-git",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-git"
+  },
+  {
+    "mirror": "mirror",
+    "package": "sleep-promise",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sleep-promise"
+  },
+  {
+    "mirror": "mirror",
+    "package": "slice-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/slice-ansi"
+  },
+  {
+    "mirror": "mirror",
+    "package": "source-map-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/source-map-js"
+  },
+  {
+    "mirror": "mirror",
+    "package": "sqlite-vec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sqlite-vec"
+  },
+  {
+    "mirror": "mirror",
+    "package": "sqlite-vec-darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sqlite-vec-darwin-arm64"
+  },
+  {
+    "mirror": "mirror",
+    "package": "stackback",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stackback"
+  },
+  {
+    "mirror": "mirror",
+    "package": "statuses",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/statuses"
+  },
+  {
+    "mirror": "mirror",
+    "package": "std-env",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/std-env"
+  },
+  {
+    "mirror": "mirror",
+    "package": "stdin-discarder",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stdin-discarder"
+  },
+  {
+    "mirror": "mirror",
+    "package": "stdout-update",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stdout-update"
+  },
+  {
+    "mirror": "mirror",
+    "package": "steno",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/steno"
+  },
+  {
+    "mirror": "mirror",
+    "package": "string-width",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/string-width"
+  },
+  {
+    "mirror": "mirror",
+    "package": "string_decoder",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/string_decoder"
+  },
+  {
+    "mirror": "mirror",
+    "package": "strip-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/strip-ansi"
+  },
+  {
+    "mirror": "mirror",
+    "package": "strip-json-comments",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/strip-json-comments"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tar",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tar-fs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar-fs"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tar-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar-stream"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tinybench",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinybench"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tinyexec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyexec"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tinyglobby",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyglobby"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tinyrainbow",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyrainbow"
+  },
+  {
+    "mirror": "mirror",
+    "package": "to-regex-range",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/to-regex-range"
+  },
+  {
+    "mirror": "mirror",
+    "package": "toidentifier",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/toidentifier"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tree-sitter-go",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-go"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tree-sitter-javascript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-javascript"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tree-sitter-python",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-python"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tree-sitter-rust",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-rust"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tree-sitter-typescript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-typescript"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tsx",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tsx"
+  },
+  {
+    "mirror": "mirror",
+    "package": "tunnel-agent",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tunnel-agent"
+  },
+  {
+    "mirror": "mirror",
+    "package": "type-is",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/type-is"
+  },
+  {
+    "mirror": "mirror",
+    "package": "typescript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/typescript"
+  },
+  {
+    "mirror": "mirror",
+    "package": "undici-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/undici-types"
+  },
+  {
+    "mirror": "mirror",
+    "package": "universalify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/universalify"
+  },
+  {
+    "mirror": "mirror",
+    "package": "unpipe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/unpipe"
+  },
+  {
+    "mirror": "mirror",
+    "package": "url-join",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/url-join"
+  },
+  {
+    "mirror": "mirror",
+    "package": "util-deprecate",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/util-deprecate"
+  },
+  {
+    "mirror": "mirror",
+    "package": "validate-npm-package-name",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/validate-npm-package-name"
+  },
+  {
+    "mirror": "mirror",
+    "package": "vary",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vary"
+  },
+  {
+    "mirror": "mirror",
+    "package": "vite",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vite"
+  },
+  {
+    "mirror": "mirror",
+    "package": "vitest",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vitest"
+  },
+  {
+    "mirror": "mirror",
+    "package": "web-tree-sitter",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/web-tree-sitter"
+  },
+  {
+    "mirror": "mirror",
+    "package": "which",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/which"
+  },
+  {
+    "mirror": "mirror",
+    "package": "why-is-node-running",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/why-is-node-running"
+  },
+  {
+    "mirror": "mirror",
+    "package": "wrap-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/wrap-ansi"
+  },
+  {
+    "mirror": "mirror",
+    "package": "wrappy",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/wrappy"
+  },
+  {
+    "mirror": "mirror",
+    "package": "y18n",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/y18n"
+  },
+  {
+    "mirror": "mirror",
+    "package": "yallist",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yallist"
+  },
+  {
+    "mirror": "mirror",
+    "package": "yaml",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yaml"
+  },
+  {
+    "mirror": "mirror",
+    "package": "yargs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yargs"
+  },
+  {
+    "mirror": "mirror",
+    "package": "yargs-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yargs-parser"
+  },
+  {
+    "mirror": "mirror",
+    "package": "yoctocolors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yoctocolors"
+  },
+  {
+    "mirror": "mirror",
+    "package": "zod",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod"
+  },
+  {
+    "mirror": "mirror",
+    "package": "zod-to-json-schema",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod-to-json-schema"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@esbuild/darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@esbuild/darwin-arm64"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@hono/node-server",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@hono/node-server"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@huggingface/jinja",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@huggingface/jinja"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@isaacs/fs-minipass",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@isaacs/fs-minipass"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@jridgewell/sourcemap-codec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@jridgewell/sourcemap-codec"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@kwsites/file-exists",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@kwsites/file-exists"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@kwsites/promise-deferred",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@kwsites/promise-deferred"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@modelcontextprotocol/sdk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@modelcontextprotocol/sdk"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@nodelib/fs.scandir",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.scandir"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@nodelib/fs.stat",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.stat"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@nodelib/fs.walk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@nodelib/fs.walk"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@rollup/rollup-darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@rollup/rollup-darwin-arm64"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@simple-git/args-pathspec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@simple-git/args-pathspec"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@simple-git/argv-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@simple-git/argv-parser"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@standard-schema/spec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@standard-schema/spec"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@tinyhttp/content-disposition",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@tinyhttp/content-disposition"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/better-sqlite3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/better-sqlite3"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/bun",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/bun"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/chai",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/chai"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/deep-eql",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/deep-eql"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/estree",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/estree"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/node",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/node"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@types/picomatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@types/picomatch"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/expect",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/expect"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/mocker",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/mocker"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/pretty-format",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/pretty-format"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/runner",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/runner"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/snapshot",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/snapshot"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/spy",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/spy"
+  },
+  {
+    "mirror": "baseline",
+    "package": "@vitest/utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/@vitest/utils"
+  },
+  {
+    "mirror": "baseline",
+    "package": "accepts",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/accepts"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ajv",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ajv"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ajv-formats",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ajv-formats"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ansi-escapes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-escapes"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ansi-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-regex"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ansi-styles",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ansi-styles"
+  },
+  {
+    "mirror": "baseline",
+    "package": "assertion-error",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/assertion-error"
+  },
+  {
+    "mirror": "baseline",
+    "package": "async-retry",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/async-retry"
+  },
+  {
+    "mirror": "baseline",
+    "package": "base64-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/base64-js"
+  },
+  {
+    "mirror": "baseline",
+    "package": "better-sqlite3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/better-sqlite3"
+  },
+  {
+    "mirror": "baseline",
+    "package": "bindings",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bindings"
+  },
+  {
+    "mirror": "baseline",
+    "package": "bl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bl"
+  },
+  {
+    "mirror": "baseline",
+    "package": "body-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/body-parser"
+  },
+  {
+    "mirror": "baseline",
+    "package": "braces",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/braces"
+  },
+  {
+    "mirror": "baseline",
+    "package": "buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/buffer"
+  },
+  {
+    "mirror": "baseline",
+    "package": "bun-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bun-types"
+  },
+  {
+    "mirror": "baseline",
+    "package": "bytes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/bytes"
+  },
+  {
+    "mirror": "baseline",
+    "package": "call-bind-apply-helpers",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/call-bind-apply-helpers"
+  },
+  {
+    "mirror": "baseline",
+    "package": "call-bound",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/call-bound"
+  },
+  {
+    "mirror": "baseline",
+    "package": "chai",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chai"
+  },
+  {
+    "mirror": "baseline",
+    "package": "chalk",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chalk"
+  },
+  {
+    "mirror": "baseline",
+    "package": "chmodrp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chmodrp"
+  },
+  {
+    "mirror": "baseline",
+    "package": "chownr",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/chownr"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ci-info",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ci-info"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cli-cursor",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cli-cursor"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cli-spinners",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cli-spinners"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cliui",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cliui"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cmake-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cmake-js"
+  },
+  {
+    "mirror": "baseline",
+    "package": "color-convert",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/color-convert"
+  },
+  {
+    "mirror": "baseline",
+    "package": "color-name",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/color-name"
+  },
+  {
+    "mirror": "baseline",
+    "package": "commander",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/commander"
+  },
+  {
+    "mirror": "baseline",
+    "package": "content-disposition",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/content-disposition"
+  },
+  {
+    "mirror": "baseline",
+    "package": "content-type",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/content-type"
+  },
+  {
+    "mirror": "baseline",
+    "package": "convert-source-map",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/convert-source-map"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cookie",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cookie"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cookie-signature",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cookie-signature"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "cross-spawn",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/cross-spawn"
+  },
+  {
+    "mirror": "baseline",
+    "package": "debug",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/debug"
+  },
+  {
+    "mirror": "baseline",
+    "package": "decompress-response",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/decompress-response"
+  },
+  {
+    "mirror": "baseline",
+    "package": "deep-extend",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/deep-extend"
+  },
+  {
+    "mirror": "baseline",
+    "package": "depd",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/depd"
+  },
+  {
+    "mirror": "baseline",
+    "package": "detect-libc",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/detect-libc"
+  },
+  {
+    "mirror": "baseline",
+    "package": "dunder-proto",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/dunder-proto"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ee-first",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ee-first"
+  },
+  {
+    "mirror": "baseline",
+    "package": "emoji-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/emoji-regex"
+  },
+  {
+    "mirror": "baseline",
+    "package": "encodeurl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/encodeurl"
+  },
+  {
+    "mirror": "baseline",
+    "package": "end-of-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/end-of-stream"
+  },
+  {
+    "mirror": "baseline",
+    "package": "env-var",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/env-var"
+  },
+  {
+    "mirror": "baseline",
+    "package": "es-define-property",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-define-property"
+  },
+  {
+    "mirror": "baseline",
+    "package": "es-errors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-errors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "es-module-lexer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-module-lexer"
+  },
+  {
+    "mirror": "baseline",
+    "package": "es-object-atoms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/es-object-atoms"
+  },
+  {
+    "mirror": "baseline",
+    "package": "esbuild",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/esbuild"
+  },
+  {
+    "mirror": "baseline",
+    "package": "escalade",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/escalade"
+  },
+  {
+    "mirror": "baseline",
+    "package": "escape-html",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/escape-html"
+  },
+  {
+    "mirror": "baseline",
+    "package": "estree-walker",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/estree-walker"
+  },
+  {
+    "mirror": "baseline",
+    "package": "etag",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/etag"
+  },
+  {
+    "mirror": "baseline",
+    "package": "eventemitter3",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventemitter3"
+  },
+  {
+    "mirror": "baseline",
+    "package": "eventsource",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventsource"
+  },
+  {
+    "mirror": "baseline",
+    "package": "eventsource-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/eventsource-parser"
+  },
+  {
+    "mirror": "baseline",
+    "package": "expand-template",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/expand-template"
+  },
+  {
+    "mirror": "baseline",
+    "package": "expect-type",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/expect-type"
+  },
+  {
+    "mirror": "baseline",
+    "package": "express",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/express"
+  },
+  {
+    "mirror": "baseline",
+    "package": "express-rate-limit",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/express-rate-limit"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fast-deep-equal",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-deep-equal"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fast-glob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-glob"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fast-uri",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fast-uri"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fastq",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fastq"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fdir",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fdir"
+  },
+  {
+    "mirror": "baseline",
+    "package": "file-uri-to-path",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/file-uri-to-path"
+  },
+  {
+    "mirror": "baseline",
+    "package": "filename-reserved-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/filename-reserved-regex"
+  },
+  {
+    "mirror": "baseline",
+    "package": "filenamify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/filenamify"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fill-range",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fill-range"
+  },
+  {
+    "mirror": "baseline",
+    "package": "finalhandler",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/finalhandler"
+  },
+  {
+    "mirror": "baseline",
+    "package": "forwarded",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/forwarded"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fresh",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fresh"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fs-constants",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fs-constants"
+  },
+  {
+    "mirror": "baseline",
+    "package": "fs-extra",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/fs-extra"
+  },
+  {
+    "mirror": "baseline",
+    "package": "function-bind",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/function-bind"
+  },
+  {
+    "mirror": "baseline",
+    "package": "get-caller-file",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-caller-file"
+  },
+  {
+    "mirror": "baseline",
+    "package": "get-east-asian-width",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-east-asian-width"
+  },
+  {
+    "mirror": "baseline",
+    "package": "get-intrinsic",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-intrinsic"
+  },
+  {
+    "mirror": "baseline",
+    "package": "get-proto",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/get-proto"
+  },
+  {
+    "mirror": "baseline",
+    "package": "github-from-package",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/github-from-package"
+  },
+  {
+    "mirror": "baseline",
+    "package": "glob-parent",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/glob-parent"
+  },
+  {
+    "mirror": "baseline",
+    "package": "gopd",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/gopd"
+  },
+  {
+    "mirror": "baseline",
+    "package": "graceful-fs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/graceful-fs"
+  },
+  {
+    "mirror": "baseline",
+    "package": "has-symbols",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/has-symbols"
+  },
+  {
+    "mirror": "baseline",
+    "package": "hasown",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/hasown"
+  },
+  {
+    "mirror": "baseline",
+    "package": "hono",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/hono"
+  },
+  {
+    "mirror": "baseline",
+    "package": "http-errors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/http-errors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "iconv-lite",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/iconv-lite"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ieee754",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ieee754"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ignore",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ignore"
+  },
+  {
+    "mirror": "baseline",
+    "package": "inherits",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/inherits"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ini",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ini"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ip-address",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ip-address"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ipaddr.js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ipaddr.js"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ipull",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ipull"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-extglob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-extglob"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-fullwidth-code-point",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-fullwidth-code-point"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-glob",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-glob"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-interactive",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-interactive"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-number",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-number"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-promise",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-promise"
+  },
+  {
+    "mirror": "baseline",
+    "package": "is-unicode-supported",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/is-unicode-supported"
+  },
+  {
+    "mirror": "baseline",
+    "package": "isexe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/isexe"
+  },
+  {
+    "mirror": "baseline",
+    "package": "jose",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/jose"
+  },
+  {
+    "mirror": "baseline",
+    "package": "json-schema-traverse",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/json-schema-traverse"
+  },
+  {
+    "mirror": "baseline",
+    "package": "json-schema-typed",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/json-schema-typed"
+  },
+  {
+    "mirror": "baseline",
+    "package": "jsonfile",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/jsonfile"
+  },
+  {
+    "mirror": "baseline",
+    "package": "lifecycle-utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lifecycle-utils"
+  },
+  {
+    "mirror": "baseline",
+    "package": "lodash.debounce",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lodash.debounce"
+  },
+  {
+    "mirror": "baseline",
+    "package": "log-symbols",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/log-symbols"
+  },
+  {
+    "mirror": "baseline",
+    "package": "lowdb",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/lowdb"
+  },
+  {
+    "mirror": "baseline",
+    "package": "magic-string",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/magic-string"
+  },
+  {
+    "mirror": "baseline",
+    "package": "math-intrinsics",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/math-intrinsics"
+  },
+  {
+    "mirror": "baseline",
+    "package": "media-typer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/media-typer"
+  },
+  {
+    "mirror": "baseline",
+    "package": "merge-descriptors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/merge-descriptors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "merge2",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/merge2"
+  },
+  {
+    "mirror": "baseline",
+    "package": "micromatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/micromatch"
+  },
+  {
+    "mirror": "baseline",
+    "package": "mime-db",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mime-db"
+  },
+  {
+    "mirror": "baseline",
+    "package": "mime-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mime-types"
+  },
+  {
+    "mirror": "baseline",
+    "package": "mimic-function",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mimic-function"
+  },
+  {
+    "mirror": "baseline",
+    "package": "mimic-response",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mimic-response"
+  },
+  {
+    "mirror": "baseline",
+    "package": "minimist",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minimist"
+  },
+  {
+    "mirror": "baseline",
+    "package": "minipass",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minipass"
+  },
+  {
+    "mirror": "baseline",
+    "package": "minizlib",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/minizlib"
+  },
+  {
+    "mirror": "baseline",
+    "package": "mkdirp-classic",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/mkdirp-classic"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ms"
+  },
+  {
+    "mirror": "baseline",
+    "package": "nanoid",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/nanoid"
+  },
+  {
+    "mirror": "baseline",
+    "package": "napi-build-utils",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/napi-build-utils"
+  },
+  {
+    "mirror": "baseline",
+    "package": "negotiator",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/negotiator"
+  },
+  {
+    "mirror": "baseline",
+    "package": "node-abi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-abi"
+  },
+  {
+    "mirror": "baseline",
+    "package": "node-addon-api",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-addon-api"
+  },
+  {
+    "mirror": "baseline",
+    "package": "node-api-headers",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-api-headers"
+  },
+  {
+    "mirror": "baseline",
+    "package": "node-gyp-build",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-gyp-build"
+  },
+  {
+    "mirror": "baseline",
+    "package": "node-llama-cpp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/node-llama-cpp"
+  },
+  {
+    "mirror": "baseline",
+    "package": "object-assign",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/object-assign"
+  },
+  {
+    "mirror": "baseline",
+    "package": "object-inspect",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/object-inspect"
+  },
+  {
+    "mirror": "baseline",
+    "package": "obug",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/obug"
+  },
+  {
+    "mirror": "baseline",
+    "package": "on-finished",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/on-finished"
+  },
+  {
+    "mirror": "baseline",
+    "package": "once",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/once"
+  },
+  {
+    "mirror": "baseline",
+    "package": "onetime",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/onetime"
+  },
+  {
+    "mirror": "baseline",
+    "package": "ora",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/ora"
+  },
+  {
+    "mirror": "baseline",
+    "package": "parse-ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/parse-ms"
+  },
+  {
+    "mirror": "baseline",
+    "package": "parseurl",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/parseurl"
+  },
+  {
+    "mirror": "baseline",
+    "package": "path-key",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/path-key"
+  },
+  {
+    "mirror": "baseline",
+    "package": "path-to-regexp",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/path-to-regexp"
+  },
+  {
+    "mirror": "baseline",
+    "package": "pathe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pathe"
+  },
+  {
+    "mirror": "baseline",
+    "package": "picocolors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picocolors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "picomatch",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch"
+  },
+  {
+    "mirror": "baseline",
+    "package": "pkce-challenge",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pkce-challenge"
+  },
+  {
+    "mirror": "baseline",
+    "package": "postcss",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/postcss"
+  },
+  {
+    "mirror": "baseline",
+    "package": "prebuild-install",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/prebuild-install"
+  },
+  {
+    "mirror": "baseline",
+    "package": "pretty-bytes",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pretty-bytes"
+  },
+  {
+    "mirror": "baseline",
+    "package": "pretty-ms",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pretty-ms"
+  },
+  {
+    "mirror": "baseline",
+    "package": "proper-lockfile",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/proper-lockfile"
+  },
+  {
+    "mirror": "baseline",
+    "package": "proxy-addr",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/proxy-addr"
+  },
+  {
+    "mirror": "baseline",
+    "package": "pump",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/pump"
+  },
+  {
+    "mirror": "baseline",
+    "package": "qs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/qs"
+  },
+  {
+    "mirror": "baseline",
+    "package": "queue-microtask",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/queue-microtask"
+  },
+  {
+    "mirror": "baseline",
+    "package": "range-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/range-parser"
+  },
+  {
+    "mirror": "baseline",
+    "package": "raw-body",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/raw-body"
+  },
+  {
+    "mirror": "baseline",
+    "package": "rc",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/rc"
+  },
+  {
+    "mirror": "baseline",
+    "package": "readable-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/readable-stream"
+  },
+  {
+    "mirror": "baseline",
+    "package": "require-directory",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/require-directory"
+  },
+  {
+    "mirror": "baseline",
+    "package": "require-from-string",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/require-from-string"
+  },
+  {
+    "mirror": "baseline",
+    "package": "restore-cursor",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/restore-cursor"
+  },
+  {
+    "mirror": "baseline",
+    "package": "retry",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/retry"
+  },
+  {
+    "mirror": "baseline",
+    "package": "reusify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/reusify"
+  },
+  {
+    "mirror": "baseline",
+    "package": "rollup",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/rollup"
+  },
+  {
+    "mirror": "baseline",
+    "package": "router",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/router"
+  },
+  {
+    "mirror": "baseline",
+    "package": "run-parallel",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/run-parallel"
+  },
+  {
+    "mirror": "baseline",
+    "package": "safe-buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/safe-buffer"
+  },
+  {
+    "mirror": "baseline",
+    "package": "safer-buffer",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/safer-buffer"
+  },
+  {
+    "mirror": "baseline",
+    "package": "semver",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/semver"
+  },
+  {
+    "mirror": "baseline",
+    "package": "send",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/send"
+  },
+  {
+    "mirror": "baseline",
+    "package": "serve-static",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/serve-static"
+  },
+  {
+    "mirror": "baseline",
+    "package": "setprototypeof",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/setprototypeof"
+  },
+  {
+    "mirror": "baseline",
+    "package": "shebang-command",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/shebang-command"
+  },
+  {
+    "mirror": "baseline",
+    "package": "shebang-regex",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/shebang-regex"
+  },
+  {
+    "mirror": "baseline",
+    "package": "side-channel",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel"
+  },
+  {
+    "mirror": "baseline",
+    "package": "side-channel-list",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-list"
+  },
+  {
+    "mirror": "baseline",
+    "package": "side-channel-map",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-map"
+  },
+  {
+    "mirror": "baseline",
+    "package": "side-channel-weakmap",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/side-channel-weakmap"
+  },
+  {
+    "mirror": "baseline",
+    "package": "siginfo",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/siginfo"
+  },
+  {
+    "mirror": "baseline",
+    "package": "signal-exit",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/signal-exit"
+  },
+  {
+    "mirror": "baseline",
+    "package": "simple-concat",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-concat"
+  },
+  {
+    "mirror": "baseline",
+    "package": "simple-get",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-get"
+  },
+  {
+    "mirror": "baseline",
+    "package": "simple-git",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/simple-git"
+  },
+  {
+    "mirror": "baseline",
+    "package": "sleep-promise",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sleep-promise"
+  },
+  {
+    "mirror": "baseline",
+    "package": "slice-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/slice-ansi"
+  },
+  {
+    "mirror": "baseline",
+    "package": "source-map-js",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/source-map-js"
+  },
+  {
+    "mirror": "baseline",
+    "package": "sqlite-vec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sqlite-vec"
+  },
+  {
+    "mirror": "baseline",
+    "package": "sqlite-vec-darwin-arm64",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/sqlite-vec-darwin-arm64"
+  },
+  {
+    "mirror": "baseline",
+    "package": "stackback",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stackback"
+  },
+  {
+    "mirror": "baseline",
+    "package": "statuses",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/statuses"
+  },
+  {
+    "mirror": "baseline",
+    "package": "std-env",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/std-env"
+  },
+  {
+    "mirror": "baseline",
+    "package": "stdin-discarder",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stdin-discarder"
+  },
+  {
+    "mirror": "baseline",
+    "package": "stdout-update",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/stdout-update"
+  },
+  {
+    "mirror": "baseline",
+    "package": "steno",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/steno"
+  },
+  {
+    "mirror": "baseline",
+    "package": "string-width",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/string-width"
+  },
+  {
+    "mirror": "baseline",
+    "package": "string_decoder",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/string_decoder"
+  },
+  {
+    "mirror": "baseline",
+    "package": "strip-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/strip-ansi"
+  },
+  {
+    "mirror": "baseline",
+    "package": "strip-json-comments",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/strip-json-comments"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tar",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tar-fs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar-fs"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tar-stream",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tar-stream"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tinybench",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinybench"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tinyexec",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyexec"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tinyglobby",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyglobby"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tinyrainbow",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tinyrainbow"
+  },
+  {
+    "mirror": "baseline",
+    "package": "to-regex-range",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/to-regex-range"
+  },
+  {
+    "mirror": "baseline",
+    "package": "toidentifier",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/toidentifier"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tree-sitter-go",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-go"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tree-sitter-javascript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-javascript"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tree-sitter-python",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-python"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tree-sitter-rust",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-rust"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tree-sitter-typescript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tree-sitter-typescript"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tsx",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tsx"
+  },
+  {
+    "mirror": "baseline",
+    "package": "tunnel-agent",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/tunnel-agent"
+  },
+  {
+    "mirror": "baseline",
+    "package": "type-is",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/type-is"
+  },
+  {
+    "mirror": "baseline",
+    "package": "typescript",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/typescript"
+  },
+  {
+    "mirror": "baseline",
+    "package": "undici-types",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/undici-types"
+  },
+  {
+    "mirror": "baseline",
+    "package": "universalify",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/universalify"
+  },
+  {
+    "mirror": "baseline",
+    "package": "unpipe",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/unpipe"
+  },
+  {
+    "mirror": "baseline",
+    "package": "url-join",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/url-join"
+  },
+  {
+    "mirror": "baseline",
+    "package": "util-deprecate",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/util-deprecate"
+  },
+  {
+    "mirror": "baseline",
+    "package": "validate-npm-package-name",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/validate-npm-package-name"
+  },
+  {
+    "mirror": "baseline",
+    "package": "vary",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vary"
+  },
+  {
+    "mirror": "baseline",
+    "package": "vite",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vite"
+  },
+  {
+    "mirror": "baseline",
+    "package": "vitest",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/vitest"
+  },
+  {
+    "mirror": "baseline",
+    "package": "web-tree-sitter",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/web-tree-sitter"
+  },
+  {
+    "mirror": "baseline",
+    "package": "which",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/which"
+  },
+  {
+    "mirror": "baseline",
+    "package": "why-is-node-running",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/why-is-node-running"
+  },
+  {
+    "mirror": "baseline",
+    "package": "wrap-ansi",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/wrap-ansi"
+  },
+  {
+    "mirror": "baseline",
+    "package": "wrappy",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/wrappy"
+  },
+  {
+    "mirror": "baseline",
+    "package": "y18n",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/y18n"
+  },
+  {
+    "mirror": "baseline",
+    "package": "yallist",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yallist"
+  },
+  {
+    "mirror": "baseline",
+    "package": "yaml",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yaml"
+  },
+  {
+    "mirror": "baseline",
+    "package": "yargs",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yargs"
+  },
+  {
+    "mirror": "baseline",
+    "package": "yargs-parser",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yargs-parser"
+  },
+  {
+    "mirror": "baseline",
+    "package": "yoctocolors",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/yoctocolors"
+  },
+  {
+    "mirror": "baseline",
+    "package": "zod",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod"
+  },
+  {
+    "mirror": "baseline",
+    "package": "zod-to-json-schema",
+    "target": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod-to-json-schema"
+  }
+]

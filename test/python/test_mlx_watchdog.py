@@ -41,6 +41,7 @@ from scripts.qmd_mlx.watchdog import (
     SystemMetricsError,
     TargetProcessValidator,
     TargetValidationError,
+    WatchdogDefaults,
 )
 
 
@@ -51,6 +52,67 @@ def _spawn_dummy_process(duration_s: int = 60) -> subprocess.Popen:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+
+
+@pytest.fixture
+def synthetic_health_watchdog():
+    """Health state tests never consult live macOS memory telemetry."""
+    child = _spawn_dummy_process()
+    sampler = MagicMock(spec=SystemMemorySampler)
+    sampler.get_process_start_time.return_value = "owned synthetic start"
+    sampler.get_process_cmdline.return_value = "python synthetic_server"
+    sampler.get_process_rss_mb.return_value = 16.0
+    sampler.get_swap_used_mb.return_value = 0.0
+    sampler.get_memory_free_pct.return_value = 50.0
+    defaults = WatchdogDefaults(32768.0, 16000.0, 8000.0, 500.0)
+    payload = {
+        "pid": child.pid, "instance_token": "owned-state", "status": "ok",
+        "state": "ready", "ready": True, "worker_alive": True,
+        "worker_idle": True, "completed_sequence": 0, "active_job_age_s": None,
+    }
+    watchdog = MLXWatchdog(
+        MLXWatchdogConfig(pid=child.pid, instance_token="owned-state", startup_grace_period_s=0, dry_run=True),
+        sampler=sampler, owned_child=child, defaults=defaults, baseline_swap_mb=0,
+        health_probe_fn=lambda *a: (True, payload, 200),
+    )
+    try:
+        yield watchdog, payload
+    finally:
+        if child.poll() is None:
+            child.terminate()
+        child.wait(timeout=1)
+
+
+@pytest.mark.parametrize("changed", [
+    {"worker_alive": False}, {"ready": False}, {"ready": "true"},
+    {"state": "failed"}, {"state": "stopping"}, {"state": "loading", "ready": False},
+    {"state": "unknown"}, {"state": None},
+])
+def test_health_200_cannot_hide_failed_worker_or_unready_state(synthetic_health_watchdog, changed):
+    watchdog, payload = synthetic_health_watchdog
+    payload.update(changed)
+    result = watchdog.check_step()
+    assert not result.healthy
+    assert result.breach_type == BreachType.HEALTH_CHECK_FAILED
+
+
+@pytest.mark.parametrize("state", ["ready", "idle"])
+def test_healthy_idle_states_remain_accepted(synthetic_health_watchdog, state):
+    watchdog, payload = synthetic_health_watchdog
+    payload["state"] = state
+    assert watchdog.check_step().healthy
+
+
+def test_http_200_loading_is_allowed_only_during_initial_startup(synthetic_health_watchdog):
+    watchdog, payload = synthetic_health_watchdog
+    watchdog.startup_grace_period_s = 30
+    payload.update(state="loading", ready=False, worker_alive=False)
+    result = watchdog.check_step()
+    assert result.healthy and result.metrics.get("startup_grace")
+    payload.update(state="idle", ready=True, worker_alive=True)
+    assert watchdog.check_step().healthy
+    payload.update(state="loading", ready=False, worker_alive=False)
+    assert not watchdog.check_step().healthy
 
 
 def test_conservative_defaults_derived_from_headroom():
@@ -106,7 +168,7 @@ def test_headroom_calculation_does_not_double_count_purgeable():
             return 0, mock_vm_stat, ""
         return 0, "", ""
 
-    sampler = SystemMemorySampler(cmd_runner=mock_runner)
+    sampler = SystemMemorySampler(cmd_runner=mock_runner, platform_name="darwin")
     headroom_mb = sampler.get_memory_headroom_mb()
 
     # Expected: (1000 + 2000 + 500) * 16384 bytes = 3500 * 16384 / (1024 * 1024) = 54.6875 MB
@@ -119,7 +181,7 @@ def test_fail_closed_on_telemetry_errors_sampler():
     def broken_runner(cmd, timeout_s=2.0):
         return -1, "", "Command failed"
 
-    sampler = SystemMemorySampler(cmd_runner=broken_runner)
+    sampler = SystemMemorySampler(cmd_runner=broken_runner, platform_name="darwin")
     with pytest.raises(SystemMetricsError):
         sampler.get_installed_ram_mb()
     with pytest.raises(SystemMetricsError):
@@ -145,7 +207,7 @@ def test_fail_closed_on_init_no_fabricated_fallbacks():
             # Telemetry fails
             return -1, "", "sysctl vm.swapusage failed"
 
-        broken_sampler = SystemMemorySampler(cmd_runner=broken_sampler_runner)
+        broken_sampler = SystemMemorySampler(cmd_runner=broken_sampler_runner, platform_name="darwin")
         config = MLXWatchdogConfig(pid=child.pid, instance_token="token-1", dry_run=True)
 
         with pytest.raises(SystemMetricsError):
@@ -263,8 +325,13 @@ def test_owned_child_required_by_default_external_requires_opt_in_and_token():
             owned_child=None,
             allow_external_pid=True,
             instance_token="valid-token-123",
+            expected_cmd_pattern=r"python",
         )
-        assert "python" in cmdline
+        # Framework Python uses an uppercase .../MacOS/Python executable. The
+        # production case-insensitive command gate above must accept it while
+        # returning the original command, not a normalized identity string.
+        assert cmdline == sampler.get_process_cmdline(child.pid)
+        assert "import time; time.sleep(60)" in cmdline
 
         # Case 4: Mismatched owned_child handle -> REJECTED
         sentinel = _spawn_dummy_process()
@@ -456,6 +523,7 @@ def test_stalled_inference_detection_while_http_health_responds_200():
                 {
                     "status": "ok",
                     "state": "ready",
+                    "ready": True,
                     "pid": pid,
                     "instance_token": "token-1",
                     "worker_alive": True,
@@ -516,6 +584,7 @@ def test_idle_worker_is_never_treated_as_stalled():
                 {
                     "status": "ok",
                     "state": "ready",
+                    "ready": True,
                     "pid": pid,
                     "instance_token": "token-1",
                     "worker_alive": True,
@@ -557,6 +626,7 @@ def test_http_pid_and_instance_token_mismatch_breach():
             return True, {
                 "status": "ok",
                 "state": "ready",
+                "ready": True,
                 "pid": pid + 100,
                 "instance_token": "token-1",
                 "worker_alive": True,
@@ -596,6 +666,7 @@ def test_missing_instance_token_in_health_response_causes_breach():
             return True, {
                 "status": "ok",
                 "state": "ready",
+                "ready": True,
                 "pid": pid,
                 "instance_token": None,
                 "worker_alive": True,
@@ -635,6 +706,7 @@ def test_malformed_progress_fields_in_health_response_causes_breach():
             return True, {
                 "status": "ok",
                 "state": "ready",
+                "ready": True,
                 "pid": pid,
                 "instance_token": "token-1",
                 "worker_alive": True,
@@ -655,6 +727,7 @@ def test_malformed_progress_fields_in_health_response_causes_breach():
             return True, {
                 "status": "ok",
                 "state": "ready",
+                "ready": True,
                 "pid": pid,
                 "instance_token": "token-1",
                 "worker_alive": True,

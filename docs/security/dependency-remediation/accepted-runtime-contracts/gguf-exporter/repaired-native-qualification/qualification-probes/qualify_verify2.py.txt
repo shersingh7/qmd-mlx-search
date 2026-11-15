@@ -1,0 +1,161 @@
+"""Read back every real GGUF: provenance, metadata, vocabulary, tensor bounds."""
+from qual_common import *
+from collections import Counter
+import gc
+q = Qualification('verify2')
+error = None
+try:
+    import numpy as np
+    import gguf
+    receipts = {name: json.loads((ROOT / (name + '-receipt.json')).read_text()) for name in ('fixture', 'standalone', 'native')}
+    assert all(receipt['success'] and receipt['environment_unchanged'] and receipt['source_unchanged'] for receipt in receipts.values())
+    assert len(receipts['standalone']['commands']) == len(receipts['native']['commands']) == 11
+    assert all(item['returncode'] == 0 for name in ('standalone', 'native') for item in receipts[name]['commands'])
+    assert len(receipts['standalone']['actual_merges']) == 2
+    assert receipts['native']['actual_checkpoint_materializations']
+    assert {x['device'] for x in receipts['native']['actual_checkpoint_materializations']} == {'cpu'}
+    tokenizer_source = json.loads((ROOT / 'public-tokenizer/tokenizer.json').read_text())
+    vocab = dict(tokenizer_source['model']['vocab'])
+    vocab.update({entry['content']: entry['id'] for entry in tokenizer_source['added_tokens']})
+    public_config = json.loads((ROOT / 'public-tokenizer/tokenizer_config.json').read_text())
+    vocab.update({entry['content']: int(index) for index, entry in public_config['added_tokens_decoder'].items()})
+    q.receipt['verifier_oracle_provenance'] = 'Retains complete v2 stock mapping including seven config-only tokens; adds all-tensor F16 numeric, merge-array and template assertions; no product/model/tokenizer changes.'
+    expected_merges = [' '.join(item) if isinstance(item, list) else item for item in tokenizer_source['model']['merges']]
+    vocab_size = receipts['fixture']['fixture']['vocab_size']
+    assert set(vocab.values()) == set(range(vocab_size))
+    expected_tokens = [''] * vocab_size
+    for token, index in vocab.items():
+        expected_tokens[index] = token
+    provenance = json.loads((ROOT / 'tokenizer-provenance.json').read_text())
+    assert all(sha256(ROOT / 'public-tokenizer' / entry['file']) == entry['sha256'] for entry in provenance['assets'])
+    artifacts = [dict(entry, entrypoint=name) for name in ('standalone', 'native') for entry in receipts[name]['artifacts']]
+    assert len(artifacts) == 7 and len({entry['path'] for entry in artifacts}) == 7
+    parsed = []
+    q.receipt['parsed_artifacts'] = parsed
+    expected_types = {'f16': 'MOSTLY_F16', 'q4_k_m': 'MOSTLY_Q4_K_M', 'q6_k': 'MOSTLY_Q6_K', 'q8_0': 'MOSTLY_Q8_0'}
+    for entry in artifacts:
+        path = Path(entry['path'])
+        assert path.is_relative_to(ROOT)
+        assert sha256(path) == entry['sha256'] and path.stat().st_size == entry['bytes']
+        reader = gguf.GGUFReader(path)
+        fields = reader.fields
+        metadata = {}
+        arrays = {}
+        for key, field in fields.items():
+            if field.types and field.types[0] == gguf.GGUFValueType.ARRAY:
+                array_value = field.contents()
+                arrays[key] = {'length': len(array_value),
+                               'json_sha256': hashlib.sha256(json.dumps(array_value, ensure_ascii=False).encode()).hexdigest()}
+                del array_value
+            elif field.types:
+                metadata[key] = field.contents()
+        assert metadata['general.architecture'] == 'qwen35'
+        assert metadata['qwen35.block_count'] == 2 and metadata['qwen35.embedding_length'] == 256
+        assert metadata['qwen35.attention.head_count'] == 4 and metadata['qwen35.attention.head_count_kv'] == 2
+        assert metadata['tokenizer.ggml.model'] == 'gpt2' and metadata['tokenizer.ggml.pre'] == 'qwen35'
+        assert metadata['tokenizer.chat_template'] == public_config['chat_template']
+        assert fields['tokenizer.ggml.merges'].contents() == expected_merges
+        assert fields['qwen35.attention.recurrent_layers'].contents() == [True, False]
+        assert fields['qwen35.rope.dimension_sections'].contents() == [3, 3, 2, 0]
+        kind = path.stem.split('-')[-1]
+        actual_type = gguf.LlamaFileType(metadata['general.file_type']).name
+        assert actual_type == expected_types[kind], (path, kind, actual_type)
+        tokens = fields['tokenizer.ggml.tokens'].contents()
+        assert len(tokens) == vocab_size and tokens == expected_tokens
+        assert metadata['tokenizer.ggml.eos_token_id'] == 248046
+        assert metadata['tokenizer.ggml.padding_token_id'] == 248044
+        token_types = fields['tokenizer.ggml.token_type'].contents()
+        assert len(token_types) == vocab_size
+        for index, value in public_config['added_tokens_decoder'].items():
+            index = int(index)
+            assert tokens[index] == value['content']
+            if value['special']:
+                assert token_types[index] == gguf.TokenType.CONTROL.value
+        tensors = []
+        ranges = []
+        types = Counter()
+        by_name = {}
+        for tensor in reader.tensors:
+            shape = [int(n) for n in tensor.shape]
+            block_size, type_size = gguf.GGML_QUANT_SIZES[tensor.tensor_type]
+            start, stop = int(tensor.data_offset), int(tensor.data_offset + tensor.n_bytes)
+            assert all(n > 0 for n in shape)
+            assert int(np.prod(tensor.shape.astype(np.int64))) == tensor.n_elements
+            assert tensor.n_elements % block_size == 0
+            assert tensor.n_bytes == tensor.n_elements // block_size * type_size
+            assert tensor.data.nbytes == tensor.n_bytes
+            assert reader.data_offset <= start < stop <= entry['bytes']
+            assert (start - reader.data_offset) % reader.alignment == 0
+            if tensor.tensor_type in (gguf.GGMLQuantizationType.F16, gguf.GGMLQuantizationType.F32):
+                assert np.isfinite(tensor.data).all(), tensor.name
+            ranges.append((start, stop, tensor.name))
+            types[tensor.tensor_type.name] += 1
+            by_name[tensor.name] = tensor
+            tensors.append({'name': tensor.name, 'shape': shape, 'type': tensor.tensor_type.name,
+                            'elements': int(tensor.n_elements), 'bytes': int(tensor.n_bytes), 'start': start, 'stop': stop,
+                            'raw_tensor_sha256': hashlib.sha256(tensor.data).hexdigest()})
+        ranges.sort()
+        assert all(left[1] <= right[0] for left, right in zip(ranges, ranges[1:]))
+        assert by_name['token_embd.weight'].shape.tolist() == [256, vocab_size]
+        assert len(by_name) == len(reader.tensors) == 25
+        assert all('nextn' not in name and 'mtp' not in name for name in by_name)
+        if kind == 'f16':
+            assert set(types) <= {'F16', 'F32'} and 'F16' in types
+        elif kind == 'q4_k_m':
+            assert 'Q4_K' in types and 'Q6_K' in types
+        elif kind == 'q6_k':
+            assert 'Q6_K' in types
+        elif kind == 'q8_0':
+            assert 'Q8_0' in types
+        for name in ('blk.0.ssm_out.weight', 'blk.1.attn_v.weight'):
+            assert name in by_name
+        detail = {**entry, 'architecture': metadata['general.architecture'], 'file_type': actual_type,
+                  'tensor_count': len(reader.tensors), 'tensor_type_counts': dict(types),
+                  'tensor_bounds_valid': True, 'vocabulary_exactly_matches_public_source': True,
+                  'vocab_size': vocab_size, 'metadata_scalars': metadata, 'metadata_arrays': arrays, 'tensors': tensors}
+        parsed.append(detail)
+        dump(ROOT / 'artifact-verification-progress.json', parsed)
+        del reader, fields, tokens, token_types, tensors, by_name, ranges
+        gc.collect()
+    # A real safetensors readback and independent merge calculation verify the standalone F16's
+    # adapted value-projection values, not just the model's in-memory post-merge state.
+    torch = q.initialize_ml()
+    from safetensors import safe_open
+    fixture = ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
+    with safe_open(fixture / 'model.safetensors', framework='pt', device='cpu') as handle:
+        expected = handle.get_tensor('model.layers.1.self_attn.v_proj.weight').clone()
+    base = expected.clone()
+    merge_records = []
+    for label in ('sft', 'grpo'):
+        with safe_open(ROOT / ('RANDOM-NOT-TRAINED-' + label + '-adapter/adapter_model.safetensors'), framework='pt', device='cpu') as handle:
+            keys = list(handle.keys())
+            a = handle.get_tensor(next(key for key in keys if '.lora_A.' in key))
+            b = handle.get_tensor(next(key for key in keys if '.lora_B.' in key))
+            assert a.device.type == b.device.type == 'cpu'
+            delta = b.float() @ a.float()  # alpha/r == 2/2 == 1 in both fixture configs.
+            expected = (expected.float() + delta).to(expected.dtype)
+            merge_records.append({'adapter': label, 'device': str(delta.device), 'delta_nonzero': int(torch.count_nonzero(delta))})
+    standalone_f16 = next(Path(entry['path']) for entry in artifacts if entry['path'].endswith('-f16.gguf'))
+    reader = gguf.GGUFReader(standalone_f16)
+    value_projection = next(t for t in reader.tensors if t.name == 'blk.1.attn_v.weight')
+    expected_numpy = expected.to(torch.float16).numpy()
+    assert np.array_equal(value_projection.data, expected_numpy)
+    assert not np.array_equal(value_projection.data, base.to(torch.float16).numpy())
+    q.receipt['standalone_f16_adapter_numerical_readback'] = {'tensor': 'blk.1.attn_v.weight',
+        'exact_sequential_merge_matches': True, 'differs_from_base': True, 'merge_records': merge_records}
+    from numeric_oracle import verify_every_f16_tensor
+    q.receipt['standalone_f16_all_tensor_numerical_readback'] = verify_every_f16_tensor(
+        torch, np, reader, fixture, expected, q)
+    q.receipt['source_revision'] = SOURCE_REVISION
+    q.receipt['public_tokenizer_revision'] = provenance['revision']
+    q.receipt['source_hashes'] = source_facts()
+    q.receipt['summary'] = [{'entrypoint': entry['entrypoint'], 'path': entry['path'], 'bytes': entry['bytes'],
+                              'sha256': entry['sha256'], 'tensors': entry['tensor_count'],
+                              'types': entry['tensor_type_counts']} for entry in parsed]
+except BaseException as exc:
+    error = exc
+    raise
+finally:
+    receipt = q.finish(error)
+    print(json.dumps({key: receipt.get(key) for key in ('success', 'environment_unchanged', 'source_unchanged',
+                     'summary', 'standalone_f16_adapter_numerical_readback', 'error')}, indent=2))

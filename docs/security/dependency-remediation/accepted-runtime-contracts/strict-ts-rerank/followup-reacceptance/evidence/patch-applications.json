@@ -1,0 +1,140 @@
+[
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/metadata-intents.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/metadata-intents.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror-only-import-relocation.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror-only-import-relocation.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/rerank-lifecycle-supplement.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/rerank-lifecycle-supplement.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/base-replay",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-entrypoint-fix-r8j5vfbp/entrypoint-fallback.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-entrypoint-fix-r8j5vfbp/entrypoint-fallback.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "--check",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-bun-zod-diagnosis-g5buabqa/proposal.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/git",
+      "apply",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-bun-zod-diagnosis-g5buabqa/proposal.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

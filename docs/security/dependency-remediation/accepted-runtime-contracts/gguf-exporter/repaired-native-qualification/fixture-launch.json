@@ -1,0 +1,70 @@
+{
+  "phase": "fixture",
+  "argv": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+    "-s",
+    "-B",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_fixture.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+  "environment": {
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/home",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/tmp",
+    "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes/knowledge",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/hf",
+    "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/hf/hub",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/xdg",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/data",
+    "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/state",
+    "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/torch",
+    "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/numba",
+    "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/matplotlib",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "DO_NOT_TRACK": "1",
+    "WANDB_MODE": "disabled",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "ACCELERATE_USE_CPU": "true",
+    "CUDA_VISIBLE_DEVICES": "",
+    "QMD_LLAMA_GPU": "false",
+    "TOKENIZERS_PARALLELISM": "false",
+    "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+    "LC_ALL": "en_US.UTF-8",
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_TERMINAL_PROMPT": "0"
+  },
+  "returncode": 0,
+  "elapsed_seconds": 26.080822666,
+  "phase_timeout_seconds": 480,
+  "rss_limit_bytes": 2147483648,
+  "sampled_peak_tree_rss_bytes": 969637888,
+  "peak_owned_processes": [
+    {
+      "pid": 97225,
+      "ppid": 97224,
+      "rss_bytes": 952647680
+    },
+    {
+      "pid": 97334,
+      "ppid": 97225,
+      "rss_bytes": 16990208
+    }
+  ],
+  "samples": 43,
+  "breach": null,
+  "monitor_scope": "ancestry only globally; RSS for owned PID tree only; no process args",
+  "stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/fixture.stdout",
+  "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/fixture.stderr"
+}

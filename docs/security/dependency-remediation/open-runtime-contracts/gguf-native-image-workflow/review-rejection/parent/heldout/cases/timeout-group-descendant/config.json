@@ -1,0 +1,5 @@
+{
+  "probe_timeout": true,
+  "descendant_on_timeout": true,
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/timeout-group-descendant/workspace"
+}

@@ -1,0 +1,647 @@
+{
+  "status": "SCOPED_NATIVE_CPU_QUALIFICATION_PASS; integration/container/fullreleasepending",
+  "delegation": "deleg_6e612155",
+  "qualification_manifest_sha256": "1a986b2d077fc49afbd102cbe56804167f834b2910612967799c11b9b254e79c",
+  "helper_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+  "actual_export_commands": 22,
+  "new_artifacts": [
+    {
+      "bytes": 140593376,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-f16.gguf",
+      "sha256": "4aaf136b76ca60b91c3107db953b435a58e65c6a6ebe55ffc1c417866b0505ff",
+      "tensors": 25,
+      "types": {
+        "F16": 14,
+        "F32": 11
+      }
+    },
+    {
+      "bytes": 63829280,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q4_k_m.gguf",
+      "sha256": "dba3d739e11e483e783e7baf2f1e643df6658deacff6b4fa2ac84666e54bf562",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q4_K": 11,
+        "Q6_K": 3
+      }
+    },
+    {
+      "bytes": 64125504,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q6_k.gguf",
+      "sha256": "659a7ea01f8843c3c1abee6be703d6876a5f34e9f0e17871f94e084faeab3447",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "bytes": 79824192,
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q8_0.gguf",
+      "sha256": "e260da836b8e5df34bd662186f0807788e57a518972b848c2ddf4cc6f33c38d3",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    },
+    {
+      "bytes": 63829280,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "sha256": "32a4f31df10fe1ccbf1bb5df5742ebdd5255f836ab1c2a80dce7b9ab1a5c40f7",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q4_K": 11,
+        "Q6_K": 3
+      }
+    },
+    {
+      "bytes": 64125504,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "sha256": "8f485b8f4fce4b82361a1787c96c3dfb0977b991a928d415257c4460b09705ce",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "bytes": 79824192,
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "sha256": "adb5d3e358ba75c6132bd5738351e9c1738eef9cfb5cbcfaf580998c79be7464",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    }
+  ],
+  "parent_verification": {
+    "pytest_passed": 3,
+    "readbacks": 14,
+    "unique_artifacts": 7,
+    "exact_f16_tensors": 25,
+    "stock_tokens": 248077,
+    "source_and_environment_unchanged": true,
+    "scope": "Freshreadback/numericverification, notparentre-export"
+  },
+  "remaining_gates": [
+    "Selectivebody/headerrebases, no oldmirror replacement",
+    "Initialmetadata/all16graphintegrationandfreshchecks",
+    "Launcher/qualifierindependentreacceptance",
+    "ActualimageCI,canonicalpackage/build/fulltests,exactheadCIandmerge"
+  ],
+  "limits": [
+    "Random initialized CPU text-only Qwen3.5, two hybrid layers, hidden size 256; deterministic nontrained nonzero rank-2 SFT/GRPO adapters, not pretrained weights or trained model quality.",
+    "No MTP-bearing native model conversion or model-quality qualification; target-only checkpoint correctly uses --no-mtp. No invented MTP tensors were added.",
+    "macOS ARM64 native CPU only; not Linux/container-image/cloud, CUDA, MPS, inference quality, or production-scale resource qualification.",
+    "The actual standalone caller requests trust_remote_code=True; the local hash-bound fixture has no Python code or auto_map and resolves to installed stock Transformers classes. Native/fixture stock loads explicitly use False.",
+    "Torch availability overrides and real-dispatch/CPU checkpoint observers exist only in the qualification process, preserving cache APIs; production/installed package code is unchanged.",
+    "Process-tree memory is sampled, not an OS hard limit. Converter/build/quantizer networking is OS-sandbox denied; Python network is refused. Only the actual exact-pin anonymous upstream Git fetch is allowed.",
+    "This is evidence for the composed source/header binding in the already cold-installed initial project environment, not a new environment install, live metadata-graph acceptance, production integration or acceptance seal. Parent owns those gates."
+  ],
+  "large_binary_retention": "SyntheticGGUFs/checkpoints remain in ownedscratch; notcommitted releaseweights. Hashes, reproduciblefixtureparameters, source andactualcommand evidence retained here.",
+  "archived_files": {
+    "REPORT.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/REPORT.md",
+      "sha256": "a982ea4fd637156439e75d88bcc95be87643fb81eb3fd02e47e48bcf3c9f749c"
+    },
+    "qualification-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualification-manifest.json",
+      "sha256": "1a986b2d077fc49afbd102cbe56804167f834b2910612967799c11b9b254e79c"
+    },
+    "source-header-environment-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/source-header-environment-manifest.json",
+      "sha256": "83872d1719834153c8e1b97fa26d741fca7505bbf9cfa59aa95279100a3a17a0"
+    },
+    "standalone-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/standalone-receipt.json",
+      "sha256": "13b00a418f288963688b18ced19818ee2f2e6712b161aaf26bf251199ec79f73"
+    },
+    "native-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/native-receipt.json",
+      "sha256": "c64a529a2d1fc159166807ac50f27138a3eb96f56ad2924c95a74347cb59e966"
+    },
+    "fixture-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/fixture-receipt.json",
+      "sha256": "acd6732ea9bc8c137dc25a1d372506cc4a2c2961930db0613b08054bcaf7c53b"
+    },
+    "verify2-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/verify2-receipt.json",
+      "sha256": "38ae5cd92eb63a6bacc1576d8dba0056277ba1b788794be8ab5a107c6ddddd42"
+    },
+    "pinned-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/pinned-receipt.json",
+      "sha256": "152585de892a96f90cfe3231f1968aef5293112aa1ac1ce4dd231727d66be907"
+    },
+    "fixture-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/fixture-launch.json",
+      "sha256": "e49064b0b70cd46ea1978fe07a756ed1b8a34280583f5e7587dd336a02f189bf"
+    },
+    "standalone-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/standalone-launch.json",
+      "sha256": "8a6337007d457ad306250beccda6d0e81a1e71b8183adc6fd39fe769b9e5038b"
+    },
+    "native-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/native-launch.json",
+      "sha256": "de336e3f7d7c07509fd0e680c7a6af25d6b3e1dc3c0a2ea622b9bf87017e8595"
+    },
+    "verify2-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/verify2-launch.json",
+      "sha256": "efdc3d4cd88dcada11b7477d7f397e4d63532a9211cb03f52ee0145e4cd73f80"
+    },
+    "pinned-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/pinned-launch.json",
+      "sha256": "b6d643e8e540449db1f380424331addaaf876ced78d4ae2c9208484dfc5adee1"
+    },
+    "final-integrity-comparison.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/final-integrity-comparison.json",
+      "sha256": "e06a4ef6f1b114e7cad6ecd59d3d465baa9c7f57c81516db32ad1a904daba6a2"
+    },
+    "tokenizer-provenance.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/tokenizer-provenance.json",
+      "sha256": "08de3c3a69431a4fbfdfeff20b50abadd6974a5382d8f178e719e71d640e4814"
+    },
+    "fixture-input-copy-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/fixture-input-copy-manifest.json",
+      "sha256": "9c7c2ea266111edc49c2d3cb174f585383aa0c1995e1438af230f6d688fd2128"
+    },
+    "qualification-probes/qual_common.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qual_common.py",
+      "sha256": "fbf1bbac71078394d22b129ff709cbbe2b82e70fd856b916bc0050132da8e06a"
+    },
+    "qualification-probes/compose.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/compose.py",
+      "sha256": "0a78dba542344bedec19e2e3325fdd151537ab5d9db1c1a7971adf074dca38ae"
+    },
+    "qualification-probes/numeric_oracle.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/numeric_oracle.py",
+      "sha256": "8de6d4c76d31b6da5a4b337b9dbc6efeef34ad2ebdf85d7400a40fc0afca20a2"
+    },
+    "qualification-probes/qualify_fixture.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_fixture.py",
+      "sha256": "6ad9ab225db08de23168352d83422d871a520302cc00b5304dc59208a5a71a19"
+    },
+    "qualification-probes/qualify_standalone.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_standalone.py",
+      "sha256": "21e61b69e44b952e3f1280f30a4639add182153d9116a6723e84bf1dc32cd6ca"
+    },
+    "qualification-probes/qualify_native.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_native.py",
+      "sha256": "cc94b0ddfae5da0645b64d241e8cb0ee5d610c0adf1730cd5b95324b764361c5"
+    },
+    "qualification-probes/qualify_verify2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_verify2.py",
+      "sha256": "7cbdd734a4ebda8d2f390988fdb0ad88f293c4b73d102bb212616c1bc60eadcd"
+    },
+    "qualification-probes/qualify_pinned.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/qualify_pinned.py",
+      "sha256": "0f8b4c2cbd96029ae7876546d502908b8fff44f8fd2c597cf01e16401589dba5"
+    },
+    "qualification-probes/launch.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/launch.py",
+      "sha256": "fba22ee6580550311e5076685ceaa830a705354e6b1340ae4af62fa8c7b7913a"
+    },
+    "parent/intake.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/intake.json",
+      "sha256": "a321d1b39dc9bbd065645d8325b9cc5c4514eabade67b0abe73390f834e1f8aa"
+    },
+    "parent/pytest.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/parent-pytest.xml",
+      "sha256": "ce7157eb83d5f9b4c81fa975af8946b94e676c6daf55cef8689b523932b07b7a"
+    },
+    "parent/readback-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/parent-readback-summary.json",
+      "sha256": "ccf79ad01df3fb30190d4ce45737ae7953fd331b0fe7632d87e82493221a5055"
+    },
+    "parent/test_native_readback.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/test_native_readback.py",
+      "sha256": "dcb220634b1094adf0baca7c26429a8199157301acd71aaf6032afb6882d92be"
+    },
+    "parent/verify2-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/verify2-receipt.json",
+      "sha256": "74e8b025fcef1a097c18e1d0f69eb3073d2d81bdb7daaf390c5087b03f43fa64"
+    },
+    "parent/pinned-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/pinned-receipt.json",
+      "sha256": "df5fea9f6e0e4106e9abfbd59c2e81e387a19878323beb3b59e3d9062610a0ec"
+    },
+    "parent/parent-verify2-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-verify2-launch.json",
+      "sha256": "fc882cfc382a596842c01955cec0fb65fe3e8dbda13faca462e6c67f722a3838"
+    },
+    "parent/parent-pinned-launch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-pinned-launch.json",
+      "sha256": "29c1c808c56f1ca8a6e1a3966ff3aee8e6177b1ae2e081c7b6b0a05a67f79f93"
+    },
+    "parent/parent-verify2.stdout": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-verify2.stdout",
+      "sha256": "3f2753dd36c87522373dfbd581ca724fef874c14710037867100b709a24e6a27"
+    },
+    "parent/parent-verify2.stderr": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-verify2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parent/parent-pinned.stdout": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-pinned.stdout",
+      "sha256": "272dfdb5d9f1a99d3c30930533671b1cd20fe83ee3efad78a312dac3173e42b0"
+    },
+    "parent/parent-pinned.stderr": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/pytest/test_dual_reader_readback_and_0/readback/parent-pinned.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parent/qualify_verify2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/prepared/qualify_verify2.py",
+      "sha256": "eb00f93576f30db0838674bbe97a2e561a1f07874b42787d31000fe2bb35a529"
+    },
+    "parent/qualify_pinned.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-repaired-native-3jd1mimn/prepared/qualify_pinned.py",
+      "sha256": "e63e14ba6c8a397107f2b574b021e09076056e5e578d6b5e5c42307a0f31efc6"
+    },
+    "qualified-source/finetune/train.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/train.py",
+      "sha256": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326"
+    },
+    "qualified-source/finetune/train_unsloth.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/train_unsloth.py",
+      "sha256": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b"
+    },
+    "qualified-source/finetune/convert_gguf.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/convert_gguf.py",
+      "sha256": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b"
+    },
+    "qualified-source/finetune/gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/gguf_toolchain.py",
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028"
+    },
+    "qualified-source/finetune/tests/test_finetune_correctness.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/tests/test_finetune_correctness.py",
+      "sha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3"
+    },
+    "qualified-source/finetune/tests/test_gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/tests/test_gguf_toolchain.py",
+      "sha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941"
+    },
+    "qualified-source/finetune/tests/test_gguf_structure.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/tests/test_gguf_structure.py",
+      "sha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617"
+    },
+    "environment-before.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/environment-before.json",
+      "source_sha256": "c531449cf6fc9d6747fdaa1890649d5f7ecb4e916c4e55ef69ebe6a8570308b0",
+      "sha256": "01dd4fe6b5deaf1908e63ca9ae3a0fff1bfe8b716e4addd788a8b723844f9a9d",
+      "encoding": "gzip"
+    },
+    "preserved-originals-before.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/preserved-originals-before.json",
+      "source_sha256": "7d9c765f99fe90475e3e0264fdc627303f409089041bdecbedb2a76798262abb",
+      "sha256": "7271c2722e131444493666c3c8aac22e7fecb022620cf1103bb7e95a4f697a09",
+      "encoding": "gzip"
+    },
+    "logs/fixture.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/fixture.stderr",
+      "source_sha256": "41b0a2dc684ca4648e5bdedfc1540413ec209dad54f59acc816ebb69edf9ffcf",
+      "sha256": "7271ee545e5f422e389aebf4ce3902b303d63d330cc13fea04db6b4b5cb87e38",
+      "encoding": "gzip"
+    },
+    "logs/fixture.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/fixture.stdout",
+      "source_sha256": "1507a11a8ef64a255a2e899f2741e7d46bca75aada8c90b416560e2c3ace5a39",
+      "sha256": "34be1e845fc61722699c43b27ad06fabb9cbf7c5b77b9cad09fd059bff9d6f96",
+      "encoding": "gzip"
+    },
+    "logs/native.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native.stderr",
+      "source_sha256": "6f9fce593ab834e486018518ae52f756afdaa7bcd60eacd5c5558f19ee1efbbc",
+      "sha256": "9dce00b6cdb70d75e80d3e034a1260008704ea6221fd32d7b8153282ac24965d",
+      "encoding": "gzip"
+    },
+    "logs/native.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native.stdout",
+      "source_sha256": "4124c417278cf1c5b8dafd28129a10f836334f76d6d68362610bfb174746569e",
+      "sha256": "74040dae1e91f265352d537b1adce5e82e62d9cc9a4267001bb522b94b32b5d0",
+      "encoding": "gzip"
+    },
+    "logs/native/01.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/01.stderr",
+      "source_sha256": "3e70934f1909b0f5a846d62237fcc1509d733b9fb0321187024723dfc67176d3",
+      "sha256": "6c1efcd93de7a845866e563adb2dfe527f552f96e3af23b105d9f3f348cb924d",
+      "encoding": "gzip"
+    },
+    "logs/native/01.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/01.stdout",
+      "source_sha256": "b7b82c4ad0722d487640191a94e5397f1b9b1f9733d1f38ef28e0f77ab2ecbba",
+      "sha256": "0d1e054cdec3a10f470c8c5bd33afabe3d44f6d0c291f49169d84a6a09fc9278",
+      "encoding": "gzip"
+    },
+    "logs/native/02.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/02.stderr",
+      "source_sha256": "0790e8e7d5a579ef0a90dd283edd9e4ca4582682b2e512bfd2180751038bd9fe",
+      "sha256": "7b16b390f3837b95ecb280679860b0eabd2743b3a716eecc5a0ed3628546dfcc",
+      "encoding": "gzip"
+    },
+    "logs/native/02.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/02.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/03.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/03.stderr",
+      "source_sha256": "d4b458e1077bb38145d71f547fca633a267cc50e0d328ae13d4b2f6613fcc128",
+      "sha256": "78acdbeeeec6730aeef82f89f09b088858c289c12386276e1c0c725eb1b8c904",
+      "encoding": "gzip"
+    },
+    "logs/native/03.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/03.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/04.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/04.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/04.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/04.stdout",
+      "source_sha256": "c331065c674499ea3ea5c42f60e3e3874489fed05fba024d8cd0b22e6e32c4e9",
+      "sha256": "b90d51d17fc485b2452707bfd9e07aa58722dae2e0f4f1197450b43716eb16ee",
+      "encoding": "gzip"
+    },
+    "logs/native/05.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/05.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/05.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/05.stdout",
+      "source_sha256": "316e3f57e5c65106060020cf5a350598d8852e832d9e9569a3a2f8f4f4e8e385",
+      "sha256": "e459c8c1b670ea6ec5446c1627c3c437fb6de90f460140eb7e512810ad3dab28",
+      "encoding": "gzip"
+    },
+    "logs/native/06.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/06.stderr",
+      "source_sha256": "8c3c51a0ecace0447e3c45c772ba7d0f680402986e80acb199339e87f499414f",
+      "sha256": "e680294fa31bcc69920b5d4936d70343f92458926cbbb38df757193cbeda61af",
+      "encoding": "gzip"
+    },
+    "logs/native/06.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/06.stdout",
+      "source_sha256": "cf96b271dd77f555032994d171c57297f37c4718f3191c2bec5e6e332c6ff4b4",
+      "sha256": "a68c467b6ea7e8032e7c8c5beb3b9c2976e1d51c3d59b9e1908cef78fd1097bf",
+      "encoding": "gzip"
+    },
+    "logs/native/07.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/07.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/07.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/07.stdout",
+      "source_sha256": "0fd7a8684cc3c7f5a980a6ecd5db1d8c49aa1cdbc155808e62e0ad69e8fd69f4",
+      "sha256": "86398972b246cc3003e7fe06d72d770153a47fc772e36f558404dd598dee0e12",
+      "encoding": "gzip"
+    },
+    "logs/native/08.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/08.stderr",
+      "source_sha256": "2067a3ac11518ff4c4a1ad3b452cd76791bc31885e9ae6fdcb182f83e9b8bb94",
+      "sha256": "1b225a9e4b19904db8b8d38d73fd08c7777e8f97fe7d447cfb2a355f7e61fd79",
+      "encoding": "gzip"
+    },
+    "logs/native/08.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/08.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/native/09.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/09.stderr",
+      "source_sha256": "b286c046a52a8836dd778c70717a0682132e70c36b4c7c6efa4ad33f2d140fbf",
+      "sha256": "5f8ca8222ad7f67f1a9642cbd8c62e8fd31c2a09faf1e7433c78564b00bf401a",
+      "encoding": "gzip"
+    },
+    "logs/native/09.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/09.stdout",
+      "source_sha256": "adf0c0017e509a2c3e82fb78d170b0bc00890740eecc52d5bdf8d00528ae3984",
+      "sha256": "64b9a0ee3fd82cfed3d52357120ea680109846fc6565494572950ff27e6ddb9f",
+      "encoding": "gzip"
+    },
+    "logs/native/10.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/10.stderr",
+      "source_sha256": "eee9c5fc7699f68da9d74955b7a07e7994fd44f9034f739a23c33578e6d0310f",
+      "sha256": "582b45e59969c3002c55077d1ff31b4fe07bf9a2cafef8e6cc4cb4eb69e7b339",
+      "encoding": "gzip"
+    },
+    "logs/native/10.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/10.stdout",
+      "source_sha256": "d9b9a3b2fd00986e1419654269dd7955bb7f7cb4c0778c3a9158bea2ebf27393",
+      "sha256": "6ceb3e20b4bb081503f32269c07f2c79fa8f426ce401c085ec4f315eaebd9ea1",
+      "encoding": "gzip"
+    },
+    "logs/native/11.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/11.stderr",
+      "source_sha256": "9b387e4e06c2d958c9be5113930f74201d97d567200fa8d60d47c74fa594a4f9",
+      "sha256": "c1b07784334effd1030e2935f5f1b3b549eaf9aa87a241572c25ee9611be5e90",
+      "encoding": "gzip"
+    },
+    "logs/native/11.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/11.stdout",
+      "source_sha256": "3aed90463ce6e44761576ad25e21006886fb32537a70fe97c0e3a88a5f43dad6",
+      "sha256": "dfef31b70d95b1f685f45cd15a775215af26a416db08aee8ca450068b8783cb8",
+      "encoding": "gzip"
+    },
+    "logs/native/CMakeCache.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/CMakeCache.txt",
+      "source_sha256": "abcb2ff6164929286f414c379033fca30503b2bc6ac5e9e2257556b2b3727891",
+      "sha256": "007e174e19cb52379dc0c5712f893056172e3125a1415ea18484a455e060d7aa",
+      "encoding": "gzip"
+    },
+    "logs/pinned.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/pinned.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/pinned.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/pinned.stdout",
+      "source_sha256": "272dfdb5d9f1a99d3c30930533671b1cd20fe83ee3efad78a312dac3173e42b0",
+      "sha256": "503341371e471a0e4f764268a7a9fa983868b99754eb9ee7e7945c6d72516845",
+      "encoding": "gzip"
+    },
+    "logs/standalone.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone.stderr",
+      "source_sha256": "f218228ea01eac82fb8b610ff62f1e1ebea7751c566fd1a87e17b54c9ea265c0",
+      "sha256": "09136ab4c81fcaa614d20a08b5f0d1b04e06eb1937aa6946ddcc0bd391c5c2b7",
+      "encoding": "gzip"
+    },
+    "logs/standalone.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone.stdout",
+      "source_sha256": "b0f95d6f1d9e608f1509cc3240417cd59964555f0d82027a3105bec17ece4b56",
+      "sha256": "1eb0d7d6f76f2729d0361d36bc1a3547c820632403dc0db6886c805a732c50d0",
+      "encoding": "gzip"
+    },
+    "logs/standalone/01.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/01.stderr",
+      "source_sha256": "3e70934f1909b0f5a846d62237fcc1509d733b9fb0321187024723dfc67176d3",
+      "sha256": "6c1efcd93de7a845866e563adb2dfe527f552f96e3af23b105d9f3f348cb924d",
+      "encoding": "gzip"
+    },
+    "logs/standalone/01.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/01.stdout",
+      "source_sha256": "9c60d4ca29ecfa2b679568d340816420ec0275720c8766a46af2bc732e732930",
+      "sha256": "da2881c46b44bad5e881aa6a423645aa465a951f521c457dff8ad12c8ffeb6d4",
+      "encoding": "gzip"
+    },
+    "logs/standalone/02.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/02.stderr",
+      "source_sha256": "0790e8e7d5a579ef0a90dd283edd9e4ca4582682b2e512bfd2180751038bd9fe",
+      "sha256": "7b16b390f3837b95ecb280679860b0eabd2743b3a716eecc5a0ed3628546dfcc",
+      "encoding": "gzip"
+    },
+    "logs/standalone/02.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/02.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/03.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/03.stderr",
+      "source_sha256": "d4b458e1077bb38145d71f547fca633a267cc50e0d328ae13d4b2f6613fcc128",
+      "sha256": "78acdbeeeec6730aeef82f89f09b088858c289c12386276e1c0c725eb1b8c904",
+      "encoding": "gzip"
+    },
+    "logs/standalone/03.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/03.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/04.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/04.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/04.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/04.stdout",
+      "source_sha256": "c331065c674499ea3ea5c42f60e3e3874489fed05fba024d8cd0b22e6e32c4e9",
+      "sha256": "b90d51d17fc485b2452707bfd9e07aa58722dae2e0f4f1197450b43716eb16ee",
+      "encoding": "gzip"
+    },
+    "logs/standalone/05.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/05.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/05.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/05.stdout",
+      "source_sha256": "316e3f57e5c65106060020cf5a350598d8852e832d9e9569a3a2f8f4f4e8e385",
+      "sha256": "e459c8c1b670ea6ec5446c1627c3c437fb6de90f460140eb7e512810ad3dab28",
+      "encoding": "gzip"
+    },
+    "logs/standalone/06.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/06.stderr",
+      "source_sha256": "8c3c51a0ecace0447e3c45c772ba7d0f680402986e80acb199339e87f499414f",
+      "sha256": "e680294fa31bcc69920b5d4936d70343f92458926cbbb38df757193cbeda61af",
+      "encoding": "gzip"
+    },
+    "logs/standalone/06.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/06.stdout",
+      "source_sha256": "0266359e0669fa4854b1b0e31d2bccdab1c507a44d1826b3a82633afc3f575d5",
+      "sha256": "a913fa42d0534a20ea2b04f4d4be9731fae478e535bb3eb071672598e4ea0c66",
+      "encoding": "gzip"
+    },
+    "logs/standalone/07.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/07.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/07.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/07.stdout",
+      "source_sha256": "ef66303913835cfaa2b1a6c14029ef093738996f8480b1588302a893596daadd",
+      "sha256": "0f435e0f64cfc01f9bd5abc64f10f115ed2d0a79bfd3faedb19433f81d461c33",
+      "encoding": "gzip"
+    },
+    "logs/standalone/08.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/08.stderr",
+      "source_sha256": "e492116581712ae73292338c2d18beadf54ecd0f6708cc20cf13bedcb5255b28",
+      "sha256": "da13b33beb47da68571ea6baefa7f858f5c230aedb645ac43e64242b98734d4d",
+      "encoding": "gzip"
+    },
+    "logs/standalone/08.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/08.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/standalone/09.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/09.stderr",
+      "source_sha256": "9f600f68ba5172f31fabc2ad8802c0af8971e4edf48f17d1678656aef652ab7b",
+      "sha256": "dedbcfbbcbdafe3681fd3e584c85b7039437f26b76111438661d42f58882fc75",
+      "encoding": "gzip"
+    },
+    "logs/standalone/09.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/09.stdout",
+      "source_sha256": "02b3bf7daba97d18ee15e98c73e1a51312204e7e83ef4e328f2642137e9e5cc8",
+      "sha256": "b8f7e4fabb0d50948490312a17371b60fa282e6a1b8f03089c58ad646cac9816",
+      "encoding": "gzip"
+    },
+    "logs/standalone/10.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/10.stderr",
+      "source_sha256": "b574d3b8713e07b1ced327a09e9bfc238ccc62999bdcb93bbd4816ae376e0dcd",
+      "sha256": "aa87eb0a1f3f06ff438ec4c1f0ac3681925f5498f0fe3a4ed24a1a3e9355121d",
+      "encoding": "gzip"
+    },
+    "logs/standalone/10.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/10.stdout",
+      "source_sha256": "2f1b2eb09124a6e67bea0ce1cd4cc67cf8dad9ab2e01d19730664be800c3d4a6",
+      "sha256": "e82913f552581642af45272ace4e0caa21fa78a0cbf731ca4ce34e2d8f0289fe",
+      "encoding": "gzip"
+    },
+    "logs/standalone/11.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/11.stderr",
+      "source_sha256": "2de9972e0bb8bfff874068e4a6da466c2bbdaff66d1e7c18c013c1fe3e19e8c9",
+      "sha256": "fd5e43b13a377b2f2eb4f82c4e7ede98a6f283960ba3cd823c231b48c31208d5",
+      "encoding": "gzip"
+    },
+    "logs/standalone/11.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/11.stdout",
+      "source_sha256": "75c917cac8d97e8f1187de2b4ed695359a65eb14c4f979d60477b793d402d0f5",
+      "sha256": "619ba64c364564be8fb78f229c83c06695cdc3029b776aba8d2548246da00356",
+      "encoding": "gzip"
+    },
+    "logs/standalone/CMakeCache.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/standalone/CMakeCache.txt",
+      "source_sha256": "844465543374d5ee67fe72f29a88df4dd33582b7c5b260d01f3a39de412efb73",
+      "sha256": "737d4a6855e9c00099827a2fbc581fed91f6991ef3b09d889f9bd2fd9b42b152",
+      "encoding": "gzip"
+    },
+    "logs/verify2.stderr.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/verify2.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "encoding": "gzip"
+    },
+    "logs/verify2.stdout.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/verify2.stdout",
+      "source_sha256": "3f2753dd36c87522373dfbd581ca724fef874c14710037867100b709a24e6a27",
+      "sha256": "328e241ddabe4e2078de37fb8e608abf4fde848a55d34188b8ac59dd28b835bd",
+      "encoding": "gzip"
+    }
+  }
+}

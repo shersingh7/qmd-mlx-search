@@ -120,6 +120,7 @@ def test_rerank_invalid_and_empty_inputs():
         adapter.score_pairs("query", [123])
 
 
+@pytest.mark.real_model
 def test_rerank_tokenization_efficiency_offline():
     """Verify that score_pairs_sync calls tokenizer encode efficiently per pair."""
     from unittest.mock import MagicMock
@@ -225,6 +226,7 @@ def test_rerank_oversize_raises_error():
         adapter.score_pairs(query, [huge_doc])
 
 
+@pytest.mark.real_model
 def test_rerank_quantized_linear_head_evaluation():
     """Verify that score_pairs_sync correctly handles QuantizedLinear heads without crashing on uint32 weights."""
     from unittest.mock import MagicMock

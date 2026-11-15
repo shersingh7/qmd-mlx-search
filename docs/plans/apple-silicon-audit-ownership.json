@@ -1,0 +1,86 @@
+{
+  "baseline": "1d6cfef",
+  "owners": {
+    "W01": [
+      "scripts/qmd_mlx/executor.py"
+    ],
+    "W02": [
+      "scripts/qmd_mlx/model_manager.py"
+    ],
+    "W03": [
+      "scripts/qmd_mlx/runtime.py",
+      "scripts/qmd_mlx/batching.py"
+    ],
+    "W04": [
+      "scripts/qmd_mlx/adapters/embedding.py",
+      "scripts/qmd_mlx/adapters/tokenization.py"
+    ],
+    "W05": [
+      "scripts/qmd_mlx/rerank.py",
+      "scripts/qmd_mlx/generate.py"
+    ],
+    "W06": [
+      "scripts/qmd_mlx/server.py",
+      "scripts/qmd_mlx/protocol.py",
+      "scripts/qmd_mlx/fake_server.py",
+      "scripts/mlx_embed_server.py"
+    ],
+    "W07": [
+      "scripts/qmd_mlx/supervisor.py",
+      "scripts/qmd_mlx/watchdog.py"
+    ],
+    "W08": [
+      "src/mlx.ts",
+      "src/embedding/config.ts",
+      "src/embedding/contract.ts",
+      "src/embedding/protocol.ts",
+      "src/expansion/protocol.ts"
+    ],
+    "W09": [
+      "src/llm.ts",
+      "src/llm/"
+    ],
+    "W10": [
+      "src/store.ts",
+      "src/indexing/",
+      "src/db.ts",
+      "src/maintenance.ts"
+    ],
+    "W11": [
+      "src/index.ts",
+      "src/collections.ts"
+    ],
+    "W12": [
+      "src/mcp/server.ts"
+    ],
+    "W13": [
+      "scripts/phase5_recovery_worker.ts",
+      "scripts/phase5_e2e_runner.ts",
+      "scripts/qmd_mlx/phase5_e2e_qualification.py"
+    ],
+    "W14": [
+      "scripts/qmd_mlx/sustained.py",
+      "scripts/qmd_gguf/benchmark.py",
+      "scripts/qmd-mlx-sustained.py",
+      "scripts/qmd-gguf-benchmark.py"
+    ],
+    "W15": [
+      "package.json",
+      "bun.lock",
+      "pnpm-lock.yaml",
+      "tsconfig.build.json",
+      "tsconfig.json",
+      ".github/workflows/",
+      "scripts/mlx_server_requirements.txt",
+      "bin/qmd",
+      "scripts/qmd-mlx-daemon.sh",
+      "scripts/launchd/",
+      "scripts/install-hooks.sh",
+      "test/smoke-install.sh",
+      "test/launcher-detection.test.sh",
+      "scripts/apply-fork-dist-patches.py"
+    ]
+  },
+  "test_ownership": "See implementation plan; each lane has exclusive new test_audit_/audit- prefix; no overlapping existing test owners",
+  "source_collisions": []
+}

@@ -1,0 +1,148 @@
+"""Independent SYNTHETIC Docker/git fixtures; never exec a real CLI/probe.
+
+All image, daemon, platform, native and compiler-looking values are synthetic.
+The optional descendant is a bounded Python sleep/write fixture, not native work.
+"""
+from pathlib import Path
+import hashlib
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+
+cfg_path = Path(sys.argv[1])
+cfg = json.loads(cfg_path.read_text())
+root = cfg_path.parent
+argv = sys.argv[2:]
+with (root / 'calls.jsonl').open('a') as stream:
+    stream.write(json.dumps({'synthetic': True, 'argv': argv, 'environment': dict(os.environ)}) + '\n')
+if argv[0] == 'git':
+    assert argv[1:] == ['-C', cfg['workspace'], 'rev-parse', '--verify', 'HEAD']
+    print('1' * 40)
+    raise SystemExit(0)
+assert argv[0] == 'docker'
+assert argv[1] == '--config' and argv[3:5] == ['--host', 'unix:///var/run/docker.sock']
+assert json.loads((Path(argv[2]) / 'config.json').read_text()) == {'auths': {}}
+args = argv[5:]
+state_path = root / 'state.json'
+state = json.loads(state_path.read_text()) if state_path.exists() else {'present': False, 'ls_count': 0, 'removed': []}
+CID = 'a' * 64
+SENTINEL = 'b' * 64
+LABEL = 'qmd.native-qualification.owner'
+
+def save():
+    state_path.write_text(json.dumps(state))
+
+def emit(value):
+    print(json.dumps(value), flush=True)
+
+def finish(code=0):
+    save()
+    raise SystemExit(code)
+
+def raw_or_value(key, value):
+    if key + '_raw' in cfg:
+        print(cfg[key + '_raw'], flush=True)
+    else:
+        emit(cfg.get(key + '_value', value))
+
+if args[0] == 'version':
+    assert args[1:] == ['--format', '{{json .}}']
+    raw_or_value('engine', {'Server': {'Version': 'SYNTHETIC-engine', 'Os': 'linux', 'Arch': 'amd64'},
+                            'Client': {'Version': 'SYNTHETIC-client', 'Os': 'linux', 'Arch': 'amd64'}})
+    finish()
+if args[0] == 'pull':
+    assert args[1:3] == ['--platform', 'linux/amd64'] and len(args) == 4
+    state['image'] = args[3]
+    print('SYNTHETIC: not a registry request or image pull')
+    finish()
+if args[:2] == ['image', 'inspect']:
+    assert len(args) == 5 and args[2] == '--format' and args[-1] == state['image']
+    tagged, digest = state['image'].split('@')
+    expected = tagged.rsplit(':', 1)[0] + '@' + digest
+    value = {'Id': 'sha256:' + 'c' * 64, 'Os': 'linux', 'Architecture': 'amd64', 'RepoDigests': [expected]}
+    value.update(cfg.get('image_update', {}))
+    raw_or_value('image', value)
+    finish()
+if args[0] == 'run':
+    assert args[-5:] == [state['image'], '-I', '-B', '-S', '/probe.py']
+    assert args[args.index('--entrypoint') + 1] == 'python'
+    assert '--native-only' not in args
+    state['cidfile'] = args[args.index('--cidfile') + 1]
+    state['label'] = args[args.index('--label') + 1]
+    state['present'] = cfg.get('keep_container', False)
+    cidfile = Path(state['cidfile'])
+    mode = cfg.get('cid_mode')
+    if mode == 'directory':
+        cidfile.mkdir()
+    elif mode == 'fifo':
+        os.mkfifo(cidfile)
+    elif mode == 'oversize':
+        cidfile.write_bytes(b'a' * (1048576 + 1))
+    else:
+        cidfile.write_text(CID + '\n')
+    mount = args[args.index('--mount') + 1]
+    assert mount.startswith('type=bind,src=') and mount.endswith(',dst=/probe.py,readonly')
+    public_bytes = Path(mount.removeprefix('type=bind,src=').removesuffix(',dst=/probe.py,readonly')).read_bytes()
+    save()
+    if cfg.get('descendant_on_timeout'):
+        worker = root.parent.parent / 'descendant_worker.py'
+        child = subprocess.Popen([sys.executable, '-I', '-B', '-S', str(worker), str(root), str(os.getpid())],
+                                 env=dict(os.environ), close_fds=True)
+        deadline = time.monotonic() + 1
+        while not (root / 'descendant-ready.json').exists():
+            assert time.monotonic() < deadline, 'bounded fixture descendant failed to start'
+            time.sleep(0.005)
+        state['present'] = True
+        save()
+        time.sleep(4)
+        child.wait(timeout=3)
+        finish(99)
+    value = {'status': 'pass', 'native_only': False, 'platform': 'Linux/x86_64', 'python': '3.12.13',
+             'versions': {tool: 'SYNTHETIC ' + tool for tool in ('git', 'cc', 'c++', 'make', 'uv')},
+             'outputs': ['qmd-c-ok', 'qmd-cxx-ok'], 'probe_sha256': hashlib.sha256(public_bytes).hexdigest(),
+             'fixture_notice': 'SYNTHETIC: no image, probe or compiler execution'}
+    value.update(cfg.get('probe_update', {}))
+    if cfg.get('probe_duplicate_status'):
+        print(json.dumps(value)[:-1] + ',"status":"pass"}', flush=True)
+    else:
+        raw_or_value('probe', value)
+    if 'probe_stderr_payload' in cfg:
+        print(cfg['probe_stderr_payload'], file=sys.stderr, flush=True)
+    finish(cfg.get('probe_exit', 0))
+if args[:2] == ['container', 'ls']:
+    assert args[2:] == ['--all', '--no-trunc', '--format', '{{json .ID}}']
+    state['ls_count'] += 1
+    if cfg.get('receipt_write_failure'):
+        # A storage-failure fixture, not an alteration of the production controller.
+        (Path(state['cidfile']).parent / 'receipt.json').mkdir(exist_ok=True)
+    if 'ls_raw' in cfg:
+        print(cfg['ls_raw'], flush=True)
+    else:
+        emit(SENTINEL)
+        if state['present']:
+            emit(CID)
+        if cfg.get('duplicate_list_id'):
+            emit(SENTINEL)
+    finish(cfg.get('ls_exit', 0))
+if args[:2] == ['container', 'inspect']:
+    assert args[-1] == CID
+    key, owner = state['label'].split('=', 1)
+    assert key == LABEL
+    if cfg.get('identity_duplicate_raw'):
+        print('{"Id":' + json.dumps(CID) + ',"Labels":{' + json.dumps(key) + ':' + json.dumps(owner)
+              + ',' + json.dumps(key) + ':' + json.dumps(owner) + '}}')
+    elif cfg.get('identity_root_array'):
+        emit([{'Id': CID, 'Labels': {key: owner}}])
+    else:
+        emit({'Id': CID, 'Labels': {key: owner}})
+    finish(cfg.get('identity_exit', 0))
+if args[:2] == ['container', 'rm']:
+    assert args[2:] == ['--force', CID]
+    state['removed'].append(CID)
+    state['present'] = False
+    print('SYNTHETIC: no actual container removed')
+    finish()
+raise AssertionError(args)

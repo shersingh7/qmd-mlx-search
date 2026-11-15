@@ -1,0 +1,7 @@
+{
+  "status": "PARENT_FIXTURE_PREPARATION_FAILURE",
+  "error": "Attempted to copy absent extra finetune/eval.py from the minimal review mirror",
+  "tests_executed": 0,
+  "product_failure": false,
+  "correction": "Copy the actually exercised seven-file proposal and explicit conftest only; preserve all behavioral tests"
+}

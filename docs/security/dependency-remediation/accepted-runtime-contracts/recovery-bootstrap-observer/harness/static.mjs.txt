@@ -1,0 +1,92 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import ts from '../mirror/node_modules/typescript/lib/typescript.js';
+import YAML from '../mirror/node_modules/yaml/dist/index.js';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=(tree,p)=>fs.readFileSync(path.join(root,tree,p),'utf8');
+const sha=x=>createHash('sha256').update(x).digest('hex');
+const input=JSON.parse(read('evidence','provided-input.json'));
+const manifest=JSON.parse(read('evidence','provided-source-hash-manifest.json'));
+const paths=manifest.changes.map(x=>x.path);
+const expectedPaths=['.github/workflows/ci.yml','test/audit-recovery-tree.test.ts','test/helpers/recovery-bootstrap-diagnostics.mjs','test/helpers/recovery-bootstrap-diagnostics.selftest.mjs'];
+assert.deepEqual(paths,expectedPaths);
+const actualChanges=[];
+for(const [p,want] of Object.entries(input.source_sha256)) {
+ assert.equal(sha(read('original',p)),want,p);
+ const got=sha(read('mirror',p));assert.equal(got,manifest.sourceSha256[p],p);
+ if(got!==want)actualChanges.push(p);
+}
+actualChanges.push(...Object.keys(manifest.sourceSha256).filter(p=>!(p in input.source_sha256)));
+assert.deepEqual(actualChanges.sort(),paths.toSorted());
+for(const [p,want] of Object.entries(manifest.sourceSha256))assert.equal(sha(read('mirror',p)),want,p);
+const before=read('original','test/audit-recovery-tree.test.ts');
+const after=read('mirror','test/audit-recovery-tree.test.ts');
+let restored=after;
+for(const [from,to] of [
+ ['import { beginRecoveryBootstrapDiagnostics } from "./helpers/recovery-bootstrap-diagnostics.mjs";\n',''],
+ ['  // No extra launch/warmup: observe this existing invocation only when opted in.\n  const bootstrapDiagnostics = beginRecoveryBootstrapDiagnostics();\n',''],
+ ['    bootstrapDiagnostics.attachAfterLaunch();\n',''],
+ ['    try { result ??= await helper; }\n    finally { bootstrapDiagnostics.finish(result); }','    result ??= await helper;'],
+]){assert.equal(restored.split(from).length,2);restored=restored.replace(from,to);}
+assert.equal(restored,before);
+function calls(text){
+ const sf=ts.createSourceFile('frozen.ts',text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);const out=[];
+ function visit(n){if(ts.isCallExpression(n)&&['it','spawn','executeRecoveryWorker'].includes(n.expression.getText(sf)))out.push({name:n.expression.getText(sf),text:n.getText(sf)});ts.forEachChild(n,visit);}visit(sf);return out;
+}
+const beforeCalls=calls(before),afterCalls=calls(after);assert.deepEqual(afterCalls,beforeCalls);
+assert.equal(beforeCalls.filter(c=>c.name==='it').length,8);
+assert.equal(beforeCalls.filter(c=>c.name!=='it').length,7);
+assert.match(after,/const timeoutMs = 200;/);assert.match(after,/}, 1_800\)/);assert.match(after,/toBeLessThan\(1_500\)/);
+assert.match(read('mirror','scripts/phase5_e2e_runner.ts'),/const teardownMs = 800;/);
+const old=YAML.parse(read('original','.github/workflows/ci.yml'));
+const proposed=YAML.parse(read('mirror','.github/workflows/ci.yml'));
+assert.deepEqual(proposed.on,old.on);assert.deepEqual(proposed.permissions,old.permissions);
+assert.deepEqual(proposed.jobs['python-portable'],old.jobs['python-portable']);assert.deepEqual(proposed.jobs['python-macos'],old.jobs['python-macos']);
+const clone=structuredClone(proposed.jobs.javascript);
+const addedNames=['Static macOS bootstrap metadata (no added interpreter launch)','After-canonical Node diagnostic controls','Preserve first-invocation bootstrap observations even on failure'];
+clone.steps=clone.steps.filter(s=>!addedNames.includes(s.name));
+const normalize=s=>s.replace(/\s+/g,' ').trim();
+for(const s of clone.steps) {
+ if(s.name==='Node tests'){
+  assert.equal(s.env.QMD_BOOTSTRAP_ENABLED,"${{ runner.os == 'macOS' && '1' || '0' }}");delete s.env;
+  s.run=s.run.replace('env QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED" QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap" ','');
+ }
+ if(s.name==="Vitest suite through Bun's package-script launcher"){
+  assert.equal(s.env.QMD_BOOTSTRAP_ENABLED,"${{ runner.os == 'macOS' && '1' || '0' }}");delete s.env.QMD_BOOTSTRAP_ENABLED;
+  s.run=s.run.replace('QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED" QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap" ','');
+ }
+ if(s.run)s.run=normalize(s.run);
+}
+const normalizedOld=structuredClone(old.jobs.javascript);for(const s of normalizedOld.steps)if(s.run)s.run=normalize(s.run);
+assert.deepEqual(clone,normalizedOld);
+const steps=proposed.jobs.javascript.steps;
+const controls=steps.findIndex(s=>s.name===addedNames[1]);assert.ok(controls>steps.findIndex(s=>s.name==='Real isolated tarball install and CLI/SQLite smoke'));
+const metadata=steps.find(s=>s.name===addedNames[0]);assert.equal(metadata.env.QMD_DIAGNOSTIC_HEAD_SHA,'${{ github.event.pull_request.head.sha || github.sha }}');assert.ok(!metadata.run.includes('${{'));
+assert.match(metadata.run,/"\$RUNNER_TEMP" >> "\$GITHUB_ENV"/);
+const upload=steps.find(s=>s.uses==='actions/upload-artifact@v4');assert.equal(upload.if,"always() && runner.os == 'macOS'");assert.equal(upload.with['retention-days'],7);assert.equal(upload.with['if-no-files-found'],'error');assert.equal(upload.with['include-hidden-files'],false);
+assert.equal(steps[controls].if,"always() && runner.os == 'macOS'");
+const helper=read('mirror','test/helpers/recovery-bootstrap-diagnostics.mjs');
+for(const forbidden of [/\.on\(["'](?:data|readable|error)["']/,/\.(?:read|resume|pause|destroy|kill|write|spawn|emit|getReader)\(/,/set(?:Timeout|Interval)\(/,/globalThis\./,/\.prototype\./])assert.ok(!forbidden.test(helper),String(forbidden));
+assert.match(helper,/const EVENT_LIMIT = 32;/);assert.match(helper,/tMs: null/);assert.match(helper,/finally \{ candidates.length = 0; unsubscribe\(\); \}/);
+assert.match(helper,/if \(!enabled\) return \{ attachAfterLaunch\(\) \{\}, finish\(/);
+assert.equal((helper.match(/query\("\//g)||[]).length,1);assert.match(helper,/query\("\/usr\/bin\/sw_vers", \[\]\)/);
+assert.ok(!/\.test\.ts$/.test('test/helpers/recovery-bootstrap-diagnostics.selftest.mjs'));
+assert.match(read('mirror','vitest.config.ts'),/include: \["test\/\*\*\/\*\.test\.ts"\]/);
+const shell=[];
+for(const s of steps.filter(x=>x.run)){
+ const res=spawnSync('/bin/bash',['-n'],{input:s.run,cwd:path.join(root,'mirror'),env:process.env,encoding:'utf8',timeout:10000});
+ shell.push({name:s.name,argv:['/bin/bash','-n'],sha256:sha(s.run),exitCode:res.status,stderr:res.stderr,signal:res.signal});assert.equal(res.status,0,s.name);
+}
+const replay=path.join(root,'patch-replay');fs.mkdirSync(replay);
+for(const p of paths){const dest=path.join(replay,p);fs.mkdirSync(path.dirname(dest),{recursive:true});if(p in input.source_sha256)fs.copyFileSync(path.join(root,'original',p),dest);}
+const patchFile=path.join(root,'evidence/provided-diagnostics-proposal.patch');
+const result=spawnSync('/usr/bin/patch',['-p1','--batch','--forward','-i',patchFile],{cwd:replay,env:process.env,encoding:'utf8',timeout:10000});
+assert.equal(result.status,0,JSON.stringify(result));
+const replayHashes=Object.fromEntries(paths.map(p=>{const got=sha(fs.readFileSync(path.join(replay,p)));assert.equal(got,manifest.sourceSha256[p]);return[p,got];}));
+const report={status:'PASS',originalFiles:244,candidateFiles:246,changes:paths,originalRecoveredByteForByte:true,itCalls:8,launchCalls:7,callOrderUnchanged:true,workflowSemanticsPreserved:true,limits:{executionMs:200,teardownMs:800,guardMs:1800,exclusiveElapsedMs:1500,eventLimit:32},shell,patch:{executable:'/usr/bin/patch',argv:['-p1','--batch','--forward','-i',patchFile],cwd:replay,exitCode:result.status,stdout:result.stdout,stderr:result.stderr,replayHashes},caveat:'Static syntax and preservation are not real CI/clock/causality qualification'};
+fs.writeFileSync(path.join(root,'evidence/static-preservation.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify(report));

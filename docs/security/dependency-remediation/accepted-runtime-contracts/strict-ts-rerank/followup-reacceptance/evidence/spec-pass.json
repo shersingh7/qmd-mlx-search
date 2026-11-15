@@ -1,0 +1,24 @@
+{
+  "source_count": 245,
+  "scope": "SPEC PASS; proceed to four-file QUALITY and bounded SDK/Zod interaction only",
+  "tests": {
+    "node": {
+      "files": 13,
+      "counts": {
+        "passed": 246,
+        "skipped": 40
+      },
+      "guard_cases": 44,
+      "guard_host": "/Users/shersingh/.hermes/node/bin/node"
+    },
+    "bun": {
+      "files": 13,
+      "counts": {
+        "passed": 224,
+        "skipped": 40
+      },
+      "guard_cases": 22,
+      "guard_host": "/Users/shersingh/.bun/bin/bun"
+    }
+  }
+}

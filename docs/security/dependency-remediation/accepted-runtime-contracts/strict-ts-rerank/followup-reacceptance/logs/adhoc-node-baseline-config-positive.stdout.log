@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+···················
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  21:27:09
+   Duration  546ms (transform 224ms, setup 19ms, import 486ms, tests 35ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-baseline-config-positive-results.json

@@ -1,0 +1,172 @@
+"""Parent verification of returned native artifacts; does not export or download."""
+from collections import Counter
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import time
+
+ROOT = Path(__file__).resolve().parent
+INPUT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh')
+ENVIRONMENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv')
+MANIFEST_SHA = '1a986b2d077fc49afbd102cbe56804167f834b2910612967799c11b9b254e79c'
+
+
+def digest(path):
+    with Path(path).open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def manifest():
+    path = INPUT / 'qualification-manifest.json'
+    assert digest(path) == MANIFEST_SHA
+    return json.loads(path.read_text())
+
+
+def header_parts(data):
+    matches = list(re.finditer(rb'(?m)^# /// script\r?\n(?:[^\n]*\n)*?^# ///\r?\n', data))
+    assert len(matches) == 1
+    match = matches[0]
+    return data[:match.start()], data[match.start():match.end()], data[match.end():]
+
+
+def test_evidence_and_all_seven_artifacts_are_hash_bound():
+    data = manifest()
+    assert len(data['evidence_sha256']) == 191
+    for relative, expected in data['evidence_sha256'].items():
+        assert re.fullmatch(r'[a-f0-9]{64}', expected)
+        assert digest(INPUT / relative) == expected, relative
+    artifacts = data['artifacts']
+    assert len(artifacts) == data['artifact_count'] == len({row['path'] for row in artifacts}) == 7
+    assert Counter(row['entrypoint'] for row in artifacts) == {'standalone': 4, 'native': 3}
+    for row in artifacts:
+        path = Path(row['path'])
+        assert path.is_relative_to(INPUT) and not path.is_symlink()
+        assert path.stat().st_size == row['bytes']
+        assert digest(path) == row['sha256']
+
+
+def test_reviewed_bodies_new_headers_and_actual_export_commands():
+    data = manifest()
+    binding = json.loads((INPUT / 'source-header-environment-manifest.json').read_text())
+    assert len(binding['composed_files_sha256']) == 40
+    for relative, expected in binding['composed_files_sha256'].items():
+        assert digest(INPUT / 'repo' / relative) == expected
+    assert len(binding['reviewed_overlay']) == 7
+    for row in binding['reviewed_overlay']:
+        reviewed = Path(binding['reviewed_source']) / 'mirror' / row['path']
+        composed = INPUT / 'repo' / row['path']
+        assert digest(reviewed) == row['reviewed_whole_sha256']
+        assert digest(composed) == row['composed_whole_sha256']
+        if row.get('every_nonheader_byte_unchanged'):
+            left, old_header, right = header_parts(reviewed.read_bytes())
+            metadata = Path(binding['metadata_inputs'][row['path']]['source'])
+            assert digest(metadata) == row['metadata_preview_whole_sha256']
+            _, new_header, _ = header_parts(metadata.read_bytes())
+            assert composed.read_bytes() == left + new_header + right
+            assert hashlib.sha256(left + right).hexdigest() == row['reviewed_body_sha256']
+            assert hashlib.sha256(old_header).hexdigest() == row['old_header_sha256']
+            assert hashlib.sha256(new_header).hexdigest() == row['new_header_sha256']
+        else:
+            assert composed.read_bytes() == reviewed.read_bytes()
+    commands = [command for group in data['real_export_commands'].values() for command in group]
+    assert len(commands) == data['total_real_export_commands'] == 22
+    assert all(command['returncode'] == 0 and command['status'] == 'completed' for command in commands)
+    builds = [command for command in commands if '--build' in command['argv']]
+    assert len(builds) == 2
+    assert all(command['argv'][0] == str(ENVIRONMENT / 'bin/cmake') for command in builds)
+    assert all(command['argv'][-2:] == ['-j', '2'] for command in builds)
+    converters = [command for command in commands if '--help' not in command['argv']
+                  and any(value.endswith('/convert_hf_to_gguf.py') for value in command['argv'])]
+    assert len(converters) == 2
+    assert sum(Path(command['argv'][0]).name == 'llama-quantize' for command in commands) == 6
+    for phase in data['actual_CPU_evidence'].values():
+        assert not phase['accelerator_calls']
+        assert set(phase['dispatch_tensor_devices']) <= {'cpu', 'meta'}
+        assert all(row['device'] == 'cpu' for row in phase['checkpoint_materializations'])
+
+
+def run_readback(run_root, phase, data):
+    env = {key: value.replace(str(INPUT), str(run_root))
+           for key, value in data['phase_launches'][phase]['environment'].items()}
+    # A fresh prefix prevents importing unbound existing .pyc files; -B also
+    # prohibits writes to the preserved environment or pinned reader package.
+    env['PYTHONPYCACHEPREFIX'] = str(run_root / 'isolation' / phase / 'cache/pycache')
+    for value in env.values():
+        if value.startswith(str(run_root)) and ':' not in value:
+            Path(value).mkdir(parents=True, exist_ok=True)
+    argv = ['/usr/bin/sandbox-exec', '-p', '(version 1) (allow default) (deny network*)',
+            str(ENVIRONMENT / 'bin/python'), '-s', '-B', str(run_root / f'qualify_{phase}.py')]
+    start = time.monotonic()
+    peak = 0
+    samples = 0
+    breach = None
+    with (run_root / f'parent-{phase}.stdout').open('x') as stdout, (run_root / f'parent-{phase}.stderr').open('x') as stderr:
+        child = subprocess.Popen(argv, cwd=run_root, env=env, stdout=stdout, stderr=stderr)
+        try:
+            while child.poll() is None:
+                sample = subprocess.run(['/bin/ps', '-p', str(child.pid), '-o', 'rss='], env=env,
+                                        capture_output=True, text=True, timeout=5)
+                if sample.returncode == 0 and sample.stdout.strip():
+                    rss = int(sample.stdout.strip()) * 1024
+                    peak = max(peak, rss)
+                    samples += 1
+                    if rss > 2 * 1024**3:
+                        breach = 'sampled verifier RSS exceeded 2 GiB'
+                        raise AssertionError(breach)
+                elif child.poll() is None:
+                    raise AssertionError('Owned verifier RSS observation unavailable')
+                if time.monotonic() - start > 180:
+                    breach = '180-second readback bound exceeded'
+                    raise AssertionError(breach)
+                time.sleep(0.2)
+        finally:
+            # Signal only the still-owned direct process handle, never a sampled
+            # process-group ID or any historical child from another receipt.
+            if child.poll() is None:
+                child.terminate()
+                try:
+                    child.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait(timeout=10)
+    observation = {'argv': argv, 'environment': env, 'returncode': child.returncode,
+                   'elapsed_seconds': time.monotonic() - start, 'sampled_verifier_rss_bytes': peak,
+                   'samples': samples, 'breach': breach, 'scope': 'readback only; no export/build/download'}
+    (run_root / f'parent-{phase}-launch.json').write_text(json.dumps(observation, indent=2) + '\n')
+    assert child.returncode == 0, (run_root / f'parent-{phase}.stderr').read_text()[-8000:]
+    assert breach is None and samples > 0
+    result = json.loads((run_root / f'{phase}-receipt.json').read_text())
+    assert result['success'] and result['environment_unchanged'] and result['source_unchanged']
+    assert not result['network_attempts'] and not result['accelerator_calls']
+    assert not result['commands'], 'Readback must not rerun exporter commands'
+    assert len(result['parsed_artifacts']) == 7
+    return result, observation
+
+
+def test_dual_reader_readback_and_all_f16_numeric_values(tmp_path):
+    data = manifest()
+    run_root = tmp_path / 'readback'
+    shutil.copytree(ROOT / 'prepared', run_root)
+    installed, first = run_readback(run_root, 'verify2', data)
+    pinned, second = run_readback(run_root, 'pinned', data)
+    expected = {row['path']: row['sha256'] for row in data['artifacts']}
+    for result in (installed, pinned):
+        assert {row['path']: row['sha256'] for row in result['parsed_artifacts']} == expected
+    numeric = installed['standalone_f16_all_tensor_numerical_readback']
+    assert numeric['all_25_output_tensors_exact'] and numeric['all_27_base_checkpoint_tensors_accounted_for']
+    assert len(numeric['records']) == 25 and all(row['all_elements_exact'] for row in numeric['records'])
+    assert installed['standalone_f16_adapter_numerical_readback']['exact_sequential_merge_matches']
+    assert installed['standalone_f16_adapter_numerical_readback']['differs_from_base']
+    for row in pinned['parsed_artifacts']:
+        assert row['stock_complete_vocabulary_merges_template_exact']
+        assert row['full_tensor_bounds_valid']
+        assert row['all_tensor_descriptors_and_payload_hashes_match_installed_reader']
+    summary = {'scope': 'Parent fresh readback of returned artifacts, not new exports or release acceptance',
+               'run_root': str(run_root), 'readbacks': len(installed['parsed_artifacts']) + len(pinned['parsed_artifacts']),
+               'unique_artifacts': len(expected), 'numeric_tensors': len(numeric['records']),
+               'stock_token_count': installed['parsed_artifacts'][0]['vocab_size'],
+               'source_and_environment_unchanged': True, 'phases': {'installed': first, 'pinned': second}}
+    (ROOT / 'parent-readback-summary.json').write_text(json.dumps(summary, indent=2) + '\n')

@@ -1,0 +1,13 @@
+{
+  "exitCode": 125,
+  "join": {
+    "errno": 1,
+    "group": 38078,
+    "currentSession": 38079,
+    "targetSession": 38078
+  },
+  "sentinelPid": 38078,
+  "sentinelAliveBeforeCleanup": true,
+  "signalAttempt": false,
+  "stderr": ""
+}

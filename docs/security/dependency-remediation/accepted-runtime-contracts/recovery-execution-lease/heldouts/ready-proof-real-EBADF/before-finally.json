@@ -1,0 +1,62 @@
+{
+  "name": "ready-proof-real-EBADF",
+  "guardFired": false,
+  "elapsedMs": 122.23895800000051,
+  "exitCode": 1,
+  "supervisorPid": 12540,
+  "supervisorAbsent": true,
+  "workers": [
+    12541
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 12540,
+      "sessionId": 12540
+    }
+  ],
+  "gates": [],
+  "groupSignals": [
+    {
+      "kind": "group-signal",
+      "pid": 12541,
+      "owner": 12540,
+      "at": 0.08777775,
+      "group": 12540,
+      "signal": 15,
+      "pinned": true,
+      "currentSession": 12540,
+      "termBlocked": true
+    },
+    {
+      "kind": "group-signal",
+      "pid": 12541,
+      "owner": 12540,
+      "at": 0.087888875,
+      "group": 12540,
+      "signal": 19,
+      "pinned": true,
+      "currentSession": 12540,
+      "termBlocked": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 116.85645799999733
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 116.86641600000058
+    }
+  ],
+  "stderr": "Traceback (most recent call last):\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldout_wrapper.py\", line 171, in <module>\n    scope['main']()\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py\", line 484, in main\n    ready()\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py\", line 298, in ready\n    send({\"type\": \"ready\", \"pid\": worker, \"sessionId\": session_id, \"processGroupId\": worker})\n  File \"/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldout_wrapper.py\", line 42, in send\n    os.close(3)\nOSError: [Errno 9] Bad file descriptor\n",
+  "eventCount": 12
+}

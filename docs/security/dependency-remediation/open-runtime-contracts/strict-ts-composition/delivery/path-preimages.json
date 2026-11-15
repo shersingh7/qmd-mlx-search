@@ -1,0 +1,87 @@
+{
+  "src/bench-rerank.ts": {
+    "preimage_sha256": "50a6ffd5abe5a6b1d032bf7a5fa1f7b43584680fc9ed002145ad0f498eb1e3a5",
+    "preimage_absent": false,
+    "postimage_sha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade"
+  },
+  "src/llm.ts": {
+    "preimage_sha256": "d103fd98fbe43635856711abe3d18496fe140a7539100107ecb9f6aed0d3fa50",
+    "preimage_absent": false,
+    "postimage_sha256": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d"
+  },
+  "src/llm/mlx-identity.ts": {
+    "preimage_sha256": "ae0141d83f927fe88b3b9d5525aa3976ec7f49f7ae7ebd919fea830743fc0261",
+    "preimage_absent": false,
+    "postimage_sha256": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa"
+  },
+  "src/mcp/server.ts": {
+    "preimage_sha256": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+    "preimage_absent": false,
+    "postimage_sha256": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930"
+  },
+  "src/test-preload.ts": {
+    "preimage_sha256": "52f113b57d8f992eb103ffe11ada08d91c53047c97909dcc652af5c2434415a6",
+    "preimage_absent": false,
+    "postimage_sha256": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6"
+  },
+  "test/bench-rerank-entrypoint.test.ts": {
+    "preimage_sha256": null,
+    "preimage_absent": true,
+    "postimage_sha256": "aa4c8ee3cfcd48afc87488afb4abc31e4375a8a38c5161784c8628ea789042b7"
+  },
+  "test/bench-rerank-lifecycle.test.ts": {
+    "preimage_sha256": null,
+    "preimage_absent": true,
+    "postimage_sha256": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520"
+  },
+  "test/cli.test.ts": {
+    "preimage_sha256": "5e6e6827c60a433078ded86979ee04d8fea1900303c098d174860b51505c75d5",
+    "preimage_absent": false,
+    "postimage_sha256": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e"
+  },
+  "test/eval-bm25.test.ts": {
+    "preimage_sha256": "769d6d989feac349bfba01772b8130248e716f413955af12231a8b65b7436800",
+    "preimage_absent": false,
+    "postimage_sha256": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697"
+  },
+  "test/eval.test.ts": {
+    "preimage_sha256": "bbf9be5ef777c7655038a49006d7f91faac212959628b116795c22566d2b2e9f",
+    "preimage_absent": false,
+    "postimage_sha256": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d"
+  },
+  "test/fixtures/public_eval_dataset.ts": {
+    "preimage_sha256": "4b36e1fbe2fccdcebc0bd1155ba59598713445753a981679c85991bc6229d909",
+    "preimage_absent": false,
+    "postimage_sha256": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29"
+  },
+  "test/llm.test.ts": {
+    "preimage_sha256": "1ac044729ade19fec18f092b9bb6bf96f081e831b8e045adf6404e5d8204e991",
+    "preimage_absent": false,
+    "postimage_sha256": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5"
+  },
+  "test/multi-collection-filter.test.ts": {
+    "preimage_sha256": "bd9524677e7d669ec552eeca3cbd537f5abdbfc31a764a2946088b584fbe074d",
+    "preimage_absent": false,
+    "postimage_sha256": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b"
+  },
+  "test/rrf-trace.test.ts": {
+    "preimage_sha256": "02b55e8776d157cc3c09f6e0fd5a0d07831f19c00725f700fb3fe80edb83e84b",
+    "preimage_absent": false,
+    "postimage_sha256": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c"
+  },
+  "test/store.helpers.unit.test.ts": {
+    "preimage_sha256": "b4a53ea834be92cb2413592c293fab290c1ec6b683c4c9098ebb568d55c390de",
+    "preimage_absent": false,
+    "postimage_sha256": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253"
+  },
+  "test/zod-import.test.ts": {
+    "preimage_sha256": null,
+    "preimage_absent": true,
+    "postimage_sha256": "f890cb6d81bda481c0c823436a922dca50bf5fda6a6d4c91acc6bd5bbba835d1"
+  },
+  "vitest.config.ts": {
+    "preimage_sha256": "e09891084b37bb3b71520848b01830c0f31a7dbcc6935736b79fdadfe7a69cf6",
+    "preimage_absent": false,
+    "postimage_sha256": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67"
+  }
+}

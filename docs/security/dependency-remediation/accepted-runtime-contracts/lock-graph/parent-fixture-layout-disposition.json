@@ -1,0 +1,6 @@
+{
+  "classification": "Parent fixture-layout failure, not product failure",
+  "cause": "Unchanged previous-heldout probe resolves original fixture relative to BASE.parent; first parent root was one directory too high",
+  "original_results_preserved": true,
+  "repair": "New invocation beneath the same dependency-remediation parent; no test/source/assertion edits"
+}

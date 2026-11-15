@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-S",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/qualify_gguf_image.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p",
+  "name": "real-uv-red",
+  "returncode": 2,
+  "seconds": 0.08617924997815862,
+  "stderr": "Native prerequisite probe failed: image probe requires uv 0.11.18\n",
+  "stdout": ""
+}

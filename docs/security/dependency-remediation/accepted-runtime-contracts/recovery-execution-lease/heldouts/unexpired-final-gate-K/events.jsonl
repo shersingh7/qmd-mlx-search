@@ -1,0 +1,18 @@
+{"kind": "source", "pid": 12512, "owner": 12512, "at": 0.085452625, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 12512, "owner": 12512, "at": 0.085838458, "preparedAt": 0.085831916, "deadline": 0.285831916}
+{"kind": "control-read", "pid": 12512, "owner": 12512, "at": 0.086121125, "dataHex": "533230300a", "preExec": false}
+{"kind": "fork-parent", "pid": 12512, "owner": 12512, "at": 0.08739325, "child": 12513, "inheritedDeadline": 0.285831916}
+{"kind": "setpgid", "pid": 12512, "owner": 12512, "at": 0.087890875, "target": 12513, "group": 12513, "currentGroup": 12512, "currentSession": 12512}
+{"kind": "fork-child", "pid": 12513, "owner": 12512, "at": 0.087474166}
+{"kind": "control-read", "pid": 12512, "owner": 12512, "at": 0.088122333, "dataHex": "45", "preExec": false}
+{"kind": "await-cancel", "pid": 12512, "owner": 12512, "at": 0.088221166}
+{"kind": "setpgid", "pid": 12513, "owner": 12512, "at": 0.08821875, "target": 0, "group": 0, "currentGroup": 12513, "currentSession": 12512}
+{"kind": "cancel-readable", "pid": 12512, "owner": 12512, "at": 0.092958708, "readable": true}
+{"kind": "e-forwarded", "pid": 12512, "owner": 12512, "at": 0.093230791}
+{"kind": "child-gate-enter", "pid": 12513, "owner": 12512, "at": 0.093273291, "deadline": 0.285831916, "fd": 3, "inheritable": false, "blocking": false}
+{"kind": "child-gate-result", "pid": 12513, "owner": 12512, "at": 0.093490666, "allowed": false, "remainingMs": 192.34591600000002, "deadline": 0.285831916}
+{"kind": "refusal-enter", "pid": 12513, "owner": 12512, "at": 0.093611833, "target": 12512, "currentGroup": 12513, "currentSession": 12512}
+{"kind": "setpgid", "pid": 12513, "owner": 12512, "at": 0.093731791, "target": 0, "group": 12512, "currentGroup": 12512, "currentSession": 12512}
+{"kind": "group-signal", "pid": 12513, "owner": 12512, "at": 0.093806666, "group": 12512, "signal": 15, "pinned": true, "currentSession": 12512, "termBlocked": true}
+{"kind": "group-signal", "pid": 12513, "owner": 12512, "at": 0.093937083, "group": 12512, "signal": 19, "pinned": true, "currentSession": 12512, "termBlocked": true}
+{"kind": "waitpid", "pid": 12512, "owner": 12512, "at": 0.117014208, "reaped": 12513, "status": 32000}

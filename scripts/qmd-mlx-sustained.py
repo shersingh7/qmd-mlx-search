@@ -51,6 +51,9 @@ os.environ["HF_DATASETS_OFFLINE"] = "1"
 from scripts.qmd_mlx.sustained import (
     SustainedRunner,
     SustainedRunnerConfig,
+    evaluate_pilot_acceptance,
+    format_metric,
+    validate_benchmark_bounds,
 )
 
 
@@ -97,7 +100,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         "--max-requests",
         type=int,
         default=None,
-        help="Maximum request iterations (defaults to 30 for pilot, 100 for soak)",
+        help="Maximum measured embedding/rejection requests, including concurrent pairs (30 pilot, 100 soak); warmup, baseline and tokenizer probes excluded",
     )
     parser.add_argument(
         "--min-headroom-mb",
@@ -128,7 +131,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--skip-pilot-gate",
         action="store_true",
-        help="Bypass pilot qualification gate check before soak mode (not recommended for unattended runs)",
+        help="Legacy rehearsal-only option; real-model soak may not bypass pilot qualification",
     )
     parser.add_argument(
         "--pilot-report",
@@ -149,10 +152,21 @@ def main(argv: Optional[list[str]] = None) -> int:
     # Validate mode and bounds
     mode = args.mode
     default_timeout = 120.0 if mode == "pilot" else 180.0
-    timeout_s = min(float(args.timeout_s or default_timeout), 180.0)
+    timeout_s = default_timeout if args.timeout_s is None else args.timeout_s
 
     default_requests = 30 if mode == "pilot" else 100
-    max_requests = min(int(args.max_requests or default_requests), 100)
+    max_requests = default_requests if args.max_requests is None else args.max_requests
+    try:
+        validate_benchmark_bounds(mode, timeout_s, max_requests, args.min_headroom_mb)
+    except ValueError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 2
+    if args.rehearsal and args.real_model:
+        print("Error: --rehearsal and --real-model are mutually exclusive.", file=sys.stderr)
+        return 2
+    if mode == "soak" and args.real_model and args.skip_pilot_gate:
+        print("Error: A real-model soak cannot bypass the strict pilot qualification gate.", file=sys.stderr)
+        return 2
 
     resolved_model_path = os.path.expanduser(args.model_path) if args.model_path else None
     if not args.rehearsal and not args.real_model and not args.dry_run:
@@ -173,20 +187,21 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not os.path.exists(pilot_path):
             print(
                 f"Error: Pilot qualification report '{pilot_path}' not found. "
-                f"Run and verify pilot qualification before escalating to soak mode, "
-                f"or pass --skip-pilot-gate to override.",
+                f"Run and verify pilot qualification before escalating to soak mode.",
                 file=sys.stderr,
             )
             return 2
         try:
             with open(pilot_path, "r", encoding="utf-8") as pf:
                 pilot_data = json.load(pf)
-            qual = pilot_data.get("qualification_evaluation", {})
+            qual = evaluate_pilot_acceptance(pilot_data, SustainedRunnerConfig(
+                model_path=resolved_model_path, min_headroom_mb=args.min_headroom_mb,
+            ))
             if qual.get("overall_status") != "passed":
                 print(
                     f"Error: Pilot qualification '{pilot_path}' recorded status '{qual.get('overall_status', 'failed')}'. "
                     f"Failure reasons: {qual.get('failure_reasons')}. "
-                    f"Refusing to escalate to soak mode without a passing pilot. Pass --skip-pilot-gate to override.",
+                    f"Refusing to escalate to soak mode without a passing pilot.",
                     file=sys.stderr,
                 )
                 return 2
@@ -215,7 +230,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     exit_code = 0
     try:
         report = runner.run()
-        exit_code = 0 if report.get("status") in ("passed", "dry_run_completed") else 1
+        exit_code = 0 if report.get("status") in ("passed", "dry_run_completed", "rehearsal_completed") else 1
     except Exception as e:
         exit_code = 1
         report = getattr(runner, "last_report", None)
@@ -251,15 +266,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(f"Endpoints:          Inference http://{config.host}:{config.port} | Control http://{config.host}:{config.control_port}")
         
         pre = report.get("preflight", {})
-        print(f"Preflight Headroom: {pre.get('headroom_mb', 0):.1f} MB (min required: {config.min_headroom_mb:.1f} MB)")
+        print(f"Preflight Headroom: {format_metric(pre.get('headroom_mb'))} MB (min required: {config.min_headroom_mb:.1f} MB)")
 
         cold = report.get("cold_startup", {})
         if cold:
-            print(f"Cold Startup Time:  {cold.get('cold_startup_elapsed_s', 0):.3f}s")
+            print(f"Cold Startup Time:  {format_metric(cold.get('cold_startup_elapsed_s'), 3)}s")
 
         warm = report.get("warmup", {})
         if warm:
-            print(f"GPU Warmup:         {warm.get('warmup_elapsed_ms', 0):.2f}ms (excluded from metrics)")
+            print(f"GPU Warmup:         {format_metric(warm.get('warmup_elapsed_ms'), 2)}ms (excluded from metrics)")
 
         summary = report.get("metrics_summary", {})
         if summary:
@@ -267,8 +282,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"  Total Measured Requests:     {summary.get('total_measured_requests', 0)} / {config.max_requests}")
             print(f"  Successful Embed Requests:   {summary.get('successful_embedding_requests', 0)}")
             print(f"  Expected Rejections (400):   {summary.get('rejected_boundary_requests', 0)}")
-            print(f"  Successful Embedded Tokens:  {summary.get('total_successful_embedded_tokens', 0)}")
-            print(f"  True Token Throughput Rate:  {summary.get('overall_effective_tokens_per_sec', 0):.1f} tokens/s")
+            print(f"  Successful Embedded Tokens:  {summary.get('total_successful_embedded_tokens') if summary.get('total_successful_embedded_tokens') is not None else 'unavailable'}")
+            print(f"  Tokenizer Token Throughput:  {format_metric(summary.get('overall_effective_tokens_per_sec'))} tokens/s")
+            print(f"  Separate Word Throughput:   {format_metric(summary.get('overall_effective_words_per_sec'))} words/s")
+            print(f"  Throughput Denominator:     {summary.get('throughput_denominator', 'unavailable')}")
             print(f"  Partial Run Flag:            {summary.get('partial_run', False)}")
 
             wall = summary.get("cumulative_wall_accounting", {})
@@ -310,8 +327,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         mem = report.get("metal_memory_telemetry", {})
         if mem:
             print(f"\nMetal Unified Memory Telemetry:")
-            print(f"  Peak Active Metal:           {mem.get('peak_active_mb', 0):.1f} MB")
-            print(f"  Active Delta:                {mem.get('delta_active_mb', 0):.1f} MB")
+            print(f"  Measurement Kind:            {mem.get('measurement_kind', 'unavailable')}")
+            print(f"  Peak Active Metal:           {format_metric(mem.get('peak_active_mb'))} MB")
+            print(f"  Active Delta:                {format_metric(mem.get('delta_active_mb'))} MB")
             stab = mem.get("provisional_stability_assessment", {})
             if stab:
                 print(f"  Stability Assessment:        {stab.get('verdict')} (Swap Growth: {stab.get('swap_growth_mb')} MB, RSS Growth: {stab.get('rss_growth_mb')} MB)")

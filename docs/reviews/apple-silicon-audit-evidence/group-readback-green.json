@@ -1,0 +1,20 @@
+{
+  "label": "group-readback-green",
+  "command": [
+    "/Users/shersingh/github/qmd-mlx-search/.venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python/test_process_ownership_quality.py",
+    "test/python/test_watchdog_cli_cleanup.py",
+    "test/python/test_audit_supervision.py",
+    "test/python/test_mlx_watchdog.py",
+    "-q",
+    "-W",
+    "error::pytest.PytestUnraisableExceptionWarning"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 17.993262750000003,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-green.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-green-yb3rohz1"
+}

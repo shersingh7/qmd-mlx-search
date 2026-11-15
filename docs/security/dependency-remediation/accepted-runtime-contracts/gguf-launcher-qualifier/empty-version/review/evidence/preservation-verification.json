@@ -1,0 +1,23 @@
+{
+  "all_unchanged": true,
+  "baseline_source_count": 42,
+  "candidate_replay_source_count": 43,
+  "group_counts": {
+    "parent-artifacts": 11,
+    "parent-baseline": 42,
+    "parent-candidate": 43,
+    "prior-artifacts": 4,
+    "prior-source": 42
+  },
+  "helper_imported_or_executed": false,
+  "helper_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+  "original_162_test_file_unchanged": true,
+  "production_AST_unchanged_functions": [
+    "run",
+    "_uv_release",
+    "main"
+  ],
+  "production_all_other_bytes_unchanged": true,
+  "retained_contract_assertions_unchanged_except_source_hash": true,
+  "unchanged_existing_candidate_files": 41
+}

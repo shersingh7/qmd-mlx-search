@@ -1,0 +1,22 @@
+{
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl",
+  "scope": "Independent read-only combined proposal review; NOT live/release acceptance",
+  "files": {
+    "REVIEW.md": "393de0ef536aeb162522070c2904cfdebc339147df8a1d46e184c1232b8ddfcf",
+    "review-result.json": "8b7a4c54ebd4f73791e2474ae248b9980ab4c452658045aa94412870e80b3c3d",
+    "evidence/integrity-final.json": "cf10f8453973df9749f6c490a86f2d7f416d94f2d56629b6f59274281b371640",
+    "entry-integrity.json": "1ec0610d990149fd2b9535a4f7ee5aa7a4d9cffe8e74d0d7e903b7a4f352b2b4",
+    "probes/verify-invariants.mjs": "77dcb4956eaa90f11bd25d68aaeb6be194cb228a40b2709177d0bf9d0f89910c",
+    "probes/independent-heldouts.test.mjs": "ac8a87b10b550731d9378a9bb92c9d96119b604f90463047204f3b20071f1d55",
+    "probes/original-typefix-heldouts.mjs": "8570ef0177043ba8234c88bf54cbb85aaf01e7b9c38f3174730256e221502d40",
+    "probes/public-llm-heldout.mjs": "e171bdc4c80a060a9b2d5f18c9a3b89692d11366b3a5da42bf6be69655185626",
+    "exact-body-lifecycle.test.mjs": "db28f2ae1e716f5579e871ca99e63e6aed910daf1a3f41cbd0540f57dbfdf811",
+    "evidence/node-root-noemit.json": "73e50971d4bff774311661b3ff222ad3f3054ef069b50b7f4a4b5c699958e1c8",
+    "evidence/bun-root-noemit.json": "356b6042da224eee3ffb6aeff712c1b916bfc6208f4aa1387117cc21b04c5103",
+    "evidence/commit-authentication.json": "fd1aa9937ab6f8ce8d4b4886e26c923d9f3a9a192352f1cab2d7a9e8ccc48a06"
+  },
+  "rootCompilerExitCodes": {
+    "node": 0,
+    "bun": 0
+  }
+}

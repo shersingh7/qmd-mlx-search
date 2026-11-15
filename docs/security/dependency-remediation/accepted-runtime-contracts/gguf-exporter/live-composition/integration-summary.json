@@ -1,0 +1,187 @@
+{
+  "sourcePathsApplied": 10,
+  "allReviewedPostimagesMatched": true,
+  "pytest": {
+    "tests": 372,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "deselectedNumericalPeftCases": 6,
+  "caseGroups": {
+    "tests.test_finetune_correctness": 31,
+    "tests.test_gguf_toolchain": 74,
+    "tests.test_gguf_structure": 78,
+    "tests.test_locked_job_submission": 162,
+    "tests.test_qualify_empty_version": 27
+  },
+  "realSourceCaseNames": [
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/convert_gguf.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train_unsloth.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/convert_gguf.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train_unsloth.py]"
+  ],
+  "graphs": 16,
+  "locksUnchanged": true,
+  "baselineAlertsChecked": 262,
+  "retainedAffectedAlerts": 0,
+  "graphInstances": 1772,
+  "newOnlineScan": false,
+  "defaultBranchAlertsClosed": false,
+  "nativeLinuxImageExecuted": false,
+  "scope": "Current accepted GGUF/launcher composition verified locally; model numerical cases deliberately not rerun, no native conversion/image/training/GPU/cloud qualification",
+  "realSourceCaseCount": 6,
+  "aggregationCorrection": "Initial substring real_source matched no names; actual two source-qualified parametrized methods yield6executed cases. Corrected readback only; original372-pass run retained, not rerun.",
+  "actualPreimageIntegration": {
+    "changedPaths": [
+      "finetune/LOCKED-JOBS.md",
+      "finetune/convert_gguf.py",
+      "finetune/gguf_toolchain.py",
+      "finetune/tests/test_finetune_correctness.py",
+      "finetune/tests/test_gguf_structure.py",
+      "finetune/tests/test_gguf_toolchain.py",
+      "finetune/tests/test_locked_job_submission.py",
+      "finetune/tools/submit_locked_job.py",
+      "finetune/train.py",
+      "finetune/train_unsloth.py"
+    ],
+    "actualChanges": 10,
+    "unchangedBaselinePaths": 248,
+    "runnerHeadersPreserved": true,
+    "numericalPeftTestAstPreserved": true,
+    "allPostimagesMatchIndependentAcceptance": true,
+    "linuxImageExecuted": false,
+    "fullReleaseAccepted": false
+  },
+  "remainingGates": [
+    "WorkflowS1-S3 repair and independent reacceptance",
+    "AcceptedTS19composition plus preservationreview",
+    "Combined final suites/build/package/security/exactheadCI",
+    "ActualnativeLinuximage andbothMacCIartifacts",
+    "Merge/defaultbranchalertreadback"
+  ],
+  "archivedFiles": {
+    "candidate.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/candidate.patch",
+      "sourceSha256": "b2ec90e1053250e3cb3cd759f5cc8e10fc42ba51a8198e6300948126cfb738c8",
+      "archivedSha256": "257240c7ff696f4b5297584bf1520e2c2ec164e6b9710f22e41c1be75e054850",
+      "encoding": "gzip"
+    },
+    "composition.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/composition.json",
+      "sourceSha256": "0ecd52b5a219c7de1a4b21d94a46691e2b5f88bcae6c8c1dab6ec7fe9e28f28b",
+      "archivedSha256": "0ecd52b5a219c7de1a4b21d94a46691e2b5f88bcae6c8c1dab6ec7fe9e28f28b",
+      "encoding": "identity"
+    },
+    "evidence/graph-checks.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/evidence/graph-checks.json",
+      "sourceSha256": "4a67a5306282a7ac026f0878cbdd5e96c33d1d3586cffacc4850c5da8125a5e7",
+      "archivedSha256": "4a67a5306282a7ac026f0878cbdd5e96c33d1d3586cffacc4850c5da8125a5e7",
+      "encoding": "identity"
+    },
+    "evidence/graph-final.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/evidence/graph-final.json",
+      "sourceSha256": "00e42faafffdbdaae4b4abc472af226e1e4e432bf1f999e7212c3ab39c47f570",
+      "archivedSha256": "00e42faafffdbdaae4b4abc472af226e1e4e432bf1f999e7212c3ab39c47f570",
+      "encoding": "identity"
+    },
+    "evidence/graph-project-explicit-python.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/evidence/graph-project-explicit-python.json",
+      "sourceSha256": "039eb5da6521bf3badb0c953f52e934c61dbe9f39e9e8718ca3c0ff619e9b79f",
+      "archivedSha256": "039eb5da6521bf3badb0c953f52e934c61dbe9f39e9e8718ca3c0ff619e9b79f",
+      "encoding": "identity"
+    },
+    "evidence/portable-and-closures.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/evidence/portable-and-closures.xml",
+      "sourceSha256": "b6d00b9722ff013a70c4118024b0c4e30ada5a7430682467e1015e3af68a4e85",
+      "archivedSha256": "b6d00b9722ff013a70c4118024b0c4e30ada5a7430682467e1015e3af68a4e85",
+      "encoding": "identity"
+    },
+    "evidence/security-baseline.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/evidence/security-baseline.json",
+      "sourceSha256": "72ae8b2c71e73e57831c014180722f58f3906d06fc7e26762553555943f4fc79",
+      "archivedSha256": "4b3ed56195115d866c0c09c45d5459cfaa36191eb1db78bb829519c1b44ce67b",
+      "encoding": "gzip"
+    },
+    "integrated-source/finetune/LOCKED-JOBS.md": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/LOCKED-JOBS.md",
+      "sourceSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "archivedSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/convert_gguf.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/convert_gguf.py",
+      "sourceSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "archivedSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/gguf_toolchain.py",
+      "sourceSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "archivedSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/tests/test_finetune_correctness.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_finetune_correctness.py",
+      "sourceSha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "archivedSha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/tests/test_gguf_structure.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_gguf_structure.py",
+      "sourceSha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "archivedSha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/tests/test_gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_gguf_toolchain.py",
+      "sourceSha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "archivedSha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/tests/test_locked_job_submission.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/tests/test_locked_job_submission.py",
+      "sourceSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "archivedSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/tools/submit_locked_job.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/tools/submit_locked_job.py",
+      "sourceSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "archivedSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/train.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/train.py",
+      "sourceSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "archivedSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "encoding": "identity"
+    },
+    "integrated-source/finetune/train_unsloth.py.txt": {
+      "source": "/Users/shersingh/github/qmd-mlx-search/finetune/train_unsloth.py",
+      "sourceSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "archivedSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "encoding": "identity"
+    },
+    "integration-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/integration-receipt.json",
+      "sourceSha256": "ad44ccb390f21d6070c30e79fb1494cd9c2e679a5166f8c4c0eb8a5959de1e0f",
+      "archivedSha256": "ad44ccb390f21d6070c30e79fb1494cd9c2e679a5166f8c4c0eb8a5959de1e0f",
+      "encoding": "identity"
+    },
+    "verified-integration-final.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/verified-integration-final.json",
+      "sourceSha256": "88fc60a2c14737237f9393b5cdae461ab3b404d01b56e4088daf583f10204042",
+      "archivedSha256": "88fc60a2c14737237f9393b5cdae461ab3b404d01b56e4088daf583f10204042",
+      "encoding": "identity"
+    },
+    "verified-integration.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5/gguf-composition/verified-integration.json",
+      "sourceSha256": "692a00b616b9ab01eb72258222262c5b2c4246cbdfb75716fdd7a95a84941207",
+      "archivedSha256": "692a00b616b9ab01eb72258222262c5b2c4246cbdfb75716fdd7a95a84941207",
+      "encoding": "identity"
+    }
+  }
+}

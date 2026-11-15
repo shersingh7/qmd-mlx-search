@@ -1,0 +1,22 @@
+"""Bounded SYNTHETIC lifecycle fixture: no CLI, network, compiler or app work."""
+from pathlib import Path
+import json
+import os
+import signal
+import sys
+import time
+
+root = Path(sys.argv[1])
+leader_pid = int(sys.argv[2])
+signal.signal(signal.SIGTERM, signal.SIG_IGN)
+started = time.monotonic()
+(root / 'descendant-ready.json').write_text(json.dumps({
+    'synthetic': True, 'pid': os.getpid(), 'leader_pid': leader_pid,
+    'pgid': os.getpgrp(), 'same_group_as_owned_popen': os.getpgrp() == leader_pid,
+    'started_monotonic': started, 'bounded_seconds': 2.0,
+}) + '\n')
+time.sleep(2.0)
+(root / 'descendant-late-side-effect.json').write_text(json.dumps({
+    'synthetic': True, 'pid': os.getpid(), 'completed_monotonic': time.monotonic(),
+    'effect': 'only this owned fixture JSON file; no external execution',
+}) + '\n')

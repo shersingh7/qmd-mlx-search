@@ -1,0 +1,103 @@
+from pathlib import Path
+import json, hashlib, stat, os, collections
+R=Path(__file__).resolve().parent
+S=R.parent
+A=S/'qmd-entrypoint-fix-r8j5vfbp';B=S/'qmd-bun-zod-diagnosis-g5buabqa'
+def load(p):return json.loads(Path(p).read_text())
+def digest(p):
+    h=hashlib.sha256()
+    with Path(p).open('rb') as f:
+        for x in iter(lambda:f.read(1048576),b''):h.update(x)
+    return h.hexdigest()
+def save(p,d):
+    with Path(p).open('x') as f:json.dump(d,f,indent=2);f.write('\n')
+def item(p):
+    p=Path(p);s=p.lstat()
+    if stat.S_ISLNK(s.st_mode):return {'kind':'link','target':os.readlink(p),'mtime_ns':s.st_mtime_ns}
+    assert stat.S_ISREG(s.st_mode),str(p)
+    return {'kind':'file','size':s.st_size,'mtime_ns':s.st_mtime_ns,'sha256':digest(p)}
+def verify(records):
+    failures=[]
+    for name,expected in records.items():
+        expected=dict(expected)
+        if 'mtimeNs' in expected:expected['mtime_ns']=expected.pop('mtimeNs')
+        try:
+            actual=item(name)
+            for k,v in expected.items():
+                if actual.get(k)!=v:failures.append({'path':name,'key':k,'before':v,'after':actual.get(k)})
+        except Exception as e:failures.append({'path':name,'error':repr(e)})
+    return failures
+binding=load(R/'source-binding.json')
+assert all(digest(R/'mirror'/n)==sha for n,sha in binding['source_sha256'].items())
+assert all(digest(R/'baseline'/n)==sha for n,sha in binding['base_sources'].items())
+for n in ['test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts']:
+    assert digest(R/'mirror'/n)==digest(R/'baseline'/n)
+for n,sha in binding['base_sources'].items():
+    if n not in ['src/bench-rerank.ts','vitest.config.ts']:assert digest(R/'mirror'/n)==sha,n
+packageIdentities={}
+for name,expected in [('zod','4.6.7'),('@modelcontextprotocol/sdk','1.32.2'),('vitest','4.1.12'),('vite','7.3.8'),('typescript','5.9.3'),('node-llama-cpp','3.22.3')]:
+    directory=(R/'mirror/node_modules'/name).resolve(strict=True);manifest=directory/'package.json';version=load(manifest)['version'];assert version==expected,(name,version)
+    packageIdentities[name]={'directory':str(directory),'version':version,'manifest_sha256':digest(manifest)}
+relevant=['zod/index.js','zod/index.cjs','vitest/dist/module-evaluator.js','vitest/dist/chunks/cli-api.B0Pz1_R7.js','@modelcontextprotocol/sdk/dist/esm/server/mcp.js','@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js','@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js','@modelcontextprotocol/sdk/dist/esm/inMemory.js']
+packageHashes={n:digest(R/'mirror/node_modules'/n) for n in relevant}
+save(R/'evidence/actual-dependencies.json',{'packages':packageIdentities,'relevant_entry_sha256':packageHashes,'runtime_binaries':{h:{'path':p,'realpath':str(Path(p).resolve()),'sha256':digest(p)} for h,p in [('node','/Users/shersingh/.hermes/node/bin/node'),('bun','/Users/shersingh/.bun/bin/bun')]}})
+results={}
+for host in ['node','bun']:
+    labels=['baseline-guard','baseline-zod-phase5','composed-focused','sdk-inlined-zod','zod-prefix-scope']
+    results[host]={}
+    for label in labels:
+        data=load(R/'evidence'/f'{host}-{label}-results.json')
+        counts=collections.Counter(a['status'] for t in data['testResults'] for a in t['assertionResults'])
+        assert sum(counts.values())==data['numTotalTests'],(host,label,counts,data['numTotalTests'])
+        assert counts['passed']==data['numPassedTests']
+        assert counts['failed']==data['numFailedTests']
+        assert counts['pending']+counts['skipped']==data['numPendingTests']
+        files=[{'file':t['name'],'status':t['status'],'counts':dict(collections.Counter(a['status'] for a in t['assertionResults'])),'message':t.get('message','')} for t in data['testResults']]
+        results[host][label]={'file_count':len(data['testResults']),'counts':dict(counts),'success':data['success'],'failed_files':sum(t['status']=='failed' for t in data['testResults']),'files':files}
+    c=results[host]['composed-focused'];assert c['file_count']==13 and c['counts']==({'passed':246,'skipped':40} if host=='node' else {'passed':224,'skipped':40}) and c['success']
+    for label in ['sdk-inlined-zod','zod-prefix-scope']:assert results[host][label]['success']
+    guards=[json.loads(l) for l in (R/'evidence'/f'{host}-composed-focused-entrypoint.jsonl').read_text().splitlines()]
+    cases=[x for x in guards if x['kind']=='case'];assert len(cases)==(44 if host=='node' else 22)
+    assert all(x['status']==0 and x['signal'] is None and not x.get('error') and x['stderr']=='' for x in cases)
+    grouped={}
+    for variant,mode in sorted({(x['variant'],x['mode']) for x in cases}):
+        subset=[x for x in cases if (x['variant'],x['mode'])==(variant,mode)]
+        mains=[x for x in subset if any(e=='llama:create' for e in x['events'])]
+        imports=[x for x in subset if not any(e=='llama:create' for e in x['events'])]
+        assert len(mains)==6 and len(imports)==5
+        for x in subset:
+            runtime=[e for e in x['events'] if isinstance(e,dict) and e.get('kind')=='runtime'];assert len(runtime)==1
+            if variant=='native':assert runtime[0]['argvReads']==0
+        grouped[variant+'/'+mode]={'mains_launched_once':len(mains),'imports_inert':len(imports),'scenarios':[x['scenario'] for x in subset]}
+    results[host]['guard_matrix']={'case_count':len(cases),'groups':grouped,'source_sha256':guards[0]['sourceSha256'],'actual_host':guards[0]['executable'],'versions':guards[0]['versions'],'complete_emitted_body_identity':guards[0]['exactExecutableBodiesVerified']}
+    source=load(R/'logs'/f'{host}-source-proof-final.stdout.log')
+    assert source['compilerRoots']['base']==147 and source['compilerRoots']['composed']==149 and not source['compilerRoots']['removed']
+    assert source['nativeBooleanGuardControls']=={'checks':2,'argvReads':0,'fsCalls':0,'urlCalls':0,'exactEmittedCondition':True}
+    results[host]['source_proof']=source
+    raw=load(R/'logs'/f'{host}-real-evaluator.stdout.log')
+    assert raw['native']['z']=='object' and raw['noInteropIdentity'] is True
+    assert raw['defaultEvaluator']['z']==('undefined' if host=='bun' else 'object')
+    results[host]['evaluator']={'native_named_z':raw['native']['z'],'default_evaluator_named_z':raw['defaultEvaluator']['z'],'no_interop_identity':raw['noInteropIdentity'],'default_namespace_marker_membership':raw['nativeDefault']['hasEsModule'],'default_namespace_marker_own':raw['nativeDefault']['ownEsModule'],'actual_host':raw['execPath'],'resolved_zod':raw['id'],'exit_code':load(R/'evidence'/f'{host}-real-evaluator.json')['exit_code']}
+    sdk=[json.loads(l) for l in (R/'evidence'/f'{host}-sdk-inlined-zod-hosts.jsonl').read_text().splitlines()]
+    boundary=[x for x in sdk if x.get('case')=='instance-boundary'];assert len(boundary)==1
+    assert boundary[0]['actualExternalSdkIdentity'] and boundary[0]['sameZodFactory']==(host=='node') and boundary[0]['sameZodClass']==(host=='node')
+    tools=[x for x in sdk if x.get('case')=='actual-sdk-memory-tool'];assert len(tools)==2
+    assert all(x['toolCalls']==10 and x['positiveInputs']==2 and x['negativeInputs']==7 and x['negativeOutputs']==1 and not x['boundaryAttempts'] and x['transportClosed'] for x in tools)
+    results[host]['sdk_interaction']={'test_checks':3,'external_sdk_identity_verified':True,'same_inlined_and_external_zod_instance':host=='node','schema_forms':[x['schemaForm'] for x in tools],'tool_calls':sum(x['toolCalls'] for x in tools),'positive_inputs':sum(x['positiveInputs'] for x in tools),'negative_inputs':sum(x['negativeInputs'] for x in tools),'negative_outputs':sum(x['negativeOutputs'] for x in tools),'socket_network_native_attempts':sum(len(x['boundaryAttempts']) for x in tools),'scope':'Real SDK public registration/listTools/callTool/input and output validation over InMemoryTransport; not QMD request/server/backend qualification'}
+    config=load(R/'logs'/f'{host}-effective-config.stdout.log');merge=load(R/'logs'/f'{host}-config-default-merge.stdout.log')
+    results[host]['config_semantics']={'baseline_and_candidate':config['records'],'real_cjs_positive_negative':config['realCjs'],'ssr_noexternal_merge':merge['observations'],'string_prefix_matching':merge['zodPrefixScope']}
+    hosts=[json.loads(l) for l in (R/'evidence'/f'{host}-composed-focused-hosts.jsonl').read_text().splitlines()]
+    assert len(hosts)==13 and all(x['execPath']==('/Users/shersingh/.hermes/node/bin/node' if host=='node' else '/Users/shersingh/.bun/bin/bun') for x in hosts)
+    assert all(('bun' in x['versions'])==(host=='bun') for x in hosts)
+    results[host]['strict_root_exit_code']=load(R/'evidence'/f'{host}-root-noemit.json')['exit_code'];assert results[host]['strict_root_exit_code']==0
+# Re-check the exact historical manifests as well as the expanded input snapshot.
+oldA=load(A/'evidence/protection-entry.json')['protected'];oldB=load(B/'evidence/preservation-before.json');own=load(R/'evidence/protected-before.json')
+a=verify(oldA);b=verify(oldB);c=verify(own)
+preservation={'guard_original_count':len(oldA),'zod_original_count':len(oldB),'expanded_input_count':len(own),'guard_mismatches':a,'zod_mismatches':b,'expanded_mismatches':c,'all_candidate_source_sha256_unchanged':True,'all_245_parent_source_bytes_unchanged':True,'all_other_base_source_and_generated_bytes_unchanged':True,'historical_cache_entries':load(B/'evidence/preservation-final.json')['historicalCacheFiles'],'source_mcp_sha256':digest(R/'mirror/src/mcp/server.ts'),'own_node_modules_containers':all(not (R/p/'node_modules').is_symlink() for p in ['mirror','baseline','sdk-probe']),'root_node_modules_owned':not (R/'node_modules').is_symlink(),'no_live_recovery_execution_or_writes':True}
+save(R/'evidence/preservation-final.json',preservation)
+assert len(oldA)==2787 and len(oldB)==3516 and len(own)==5532 and not a and not b and not c
+finding={'id':'Q1','severity':'minor/P3','file':'vitest.config.ts','line':13,'title':'Vitest string matcher is prefix-based, not package-exclusive','detail':'Installed Vitest 4.1.12 matchPattern uses id.includes(join(moduleDirectory, pattern)). inline:["zod"] also transforms directly imported zod-to-json-schema 3.25.2 under Bun. Fresh real converter identity and conversion/non-coercion controls pass, SDK remains external, and no validation regression was found. This is a test-harness breadth/maintenance caveat, not a native production defect. Use an explicitly package-boundary RegExp if literal Zod-only scope is required. No candidate change made.','evidence':['logs/bun-config-default-merge.stdout.log','evidence/bun-zod-prefix-scope-hosts.jsonl','evidence/bun-zod-prefix-scope-results.json']}
+result={'spec':'PASS for exact frozen four-file delta composed with the reviewed 19-path source proposal; not live integration or release acceptance','quality':'APPROVE_WITH_MINOR_FINDING','resolved_prior_finding':'Legacy fallback symlink finding resolved on current installed Node/Bun branches, with no older-Node binary qualification','findings':[finding],'source_binding':'source-binding.json','four_file_sha256':binding['four_file_sha256'],'integration_source_count':len(binding['integration_paths']),'integration_sha256':binding['integration_sha256'],'source_inventory_count':len(binding['source_sha256']),'results':results,'preservation':'evidence/preservation-final.json','actual_dependencies':'evidence/actual-dependencies.json','issues':[{'classification':'own-harness-only','receipt':'evidence/node-source-proof.json','correction':'Restored only owned omitted generated baseline dist to source replay for root-inventory comparison; candidate compiler roots never removed or edited; final source proof both hosts passed.'}],'remaining_gates':['Parent-only acceptance/integration/replay/durable archive','Current live recovery owner rebase and acceptance; old frozen prefix must never replace live implementation','Canonical full package test/build, metadata/lock/real-declaration/audit/Nix integration','Installed native library/model/GPU/inference/disposal behavior and CI','Older Node binary qualification','Full native Bun suite/HTTP qualification (HTTP remains documented Node-only)'],'no_model_or_network_or_live_operations':True}
+save(R/'review-result.json',result)
+save(R/'evidence/count-summary.json',{host:{'focused':results[host]['composed-focused']['counts'],'focused_files':13,'guard_cases':results[host]['guard_matrix']['case_count'],'sdk_checks':3,'sdk_tool_calls':results[host]['sdk_interaction']['tool_calls'],'sdk_positive_inputs':results[host]['sdk_interaction']['positive_inputs'],'sdk_negative_inputs':results[host]['sdk_interaction']['negative_inputs'],'sdk_negative_outputs':results[host]['sdk_interaction']['negative_outputs'],'strict_root_exit_code':results[host]['strict_root_exit_code']} for host in results})
+print(json.dumps({'spec':result['spec'],'quality':result['quality'],'finding':finding,'counts':load(R/'evidence/count-summary.json'),'protected_original_counts':[len(oldA),len(oldB)],'expanded_protection':len(own),'mismatches':len(a)+len(b)+len(c),'four_file_sha256':binding['four_file_sha256'],'integration_count':len(binding['integration_paths'])},indent=2))

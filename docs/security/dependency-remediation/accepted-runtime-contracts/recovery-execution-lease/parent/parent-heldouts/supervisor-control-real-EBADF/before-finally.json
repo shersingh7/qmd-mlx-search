@@ -1,0 +1,75 @@
+{
+  "name": "supervisor-control-real-EBADF",
+  "guardFired": false,
+  "elapsedMs": 168.48041699999783,
+  "exitCode": 0,
+  "supervisorPid": 38133,
+  "supervisorAbsent": true,
+  "workers": [
+    38134
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38134
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38133,
+      "sessionId": 38133
+    },
+    {
+      "type": "ready",
+      "pid": 38134,
+      "sessionId": 38133,
+      "processGroupId": 38134
+    },
+    {
+      "type": "exit",
+      "exitCode": null,
+      "signal": "SIGKILL"
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        38134
+      ],
+      "timedOut": false,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery pre-execution control channel failed: [Errno 9] Bad file descriptor",
+        "Recovery runner control channel closed or cancelled before execution",
+        "Recovery runner control channel closed before teardown",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 115.87599999999654
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 115.88583299999655
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 117.89741699999823
+    }
+  ],
+  "stderr": "",
+  "eventCount": 12
+}

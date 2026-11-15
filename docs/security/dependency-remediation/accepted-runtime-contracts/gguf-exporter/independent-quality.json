@@ -1,0 +1,387 @@
+{
+  "SPEC": "PASS",
+  "QUALITY": "PASS",
+  "scope": "Whole composed seven-file code proposal only; parent integration/release gates remain",
+  "blocking_findings": [],
+  "actionable_nonblocking_findings": [],
+  "original_helper_definitions_unchanged_except": [
+    "validate_gguf",
+    "conversion_flags"
+  ],
+  "unchanged_helper_definitions": [
+    "check_prerequisites",
+    "run_checked",
+    "Toolchain",
+    "prepare_toolchain",
+    "convert_model"
+  ],
+  "callers_unchanged_outside_cold_export_delta": {
+    "finetune/train.py": {
+      "changed_top_level_definitions": [
+        "cmd_sft",
+        "export_gguf"
+      ],
+      "unchanged_definitions": [
+        "TimedSaveCallback",
+        "build_sft_config",
+        "cmd_grpo",
+        "main",
+        "run_eval"
+      ]
+    },
+    "finetune/train_unsloth.py": {
+      "changed_top_level_definitions": [
+        "main"
+      ],
+      "unchanged_definitions": [
+        "export_gguf_artifacts"
+      ]
+    },
+    "finetune/convert_gguf.py": {
+      "changed_top_level_definitions": [
+        "main",
+        "run_cmd"
+      ],
+      "unchanged_definitions": []
+    }
+  },
+  "numerical_test_body_unchanged": true,
+  "stock_evidence_files_checked": 93,
+  "old_native_converter_commands_verified": [
+    {
+      "context": "native-receipt.json/commands/0",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "init",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/1",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp",
+        "fetch",
+        "--depth",
+        "1",
+        "https://github.com/ggml-org/llama.cpp.git",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/2",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp",
+        "checkout",
+        "--detach",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/3",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp",
+        "rev-parse",
+        "HEAD"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/4",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp/convert_hf_to_gguf.py",
+        "--help"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/5",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/cmake-venv/bin/cmake",
+        "-B",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/build",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_C_COMPILER=/usr/bin/cc",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/c++",
+        "-DCMAKE_MAKE_PROGRAM=/usr/bin/make",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DGGML_CUDA=OFF",
+        "-DGGML_METAL=OFF",
+        "-DGGML_OPENMP=OFF",
+        "-DLLAMA_OPENSSL=OFF",
+        "-DLLAMA_BUILD_TESTS=OFF",
+        "-DLLAMA_BUILD_EXAMPLES=OFF",
+        "-DLLAMA_BUILD_SERVER=OFF",
+        "-DLLAMA_BUILD_APP=OFF",
+        "-DLLAMA_BUILD_UI=OFF",
+        "-DLLAMA_CONNECT=OFF"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/6",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/cmake-venv/bin/cmake",
+        "--build",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/build",
+        "--target",
+        "llama-quantize",
+        "-j",
+        "2"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/7",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/llama.cpp/convert_hf_to_gguf.py",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/merged",
+        "--outfile",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "--outtype",
+        "f16",
+        "--no-mtp"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/8",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+        "Q4_K_M"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/9",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+        "Q6_K"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "native-receipt.json/commands/10",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/actual-native-stock-tokenizer/.gguf-convert-52n_dc6c/tools/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+        "Q8_0"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/0",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "init",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/1",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp",
+        "fetch",
+        "--depth",
+        "1",
+        "https://github.com/ggml-org/llama.cpp.git",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/2",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp",
+        "checkout",
+        "--detach",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/3",
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp",
+        "rev-parse",
+        "HEAD"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/4",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp/convert_hf_to_gguf.py",
+        "--help"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/5",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/cmake-venv/bin/cmake",
+        "-B",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/build",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_C_COMPILER=/usr/bin/cc",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/c++",
+        "-DCMAKE_MAKE_PROGRAM=/usr/bin/make",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DGGML_CUDA=OFF",
+        "-DGGML_METAL=OFF",
+        "-DGGML_OPENMP=OFF",
+        "-DLLAMA_OPENSSL=OFF",
+        "-DLLAMA_BUILD_TESTS=OFF",
+        "-DLLAMA_BUILD_EXAMPLES=OFF",
+        "-DLLAMA_BUILD_SERVER=OFF",
+        "-DLLAMA_BUILD_APP=OFF",
+        "-DLLAMA_BUILD_UI=OFF",
+        "-DLLAMA_CONNECT=OFF"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/6",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/cmake-venv/bin/cmake",
+        "--build",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/build",
+        "--target",
+        "llama-quantize",
+        "-j",
+        "2"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/7",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/llama.cpp/convert_hf_to_gguf.py",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/merged",
+        "--outfile",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-f16.gguf",
+        "--outtype",
+        "f16",
+        "--no-mtp"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/8",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-q4_k_m.gguf",
+        "Q4_K_M"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/9",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-q6_k.gguf",
+        "Q6_K"
+      ],
+      "returncode": 0
+    },
+    {
+      "context": "standalone-receipt.json/commands/10",
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr/tmp/qmd-gguf-convert-s3463n6a/tools/gguf/RANDOM-Qwen3.5-standalone-q8_0.gguf",
+        "Q8_0"
+      ],
+      "returncode": 0
+    }
+  ],
+  "real_old_artifacts_checked": 7,
+  "protected_input_files_verified": 30,
+  "protected_inputs_changed": 0,
+  "environment_after": {
+    "tree": {
+      "entries": 30765,
+      "sha256": "5eb62fd294bd6de9259f7221975cdec95f4c7d1528298335ce591ce809568856"
+    },
+    "metadata_sha256": "28bd800b953d38a2bc4ec9adee0f940c2a4bc705b47aab645fa2e570e2559dc4"
+  },
+  "environment_unchanged": true,
+  "legacy_adapter_qualification": "Exact zero-status success marker only; 32 previous routing assertions, 15 numerical cases deliberately deselected. No fresh legacy-47 claim.",
+  "approval_limits": [
+    "Not a live-tree replacement. Rebase reviewed deltas only, preserve separately advanced accepted sources/PEP headers.",
+    "Parent must integrate initial locked cmake/protobuf/sentencepiece, all 16 graphs, 3 helper closures, complete native image/CI.",
+    "No fresh changed-helper native compiler/converter/model run, MTP-bearing model quality, Linux image, Hub write or whole-repository acceptance.",
+    "Maintained GGUFReader metadata and tensor byte-range validation is not semantic model completeness, correct quantization numerics or inference quality.",
+    "Existing adapter/tokenizer uploads before native GGUF export intentionally remain; no all-Hub atomic transaction claim.",
+    "No group-atomic guarantee for filesystem rename/upload failures after successful complete validation; requested previous-output preservation applies to processor/validation failures."
+  ],
+  "harness_issues": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/harness-issues.md"
+}

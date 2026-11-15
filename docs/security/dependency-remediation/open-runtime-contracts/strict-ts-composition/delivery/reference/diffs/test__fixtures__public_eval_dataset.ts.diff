@@ -1,0 +1,31 @@
+--- baseline/test/fixtures/public_eval_dataset.ts
++++ accepted19/test/fixtures/public_eval_dataset.ts
+@@ -218,14 +218,15 @@
+     const ranked = rankedDocIdsList[q] || [];
+     const relSet = new Set(relevantDocIdsList[q] || []);
+ 
+-    if (ranked.length > 0 && relSet.has(ranked[0])) hits1++;
++    const first = ranked[0];
++    if (first !== undefined && relSet.has(first)) hits1++;
+     if (ranked.slice(0, 3).some(id => relSet.has(id))) hits3++;
+     if (ranked.slice(0, 5).some(id => relSet.has(id))) hits5++;
+ 
+     // Reciprocal Rank (MRR)
+     let rr = 0;
+-    for (let r = 0; r < ranked.length; r++) {
+-      if (relSet.has(ranked[r])) {
++    for (const [r, id] of ranked.entries()) {
++      if (relSet.has(id)) {
+         rr = 1 / (r + 1);
+         break;
+       }
+@@ -235,7 +236,8 @@
+     // nDCG@k
+     let dcg = 0;
+     for (let i = 0; i < Math.min(ranked.length, k); i++) {
+-      if (relSet.has(ranked[i])) {
++      const id = ranked[i];
++      if (id !== undefined && relSet.has(id)) {
+         dcg += 1.0 / Math.log2(i + 2);
+       }
+     }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="1.632" timestamp="2026-11-13T22:04:57.829605-05:00" hostname="AI-MacBook-Pro.local"><testcase classname="test_probe_contract" name="test_uv_release_contract[bare-control-uv 0.11.18-0]" time="1.077" /><testcase classname="test_probe_contract" name="test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0]" time="0.169"><failure message="AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}&#10;assert 2 == 0&#10; +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\n').returncode">tmp_path = PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/pytest-tmp/red/test_uv_release_contract_upstr0')
+label = 'upstream-without-commit'
+display = 'uv 0.11.18 (x86_64-unknown-linux-musl)', expected = 0
+
+    @pytest.mark.parametrize('label,display,expected', [
+        ('bare-control', 'uv 0.11.18', 0),
+        ('upstream-without-commit', 'uv 0.11.18 (x86_64-unknown-linux-musl)', 0),
+        ('upstream-with-commit', 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 0),
+        ('wrong-release-control', 'uv 0.11.17 (x86_64-unknown-linux-musl)', 2),
+    ])
+    def test_uv_release_contract(tmp_path, label, display, expected):
+        assert hashlib.sha256(PROBE.read_bytes()).hexdigest() == '6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf'
+        uv = tmp_path / 'uv'
+        uv.write_text('#!/bin/sh\nprintf "%s\\n" "' + display + '"\n')
+        uv.chmod(0o700)
+        env = S['environment']('contract-' + label)
+        env['PATH'] = str(tmp_path) + ':' + env['PATH']
+        result = subprocess.run([sys.executable, '-I', '-B', '-S', str(PROBE)], env=env, cwd=tmp_path,
+                                capture_output=True, text=True, timeout=120)
+        receipt = {'label': label, 'synthetic_uv_display': display, 'expected_exit': expected,
+                   'actual_exit': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr,
+                   'scope': 'HOST probe with real compiler/make and synthetic uv --version; NOT image execution'}
+        (S['ROOT'] / 'evidence' / ('contract-' + label + '.json')).write_text(json.dumps(receipt, indent=2, sort_keys=True))
+&gt;       assert result.returncode == expected, receipt
+E       AssertionError: {'label': 'upstream-without-commit', 'synthetic_uv_display': 'uv 0.11.18 (x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\n').returncode
+
+test_probe_contract.py:34: AssertionError</failure></testcase><testcase classname="test_probe_contract" name="test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0]" time="0.195"><failure message="AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}&#10;assert 2 == 0&#10; +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\n').returncode">tmp_path = PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/pytest-tmp/red/test_uv_release_contract_upstr1')
+label = 'upstream-with-commit'
+display = 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)'
+expected = 0
+
+    @pytest.mark.parametrize('label,display,expected', [
+        ('bare-control', 'uv 0.11.18', 0),
+        ('upstream-without-commit', 'uv 0.11.18 (x86_64-unknown-linux-musl)', 0),
+        ('upstream-with-commit', 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 0),
+        ('wrong-release-control', 'uv 0.11.17 (x86_64-unknown-linux-musl)', 2),
+    ])
+    def test_uv_release_contract(tmp_path, label, display, expected):
+        assert hashlib.sha256(PROBE.read_bytes()).hexdigest() == '6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf'
+        uv = tmp_path / 'uv'
+        uv.write_text('#!/bin/sh\nprintf "%s\\n" "' + display + '"\n')
+        uv.chmod(0o700)
+        env = S['environment']('contract-' + label)
+        env['PATH'] = str(tmp_path) + ':' + env['PATH']
+        result = subprocess.run([sys.executable, '-I', '-B', '-S', str(PROBE)], env=env, cwd=tmp_path,
+                                capture_output=True, text=True, timeout=120)
+        receipt = {'label': label, 'synthetic_uv_display': display, 'expected_exit': expected,
+                   'actual_exit': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr,
+                   'scope': 'HOST probe with real compiler/make and synthetic uv --version; NOT image execution'}
+        (S['ROOT'] / 'evidence' / ('contract-' + label + '.json')).write_text(json.dumps(receipt, indent=2, sort_keys=True))
+&gt;       assert result.returncode == expected, receipt
+E       AssertionError: {'label': 'upstream-with-commit', 'synthetic_uv_display': 'uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)', 'expected_exit': 0, 'actual_exit': 2, ...}
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python', '...gguf_image.py'], returncode=2, stdout='', stderr='Native prerequisite probe failed: image probe requires uv 0.11.18\n').returncode
+
+test_probe_contract.py:34: AssertionError</failure></testcase><testcase classname="test_probe_contract" name="test_uv_release_contract[wrong-release-control-uv 0.11.17 (x86_64-unknown-linux-musl)-2]" time="0.158" /></testsuite></testsuites>

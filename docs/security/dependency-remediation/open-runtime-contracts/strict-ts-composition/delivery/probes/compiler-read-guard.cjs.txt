@@ -1,0 +1,40 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { fileURLToPath } = require('node:url');
+const root = process.env.QMD_COMPOSE_ROOT;
+const source = path.resolve(process.cwd());
+const raw = { readFileSync:fs.readFileSync, readFile:fs.readFile, readdirSync:fs.readdirSync, readdir:fs.readdir, realpathSync:fs.realpathSync, appendFileSync:fs.appendFileSync };
+const aliases = JSON.parse(raw.readFileSync(path.join(root,'evidence',path.basename(source)+'-package-aliases.json'),'utf8'));
+const packageReal = Object.values(aliases);
+const inDir = (p, dir) => p === dir || p.startsWith(dir+path.sep);
+const sourceReal = raw.realpathSync(source);
+const evidence = path.join(root,'evidence',process.env.QMD_RUN_LABEL+'-compiler-reads-'+process.pid+'.jsonl');
+const sourceNM = path.join(source,'node_modules');
+function lexicalPackage(p) {
+  return Object.keys(aliases).some(name=>inDir(p,path.join(sourceNM,name))) || packageReal.some(dir=>inDir(p,dir));
+}
+function guard(value, operation) {
+  if (typeof value === 'number') return;
+  const p = path.resolve(value instanceof URL ? fileURLToPath(value) : String(value));
+  let real;
+  try { real = raw.realpathSync(p); } catch (e) { if(e.code==='ENOENT'||e.code==='ENOTDIR') return; throw e; }
+  const lexicalOwned = inDir(p,source) && !inDir(p,sourceNM);
+  const realOwned = inDir(real,sourceReal) && !inDir(real,path.join(sourceReal,'node_modules'));
+  const ownNMContainer = inDir(p,sourceNM) && inDir(real,path.join(sourceReal,'node_modules'));
+  const allowed = (lexicalOwned && realOwned) || ownNMContainer || (lexicalPackage(p) && packageReal.some(dir=>inDir(real,dir))) || (inDir(p,path.join(root,'probes')) && inDir(real,path.join(root,'probes')));
+  raw.appendFileSync(evidence,JSON.stringify({operation,lexical:p,real,allowed})+'\n');
+  if (!allowed) {
+    const e = new Error('COMPOSE_COMPILER_READ_DENIED '+operation+' '+p+' -> '+real);
+    e.code = 'COMPOSE_COMPILER_READ_DENIED';
+    throw e;
+  }
+}
+for (const name of ['readFileSync','readdirSync']) fs[name] = function(value,...args) {guard(value,name);return raw[name].call(this,value,...args);};
+for (const name of ['readFile','readdir']) fs[name] = function(value,...args) {guard(value,name);return raw[name].call(this,value,...args);};
+const fp = fs.promises;
+for (const name of ['readFile','readdir','opendir']) {
+  const original=fp[name];
+  fp[name]=async function(value,...args) {guard(value,'promises.'+name);return original.call(this,value,...args);};
+}
+require('node:module').syncBuiltinESMExports();
+process.on('exit',()=>raw.appendFileSync(evidence,JSON.stringify({kind:'compiler-host',execPath:process.execPath,versions:process.versions,source})+'\n'));

@@ -1,0 +1,86 @@
+name: Accelerate checkpoint security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-checkpoint-security:
+    name: Installed checkpoint security (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    env:
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      HF_DATASETS_OFFLINE: '1'
+      CUDA_VISIBLE_DEVICES: ''
+      ACCELERATE_USE_CPU: 'true'
+      PYTHONDONTWRITEBYTECODE: '1'
+      UV_PYTHON_DOWNLOADS: never
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Create isolated CPU test environment and frozen constraints
+        # Only trusted runner paths enter the shell, never event/PR strings.
+        run: |
+          mkdir -p "$RUNNER_TEMP/qmd-checkpoint-home"
+          printf 'HOME=%s/qmd-checkpoint-home\nTMPDIR=%s\nVENV_PYTHON=%s/qmd-checkpoint-venv/bin/python\n' "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          python -m pip install uv==0.11.18
+          uv venv --python "$(command -v python)" "$RUNNER_TEMP/qmd-checkpoint-venv"
+          uv export --project finetune --frozen --no-hashes --no-emit-project --no-emit-package accelerate --all-groups --output-file "$RUNNER_TEMP/checkpoint-constraints.txt"
+      - name: Install the exact Linux CPU Torch artifact
+        if: runner.os == 'Linux'
+        # Verified official PyTorch CPU index URL; hash is enforced by uv.
+        run: |
+          uv pip install --python "$VENV_PYTHON" --no-deps 'https://download-r2.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=0955c7e3446326293f48af18fad67872fa31dee5a36a87690eb9e5be8b465be3'
+      - name: Install the macOS Torch artifact
+        if: runner.os == 'macOS'
+        run: uv pip install --python "$VENV_PYTHON" -c "$RUNNER_TEMP/checkpoint-constraints.txt" torch==2.15.0
+      - name: Install the controlled wheel and locked fine-tuning test dependencies
+        # Literal commands + repository manifests only; no event payload is executed.
+        run: |
+          python - <<'PY'
+          import os, re, subprocess, tomllib
+          from pathlib import Path
+          project = tomllib.loads(Path('finetune/pyproject.toml').read_text())
+          requirements = list(project['project']['dependencies'])
+          for group in ('dev', 'onnx'):
+              requirements.extend(project['dependency-groups'][group])
+          # Retain the preinstalled CPU Torch instead of making every CUDA-only
+          # transitive node in the universal lock an explicit install request.
+          requirements = [value for value in requirements
+                          if re.split(r'[\[<>=!~;\s]', value, maxsplit=1)[0].lower()
+                          not in {'torch', 'accelerate'}]
+          subprocess.run([
+              'uv', 'pip', 'install', '--python', os.environ['VENV_PYTHON'],
+              '-c', str(Path(os.environ['RUNNER_TEMP']) / 'checkpoint-constraints.txt'),
+              'finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl',
+              *requirements,
+          ], check=True)
+          PY
+          uv pip check --python "$VENV_PYTHON"
+          "$VENV_PYTHON" -c 'import accelerate,torch; assert accelerate.__version__ == "1.15.0+qmd.2"; assert torch.__version__ in {"2.15.0", "2.15.0+cpu"}; assert torch.version.cuda is None; print("CPU-only installed wheel:", accelerate.__version__, torch.__version__)'
+      - name: Test the installed checkpoint and complete fine-tuning API contracts
+        run: |
+          "$VENV_PYTHON" -m pytest -q -p no:cacheprovider finetune/tests --junitxml="$RUNNER_TEMP/accelerate-checkpoint.xml"
+      - name: Retain native platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accelerate-checkpoint-${{ matrix.os }}
+          path: ${{ runner.temp }}/accelerate-checkpoint.xml
+          if-no-files-found: warn

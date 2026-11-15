@@ -1,0 +1,26 @@
+{
+  "applied17": [
+    "src/bench-rerank.ts",
+    "src/llm.ts",
+    "src/llm/mlx-identity.ts",
+    "src/mcp/server.ts",
+    "src/test-preload.ts",
+    "test/bench-rerank-entrypoint.test.ts",
+    "test/bench-rerank-lifecycle.test.ts",
+    "test/cli.test.ts",
+    "test/eval-bm25.test.ts",
+    "test/eval.test.ts",
+    "test/fixtures/public_eval_dataset.ts",
+    "test/llm.test.ts",
+    "test/multi-collection-filter.test.ts",
+    "test/rrf-trace.test.ts",
+    "test/store.helpers.unit.test.ts",
+    "test/zod-import.test.ts",
+    "vitest.config.ts"
+  ],
+  "heldLeasePaths": [
+    "scripts/phase5_e2e_runner.ts",
+    "test/phase5-recovery.test.ts"
+  ],
+  "dependencyEntries": 18642
+}

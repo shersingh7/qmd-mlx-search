@@ -1,0 +1,9 @@
+{
+  "image_update": {
+    "RepoDigests": [
+      "ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+      "example.invalid/other@sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/control-extra-digests/workspace"
+}

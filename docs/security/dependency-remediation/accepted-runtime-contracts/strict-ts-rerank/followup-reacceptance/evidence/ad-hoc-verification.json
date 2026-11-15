@@ -1,0 +1,10 @@
+{
+  "classification": "ad-hoc focused verification, not canonical/full-suite acceptance",
+  "temporary_script": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/hermes-verify-a45_hofp.py",
+  "script_sha256": "e6cbb4b40084427f39450f8d8e76318b1a34e1dec9d0cdf735a5ed3a6f59153d",
+  "source_snapshot": "evidence/ad-hoc-verifier-source.py",
+  "exit_code": 0,
+  "managed_scratch_used_instead_of_system_tmp": "Required by parent readonly/owned-scratch scope",
+  "stdout": "logs/ad-hoc-verification.stdout.log",
+  "stderr": "logs/ad-hoc-verification.stderr.log"
+}

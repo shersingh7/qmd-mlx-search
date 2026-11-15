@@ -1,0 +1,146 @@
+"""Authenticate the bounded two-file candidate and replay in an owned snapshot."""
+from __future__ import annotations
+import difflib
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parent
+PARENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv')
+PRIOR = Path('/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h')
+PYTHON = Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python')
+EXPECTED_PATCH = '3408d9b639ea3b0cadb1d3522fa0b04b304acacdc00f7d05ce0ab5da5bf9113c'
+EXPECTED_PRIOR = '0cd28c76456d3dcec36ab4784cac64d865bef91b30c27a1a333d1a159843cbed'
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def record(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, sort_keys=True) + '\n')
+
+def files(root):
+    result = {}
+    for path in root.rglob('*'):
+        assert not path.is_symlink(), str(path)
+        if path.is_file():
+            result[str(path.relative_to(root))] = sha(path)
+    return result
+
+assert Path(sys.executable) == PYTHON, sys.executable
+assert platform.python_version() == '3.12.13', platform.python_version()
+assert not (ROOT / 'repo').exists(), 'review root must be fresh'
+for folder in ('home', 'hermes', 'knowledge', 'cache', 'config', 'data', 'hf', 'tmp', 'uv', 'torch', 'pycache', 'evidence', 'inputs'):
+    (ROOT / folder).mkdir(exist_ok=True)
+assert sha(PRIOR / 'review-result.json') == EXPECTED_PRIOR
+manifest = json.loads((PARENT / 'repair-manifest.json').read_text())
+binding = json.loads((PARENT / 'base-source-binding.json').read_text())
+assert manifest['baseReviewResultSha256'] == binding['reviewResultSha256'] == EXPECTED_PRIOR
+assert sha(PARENT / 'empty-version.patch') == EXPECTED_PATCH == manifest['patchSha256']
+prior_result = json.loads((PRIOR / 'review-result.json').read_text())
+assert prior_result['spec'] == 'PASS'
+assert prior_result['R1']['status'] == 'CLOSED'
+assert binding['sourceSha256'] == prior_result['source_bindings']
+base = binding['sourceSha256']
+candidate = manifest['sourceSha256']
+base_files = files(PARENT / 'baseline')
+candidate_files = files(PARENT / 'repo')
+assert base_files == base, {'baseline_extra': sorted(base_files.keys() - base.keys()), 'baseline_missing': sorted(base.keys() - base_files.keys())}
+assert candidate_files == candidate
+assert files(PRIOR / 'repo') == base
+changed = [p for p in base if candidate.get(p) != base[p]]
+added = sorted(candidate.keys() - base.keys())
+assert changed == ['finetune/tools/qualify_gguf_image.py'], changed
+assert added == ['finetune/tests/test_qualify_empty_version.py'], added
+assert not (base.keys() - candidate.keys())
+for change in manifest['changedFiles']:
+    assert base.get(change['path']) == change['before']
+    assert candidate.get(change['path']) == change['after']
+old = (PARENT / 'baseline/finetune/tools/qualify_gguf_image.py').read_text()
+new = (PARENT / 'repo/finetune/tools/qualify_gguf_image.py').read_text()
+old_fragment = '        versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]\n                    for name, path in tools.items()}\n'
+new_fragment = '        versions = {}\n        for name, path in tools.items():\n            output = run([path, "--version"], work, env, timeout=10)\n            if not output:\n                raise RuntimeError(f"empty version output from native prerequisite: {name}")\n            versions[name] = output.splitlines()[0]\n'
+assert old.count(old_fragment) == 1
+assert new == old.replace(old_fragment, new_fragment)
+protected = {
+    'parent-baseline': base_files,
+    'parent-candidate': candidate_files,
+    'prior-source': files(PRIOR / 'repo'),
+    'parent-artifacts': {},
+    'prior-artifacts': {'review-result.json': sha(PRIOR / 'review-result.json')},
+}
+for rel in ('repair-manifest.json', 'base-source-binding.json', 'empty-version.patch', 'review_support.py', 'test_probe_contract_green.py', 'test_repair_heldouts.py', 'test_probe_contract_green.py.binding.patch', 'test_repair_heldouts.py.binding.patch'):
+    protected['parent-artifacts'][rel] = sha(PARENT / rel)
+    destination = ROOT / 'inputs' / rel
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(PARENT / rel, destination)
+for rel in ('evidence/empty-output-red.xml', 'evidence/complete-green.xml', 'evidence/real-installed-uv-full.json'):
+    protected['parent-artifacts'][rel] = sha(PARENT / rel)
+    destination = ROOT / 'inputs' / rel
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(PARENT / rel, destination)
+for rel in ('review_support.py', 'test_probe_contract_green.py', 'test_repair_heldouts.py'):
+    assert sha(PRIOR / rel) == binding['copiedHarnessSha256'][rel]
+    protected['prior-artifacts'][rel] = sha(PRIOR / rel)
+    current = (PARENT / rel).read_text()
+    original = (PRIOR / rel).read_text()
+    if rel == 'review_support.py':
+        assert current == original
+    else:
+        before = base['finetune/tools/qualify_gguf_image.py']
+        after = candidate['finetune/tools/qualify_gguf_image.py']
+        assert original.count(before) == 1
+        assert current == original.replace(before, after)
+    shutil.copyfile(PARENT / rel, ROOT / rel)
+shutil.copytree(PARENT / 'baseline', ROOT / 'baseline')
+shutil.copytree(PARENT / 'baseline', ROOT / 'repo')
+env = dict(os.environ)
+assert 'PYTHONPATH' not in env
+command = ['/usr/bin/git', 'apply', '--check', str(ROOT / 'inputs/empty-version.patch')]
+check = subprocess.run(command, cwd=ROOT / 'repo', env=env, capture_output=True, text=True, timeout=10)
+record(ROOT / 'evidence/patch-apply-check.json', {'command': command, 'returncode': check.returncode, 'stdout': check.stdout, 'stderr': check.stderr})
+assert check.returncode == 0, check.stderr
+command = ['/usr/bin/git', 'apply', str(ROOT / 'inputs/empty-version.patch')]
+apply = subprocess.run(command, cwd=ROOT / 'repo', env=env, capture_output=True, text=True, timeout=10)
+record(ROOT / 'evidence/patch-replay.json', {'command': command, 'returncode': apply.returncode, 'stdout': apply.stdout, 'stderr': apply.stderr})
+assert apply.returncode == 0, apply.stderr
+assert files(ROOT / 'repo') == candidate
+assert files(ROOT / 'baseline') == base
+# The old-source derivative retains the authored test unchanged for genuine RED.
+shutil.copytree(ROOT / 'repo', ROOT / 'old-repo')
+shutil.copyfile(ROOT / 'baseline/finetune/tools/qualify_gguf_image.py', ROOT / 'old-repo/finetune/tools/qualify_gguf_image.py')
+# Environment-only reviewer harness hardening: no assertion/source changes.
+support_path = ROOT / 'review_support.py'
+support = support_path.read_text()
+old_line = "        'HERMES_KNOWLEDGE_DIR': str(r / 'knowledge'), 'XDG_CACHE_HOME': str(r / 'cache'),\n"
+new_line = "        'HERMES_KNOWLEDGE_DIR': str(r / 'knowledge'), 'KNOWLEDGE_DIR': str(r / 'knowledge'), 'XDG_CACHE_HOME': str(r / 'cache'),\n"
+assert support.count(old_line) == 1
+hardened = support.replace(old_line, new_line)
+old_line2 = "        'UV_CACHE_DIR': str(r / 'uv'), 'PYTHONPYCACHEPREFIX': str(r / 'pycache'), 'TMPDIR': str(r / 'tmp'),\n"
+new_line2 = "        'UV_CACHE_DIR': str(r / 'uv'), 'PYTHONPYCACHEPREFIX': str(r / 'pycache'), 'TMPDIR': str(r / 'tmp'), 'TMP': str(r / 'tmp'), 'TEMP': str(r / 'tmp'),\n"
+assert hardened.count(old_line2) == 1
+hardened = hardened.replace(old_line2, new_line2)
+support_path.write_text(hardened)
+(ROOT / 'evidence/reviewer-harness-isolation.patch').write_text(''.join(difflib.unified_diff(support.splitlines(True), hardened.splitlines(True), fromfile='parent/review_support.py', tofile='review/review_support.py')))
+
+def junit(path):
+    # These are hash-preserved local pytest receipts, not untrusted XML input.
+    cases = list(ET.parse(path).iter('testcase'))
+    return {'tests': len(cases), 'failures': sum(len(c.findall('failure')) for c in cases), 'errors': sum(len(c.findall('error')) for c in cases), 'skipped': sum(len(c.findall('skipped')) for c in cases), 'groups': {name: sum(c.get('classname') == name for c in cases) for name in sorted(set(c.get('classname') for c in cases))}, 'failure_texts': [c.find('failure').text for c in cases if c.find('failure') is not None]}
+parent_red = junit(ROOT / 'inputs/evidence/empty-output-red.xml')
+assert parent_red['tests'] == parent_red['failures'] == 27
+assert parent_red['errors'] == parent_red['skipped'] == 0
+assert all('IndexError: list index out of range' in t and 'assert 1 == 2' in t for t in parent_red['failure_texts'])
+parent_green = junit(ROOT / 'inputs/evidence/complete-green.xml')
+assert parent_green['tests'] == 252
+assert parent_green['failures'] == parent_green['errors'] == parent_green['skipped'] == 0
+record(ROOT / 'evidence/protected-before.json', protected)
+summary = {'root': str(ROOT), 'python': sys.executable, 'python_version': platform.python_version(), 'patch_sha256': EXPECTED_PATCH, 'base_review_sha256': EXPECTED_PRIOR, 'source_sha256': candidate, 'base_count': len(base), 'candidate_count': len(candidate), 'unchanged_original_files': len(base) - len(changed), 'changed_existing': changed, 'added': added, 'production_change_only_expected_loop': True, 'patch_replay_exact': True, 'parent_red': {k:v for k,v in parent_red.items() if k != 'failure_texts'}, 'parent_green': {k:v for k,v in parent_green.items() if k != 'failure_texts'}, 'retained_harness_source_binding_only': True, 'harness_environment_only_hardening': True}
+record(ROOT / 'evidence/source-authentication.json', summary)
+print(json.dumps({k:v for k,v in summary.items() if k != 'source_sha256'}, indent=2))

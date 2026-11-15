@@ -1,0 +1,40 @@
+{
+  "scope": "Four reviewed test/CI paths only; no publication or native CI execution",
+  "pathsIntegrated": [
+    ".github/workflows/ci.yml",
+    "test/audit-recovery-tree.test.ts",
+    "test/helpers/recovery-bootstrap-diagnostics.mjs",
+    "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"
+  ],
+  "sourcePreimagesMatched": true,
+  "changes": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "originalSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "proposedSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f"
+    },
+    {
+      "path": "test/audit-recovery-tree.test.ts",
+      "originalSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "proposedSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "originalSha256": null,
+      "proposedSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+      "originalSha256": null,
+      "proposedSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e"
+    }
+  ],
+  "leaseProductionUnchanged": true,
+  "leaseProductionSha256": {
+    "scripts/phase5_e2e_runner.ts": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+    "scripts/phase5_recovery_process.py": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf"
+  },
+  "ciAccepted": false,
+  "reviewReceiptSha256": "0592bee5cfd3f014f56aabd8f86aeed1150c5d062b9eed76e6e90a52d97fbdae",
+  "integrationRecovery": "Programmatic patch RPC applied ci.yml then failed to decode its response; exact readback confirmed that one applied path and three untouched preimages. Git apply --check plus explicit --include completed only the three remaining paths; all four final hashes verified."
+}

@@ -1,0 +1,292 @@
+"""Owned offline control-flow tests. ALL Docker/host/native receipts are SYNTHETIC.
+
+No real Docker binary/daemon, registry, probe, launcher, model, SDK or compiler is
+executed. Generated Bash runs with one test-only Python-executable substitution;
+its embedded production controller is unchanged. The adapter substitutes two
+CLI destinations (Docker/git), host answers and one short timeout in that case.
+"""
+from pathlib import Path
+import ast
+import hashlib
+import json
+import os
+import platform
+import shlex
+import stat
+import subprocess
+import sys
+
+ROOT = Path(__file__).parent.parent
+EVIDENCE = ROOT / 'evidence'
+PYTHON = sys.executable
+WORKFLOW = ROOT / 'mirror/.github/workflows/gguf-native-image-qualification.yml'
+LAUNCHER = (ROOT / 'mirror/finetune/tools/submit_locked_job.py').read_bytes()
+PROBE = (ROOT / 'mirror/finetune/tools/qualify_gguf_image.py').read_bytes()
+IMAGE = next(node.value.value for node in ast.parse(LAUNCHER).body if isinstance(node, ast.Assign)
+             and any(isinstance(target, ast.Name) and target.id == 'GGUF_IMAGE' for target in node.targets))
+SHA = lambda raw: hashlib.sha256(raw).hexdigest()
+BASE_ENV = {
+    'PATH': '/usr/bin:/bin', 'HOME': str(ROOT / 'home'), 'TMPDIR': str(ROOT / 'tmp'),
+    'HERMES_HOME': str(ROOT / 'hermes'), 'KNOWLEDGE_DIR': str(ROOT / 'knowledge'),
+    'XDG_CACHE_HOME': str(ROOT / 'cache'), 'XDG_CONFIG_HOME': str(ROOT / 'config'),
+    'XDG_DATA_HOME': str(ROOT / 'data'), 'HF_HOME': str(ROOT / 'hf'),
+    'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_DATASETS_OFFLINE': '1',
+    'QMD_LLAMA_GPU': 'false', 'CUDA_VISIBLE_DEVICES': '', 'PYTHONDONTWRITEBYTECODE': '1',
+}
+CASES = [
+    ('success-auto-removed', 0, {}),
+    ('success-owned-removal', 0, {'keep_container': True}),
+    ('success-inspect-race-absent', 0, {'keep_container': True, 'inspect_race_absent': True}),
+    ('success-rm-nonzero-but-readback-absent', 0, {'keep_container': True, 'remove_exit': 9}),
+    ('push-distinct-shas', 0, {'event': 'push'}),
+    ('dispatch-no-event-head', 0, {'event': 'workflow_dispatch', 'event_head': ''}),
+    ('quoted-event-data', 0, {'event': '$(touch NEVER_EXECUTED); `false`'}),
+    ('bind-updated-literal-without-second-pin', 0, {'bad_image': IMAGE.split('@')[0] + '@sha256:' + 'd' * 64}),
+    ('literal-missing', 1, {'selection': 'missing'}),
+    ('literal-duplicate', 1, {'selection': 'duplicate'}),
+    ('literal-dynamic-never-execute', 1, {'selection': 'dynamic'}),
+    ('literal-import-overwrite', 1, {'selection': 'import-overwrite'}),
+    ('literal-conditional-overwrite', 1, {'selection': 'conditional-overwrite'}),
+    ('literal-nonstring', 1, {'selection': 'nonstring'}),
+    ('image-wrong-registry', 1, {'bad_image': IMAGE.replace('ghcr.io/', 'evil.example/')}),
+    ('image-no-digest', 1, {'bad_image': IMAGE.split('@')[0]}),
+    ('image-slim', 1, {'bad_image': IMAGE.replace('-trixie@', '-trixie-slim@')}),
+    ('image-leading-space', 1, {'bad_image': ' ' + IMAGE}),
+    ('image-trailing-newline', 1, {'bad_image': IMAGE + '\n'}),
+    ('image-uppercase-digest', 1, {'bad_image': IMAGE.split('@')[0] + '@' + IMAGE.split('@')[1].upper()}),
+    ('image-invalid-digest-length', 1, {'bad_image': IMAGE[:-1]}),
+    ('source-probe-symlink', 1, {'source_mode': 'probe-symlink'}),
+    ('source-probe-hardlink', 1, {'source_mode': 'probe-hardlink'}),
+    ('source-probe-fifo', 1, {'source_mode': 'probe-fifo'}),
+    ('source-probe-directory', 1, {'source_mode': 'probe-directory'}),
+    ('source-ancestor-symlink', 1, {'source_mode': 'ancestor-symlink'}),
+    ('source-launcher-symlink', 1, {'source_mode': 'launcher-symlink'}),
+    ('invalid-checkout-sha', 1, {'checkout': 'not-a-sha'}),
+    ('invalid-context-sha', 1, {'context': 'broken'}),
+    ('invalid-event-head', 1, {'event_head': '$(touch NEVER_EXECUTED)'}),
+    ('host-arm64', 1, {'host_arch': 'aarch64'}),
+    ('host-darwin', 1, {'host_os': 'Darwin'}),
+    ('runner-arm64', 1, {'runner_arch': 'ARM64'}),
+    ('daemon-arm64', 1, {'daemon_arch': 'arm64'}),
+    ('daemon-windows', 1, {'daemon_os': 'windows'}),
+    ('daemon-version-failure', 17, {'engine_exit': 17}),
+    ('daemon-malformed-json', 1, {'engine_bad_json': True}),
+    ('pull-failure', 23, {'pull_exit': 23}),
+    ('image-arm64', 1, {'image_arch': 'arm64'}),
+    ('image-windows', 1, {'image_os': 'windows'}),
+    ('image-inspect-failure', 25, {'image_exit': 25}),
+    ('image-malformed-json', 1, {'image_bad_json': True}),
+    ('image-duplicate-json', 1, {'image_duplicate_json': True}),
+    ('image-invalid-id', 1, {'image_id': 'not-an-id'}),
+    ('digest-loose-substring-control', 1, {'digest_suffix': True}),
+    ('digest-wrong-repository', 1, {'digests': ['evil.example/uv@' + IMAGE.split('@')[1]]}),
+    ('digests-not-list', 1, {'digests': 'ghcr.io/astral-sh/uv@' + IMAGE.split('@')[1]}),
+    ('probe-nonzero', 37, {'probe_exit': 37}),
+    ('probe-version-refusal-propagates', 2, {'probe_exit': 2, 'probe_stderr': 'SYNTHETIC: Native prerequisite probe failed: image probe requires uv 0.11.18'}),
+    ('container-start-failure-unknown-cid', 125, {'probe_exit': 125, 'cid_mode': 'missing', 'keep_container': True}),
+    ('probe-nonzero-preserved-cleanup-failure', 37, {'probe_exit': 37, 'cleanup_daemon_failure': True}),
+    ('probe-timeout-owned-cleanup', 124, {'probe_timeout': True}),
+    ('probe-signal-owned-cleanup', 143, {'probe_signal': True}),
+    ('probe-invalid-json', 1, {'probe_bad_json': True}),
+    ('probe-native-only-bypass-rejected', 1, {'probe_update': {'native_only': True}}),
+    ('probe-wrong-python', 1, {'probe_update': {'python': '3.13.0'}}),
+    ('probe-wrong-platform', 1, {'probe_update': {'platform': 'Linux/aarch64'}}),
+    ('probe-fake-output-rejected', 1, {'probe_update': {'outputs': ['not-C', 'not-C++']}}),
+    ('probe-wrong-source-hash', 1, {'probe_update': {'probe_sha256': '0' * 64}}),
+    ('probe-missing-version', 1, {'probe_update': {'versions': {'git': 'synthetic'}}}),
+    ('probe-nonpass-receipt', 1, {'probe_update': {'status': 'fail'}}),
+    ('cid-malformed', 1, {'cid_mode': 'invalid', 'keep_container': True}),
+    ('cid-empty', 1, {'cid_mode': 'empty', 'keep_container': True}),
+    ('cid-missing-unknown-not-absence', 1, {'cid_mode': 'missing', 'keep_container': True}),
+    ('cid-symlink', 1, {'cid_mode': 'symlink', 'keep_container': True}),
+    ('cid-hardlink', 1, {'cid_mode': 'hardlink', 'keep_container': True}),
+    ('cleanup-daemon-unreachable', 1, {'cleanup_daemon_failure': True}),
+    ('cleanup-identity-wrong-label', 1, {'keep_container': True, 'identity_wrong_label': True}),
+    ('cleanup-identity-wrong-id', 1, {'keep_container': True, 'identity_wrong_id': True}),
+    ('cleanup-rm-success-not-proof', 1, {'keep_container': True, 'remove_effect': False}),
+    ('cleanup-rm-failure-still-present', 1, {'keep_container': True, 'remove_effect': False, 'remove_exit': 9}),
+    ('cleanup-final-daemon-unreachable', 1, {'keep_container': True, 'final_daemon_failure': True}),
+    ('cleanup-list-malformed-json', 1, {'list_bad_json': True}),
+    ('cleanup-list-truncated-id', 1, {'list_short_id': True}),
+]
+
+def launcher_bytes(cfg):
+    tree = ast.parse(LAUNCHER)
+    node = next(node for node in tree.body if isinstance(node, ast.Assign)
+                and any(isinstance(t, ast.Name) and t.id == 'GGUF_IMAGE' for t in node.targets))
+    lines = LAUNCHER.decode().splitlines(keepends=True)
+    replace = None
+    if 'bad_image' in cfg:
+        replace = 'GGUF_IMAGE = ' + repr(cfg['bad_image']) + '\n'
+    mode = cfg.get('selection')
+    if mode == 'missing':
+        replace = ''
+    if mode == 'nonstring':
+        replace = 'GGUF_IMAGE = 42\n'
+    if mode == 'dynamic':
+        replace = "GGUF_IMAGE = __import__('os').system('touch NEVER_EXECUTED')\n"
+    if replace is not None:
+        lines[node.lineno - 1:node.end_lineno] = [replace]
+    text = ''.join(lines)
+    if mode == 'duplicate':
+        text += '\nGGUF_IMAGE = ' + repr(IMAGE) + '\n'
+    if mode == 'import-overwrite':
+        text += '\nfrom impossible_module import GGUF_IMAGE\n'
+    if mode == 'conditional-overwrite':
+        text += '\nif True:\n    GGUF_IMAGE = ' + repr(IMAGE) + '\n'
+    return text.encode()
+
+def check_argv(calls, receipt, case, workspace):
+    docker_calls = [item['argv'] for item in calls if item['argv'][0] == 'docker']
+    for call in calls:
+        env = call['environment']
+        assert not (set(env) & {'PYTHONPATH', 'NODE_OPTIONS', 'GITHUB_TOKEN', 'GH_TOKEN', 'HF_TOKEN', 'DOCKER_HOST', 'DOCKER_AUTH_CONFIG'})
+        for key in ('HOME', 'HERMES_HOME', 'KNOWLEDGE_DIR', 'XDG_CACHE_HOME', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'TMPDIR', 'HF_HOME', 'DOCKER_CONFIG'):
+            assert Path(env[key]).is_relative_to(case / 'runner temp'), (key, env[key])
+        assert env['HF_HUB_OFFLINE'] == env['TRANSFORMERS_OFFLINE'] == env['HF_DATASETS_OFFLINE'] == '1'
+        assert env['QMD_LLAMA_GPU'] == 'false'
+    for cmd in receipt['commands']:
+        assert 0 < cmd['timeout_seconds'] <= 180
+        assert 'stdout' in cmd and 'stderr' in cmd and 'process_exit' in cmd
+    runs = [item for item in docker_calls if item[5] == 'run']
+    pulls = [item for item in docker_calls if item[5] == 'pull']
+    assert len(runs) <= 1 and len(pulls) <= 1, 'no retries until green'
+    if not runs:
+        assert receipt['cleanup']['status'] == 'container-command-not-attempted'
+        return
+    call = runs[0][5:]
+    assert call[-5:] == [receipt['image_input'], '-I', '-B', '-S', '/probe.py']
+    for flag, value in [('--pull', 'never'), ('--platform', 'linux/amd64'), ('--network', 'none'),
+                        ('--user', '65534:65534'), ('--cpus', '2'), ('--memory', '1g'), ('--pids-limit', '64'),
+                        ('--cap-drop', 'ALL'), ('--security-opt', 'no-new-privileges'), ('--entrypoint', 'python')]:
+        assert call[call.index(flag) + 1] == value
+    assert '--read-only' in call and '--rm' in call
+    assert not (set(call) & {'--privileged', '--gpus', '--volume', '-v'})
+    assert call.count('--mount') == 1 and call.count('--tmpfs') == 1
+    assert call[call.index('--tmpfs') + 1] == '/tmp:rw,exec,nosuid,nodev,size=128m,uid=65534,gid=65534,mode=0700'
+    mount = call[call.index('--mount') + 1]
+    source = Path(mount.removeprefix('type=bind,src=').removesuffix(',dst=/probe.py,readonly'))
+    assert source.is_relative_to(case / 'runner temp') and not source.is_relative_to(workspace)
+    assert SHA(source.read_bytes()) == receipt['sources']['probe_sha256']
+    assert stat.S_IMODE(source.stat().st_mode) == 0o444 and source.stat().st_nlink == 1
+    envs = [call[i + 1] for i, token in enumerate(call) if token == '--env']
+    assert all('=' in item and 'TOKEN' not in item and 'SECRET' not in item for item in envs)
+    if receipt['final_exit'] == 0:
+        assert receipt['cleanup']['absence_verified'] is True
+        assert receipt['probe_receipt']['fixture_notice'].startswith('SYNTHETIC')
+        assert receipt['probe_exit'] == 0
+    removes = [item for item in docker_calls if item[5:7] == ['container', 'rm']]
+    for call in removes:
+        assert call[-1] == 'a' * 64
+    assert all('b' * 64 not in call for call in removes), 'sentinel must never be removed'
+
+def run_case(base, script, name, expected, source_cfg):
+    case = base / name
+    case.mkdir()
+    workspace = case / 'public work space'
+    tools = workspace / 'finetune/tools'
+    tools.mkdir(parents=True)
+    cfg = dict(source_cfg)
+    launcher = launcher_bytes(cfg)
+    (tools / 'submit_locked_job.py').write_bytes(launcher)
+    (tools / 'qualify_gguf_image.py').write_bytes(PROBE)
+    mode = cfg.get('source_mode', '')
+    leaf = tools / ('submit_locked_job.py' if mode == 'launcher-symlink' else 'qualify_gguf_image.py')
+    if mode.startswith('probe-') or mode == 'launcher-symlink':
+        leaf.unlink()
+        if mode.endswith('symlink') or mode.endswith('hardlink'):
+            target = case / 'public-target'
+            target.write_bytes(LAUNCHER if mode == 'launcher-symlink' else PROBE)
+            if mode.endswith('symlink'):
+                leaf.symlink_to(target)
+            else:
+                os.link(target, leaf)
+        elif mode == 'probe-fifo':
+            os.mkfifo(leaf)
+        elif mode == 'probe-directory':
+            leaf.mkdir()
+    elif mode == 'ancestor-symlink':
+        real = case / 'public-tools'
+        tools.rename(real)
+        tools.symlink_to(real, target_is_directory=True)
+    runner_temp = case / 'runner temp'
+    runner_temp.mkdir()
+    cfg['workspace'] = str(workspace)
+    cfg_path = case / 'config.json'
+    cfg_path.write_text(json.dumps(cfg, indent=2))
+    needle = 'python3 -I -B -S - "$owned"'
+    replacement = f'{shlex.quote(PYTHON)} -I -B -S {shlex.quote(str(EVIDENCE / "fixture_adapter.py"))} {shlex.quote(str(cfg_path))} "$owned"'
+    assert script.count(needle) == 1
+    adapted = script.replace(needle, replacement)
+    assert adapted.split("<<'PY'\n", 1)[1] == script.split("<<'PY'\n", 1)[1], 'controller bytes changed by fixture'
+    path = case / 'step-test-adapter.bash'
+    path.write_text(adapted)
+    env = dict(BASE_ENV, RUNNER_TEMP=str(runner_temp), RUNNER_OS=cfg.get('runner_os', 'Linux'),
+               RUNNER_ARCH=cfg.get('runner_arch', 'X64'), RUNNER_NAME='SYNTHETIC fixture runner',
+               QMD_WORKSPACE=str(workspace), QMD_EVENT=cfg.get('event', 'pull_request'),
+               QMD_CONTEXT_SHA=cfg.get('context', '3' * 40), QMD_EVENT_HEAD_SHA=cfg.get('event_head', '2' * 40))
+    result = subprocess.run(['/bin/bash', str(path)], cwd=case, env=env, capture_output=True, text=True, timeout=30)
+    (case / 'stdout.log').write_text(result.stdout)
+    (case / 'stderr.log').write_text(result.stderr)
+    records = [json.loads(line) for line in result.stdout.splitlines()]
+    receipts = [item['qualification_receipt'] for item in records if 'qualification_receipt' in item]
+    assert len(receipts) == 1, f'expected final receipt, stderr: {result.stderr!r}'
+    receipt = receipts[0]
+    assert result.returncode == expected == receipt['final_exit'], (result.returncode, expected, receipt.get('error'), receipt['cleanup'])
+    assert (result.returncode == 0) == (receipt['status'] == 'qualified-native-amd64-prerequisites')
+    assert receipt['event'] == env['QMD_EVENT']
+    assert receipt['context_sha'] == env['QMD_CONTEXT_SHA']
+    assert receipt['event_head_sha'] == (env['QMD_EVENT_HEAD_SHA'] or None)
+    if 'sources' in receipt:
+        assert receipt['sources'] == {'launcher_sha256': SHA(launcher), 'probe_sha256': SHA(PROBE)}
+    assert not (case / 'NEVER_EXECUTED').exists()
+    assert not list(runner_temp.glob('*/NEVER_EXECUTED'))
+    calls = [json.loads(line) for line in (case / 'calls.jsonl').read_text().splitlines()]
+    check_argv(calls, receipt, case, workspace)
+    state_path = case / 'state.json'
+    state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    assert 'b' * 64 not in state.get('removed', [])
+    if cfg.get('identity_wrong_label') or cfg.get('identity_wrong_id') or cfg.get('cid_mode'):
+        assert not state.get('removed'), 'unsafe ownership must not remove any container'
+    if cfg.get('probe_timeout') or cfg.get('probe_signal'):
+        assert receipt['cleanup']['absence_verified'] is True
+        assert next(cmd for cmd in receipt['commands'] if cmd['name'] == 'probe')['process_exit'] is not None
+    if cfg.get('cleanup_daemon_failure') or cfg.get('final_daemon_failure') or cfg.get('remove_effect') is False:
+        assert receipt['cleanup']['absence_verified'] is False
+    stored = list(runner_temp.glob('*/receipt.json'))
+    assert len(stored) == 1 and json.loads(stored[0].read_text()) == receipt
+    return {'case': name, 'passed': True, 'expected_exit': expected, 'actual_exit': result.returncode,
+            'primary_exit': receipt['primary_exit'], 'cleanup': receipt['cleanup'],
+            'synthetic_only': True, 'native_image_execution_performed': False,
+            'fixture_call_count': len(calls), 'raw_stdout': str(case / 'stdout.log'), 'raw_stderr': str(case / 'stderr.log')}
+
+def main():
+    phase = sys.argv[1] if len(sys.argv) > 1 else 'final-v1'
+    selected = CASES[:2] if len(sys.argv) > 2 and sys.argv[2] == 'smoke' else CASES
+    base = EVIDENCE / ('synthetic-' + phase)
+    base.mkdir()
+    text = WORKFLOW.read_text()
+    block = text.split('        run: |\n', 1)[1]
+    script = '\n'.join(line[10:] if line else '' for line in block.splitlines()) + '\n'
+    results = []
+    for name, expected, cfg in selected:
+        try:
+            record = run_case(base, script, name, expected, cfg)
+        except Exception as exc:
+            record = {'case': name, 'passed': False, 'synthetic_only': True, 'error': f'{type(exc).__name__}: {exc}'}
+        results.append(record)
+        with (base / 'results.jsonl').open('a') as stream:
+            stream.write(json.dumps(record) + '\n')
+        print(json.dumps(record), flush=True)
+    summary = {'workflow_sha256': SHA(WORKFLOW.read_bytes()), 'generated_bash_sha256': SHA(script.encode()),
+               'controller_sha256': SHA(script.split("<<'PY'\n", 1)[1].rsplit('\nPY\n', 1)[0].encode()),
+               'physical_test_host': {'os': platform.system(), 'architecture': platform.machine()},
+               'scope': __doc__, 'cases': len(results), 'passed': sum(item['passed'] for item in results),
+               'failed': sum(not item['passed'] for item in results), 'skipped': 0,
+               'native_image_execution_performed': False, 'results': results}
+    (base / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+    print(json.dumps({key: value for key, value in summary.items() if key != 'results'}, indent=2))
+    return 0 if summary['failed'] == 0 else 1
+
+if __name__ == '__main__':
+    raise SystemExit(main())

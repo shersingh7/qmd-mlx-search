@@ -1,0 +1,45 @@
+{
+  "guard_original_count": 2787,
+  "zod_original_count": 3516,
+  "expanded_input_count": 5532,
+  "guard_mismatches": [],
+  "zod_mismatches": [],
+  "expanded_mismatches": [],
+  "all_candidate_source_sha256_unchanged": true,
+  "all_245_parent_source_bytes_unchanged": true,
+  "all_other_base_source_and_generated_bytes_unchanged": true,
+  "historical_cache_entries": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json": {
+      "before": {
+        "kind": "file",
+        "size": 3839,
+        "mtime_ns": 1794608031759430836,
+        "sha256": "aa0b2e06cb12d8ca1a44b5a04b5ea60d3d2b87d27d1a8c6cc849a0dc77fc2d2c"
+      },
+      "after": {
+        "kind": "file",
+        "size": 3839,
+        "mtime_ns": 1794608031759430836,
+        "sha256": "aa0b2e06cb12d8ca1a44b5a04b5ea60d3d2b87d27d1a8c6cc849a0dc77fc2d2c"
+      }
+    },
+    "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/baseline/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json": {
+      "before": {
+        "kind": "file",
+        "size": 3852,
+        "mtime_ns": 1794611793003937117,
+        "sha256": "e795b515eee39e3604d060b5bba34a76dc370da22eccce927d82e2000deb6942"
+      },
+      "after": {
+        "kind": "file",
+        "size": 3852,
+        "mtime_ns": 1794611793003937117,
+        "sha256": "e795b515eee39e3604d060b5bba34a76dc370da22eccce927d82e2000deb6942"
+      }
+    }
+  },
+  "source_mcp_sha256": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+  "own_node_modules_containers": true,
+  "root_node_modules_owned": true,
+  "no_live_recovery_execution_or_writes": true
+}

@@ -1,0 +1,90 @@
+"""Independent, fixture-specific arithmetic oracle, never imports converter code.
+
+The actual fetched converter modules are hash-bound in the export receipts.
+Qwen3.5's public convention: norms +1 (not SSM norm), -exp(A_log),
+grouped-to-tiled V heads, and the two explicit shared-input concatenations.
+The mapping is literal for this small genuine 2-layer fixture, not a generic
+converter or output generator. It only reads actual output and CPU checkpoints.
+"""
+import hashlib
+
+
+def verify_every_f16_tensor(torch, np, reader, fixture, merged_value_projection, qualification):
+    from safetensors import safe_open
+    by_name = {t.name: t for t in reader.tensors}
+    assert len(by_name) == 25
+    records = []
+    used = set()
+    with safe_open(fixture / 'model.safetensors', framework='pt', device='cpu') as handle:
+        assert len(handle.keys()) == 27
+        def get(name):
+            used.add(name)
+            tensor = handle.get_tensor(name)
+            assert tensor.device.type == 'cpu'
+            return tensor
+        # Explicit head sequence [group0/member0, group1/member0,
+        # group0/member1, group1/member1], independently indexed.
+        head_indices = [0, 2, 1, 3]
+        channel_indices = [head * 64 + channel for head in head_indices for channel in range(64)]
+        def check(target, sources, transform, value):
+            actual = by_name[target]
+            dtype = torch.float16 if actual.tensor_type.name == 'F16' else torch.float32
+            expected = value.detach().to(dtype).contiguous().numpy()
+            assert expected.shape == actual.data.shape, (target, expected.shape, actual.data.shape)
+            assert np.array_equal(expected, actual.data), ('Independent full numeric mismatch', target)
+            expected_hash = hashlib.sha256(expected).hexdigest()
+            actual_hash = hashlib.sha256(actual.data).hexdigest()
+            assert expected_hash == actual_hash
+            records.append({'tensor': target, 'sources': sources, 'transform': transform,
+                            'shape': list(expected.shape), 'elements': int(expected.size),
+                            'type': actual.tensor_type.name, 'device': str(value.device),
+                            'expected_data_sha256': expected_hash, 'actual_data_sha256': actual_hash,
+                            'all_elements_exact': True})
+        name = 'model.embed_tokens.weight'
+        check('token_embd.weight', [name], 'identity, BF16 exactly widened then narrowed to F16', get(name))
+        for layer in (0, 1):
+            prefix = 'model.layers.' + str(layer) + '.'
+            for source_suffix, target_suffix in (('input_layernorm.weight', 'attn_norm.weight'),
+                                                   ('post_attention_layernorm.weight', 'post_attention_norm.weight')):
+                name = prefix + source_suffix
+                check(f'blk.{layer}.{target_suffix}', [name], 'float32(source)+1', get(name).float() + 1)
+            for stem in ('down', 'gate', 'up'):
+                name = prefix + 'mlp.' + stem + '_proj.weight'
+                check(f'blk.{layer}.ffn_{stem}.weight', [name], 'identity', get(name))
+        prefix = 'model.layers.0.linear_attn.'
+        name = prefix + 'A_log'
+        check('blk.0.ssm_a', [name], '-exp(float32(source[0,2,1,3]))', -torch.exp(get(name).float()[head_indices]))
+        name = prefix + 'conv1d.weight'
+        value = get(name).float().squeeze(1)
+        value = torch.cat([value[:256], value[256:][channel_indices]], dim=0)
+        check('blk.0.ssm_conv1d.weight', [name], 'squeeze unit axis; reorder V channel half only', value)
+        name = prefix + 'dt_bias'
+        check('blk.0.ssm_dt.bias', [name], 'head order [0,2,1,3]', get(name)[head_indices])
+        names = [prefix + 'in_proj_b.weight', prefix + 'in_proj_a.weight']
+        value = torch.cat([get(name)[head_indices] for name in names], dim=0)
+        check('blk.0.ssm_beta_alpha.weight', names, 'cat(reordered beta, reordered alpha)', value)
+        names = [prefix + 'in_proj_qkv.weight', prefix + 'in_proj_z.weight']
+        qkv = get(names[0])
+        value = torch.cat([qkv[:256], qkv[256:][channel_indices], get(names[1])[channel_indices]], dim=0)
+        check('blk.0.attn_qkv_gate.weight', names, 'cat(Q,K,reordered V,reordered Z)', value)
+        name = prefix + 'norm.weight'
+        check('blk.0.ssm_norm.weight', [name], 'identity, SSM norm has no +1', get(name))
+        name = prefix + 'out_proj.weight'
+        check('blk.0.ssm_out.weight', [name], 'reorder V input columns', get(name)[:, channel_indices])
+        prefix = 'model.layers.1.self_attn.'
+        for stem in ('q', 'k'):
+            name = prefix + stem + '_norm.weight'
+            check(f'blk.1.attn_{stem}_norm.weight', [name], 'float32(source)+1', get(name).float() + 1)
+        for stem, target in (('q', 'q'), ('k', 'k'), ('o', 'output')):
+            name = prefix + stem + '_proj.weight'
+            check(f'blk.1.attn_{target}.weight', [name], 'identity', get(name))
+        name = prefix + 'v_proj.weight'
+        used.add(name)
+        check('blk.1.attn_v.weight', [name, 'sft LoRA A/B', 'grpo LoRA A/B'],
+              'independently computed sequential BF16(base + float32(B@A)) merges then F16', merged_value_projection)
+        name = 'model.norm.weight'
+        check('output_norm.weight', [name], 'float32(source)+1', get(name).float() + 1)
+        assert used == set(handle.keys()), (used ^ set(handle.keys()))
+    assert len(records) == 25 and {record['tensor'] for record in records} == set(by_name)
+    return {'all_25_output_tensors_exact': True, 'all_27_base_checkpoint_tensors_accounted_for': True,
+            'no_converter_code_execution_for_oracle': True, 'records': records}

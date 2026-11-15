@@ -39,6 +39,11 @@ export interface ExpansionParseOptions {
   includeLexical?: boolean;
 }
 
+export const MAX_EXPANSION_BYTES = 65_536;
+export const MAX_EXPANSION_LINES = 32;
+export const MAX_EXPANSION_ITEMS = 12;
+export const MAX_EXPANSION_LINE_BYTES = 4096;
+
 /**
  * Builds a strict, structured query expansion prompt for generic / chat instruction models.
  * Delimits the search query within <query>...</query> tags to treat user input purely as data.
@@ -82,7 +87,10 @@ export function parseExpansionOutput(
 ): ParsedExpansion {
   const includeLexical = options?.includeLexical ?? true;
   const query = options?.query ?? "";
-  const rawText = text ?? "";
+  const input = text ?? "";
+  const oversized = input.length > MAX_EXPANSION_BYTES || Buffer.byteLength(input, "utf8") > MAX_EXPANSION_BYTES;
+  // Keep only a small diagnostic prefix for rejected oversized completions.
+  const rawText = oversized ? input.slice(0, 4096) : input;
 
   const result: ParsedExpansion = {
     queryables: [],
@@ -95,6 +103,17 @@ export function parseExpansionOutput(
     rawText,
   };
 
+  if (oversized) {
+    result.qualityMessage = "Completion exceeds byte limit";
+    return result;
+  }
+
+  const lines = rawText.split("\n");
+  if (lines.length > MAX_EXPANSION_LINES || lines.some((line) => Buffer.byteLength(line, "utf8") > MAX_EXPANSION_LINE_BYTES)) {
+    result.qualityMessage = "Completion exceeds line count or line byte limit";
+    return result;
+  }
+
   if (!rawText.trim()) {
     result.qualityMessage = "Completion text is empty";
     return result;
@@ -105,21 +124,18 @@ export function parseExpansionOutput(
     return result;
   }
 
-  const queryLower = query.toLowerCase().trim();
-  const queryTerms = queryLower
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((t) => t.length >= 2);
+  const queryLower = query.normalize("NFKC").toLowerCase().trim();
+  const queryTerms = queryLower.match(/[\p{L}\p{N}\p{M}]+/gu) ?? [];
 
   const hasQueryRelevance = (content: string): boolean => {
-    if (queryTerms.length === 0) return true;
-    const lower = content.toLowerCase();
-    return queryTerms.some((term) => lower.includes(term)) || lower.includes(queryLower);
+    if (!queryLower) return true;
+    const lower = content.normalize("NFKC").toLowerCase();
+    // Non-Latin and punctuation-only queries must never disable relevance checks.
+    return lower.includes(queryLower) || queryTerms.some((term) => lower.includes(term));
   };
 
   const seen = new Set<string>();
 
-  const lines = rawText.split("\n");
   for (const rawLine of lines) {
     const line = rawLine.trim();
     if (!line) continue;
@@ -177,6 +193,15 @@ export function parseExpansionOutput(
       continue;
     }
     seen.add(key);
+
+    if (seen.size > MAX_EXPANSION_ITEMS) {
+      result.queryables = [];
+      result.lex = [];
+      result.vec = [];
+      result.hyde = [];
+      result.qualityMessage = "Completion exceeds expansion item limit";
+      return result;
+    }
 
     // Record accepted typed items
     if (typeStr === "lex") {

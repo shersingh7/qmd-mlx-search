@@ -1,0 +1,65 @@
+import { it, expect } from 'vitest';
+import { z } from 'zod';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import picomatch from 'picomatch';
+import { nativeZodObjectFactory, nativeZodObjectClass, NativeMcpServer, identityPaths } from 'review-native-zod';
+import { appendFileSync } from 'node:fs';
+const receipt=value=>appendFileSync(process.env.QMD_REVIEW_HOST_RECEIPT,JSON.stringify({kind:'sdk-interaction',execPath:process.execPath,versions:process.versions,...value})+'\n');
+it('retains external SDK and CJS semantics while exposing the actual Zod instance boundary',()=>{
+  expect(McpServer).toBe(NativeMcpServer);
+  const sameFactory=z.object===nativeZodObjectFactory;
+  const sameClass=z.ZodObject===nativeZodObjectClass;
+  if(process.versions.bun){expect(sameFactory).toBe(false);expect(sameClass).toBe(false);}
+  else {expect(sameFactory).toBe(true);expect(sameClass).toBe(true);}
+  expect(typeof picomatch).toBe('function');expect(picomatch('*.md')('a.md')).toBe(true);expect(picomatch('*.md')('a.txt')).toBe(false);
+  receipt({case:'instance-boundary',actualExternalSdkIdentity:true,sameZodFactory:sameFactory,sameZodClass:sameClass,cjsPositiveAndNegative:true,identityPaths});
+});
+for(const schemaForm of ['object','raw-shape'])it(`real external SDK registers, advertises and validates ${schemaForm} inlined-Zod schemas`,async()=>{
+  const inputShape={limit:z.number().int().min(1).max(100)};
+  const outputShape={limit:z.number().int().min(1).max(100)};
+  const schema=shape=>schemaForm==='object'?z.object(shape):shape;
+  const seen=[];let badOutputExecutions=0;const observations=[];
+  const server=new McpServer({name:'bounded-zod-review',version:'0.0.0'});
+  const client=new Client({name:'bounded-zod-review-client',version:'0.0.0'});
+  const [clientTransport,serverTransport]=InMemoryTransport.createLinkedPair();
+  server.registerTool('bounded',{inputSchema:schema(inputShape),outputSchema:schema(outputShape)},async({limit})=>{
+    seen.push(limit);return {content:[{type:'text',text:String(limit)}],structuredContent:{limit}};
+  });
+  server.registerTool('invalid-output',{inputSchema:schema(inputShape),outputSchema:schema(outputShape)},async({limit})=>{
+    badOutputExecutions++;return {content:[{type:'text',text:'intentional invalid public schema output'}],structuredContent:{limit:String(limit)}};
+  });
+  try{
+    await server.connect(serverTransport);
+    await client.connect(clientTransport,{timeout:1000});
+    const listed=await client.listTools(undefined,{timeout:1000});
+    expect(listed.tools.map(t=>t.name).sort()).toEqual(['bounded','invalid-output']);
+    const advertised=listed.tools.find(t=>t.name==='bounded');
+    expect(advertised.inputSchema.type).toBe('object');
+    expect(advertised.inputSchema.properties.limit.type).toBe('integer');
+    expect(advertised.inputSchema.properties.limit.minimum).toBe(1);
+    expect(advertised.inputSchema.properties.limit.maximum).toBe(100);
+    expect(advertised.outputSchema.properties.limit.type).toBe('integer');
+    for(const limit of [1,100]){
+      const result=await client.callTool({name:'bounded',arguments:{limit}},undefined,{timeout:1000});
+      expect(result.isError).not.toBe(true);expect(result.structuredContent).toEqual({limit});
+      observations.push({kind:'positive-input',arguments:{limit},isError:result.isError??false,structuredContent:result.structuredContent});
+    }
+    const invalidArguments=[{limit:'1'},{limit:0},{limit:101},{limit:1.5},{limit:null},{},{limit:true}];
+    for(const args of invalidArguments){
+      const result=await client.callTool({name:'bounded',arguments:args},undefined,{timeout:1000});
+      expect(result.isError).toBe(true);expect(result.content[0].text).toContain('Input validation error');
+      observations.push({kind:'negative-input',arguments:args,isError:result.isError,error:result.content[0].text});
+    }
+    expect(seen).toEqual([1,100]);
+    const invalidOutput=await client.callTool({name:'invalid-output',arguments:{limit:1}},undefined,{timeout:1000});
+    expect(invalidOutput.isError).toBe(true);expect(invalidOutput.content[0].text).toContain('Output validation error');
+    expect(badOutputExecutions).toBe(1);
+    observations.push({kind:'negative-output',isError:invalidOutput.isError,error:invalidOutput.content[0].text});
+  }finally{
+    const closed=await Promise.allSettled([client.close(),server.close()]);
+    expect(closed.map(r=>r.status)).toEqual(['fulfilled','fulfilled']);
+    receipt({case:'actual-sdk-memory-tool',schemaForm,toolCalls:observations.length,positiveInputs:observations.filter(o=>o.kind==='positive-input').length,negativeInputs:observations.filter(o=>o.kind==='negative-input').length,negativeOutputs:observations.filter(o=>o.kind==='negative-output').length,callbackInputs:seen,badOutputExecutions,observations,boundaryAttempts:globalThis.__sdkReviewBoundaryAttempts,transportClosed:true,sockets:false,models:false,store:false});
+  }
+});

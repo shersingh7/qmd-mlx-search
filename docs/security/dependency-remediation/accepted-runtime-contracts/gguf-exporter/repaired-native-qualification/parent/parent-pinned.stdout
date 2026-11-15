@@ -1,0 +1,107 @@
+{
+  "success": true,
+  "environment_unchanged": true,
+  "source_unchanged": true,
+  "actual_pinned_reader_identity": {
+    "source_revision": "5193ef1d4f7c95b006ab3b9f857ed27be9a63235",
+    "module_path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-pinned-reader/standalone/gguf/__init__.py",
+    "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-pinned-reader/standalone/gguf/gguf_reader.py",
+    "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+    "full_package_files_sha256": {
+      "__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+      "constants.py": "b070f76b0585b7cd9065ab9d67bfa033b9c3e4af81216695efc56cc5cbd0059c",
+      "gguf.py": "f0c0eeedad0911784b52ffed8e162a0eb5ae6d535ce35705bc16196e46597a72",
+      "gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+      "gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542",
+      "lazy.py": "dbcf8b7376284ab2d920103657cc52c1c62e93fec3856a08a1ae638394e6a7c1",
+      "metadata.py": "7cedac3b8457271a3f58e5531a7e6958fdecb9ea072f7895ba5d7f6693c9db29",
+      "py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "quants.py": "f896726209ba8c91afd083dd87031c2d39dc4ef6a78e8a6c12763eeb8ed6ff84",
+      "scripts/gguf_convert_endian.py": "6ecc8d50c30fa0f3056c666795bcb23ed1de82aad45f86433b9855ce9b546c31",
+      "scripts/gguf_dump.py": "d8b8fc28e96d15d8a4d6f05cdff4a747f5a06f31172efee9dfc971998ed0203f",
+      "scripts/gguf_editor_gui.py": "6e9d70e850268fff5d4108d9ecbc2b4d90e70b61f08e71f7d37ac20916d854bb",
+      "scripts/gguf_hash.py": "9f277c9338d12a73857a4e54683d7da4d5de01531751f14401267c9289e4197f",
+      "scripts/gguf_new_metadata.py": "972499d35957b4721b9243828d5547d1c84def8d4e6fc641887c6578bf765255",
+      "scripts/gguf_set_metadata.py": "c8612a7109428a677ea55976dd5eeed6088934ddef7ef01246a5bc7a6e585b3b",
+      "tensor_mapping.py": "065375aa115b9a5a6940f2a3e1d23cc5cc6a640a7281f0b677af023ed47f7584",
+      "utility.py": "da920e2c62166ec9f30e407e9fb35ec29fda671310ffbf0f8ce856b62f1c70d7",
+      "vocab.py": "fce519b621f873213973c8186b010d7c41d6bb22134e411c8d47bf3a3e63f807"
+    },
+    "both_fresh_export_checkout_packages_identical": true
+  },
+  "summary": [
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-f16.gguf",
+      "entrypoint": "standalone",
+      "sha256": "4aaf136b76ca60b91c3107db953b435a58e65c6a6ebe55ffc1c417866b0505ff",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F16": 14,
+        "F32": 11
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q4_k_m.gguf",
+      "entrypoint": "standalone",
+      "sha256": "dba3d739e11e483e783e7baf2f1e643df6658deacff6b4fa2ac84666e54bf562",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q6_K": 3,
+        "Q4_K": 11
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q6_k.gguf",
+      "entrypoint": "standalone",
+      "sha256": "659a7ea01f8843c3c1abee6be703d6876a5f34e9f0e17871f94e084faeab3447",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q8_0.gguf",
+      "entrypoint": "standalone",
+      "sha256": "e260da836b8e5df34bd662186f0807788e57a518972b848c2ddf4cc6f33c38d3",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "entrypoint": "native",
+      "sha256": "32a4f31df10fe1ccbf1bb5df5742ebdd5255f836ab1c2a80dce7b9ab1a5c40f7",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q6_K": 3,
+        "Q4_K": 11
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "entrypoint": "native",
+      "sha256": "8f485b8f4fce4b82361a1787c96c3dfb0977b991a928d415257c4460b09705ce",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "entrypoint": "native",
+      "sha256": "adb5d3e358ba75c6132bd5738351e9c1738eef9cfb5cbcfaf580998c79be7464",
+      "tensor_count": 25,
+      "tensor_type_counts": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    }
+  ],
+  "error": null
+}

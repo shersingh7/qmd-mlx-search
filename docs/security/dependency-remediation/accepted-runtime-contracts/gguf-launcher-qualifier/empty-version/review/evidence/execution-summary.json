@@ -1,0 +1,50 @@
+{
+  "green": {
+    "errors": 0,
+    "failures": 0,
+    "groups": {
+      "test_probe_contract_green": 4,
+      "test_qualify_empty_version": 27,
+      "test_repair_heldouts": 59
+    },
+    "returncode": 0,
+    "seconds": 29.683537625009194,
+    "skipped": 0,
+    "tests": 90
+  },
+  "new_27_case_name_multiset_retained": true,
+  "original_162_suite_freshly_rerun": false,
+  "real_full_exit": 0,
+  "real_full_receipt": {
+    "locked_python_converter_training_gpu_cloud_qualified": false,
+    "native_only": false,
+    "outputs": [
+      "qmd-c-ok",
+      "qmd-cxx-ok"
+    ],
+    "platform": "Darwin/arm64",
+    "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "python": "3.12.13",
+    "scope": "native CPU C/C++ prerequisites only",
+    "status": "pass",
+    "versions": {
+      "c++": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "cc": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "git": "git version 2.53.0",
+      "make": "GNU Make 3.81",
+      "uv": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)"
+    }
+  },
+  "real_multiline_quiet_build_exit": 0,
+  "real_multiline_quiet_receipt_equal": true,
+  "red": {
+    "errors": 0,
+    "failures": 27,
+    "returncode": 1,
+    "seconds": 8.672635208000429,
+    "skipped": 0,
+    "tests": 27
+  },
+  "retained_85_heldouts_and_7_mutations_freshly_rerun": false,
+  "spec_stage": "PASS"
+}

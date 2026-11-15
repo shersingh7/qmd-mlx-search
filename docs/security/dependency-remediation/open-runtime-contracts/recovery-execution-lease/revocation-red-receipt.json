@@ -1,0 +1,10 @@
+{
+  "sourceSha256": {
+    "scripts/phase5_recovery_process.py": "8e4924483fa67545879d6f4583ec6a3b14048b1d5f4ec1be4ef00f1212aaf6ea",
+    "scripts/phase5_e2e_runner.ts": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+    "test/audit-recovery-execution-admission.test.ts": "0792a661fda0e2efb0b276198929b473b20e41c79a8396e58baa9312a83a428d"
+  },
+  "exit_code": 1,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/logs/revocation-red.log",
+  "finding": "K consumed before child admission was erased while supervisor paused; actual work executed with ~65ms lease remaining"
+}

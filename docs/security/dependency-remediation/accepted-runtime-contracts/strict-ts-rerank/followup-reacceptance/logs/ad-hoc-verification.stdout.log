@@ -1,0 +1,527 @@
+OWN_PYTHON_SYNTAX_PASS
+{"label": "adhoc-js-syntax-0", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror-isolated.config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.028685625000000006, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-1", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-isolated.config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.026142083999999996, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-2", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline-isolated.config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.029410875000000003, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-3", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/sdk-network-guard.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.027807584000000024, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-4", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.02598587499999999, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-5", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/evaluator.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.026538957999999974, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-6", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/effective-config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.02578808399999999, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-7", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/pure-namespace-evaluator.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.02649287499999997, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-8", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/merge-and-matcher.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.026200166999999996, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-9", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/source-proof.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.026467708000000034, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-10", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/node_modules/review-native-zod/index.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.026908708000000003, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-js-syntax-11", "command": ["/Users/shersingh/.hermes/node/bin/node", "--check", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/node_modules/review-converter-native/index.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.027620500000000048, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-node-source-proof", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/source-proof.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.286887417, "exit_code": 0, "expected_exit_code": 0}
+     "test/ast.test.ts",
+      "test/audit-cli-ipc.test.ts",
+      "test/audit-daemon-entrypoints.test.ts",
+      "test/audit-llm-cleanup-review.test.ts",
+      "test/audit-llm-deadline-review.test.ts",
+      "test/audit-llm-lifecycle.test.ts",
+      "test/audit-mcp-admission.test.ts",
+      "test/audit-mcp-http.test.ts",
+      "test/audit-mcp-request-ownership.test.ts",
+      "test/audit-mcp-runtime-review.test.ts",
+      "test/audit-native-bun-recovery.test.ts",
+      "test/audit-query-identity.test.ts",
+      "test/audit-query-snapshot.test.ts",
+      "test/audit-recovery-startup.test.ts",
+      "test/audit-recovery-tree.test.ts",
+      "test/audit-recovery.test.ts",
+      "test/audit-sdk.test.ts",
+      "test/audit-store-quality-regressions.test.ts",
+      "test/audit-store-review.test.ts",
+      "test/audit-store.test.ts",
+      "test/audit-transport-review.test.ts",
+      "test/audit-transport.test.ts",
+      "test/bench-rerank-entrypoint.test.ts",
+      "test/bench-rerank-lifecycle.test.ts",
+      "test/bench-score.test.ts",
+      "test/cli.test.ts",
+      "test/collections-config.test.ts",
+      "test/dependency-locks.test.ts",
+      "test/embed-outcome.test.ts",
+      "test/embedding-contract.test.ts",
+      "test/embedding-index.test.ts",
+      "test/eval-bm25.test.ts",
+      "test/eval-deep-research.ts",
+      "test/eval-harness.ts",
+      "test/eval.test.ts",
+      "test/expansion.test.ts",
+      "test/fixtures/bun_recovery_ownership.ts",
+      "test/fixtures/public_eval_dataset.ts",
+      "test/formatter.test.ts",
+      "test/helpers/source-cli.ts",
+      "test/indexing-resume.test.ts",
+      "test/intent.test.ts",
+      "test/llm.test.ts",
+      "test/mcp.test.ts",
+      "test/mlx.test.ts",
+      "test/multi-collection-filter.test.ts",
+      "test/phase5-recovery.test.ts",
+      "test/rrf-trace.test.ts",
+      "test/sdk.test.ts",
+      "test/semantic-hyphens.test.ts",
+      "test/store-paths.test.ts",
+      "test/store.helpers.unit.test.ts",
+      "test/store.test.ts",
+      "test/structured-search.test.ts",
+      "test/zod-import.test.ts",
+      "vitest.config.ts"
+    ]
+  },
+  "strict": true,
+  "noUncheckedIndexedAccess": true,
+  "noEmit": true
+}
+
+
+{"label": "adhoc-node-effective-config", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/effective-config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.178237875, "exit_code": 0, "expected_exit_code": 0}
+{
+  "execPath": "/Users/shersingh/.hermes/node/bin/node",
+  "versions": {
+    "node": "22.22.3",
+    "acorn": "8.16.0",
+    "ada": "2.9.2",
+    "amaro": "1.1.8",
+    "ares": "1.34.6",
+    "brotli": "1.1.0",
+    "cjs_module_lexer": "2.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.3.1",
+    "modules": "127",
+    "napi": "10",
+    "nbytes": "0.1.3",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.64.0",
+    "openssl": "3.5.6",
+    "simdjson": "4.5.0",
+    "simdutf": "6.4.2",
+    "sqlite": "3.51.3",
+    "tz": "2026a",
+    "undici": "6.24.1",
+    "unicode": "17.0",
+    "uv": "1.51.0",
+    "uvwasi": "0.0.23",
+    "v8": "12.4.254.21-node.56",
+    "zlib": "1.3.1-e00f703",
+    "zstd": "1.5.7"
+  },
+  "records": [
+    {
+      "layout": "baseline",
+      "maxWorkers": 2,
+      "testTimeout": 30000,
+      "include": [
+        "test/**/*.test.ts"
+      ],
+      "inline": null,
+      "interopDefault": null,
+      "serverDeps": {},
+      "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/adhoc-node-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "setupFiles": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+      ]
+    },
+    {
+      "layout": "mirror",
+      "maxWorkers": 2,
+      "testTimeout": 30000,
+      "include": [
+        "test/**/*.test.ts"
+      ],
+      "inline": [],
+      "interopDefault": null,
+      "serverDeps": {
+        "inline": []
+      },
+      "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/adhoc-node-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "setupFiles": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+      ]
+    }
+  ],
+  "realCjs": {
+    "id": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch/index.js",
+    "defaultType": "function",
+    "positive": true,
+    "negative": true
+  },
+  "defaultInlineRemainsIndependent": true,
+  "vitestResolverSha256": "222aa60f8555aea9311703c68edaaa8eba0888ea29bfb4a49b37f98e0811ee2d"
+}
+
+
+{"label": "adhoc-node-merge-and-matcher", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/merge-and-matcher.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.17474383300000007, "exit_code": 0, "expected_exit_code": 0}
+{
+  "execPath": "/Users/shersingh/.hermes/node/bin/node",
+  "versions": {
+    "node": "22.22.3",
+    "acorn": "8.16.0",
+    "ada": "2.9.2",
+    "amaro": "1.1.8",
+    "ares": "1.34.6",
+    "brotli": "1.1.0",
+    "cjs_module_lexer": "2.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.3.1",
+    "modules": "127",
+    "napi": "10",
+    "nbytes": "0.1.3",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.64.0",
+    "openssl": "3.5.6",
+    "simdjson": "4.5.0",
+    "simdutf": "6.4.2",
+    "sqlite": "3.51.3",
+    "tz": "2026a",
+    "undici": "6.24.1",
+    "unicode": "17.0",
+    "uv": "1.51.0",
+    "uvwasi": "0.0.23",
+    "v8": "12.4.254.21-node.56",
+    "zlib": "1.3.1-e00f703",
+    "zstd": "1.5.7"
+  },
+  "observations": [
+    {
+      "layout": "baseline",
+      "ssrNoExternal": [
+        "review-sentinel"
+      ],
+      "effectiveInline": [
+        "review-sentinel"
+      ]
+    },
+    {
+      "layout": "mirror",
+      "ssrNoExternal": [
+        "review-sentinel"
+      ],
+      "effectiveInline": [
+        "review-sentinel"
+      ]
+    }
+  ],
+  "exactInstalledMatchPattern": "function matchPattern(id, moduleDirectories, patterns) {\n\tif (patterns == null) return false;\n\tif (patterns === true) return true;\n\tfor (const ex of patterns) if (typeof ex === \"string\") {\n\t\tif (moduleDirectories.some((dir) => id.includes(join(dir, ex)))) return true;\n\t} else if (ex.test(id)) return true;\n\treturn false;\n}",
+  "zodPrefixScope": {
+    "zod/index.js": true,
+    "zod/v4/core/index.js": true,
+    "zod-to-json-schema/dist/esm/index.js": true,
+    "picomatch/index.js": false,
+    "@modelcontextprotocol/sdk/dist/esm/server/mcp.js": false
+  }
+}
+
+
+{"label": "adhoc-node-three-product-files", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-three-product-files-results.json", "test/bench-rerank-entrypoint.test.ts", "test/zod-import.test.ts", "test/phase5-recovery.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 1.9871437909999998, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror
+
+·······························································
+
+ Test Files  3 passed (3)
+      Tests  63 passed (63)
+   Start at  21:26:59
+   Duration  1.80s (transform 313ms, setup 22ms, import 780ms, tests 1.49s, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-three-product-files-results.json
+
+
+{"label": "adhoc-node-sdk-boundaries", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-sdk-boundaries-results.json", "test/sdk-inlined-zod.test.ts", "test/zod-prefix-scope.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.383033583, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe
+
+····
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  21:27:01
+   Duration  202ms (transform 50ms, setup 51ms, import 107ms, tests 26ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-sdk-boundaries-results.json
+
+
+{"label": "adhoc-node-strict-root", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/typescript/bin/tsc", "-p", "tsconfig.json", "--noEmit", "--pretty", "false"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 2.564389958, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-bun-source-proof", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/source-proof.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.3890055839999995, "exit_code": 0, "expected_exit_code": 0}
+     "test/ast.test.ts",
+      "test/audit-cli-ipc.test.ts",
+      "test/audit-daemon-entrypoints.test.ts",
+      "test/audit-llm-cleanup-review.test.ts",
+      "test/audit-llm-deadline-review.test.ts",
+      "test/audit-llm-lifecycle.test.ts",
+      "test/audit-mcp-admission.test.ts",
+      "test/audit-mcp-http.test.ts",
+      "test/audit-mcp-request-ownership.test.ts",
+      "test/audit-mcp-runtime-review.test.ts",
+      "test/audit-native-bun-recovery.test.ts",
+      "test/audit-query-identity.test.ts",
+      "test/audit-query-snapshot.test.ts",
+      "test/audit-recovery-startup.test.ts",
+      "test/audit-recovery-tree.test.ts",
+      "test/audit-recovery.test.ts",
+      "test/audit-sdk.test.ts",
+      "test/audit-store-quality-regressions.test.ts",
+      "test/audit-store-review.test.ts",
+      "test/audit-store.test.ts",
+      "test/audit-transport-review.test.ts",
+      "test/audit-transport.test.ts",
+      "test/bench-rerank-entrypoint.test.ts",
+      "test/bench-rerank-lifecycle.test.ts",
+      "test/bench-score.test.ts",
+      "test/cli.test.ts",
+      "test/collections-config.test.ts",
+      "test/dependency-locks.test.ts",
+      "test/embed-outcome.test.ts",
+      "test/embedding-contract.test.ts",
+      "test/embedding-index.test.ts",
+      "test/eval-bm25.test.ts",
+      "test/eval-deep-research.ts",
+      "test/eval-harness.ts",
+      "test/eval.test.ts",
+      "test/expansion.test.ts",
+      "test/fixtures/bun_recovery_ownership.ts",
+      "test/fixtures/public_eval_dataset.ts",
+      "test/formatter.test.ts",
+      "test/helpers/source-cli.ts",
+      "test/indexing-resume.test.ts",
+      "test/intent.test.ts",
+      "test/llm.test.ts",
+      "test/mcp.test.ts",
+      "test/mlx.test.ts",
+      "test/multi-collection-filter.test.ts",
+      "test/phase5-recovery.test.ts",
+      "test/rrf-trace.test.ts",
+      "test/sdk.test.ts",
+      "test/semantic-hyphens.test.ts",
+      "test/store-paths.test.ts",
+      "test/store.helpers.unit.test.ts",
+      "test/store.test.ts",
+      "test/structured-search.test.ts",
+      "test/zod-import.test.ts",
+      "vitest.config.ts"
+    ]
+  },
+  "strict": true,
+  "noUncheckedIndexedAccess": true,
+  "noEmit": true
+}
+
+
+{"label": "adhoc-bun-effective-config", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/effective-config.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.16281800000000057, "exit_code": 0, "expected_exit_code": 0}
+f6f47af0a9782a354f61e06d7f83d097d9f84",
+    "zig": "0.14.1",
+    "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+    "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+    "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+    "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+    "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+    "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+    "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+    "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+    "v8": "13.6.233.10-node.18",
+    "uv": "1.48.0",
+    "napi": "10",
+    "icu": "74.2",
+    "unicode": "15.1",
+    "modules": "137"
+  },
+  "records": [
+    {
+      "layout": "baseline",
+      "maxWorkers": 2,
+      "testTimeout": 30000,
+      "include": [
+        "test/**/*.test.ts"
+      ],
+      "inline": null,
+      "interopDefault": null,
+      "serverDeps": {},
+      "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/adhoc-bun-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "setupFiles": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+      ]
+    },
+    {
+      "layout": "mirror",
+      "maxWorkers": 2,
+      "testTimeout": 30000,
+      "include": [
+        "test/**/*.test.ts"
+      ],
+      "inline": [
+        "zod"
+      ],
+      "interopDefault": null,
+      "serverDeps": {
+        "inline": [
+          "zod"
+        ]
+      },
+      "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/adhoc-bun-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "setupFiles": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+      ]
+    }
+  ],
+  "realCjs": {
+    "id": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch/index.js",
+    "defaultType": "function",
+    "positive": true,
+    "negative": true
+  },
+  "defaultInlineRemainsIndependent": true,
+  "vitestResolverSha256": "222aa60f8555aea9311703c68edaaa8eba0888ea29bfb4a49b37f98e0811ee2d"
+}
+
+
+{"label": "adhoc-bun-merge-and-matcher", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/merge-and-matcher.mjs"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.15832495799999968, "exit_code": 0, "expected_exit_code": 0}
+{
+  "execPath": "/Users/shersingh/.bun/bin/bun",
+  "versions": {
+    "node": "24.3.0",
+    "bun": "1.3.8",
+    "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+    "openssl": "1.1.0",
+    "llhttp": "9.3.0",
+    "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+    "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+    "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+    "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+    "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+    "zig": "0.14.1",
+    "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+    "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+    "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+    "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+    "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+    "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+    "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+    "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+    "v8": "13.6.233.10-node.18",
+    "uv": "1.48.0",
+    "napi": "10",
+    "icu": "74.2",
+    "unicode": "15.1",
+    "modules": "137"
+  },
+  "observations": [
+    {
+      "layout": "baseline",
+      "ssrNoExternal": [
+        "review-sentinel"
+      ],
+      "effectiveInline": [
+        "review-sentinel"
+      ]
+    },
+    {
+      "layout": "mirror",
+      "ssrNoExternal": [
+        "review-sentinel"
+      ],
+      "effectiveInline": [
+        "zod",
+        "review-sentinel"
+      ]
+    }
+  ],
+  "exactInstalledMatchPattern": "function matchPattern(id, moduleDirectories, patterns) {\n\tif (patterns == null) return false;\n\tif (patterns === true) return true;\n\tfor (const ex of patterns) if (typeof ex === \"string\") {\n\t\tif (moduleDirectories.some((dir) => id.includes(join(dir, ex)))) return true;\n\t} else if (ex.test(id)) return true;\n\treturn false;\n}",
+  "zodPrefixScope": {
+    "zod/index.js": true,
+    "zod/v4/core/index.js": true,
+    "zod-to-json-schema/dist/esm/index.js": true,
+    "picomatch/index.js": false,
+    "@modelcontextprotocol/sdk/dist/esm/server/mcp.js": false
+  }
+}
+
+
+{"label": "adhoc-bun-three-product-files", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-three-product-files-results.json", "test/bench-rerank-entrypoint.test.ts", "test/zod-import.test.ts", "test/phase5-recovery.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 1.1830619579999997, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror
+
+·········································
+
+ Test Files  3 passed (3)
+      Tests  41 passed (41)
+   Start at  21:27:04
+   Duration  995ms (transform 444ms, setup 29ms, import 1.08s, tests 604ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-three-product-files-results.json
+
+
+{"label": "adhoc-bun-sdk-boundaries", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-sdk-boundaries-results.json", "test/sdk-inlined-zod.test.ts", "test/zod-prefix-scope.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 0.615330792, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe
+
+····
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  21:27:06
+   Duration  427ms (transform 306ms, setup 41ms, import 471ms, tests 31ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-sdk-boundaries-results.json
+
+
+{"label": "adhoc-bun-strict-root", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/node_modules/typescript/bin/tsc", "-p", "tsconfig.json", "--noEmit", "--pretty", "false"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror", "env": "[retained in receipt]", "elapsed_seconds": 2.5113474999999994, "exit_code": 0, "expected_exit_code": 0}
+
+
+{"label": "adhoc-node-baseline-config-positive", "command": ["/Users/shersingh/.hermes/node/bin/node", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-baseline-config-positive-results.json", "test/zod-import.test.ts", "test/phase5-recovery.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline", "env": "[retained in receipt]", "elapsed_seconds": 0.7356173340000005, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+···················
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  21:27:09
+   Duration  546ms (transform 224ms, setup 19ms, import 486ms, tests 35ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-baseline-config-positive-results.json
+
+
+{"label": "adhoc-bun-baseline-config-positive", "command": ["/Users/shersingh/.bun/bin/bun", "--bun", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/node_modules/vitest/vitest.mjs", "run", "--config", "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline-isolated.config.mjs", "--no-cache", "--reporter=dot", "--reporter=json", "--outputFile.json=/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-baseline-config-positive-results.json", "test/bench-rerank-entrypoint.test.ts"], "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline", "env": "[retained in receipt]", "elapsed_seconds": 1.1114676670000012, "exit_code": 0, "expected_exit_code": 0}
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline
+
+······················
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  21:27:09
+   Duration  921ms (transform 50ms, setup 13ms, import 328ms, tests 517ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-baseline-config-positive-results.json
+
+
+AD_HOC_CHANGED_BEHAVIOR_CHECKS_PASS

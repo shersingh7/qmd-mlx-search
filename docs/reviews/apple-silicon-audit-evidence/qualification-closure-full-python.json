@@ -1,0 +1,18 @@
+{
+  "label": "qualification-closure-full-python",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python",
+    "-q",
+    "-m",
+    "not real_model",
+    "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-results.xml"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 1,
+  "elapsed_seconds": 134.888534958,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/qualification-closure-full-python-2bmnhm3h"
+}

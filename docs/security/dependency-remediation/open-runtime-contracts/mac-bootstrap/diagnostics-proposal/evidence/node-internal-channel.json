@@ -1,0 +1,38 @@
+[
+  {
+    "line": 62,
+    "text": "const { convertToValidSignal, deprecate, SymbolDispose } = require('internal/util');\nconst { isArrayBufferView } = require('internal/util/types');\nconst spawn_sync = internalBinding('spawn_sync');\nconst { kStateSymbol } = require('internal/dgram');\nconst dc = require('diagnostics_channel');\nconst childProcessChannel = dc.channel('child_process');\n\nconst {\n  UV_EACCES,"
+  },
+  {
+    "line": 63,
+    "text": "const { isArrayBufferView } = require('internal/util/types');\nconst spawn_sync = internalBinding('spawn_sync');\nconst { kStateSymbol } = require('internal/dgram');\nconst dc = require('diagnostics_channel');\nconst childProcessChannel = dc.channel('child_process');\n\nconst {\n  UV_EACCES,\n  UV_EAGAIN,"
+  },
+  {
+    "line": 290,
+    "text": "\n      if (this.spawnfile)\n        err.path = this.spawnfile;\n\n      err.spawnargs = ArrayPrototypeSlice(this.spawnargs, 1);\n      this.emit('error', err);\n    } else {\n      this.emit('exit', this.exitCode, this.signalCode);\n    }"
+  },
+  {
+    "line": 306,
+    "text": "    process.nextTick(flushStdio, this);\n\n    maybeClose(this);\n  };\n  if (childProcessChannel.hasSubscribers) {\n    childProcessChannel.publish({\n      process: this,\n    });\n  }"
+  },
+  {
+    "line": 307,
+    "text": "\n    maybeClose(this);\n  };\n  if (childProcessChannel.hasSubscribers) {\n    childProcessChannel.publish({\n      process: this,\n    });\n  }\n}"
+  },
+  {
+    "line": 389,
+    "text": "  validateString(options.file, 'options.file');\n  this.spawnfile = options.file;\n\n  if (options.args === undefined) {\n    this.spawnargs = [];\n  } else {\n    validateArray(options.args, 'options.args');\n    this.spawnargs = options.args;\n  }"
+  },
+  {
+    "line": 392,
+    "text": "  if (options.args === undefined) {\n    this.spawnargs = [];\n  } else {\n    validateArray(options.args, 'options.args');\n    this.spawnargs = options.args;\n  }\n\n  const err = this._handle.spawn(options);\n"
+  },
+  {
+    "line": 469,
+    "text": "    stdio[1].socket : null;\n  this.stderr = stdio.length >= 3 && stdio[2].socket !== undefined ?\n    stdio[2].socket : null;\n\n  this.stdio = [];\n\n  for (i = 0; i < stdio.length; i++)\n    ArrayPrototypePush(this.stdio,\n                       stdio[i].socket === undefined ? null : stdio[i].socket);"
+  },
+  {
+    "line": 472,
+    "text": "\n  this.stdio = [];\n\n  for (i = 0; i < stdio.length; i++)\n    ArrayPrototypePush(this.stdio,\n                       stdio[i].socket === undefined ? null : stdio[i].socket);\n\n  // Add .send() method and start listening for IPC data\n  if (ipc !== undefined) setupChannel(this, ipc, serialization);"
+  }
+]

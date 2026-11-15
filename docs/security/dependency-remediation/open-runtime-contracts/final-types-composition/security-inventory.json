@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-11-14T08:56:49.213120+00:00",
+  "repository": "shersingh7/qmd-mlx-search",
+  "apiCommand": [
+    "/opt/homebrew/bin/gh",
+    "api",
+    "--paginate",
+    "--slurp",
+    "repos/shersingh7/qmd-mlx-search/dependabot/alerts?state=open&per_page=100"
+  ],
+  "exitCode": 0,
+  "pages": 3,
+  "openAlerts": 262,
+  "severities": {
+    "medium": 122,
+    "high": 93,
+    "low": 30,
+    "critical": 17
+  },
+  "baseline262NotOverwritten": true,
+  "notCandidateMitigationProof": true,
+  "nixKnownDefaultPathExists": false
+}

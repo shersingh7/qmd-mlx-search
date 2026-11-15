@@ -1,0 +1,5 @@
+{
+  "probe_exit": 2,
+  "probe_stderr": "SYNTHETIC: Native prerequisite probe failed: image probe requires uv 0.11.18",
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/evidence/synthetic-parent/probe-version-refusal-propagates/public work space"
+}

@@ -1,0 +1,72 @@
+{
+  "status": "ACCEPTED: independently reviewed static graph consistency at exact source hashes; release remains gated",
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji",
+  "source_sha256": {
+    "scripts/verify_patched_dependencies.py": "3925f9ae6602688848530aa37f59d015c6230b1562a78d7a2ed64f67059706ea",
+    "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596",
+    "test/security/test_patched_dependencies.py": "5a6b7df95337a05a7393c5576eeeae32b150b71b81711add23cbbffe50515dcb",
+    "test/security/test_uv_lock_graph.py": "578b385e3940d17b9807793bc4acc9bf11275d64de7de89c1921aa7aa57da432"
+  },
+  "independent_review_sha256": "324c72e7bc7129147d0c75784120c98028232ef36a7f3d93e7880a267bcfd675",
+  "parent_fresh_replay": {
+    "testcase_elements": 214,
+    "failures_errors_skips": 0,
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--rootdir=/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji",
+      "--confcutdir=/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji",
+      "--basetemp=/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/tmp/fixtures",
+      "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/parent-replay.xml",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/test_r2_heldout.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/test_previous_heldout_contracts.py",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/test_quality_contracts.py"
+    ],
+    "probe_bytes_unchanged": true
+  },
+  "authenticated_independent_junit": {
+    "testcase_elements": 671,
+    "declared_including_subtests": 714
+  },
+  "authenticated_cli_matrix": {
+    "total": 51,
+    "refused_no_proof": 24,
+    "successful": 27
+  },
+  "authenticated_graphs": {
+    "count": 16,
+    "python_instances": 931,
+    "runner_headers": 15
+  },
+  "fresh_baseline_audit": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+      "-B",
+      "/Users/shersingh/github/qmd-mlx-search/scripts/check_dependency_security.py",
+      "--repo",
+      "/Users/shersingh/github/qmd-mlx-search",
+      "--output",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/parent-graph-acceptance-_a8a0cji/current-repo-audit.json"
+    ],
+    "exit_code": 0,
+    "alerts_checked": 262,
+    "affected_alerts": 0,
+    "graph_instances": 1772,
+    "source_proofs": 11
+  },
+  "retained_parent_fixture_layout_failure": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-graph-acceptance-8ofx7bw3",
+  "limits": [
+    "declared/recorded static graph consistency, not a full resolver",
+    "does not reconstruct absent upstream metadata or authenticate ordinary registry artifacts",
+    "does not prove platform-wheel availability or application compatibility",
+    "dimension/input budgets are not a global operation-count or wall-clock SLA",
+    "repository reads are bounded per-file, not an atomic concurrent whole-repository snapshot",
+    "native CI, final integration/default-branch closure remain parent-owned"
+  ],
+  "online_advisory_scan_or_default_branch_closure": false
+}

@@ -1,0 +1,115 @@
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { stripVTControlCharacters } from "node:util";
+import YAML from "../mirror/node_modules/yaml/dist/index.js";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const json=name=>JSON.parse(read(name));
+const sha=bytes=>createHash("sha256").update(bytes).digest("hex");
+const manifest=json("source-hash-manifest.json");
+const evidence=[];
+function records(label) { return stripVTControlCharacters(read(`evidence/${label}.stdout.log`)).split("\n").filter(line=>line.startsWith("{")||line.startsWith("# {"))
+  .map(line=>{try{return JSON.parse(line.replace(/^# /,""));}catch{return null;}}).filter(Boolean); }
+function artifact(label) {
+  const directory=path.join(root,"evidence",`${label}-artifacts`);
+  const files=fs.readdirSync(directory).filter(name=>name.startsWith("fast-timeout-")&&name.endsWith(".json"));
+  assert.equal(files.length,1); return JSON.parse(fs.readFileSync(path.join(directory,files[0]),"utf8"));
+}
+for(const label of ["fast-on-hashbound","fast-off-hashbound"]) {
+  const report=json(`evidence/${label}.json`), command=json(`evidence/${label}-command.json`);
+  assert.equal(report.numPassedTests,1); assert.equal(report.numFailedTests,0); assert.equal(report.numPendingTests,7);
+  assert.equal(command.exitCode,0); assert.equal(command.outerCleanup,"none");
+  const rec=records(label); const before=rec.find(row=>row.evidence==="recovery-fast-timeout-before-finally"); const after=rec.find(row=>row.evidence==="recovery-fast-timeout-finally");
+  assert.ok(before.elapsedMs>=200&&before.elapsedMs<1500); assert.equal(before.supervisorAbsent,true); assert.equal(before.sentinelAlive,true); assert.equal(before.guardFired,false);
+  assert.equal(before.result.cleanup.pipesClosed,true); assert.equal(before.result.cleanup.forcedPipeClose,false); assert.equal(before.result.cleanup.containmentVerified,false);
+  assert.deepEqual(after.finallyKilled,[]); assert.equal(after.scratchRemoved,true);
+  evidence.push({label,passed:report.numPassedTests,failed:report.numFailedTests,filtered:report.numPendingTests,elapsedMs:before.elapsedMs,launch:before.result.launch,cleanup:before.result.cleanup});
+}
+const normal=artifact("fast-on-hashbound");
+assert.equal(normal.status,"observed-node-supervisor");
+assert.equal(normal.runtime.node,"22.22.3"); assert.equal(normal.runtime.bun,null);
+const normalReceipt=records("fast-on-hashbound").find(row=>row.evidence==="recovery-fast-timeout-before-finally").result;
+assert.equal(normal.ownerPid,normalReceipt.launch.supervisorPid);
+for(const stream of ["stdout","stderr","control"]) {
+  assert.ok(normal.events.some(event=>event.event===stream+".end"));
+  assert.ok(normal.events.some(event=>event.event===stream+".close"));
+}
+assert.ok(normal.events.some(event=>event.event==="owner.spawn")); assert.ok(normal.events.some(event=>event.event==="owner.exit")); assert.ok(normal.events.some(event=>event.event==="owner.close"));
+assert.equal(normal.finalState.closeCounter.got,4); assert.equal(normal.finalState.closeCounter.needed,4); assert.equal(normal.droppedEvents,0);
+assert.deepEqual(normal.restoration,{channelUnsubscribed:true,listenersRemoved:true});
+assert.equal(normal.receipt.preForcedClosure,null);
+for(const forbidden of ["import time; time.sleep", "shadow-unused.sqlite", "launch-token", "PYTHONPATH", "NODE_OPTIONS"])
+  assert.ok(!JSON.stringify(normal).includes(forbidden));
+const controls=read("evidence/selftests-hashbound.stdout.log");
+const tapCount=key=>Number(controls.match(new RegExp(`^# ${key} (\\d+)$`,"m"))?.[1]);
+assert.equal(tapCount("tests"),8); assert.equal(tapCount("pass"),8); assert.equal(tapCount("fail"),0); assert.equal(tapCount("skipped"),0);
+const controlRecords=records("selftests-hashbound");
+assert.equal(controlRecords.length,4);
+assert.deepEqual(controlRecords.find(row=>row.evidence==="diagnostic-control-known-fixture-FD3-writer").ends,{stdout:true,stderr:true,control:false});
+assert.equal(controlRecords.find(row=>row.evidence==="diagnostic-control-known-fixture-FD3-writer").closeCounter.got,3);
+assert.ok(controlRecords.find(row=>row.evidence==="diagnostic-control-delayed-reader").closeDelayMs>=40);
+const native=artifact("native-import-control");
+assert.equal(native.status,"native-bun-owner-diagnostics-not-implemented");
+assert.equal(native.events,undefined);
+const nativeLog=read("evidence/native-import-control.stderr.log");
+assert.match(nativeLog,/1 pass/);assert.match(nativeLog,/7 filtered out/);assert.match(nativeLog,/0 fail/);
+const nativeRecords=records("native-import-control");
+assert.equal(nativeRecords.find(row=>row.evidence==="recovery-tree-native-runtime").bun,"1.3.8");
+const actual=artifact("actual-fallback-after-first");
+const actualRec=records("actual-fallback-after-first");
+const actualResult=actualRec.find(row=>row.evidence==="separate-after-first-actual-production-fallback-control");
+assert.equal(actual.status,"observed-node-supervisor");
+assert.equal(actualResult.coldOrCIProof,false);
+assert.deepEqual(actual.receipt.preForcedClosure.transportFailure,actualResult.transportFailure);
+assert.equal(actual.receipt.preForcedClosure.tMs,null);
+assert.equal(actual.receipt.cleanup.pipesClosed,false);
+assert.equal(actual.receipt.cleanup.forcedPipeClose,true);
+assert.equal(actual.receipt.cleanup.containmentVerified,false);
+assert.equal(actual.finalState.closeCounter.got,2); assert.equal(actual.finalState.closeCounter.needed,4);
+assert.equal(actual.events.some(event=>event.event==="stdout.end"||event.event==="stderr.end"),false);
+assert.ok(actual.events.some(event=>event.event==="control.end"));
+assert.equal(actualRec.find(row=>row.evidence==="separate-after-first-actual-production-fallback-finally").noNumericalPidSignals,true);
+const metadata=json("evidence/metadata-hashbound-artifacts/runner-metadata.json");
+assert.equal(metadata.execution,"local-metadata-command-not-CI-proof");
+assert.equal(metadata.git.actualCheckout,null);
+assert.equal(metadata.systemPython.firstSelectedInterpreterVersion,"not-observed");
+for(const [name,expected] of Object.entries(metadata.sourceSha256)) assert.equal(expected,manifest.sourceSha256[name]);
+for(const [name,expected] of Object.entries(manifest.sourceSha256)) assert.equal(sha(fs.readFileSync(path.join(root,"mirror",name))),expected);
+for(const label of ["helper-typecheck-hashbound","syntax-helper","syntax-controls","actionlint-final","actionlint-published","validation-first","metadata-hashbound","actual-fallback-after-first","native-import-control"]) {
+  const command=json(`evidence/${label}-command.json`); assert.equal(command.exitCode,0,label);
+  assert.equal(command.outerCleanup,"none");
+}
+const workflow=YAML.parse(read("mirror/.github/workflows/ci.yml"));
+const shellSyntax=workflow.jobs.javascript.steps.filter(step=>step.run).map(step=>{
+  const result=spawnSync("/bin/bash",["-n"],{input:step.run,env:process.env,encoding:"utf8",timeout:2000});
+  assert.equal(result.status,0,step.name+result.stderr);
+  return {step:step.name,argv:["/bin/bash","-n"],inputSha256:sha(step.run),exitCode:result.status,stderr:result.stderr};
+});
+const typesBefore=read("evidence/types-before.stdout.log");const typesAfter=read("evidence/types-after.stdout.log");
+const rawTypes={before:(typesBefore.match(/error TS\d+/g)||[]).length,after:(typesAfter.match(/error TS\d+/g)||[]).length,
+  disqualifiedForFrozenScope:true,reason:"whole-snapshot allowJs followed absolute live-source imports in archived documentation .mjs; parse-only, not executed; no live writes. Final bounded validation excludes those JS docs and guards every source-file read."};
+const publishedReceipt=JSON.parse(fs.readFileSync("/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/receipt.json","utf8"));
+assert.equal(sha(fs.readFileSync("/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint")),publishedReceipt.binary_sha256);
+fs.copyFileSync("/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/receipt.json",path.join(root,"evidence/actionlint-published-release-receipt.json"),fs.constants.COPYFILE_EXCL);
+const summary={status:"LOCAL_TEST_ONLY_PROPOSAL_VERIFIED; parent review/integration/real CI pending",patchSha256:manifest.patchSha256,changes:manifest.changes,
+  finalFocused:evidence,observerEvents:normal.events.map(row=>({event:row.event,tMs:row.tMs})),nodeCloseCounter:normal.finalState.closeCounter,
+  selftests:{tests:tapCount("tests"),passed:tapCount("pass"),failed:tapCount("fail"),skipped:tapCount("skipped"),controls:controlRecords},
+  nativeImportOnly:{passed:1,filtered:7,runtime:"Bun1.3.8",nativeOwnerDiagnostics:"not-implemented",receipt:native},
+  actualPostCanonicalFallback:{elapsedMs:actualResult.elapsedMs,closeCounter:actual.finalState.closeCounter,receipt:actual.receipt,notCIOrColdProof:true},
+  ownSourcePreservation:{frozenFiles:manifest.verifiedFrozenFiles,canonicalTestRecoveredByteForByte:manifest.originalTestRecoveredByteForByte,originalItCalls:manifest.unchangedCanonicalItCalls,originalLaunchCalls:manifest.unchangedCanonicalLaunchCalls,unchangedStrategyAndTriggers:true,sourceFilesOnlyChanged:manifest.changes.map(row=>row.path)},
+  typeValidation:{boundedSameSourceBefore:manifest.boundedTypes.before,boundedSameSourceAfter:manifest.boundedTypes.after,newDiagnostics:0,helperStrictCheckExit:0,exploratoryRoot:rawTypes,canonicalRoot61Gate:"separate parent-owned gate; not repaired or qualified here"},
+  shellSyntax,actionlint:{publishedVersion:publishedReceipt.release,binarySha256:publishedReceipt.binary_sha256,exitCode:0,shellcheck:"not installed; disabled explicitly; bash -n checked workflow run scripts"},actualHost:metadata.host,actualNode:metadata.runtime,ciExecuted:false,originalCICause:"unproven",limits:{events:32,canonicalExecutionMs:200,productionTeardownMs:800,canonicalGuardMs:1800,canonicalElapsedExclusiveBoundMs:1500},
+  remaining:["Parent independent review of proposal and lease interaction","Parent full canonical suite/build/type integration","Real macOS CI artifacts at exact candidate source head and actual checkout; inspect actual first-case scheduling","Native Bun native-owner tracing not implemented; existing native ownership suite still required","No kernel holder or first selected-interpreter identity proof; optional separately labeled probe required if runtime trace remains ambiguous"]};
+fs.writeFileSync(path.join(root,"verification-summary.json"),JSON.stringify(summary,null,2)+"\n",{flag:"wx"});
+const artifacts={};
+for(const directory of ["harness","evidence"]) {
+  function walk(dir) {for(const entry of fs.readdirSync(path.join(root,dir),{withFileTypes:true})) {const name=path.join(dir,entry.name); if(entry.isDirectory())walk(name);else if(entry.isFile())artifacts[name]=sha(fs.readFileSync(path.join(root,name)));}}
+  walk(directory);
+}
+for(const name of ["input.json","DESIGN.md","source-hash-manifest.json","diagnostics-proposal.patch","verification-summary.json"])artifacts[name]=sha(fs.readFileSync(path.join(root,name)));
+fs.writeFileSync(path.join(root,"artifact-hash-manifest.json"),JSON.stringify({scope:"verification inputs/artifacts present before finalize runner logs and narrative report",sha256:artifacts},null,2)+"\n",{flag:"wx"});
+console.log(JSON.stringify({patchSha256:summary.patchSha256,finalFocused:summary.finalFocused.map(row=>({label:row.label,passed:row.passed,filtered:row.filtered,elapsedMs:row.elapsedMs})),selftests:summary.selftests,nativeOwnerDiagnostics:summary.nativeImportOnly.nativeOwnerDiagnostics,actualFallback:summary.actualPostCanonicalFallback,boundedTypes:manifest.boundedTypes,exploratoryRoot:rawTypes,artifactCount:Object.keys(artifacts).length,workflowShellStepsChecked:shellSyntax.length},null,2));

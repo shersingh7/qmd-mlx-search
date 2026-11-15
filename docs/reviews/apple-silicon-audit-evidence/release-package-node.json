@@ -1,0 +1,14 @@
+{
+  "label": "release-package-node",
+  "command": [
+    "bash",
+    "test/smoke-install.sh",
+    "--runtime",
+    "node"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 13.666316958,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t"
+}

@@ -1,0 +1,390 @@
+{
+  "purpose": "Final narrow pre-body HTTP bounds and rejected-initialization non-eviction closure",
+  "runtime": "v22.22.3",
+  "before": {
+    "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-admission.test.ts": "805c36a7df2ddd4b028ed5b3bd4e14c8702ba05df0cef09b6cbd47badad1f368",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-request-ownership.test.ts": "c2c67466f5ada283d8600f385da834a3209b1f164a4ea78fca9898b4dc3427d3",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-http.test.ts": "1e58716cc88d4812e676f2f465481e62847519cfea74bb51fcb4299547a477dd",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-runtime-review.test.ts": "1e1af8ac2f04443ff18b6a30944f24070152f4a1117443354e62206cad7f7bd6",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/mcp-positive-contract-and-admission-review.mjs": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/mcp-positive-contract-and-admission-review-result.json": "d446cefcca74838a27bd7f84d2dfd5ee997fbcf0140b0079bc686c90a691a135",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/quality-mcp-heldout-cancel.mjs": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997"
+  },
+  "cases": [
+    {
+      "name": "MCP and both REST aliases share a pre-body upload bound; refusal never installs a collector",
+      "status": "PASS",
+      "elapsedMs": 228.67783399999996,
+      "evidence": {
+        "pendingUploads": 2,
+        "applicationBytesRetained": 32768,
+        "refusals": [
+          {
+            "path": "/query",
+            "status": 503,
+            "collectors": 0,
+            "applicationBodyBytes": 0
+          },
+          {
+            "path": "/search",
+            "status": 503,
+            "collectors": 0,
+            "applicationBodyBytes": 0
+          },
+          {
+            "path": "/mcp",
+            "status": 503,
+            "collectors": 0,
+            "applicationBodyBytes": 0
+          }
+        ],
+        "health": 200,
+        "cancel": 202,
+        "delete": 200,
+        "originalSettledAndDownstreamClosed": true,
+        "stopClosedPartialUploads": true
+      }
+    },
+    {
+      "name": "The bounded control reserve refuses saturation honestly and recovers health, DELETE, and cancellation",
+      "status": "PASS",
+      "elapsedMs": 55.42495800000006,
+      "evidence": {
+        "duplicate": 409,
+        "nonControlFallback": 503,
+        "saturatedCancel": 503,
+        "saturatedHealth": 503,
+        "saturatedDelete": 503,
+        "recoveredHealth": 200,
+        "recoveredCancel": 202,
+        "deleteUnderDataSaturation": 200,
+        "literalIds": [
+          "",
+          0
+        ],
+        "downstreamsClosed": 2,
+        "freshRest": 200
+      }
+    },
+    {
+      "name": "Chunked fallback cancellation uploads have a 4 KiB ceiling and no owner/control leak after overflow",
+      "status": "PASS",
+      "elapsedMs": 14.986084000000005,
+      "evidence": {
+        "chunkedBytes": 4097,
+        "ceiling": 4096,
+        "status": 413,
+        "activeOwnerUntouchedUntilRealCancel": true,
+        "health": 200,
+        "cancel": 202
+      }
+    },
+    {
+      "name": "Receipt releases upload slots during long legitimate MCP/REST work; shared HTTP processing capacity remains exact",
+      "status": "PASS",
+      "elapsedMs": 32.872292000000016,
+      "evidence": {
+        "concurrentCompletedUploadsStillProcessing": 3,
+        "maxPendingUploads": 1,
+        "refusedFourthHttpHandler": 503,
+        "refusedCollector": 0,
+        "untouchedRestOperations": 2,
+        "normalRestCompletions": 2,
+        "reusedLiteralZero": 200
+      }
+    },
+    {
+      "name": "/mcp: upload/HTTP slots recover after disconnect without underflow",
+      "status": "PASS",
+      "elapsedMs": 27.104665999999952,
+      "evidence": {
+        "cause": "disconnect",
+        "initialStatus": "client disconnect",
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/mcp: upload/HTTP slots recover after body deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 254.04287499999998,
+      "evidence": {
+        "cause": "body deadline",
+        "initialStatus": 408,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/mcp: upload/HTTP slots recover after processing deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 255.3873749999998,
+      "evidence": {
+        "cause": "processing deadline",
+        "initialStatus": 504,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/mcp: upload/HTTP slots recover after invalid JSON without underflow",
+      "status": "PASS",
+      "elapsedMs": 20.835207999999966,
+      "evidence": {
+        "cause": "invalid JSON",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/mcp: upload/HTTP slots recover after invalid UTF-8 without underflow",
+      "status": "PASS",
+      "elapsedMs": 20.73612500000013,
+      "evidence": {
+        "cause": "invalid UTF-8",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/query: upload/HTTP slots recover after disconnect without underflow",
+      "status": "PASS",
+      "elapsedMs": 28.351458999999977,
+      "evidence": {
+        "cause": "disconnect",
+        "initialStatus": "client disconnect",
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/query: upload/HTTP slots recover after body deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 253.23187499999995,
+      "evidence": {
+        "cause": "body deadline",
+        "initialStatus": 408,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/query: upload/HTTP slots recover after processing deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 252.964792,
+      "evidence": {
+        "cause": "processing deadline",
+        "initialStatus": 504,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/query: upload/HTTP slots recover after invalid JSON without underflow",
+      "status": "PASS",
+      "elapsedMs": 24.34874999999988,
+      "evidence": {
+        "cause": "invalid JSON",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/query: upload/HTTP slots recover after invalid UTF-8 without underflow",
+      "status": "PASS",
+      "elapsedMs": 23.99845899999991,
+      "evidence": {
+        "cause": "invalid UTF-8",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/search: upload/HTTP slots recover after disconnect without underflow",
+      "status": "PASS",
+      "elapsedMs": 25.418291999999838,
+      "evidence": {
+        "cause": "disconnect",
+        "initialStatus": "client disconnect",
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/search: upload/HTTP slots recover after body deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 257.0255420000003,
+      "evidence": {
+        "cause": "body deadline",
+        "initialStatus": 408,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/search: upload/HTTP slots recover after processing deadline without underflow",
+      "status": "PASS",
+      "elapsedMs": 251.90483300000005,
+      "evidence": {
+        "cause": "processing deadline",
+        "initialStatus": 504,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/search: upload/HTTP slots recover after invalid JSON without underflow",
+      "status": "PASS",
+      "elapsedMs": 24.04187499999989,
+      "evidence": {
+        "cause": "invalid JSON",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "/search: upload/HTTP slots recover after invalid UTF-8 without underflow",
+      "status": "PASS",
+      "elapsedMs": 31.48550000000023,
+      "evidence": {
+        "cause": "invalid UTF-8",
+        "initialStatus": 400,
+        "refillCollectors": 1,
+        "exactCapacityOverflowStatus": 503,
+        "overflowCollectors": 0,
+        "recoveredRest": 200
+      }
+    },
+    {
+      "name": "Raw socket count, absolute incomplete-header deadline, and parser header bytes are bounded before application requests",
+      "status": "PASS",
+      "elapsedMs": 309.0490829999999,
+      "evidence": {
+        "maxConnections": 3,
+        "overcapWireBytes": 0,
+        "absoluteHeaderDeadlineMs": 150,
+        "trickleStatus": 408,
+        "maxHeaderBytes": 1024,
+        "oversizedStatus": 431,
+        "applicationRequestsBeforeRecovery": 0,
+        "recoveredHealth": 200
+      }
+    },
+    {
+      "name": "Rejected global initialization leaves idle B valid, active A untouched, and later legitimate initialization available",
+      "status": "PASS",
+      "elapsedMs": 42.77633300000025,
+      "evidence": {
+        "refusedInitializations": [
+          503,
+          503,
+          503,
+          503,
+          503,
+          503,
+          503
+        ],
+        "BDuringEveryRefusal": 200,
+        "allocationReadsOnRefusal": 0,
+        "duplicateA": 409,
+        "ASignalUnaffectedUntilCancel": true,
+        "ACancel": 202,
+        "BAfterRelease": 200,
+        "admittedC": 200,
+        "BAfterAdmittedC": 200,
+        "CValid": 200,
+        "intentionallyEvictedIdleA": 404
+      }
+    },
+    {
+      "name": "An asynchronous initialization holds actual global capacity before bystander eviction can be attempted",
+      "status": "PASS",
+      "elapsedMs": 23.11962500000027,
+      "evidence": {
+        "heldAcrossAwait": true,
+        "refusedCompetitors": 4,
+        "refusedStatus": 503,
+        "idleBSurvived": 200,
+        "originalInitializationCompleted": 200,
+        "initializedOwnerValid": 200
+      }
+    },
+    {
+      "name": "Session-slot refusal releases the pre-reserved global lease once, with neither leaks nor counter underflow",
+      "status": "PASS",
+      "elapsedMs": 28.16249999999991,
+      "evidence": {
+        "rejectedSessionReservations": 9,
+        "firstOwnerPreserved": true,
+        "remainingGlobalSlotUsable": true,
+        "exactGlobalOwners": 2,
+        "refusedThird": 503,
+        "duplicatePrecedence": 409,
+        "normalCompletions": 2,
+        "freshInitialization": 200
+      }
+    },
+    {
+      "name": "A real initialization store failure returns all leases, and a subsequent owner still sees the exact global cap",
+      "status": "PASS",
+      "elapsedMs": 13.397041000000172,
+      "evidence": {
+        "injectedInitializationFailure": 500,
+        "nextInitialization": 200,
+        "actualOwnersAtCap": 1,
+        "refusedAdditionalOwner": 503,
+        "normalCompletion": 200,
+        "laterInitialization": 200
+      }
+    }
+  ],
+  "after": {
+    "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts": "b05d94d11b22f3423c30c660609691811a412738ca49cf8b5716ee26d05408ce",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-admission.test.ts": "805c36a7df2ddd4b028ed5b3bd4e14c8702ba05df0cef09b6cbd47badad1f368",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-request-ownership.test.ts": "c2c67466f5ada283d8600f385da834a3209b1f164a4ea78fca9898b4dc3427d3",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-http.test.ts": "1e58716cc88d4812e676f2f465481e62847519cfea74bb51fcb4299547a477dd",
+    "/Users/shersingh/github/qmd-mlx-search/test/audit-mcp-runtime-review.test.ts": "1e1af8ac2f04443ff18b6a30944f24070152f4a1117443354e62206cad7f7bd6",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/mcp-positive-contract-and-admission-review.mjs": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/mcp-positive-contract-and-admission-review-result.json": "d446cefcca74838a27bd7f84d2dfd5ee997fbcf0140b0079bc686c90a691a135",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/quality-mcp-heldout-cancel.mjs": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997"
+  },
+  "sourceTestsAndNegativeEvidenceUnchanged": true,
+  "passed": 24,
+  "failed": 0,
+  "total": 24,
+  "overall": "PASS"
+}

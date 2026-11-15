@@ -12,11 +12,11 @@ Monitors:
 
 Guarantees:
 - Owned-child-only management by default; external attach requires explicit opt-in, non-empty start identity, and instance token.
-- Safe Target Isolation: Revalidates start time before EVERY signal (SIGTERM & SIGKILL); never signals recycled PIDs or unrelated sentinels.
+- Safe Target Isolation: Retains an unreaped owned leader through final tree cleanup; revalidates live PID identity before SIGTERM & SIGKILL. External attach remains leader-only.
 - Conservative Defaults: Derived from available memory headroom, not installed RAM; no purgeable double-counting.
 - Fail Closed: Telemetry failures and preflight checks trigger fail-safe alerts rather than hallucinating safety.
 - Non-blocking: Probing stays responsive with strict wall-clock timeouts, numeric 127.0.0.1 loopback, no proxy interference, and bounded response sizes.
-- Clean Lifecycle: Reaps owned test child process on all exit paths (--once, breach, error, interrupt).
+- Clean Lifecycle: Reaps owned test child and cleans its inherited process group on all exit paths (--once, breach, error, interrupt).
 
 Usage:
     python3 scripts/qmd-mlx-watchdog.py --port 8787 --control-port 8788 --launch python3 scripts/mlx_embed_server.py --port 8787 --control-port 8788
@@ -28,11 +28,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import socket
 import subprocess
 import sys
+import time
 import uuid
 from typing import Optional
 
@@ -51,6 +53,8 @@ from scripts.qmd_mlx.watchdog import (
     SystemMetricsError,
     TargetValidationError,
     is_numeric_loopback,
+    spawn_owned_process,
+    terminate_owned_process,
     validate_config_parameters,
 )
 
@@ -338,7 +342,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             )
             return 2
 
-        # Validate clean launch command BEFORE Popen or binding
+        # Validate clean launch command BEFORE spawning or binding
         launch_cmd = list(args.launch)
         if launch_cmd and launch_cmd[0] == "--":
             launch_cmd = launch_cmd[1:]
@@ -419,6 +423,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     owned_child: Optional[subprocess.Popen] = None
     target_pid = args.pid
     instance_token = args.instance_token
+    exit_code = 2
+    payload = {
+        "timestamp": time.time(), "healthy": False, "breach_type": None,
+        "breach_reason": None, "metrics": {}, "terminated_pid": None,
+        "sigkill_used": False,
+    }
+    cleanup = {
+        "required": False, "cleaned": None, "pid": None,
+        "exit_code": None, "sigkill_used": False, "error": None,
+    }
+    failure_label = "Unexpected watchdog error"
 
     try:
         if args.launch is not None:
@@ -437,89 +452,107 @@ def main(argv: Optional[list[str]] = None) -> int:
                 f"[watchdog] Launching owned child process: {' '.join(cmd)} (instance_token={instance_token})",
                 file=sys.stderr if args.json else sys.stdout,
             )
-            try:
-                owned_child = subprocess.Popen(cmd, env=child_env)
-                target_pid = owned_child.pid
-            except Exception as e:
-                print(f"[watchdog] Failed to spawn child process: {e}", file=sys.stderr)
-                return 2
+            failure_label = "Failed to spawn child process"
+            # A launched child's ordinary stdout must not corrupt --json.
+            owned_child = spawn_owned_process(cmd, env=child_env, stdout=2 if args.json else None)
+            target_pid = owned_child.pid
 
-        # Construct MLXWatchdogConfig with finalized target_pid
-        try:
-            config = MLXWatchdogConfig(
-                pid=target_pid,
-                host=args.host,
-                port=effective_port,
-                control_port=effective_control_port,
-                max_rss_mb=args.max_rss_mb,
-                max_swap_growth_mb=args.max_swap_growth_mb,
-                min_free_memory_pct=args.min_free_memory_pct,
-                health_timeout_s=args.health_timeout_s,
-                consecutive_health_failures=args.consecutive_failures,
-                check_interval_s=args.check_interval_s,
-                grace_period_s=args.grace_period_s,
-                startup_grace_period_s=args.startup_grace_period_s,
-                stalled_inference_timeout_s=args.stalled_timeout_s,
-                expected_cmd_pattern=args.expected_cmd,
-                instance_token=instance_token,
-                allow_external_pid=args.allow_external_pid or (owned_child is not None),
-                dry_run=args.dry_run,
-            )
-        except ValueError as e:
-            print(f"[watchdog] Invalid configuration: {e}", file=sys.stderr)
-            return 2
-
-        try:
-            watchdog = MLXWatchdog(
-                config=config,
-                sampler=sampler,
-                owned_child=owned_child,
-                baseline_swap_mb=baseline_swap,
-                defaults=defaults,
-            )
-        except (TargetValidationError, SystemMetricsError) as e:
-            print(f"[watchdog] Target process safety validation failed: {e}", file=sys.stderr)
-            return 2
-
+        failure_label = "Invalid configuration"
+        assert target_pid is not None
+        config = MLXWatchdogConfig(
+            pid=target_pid,
+            host=args.host,
+            port=effective_port,
+            control_port=effective_control_port,
+            max_rss_mb=args.max_rss_mb,
+            max_swap_growth_mb=args.max_swap_growth_mb,
+            min_free_memory_pct=args.min_free_memory_pct,
+            health_timeout_s=args.health_timeout_s,
+            consecutive_health_failures=args.consecutive_failures,
+            check_interval_s=args.check_interval_s,
+            grace_period_s=args.grace_period_s,
+            startup_grace_period_s=args.startup_grace_period_s,
+            stalled_inference_timeout_s=args.stalled_timeout_s,
+            expected_cmd_pattern=args.expected_cmd,
+            instance_token=instance_token,
+            allow_external_pid=args.allow_external_pid or (owned_child is not None),
+            dry_run=args.dry_run,
+        )
+        failure_label = "Target process safety validation failed"
+        watchdog = MLXWatchdog(
+            config=config,
+            sampler=sampler,
+            owned_child=owned_child,
+            baseline_swap_mb=baseline_swap,
+            defaults=defaults,
+        )
+        failure_label = "Unexpected watchdog error"
         if args.once:
             result = watchdog.check_step()
-            if args.json:
-                print(json.dumps({
-                    "timestamp": result.timestamp,
-                    "healthy": result.healthy,
-                    "breach_type": result.breach_type.value if result.breach_type else None,
-                    "breach_reason": result.breach_reason,
-                    "metrics": result.metrics,
-                    "terminated_pid": result.terminated_pid,
-                    "sigkill_used": result.sigkill_used,
-                }, indent=2))
-            else:
-                if result.healthy:
-                    print(f"[watchdog] OK: Target PID {target_pid} healthy. Metrics: {result.metrics}")
-                else:
-                    print(f"[watchdog] BREACH: {result.breach_reason}")
-            return 0 if result.healthy else 1
-
-        return watchdog.run_loop()
+            exit_code = 0 if result.healthy else 1
+        else:
+            # --json is one final machine-readable result, not loop messages
+            # followed by JSON. Keep diagnostics off its stdout channel.
+            with contextlib.redirect_stdout(sys.stderr) if args.json else contextlib.nullcontext():
+                exit_code = watchdog.run_loop()
+            result = watchdog.last_check_result
+        if result is not None:
+            payload.update(
+                timestamp=result.timestamp, healthy=result.healthy,
+                breach_type=result.breach_type.value if result.breach_type else None,
+                breach_reason=result.breach_reason, metrics=result.metrics,
+                terminated_pid=result.terminated_pid, sigkill_used=result.sigkill_used,
+            )
+        else:
+            payload["healthy"] = exit_code == 0
+        if exit_code == 2:
+            payload["healthy"] = False
 
     except KeyboardInterrupt:
         print("\n[watchdog] Interrupted by user; stopping watchdog.", file=sys.stderr)
-        return 0
+        exit_code = 0
+        payload.update(healthy=True, interrupted=True)
     except Exception as e:
-        print(f"[watchdog] Unexpected watchdog error: {e}", file=sys.stderr)
-        return 2
+        message = f"{failure_label}: {e}"
+        print(f"[watchdog] {message}", file=sys.stderr)
+        payload.update(healthy=False, error=message, breach_reason=message)
+        exit_code = 2
     finally:
-        # Guarantee cleanup and reaping of owned test child on every exit path
-        if owned_child is not None and owned_child.poll() is None:
+        # Do not compute the return value or publish status until this finishes.
+        # A permission failure cannot leave a healthy/zero-exit success on stdout.
+        # Raw/external targets never acquire this spawn-owned group capability.
+        if owned_child is not None:
+            cleanup.update(required=True, cleaned=False, pid=owned_child.pid)
             try:
-                owned_child.terminate()
-                owned_child.wait(timeout=2.0)
-            except Exception:
-                try:
-                    owned_child.kill()
-                    owned_child.wait(timeout=1.0)
-                except Exception:
-                    pass
+                cleaned, sigkill_used = terminate_owned_process(owned_child, grace_s=args.grace_period_s)
+                cleanup.update(cleaned=cleaned, sigkill_used=sigkill_used)
+                if not cleaned:
+                    raise RuntimeError("Owned child cleanup did not complete")
+            except Exception as e:
+                message = f"Owned child cleanup failed: {e}"
+                print(f"[watchdog] {message}", file=sys.stderr)
+                cleanup.update(cleaned=False, error=str(e))
+                payload.update(
+                    healthy=False, breach_type="cleanup_failed", breach_reason=message,
+                    terminated_pid=None,
+                )
+                exit_code = 2
+            cleanup["exit_code"] = owned_child.returncode
+            group = getattr(owned_child, "_qmd_owned_group", None)
+            cleanup["sigkill_used"] = bool(getattr(group, "sigkill_used", False))
+
+    payload["metrics"].setdefault("target_pid", target_pid)
+    payload.update(exit_code=exit_code, child_cleanup=cleanup)
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    elif cleanup["error"] is not None:
+        print(f"[watchdog] FAILED: {payload['breach_reason']}")
+    elif args.once and exit_code in (0, 1):
+        if payload["healthy"]:
+            print(f"[watchdog] OK: Target PID {target_pid} healthy. Metrics: {payload['metrics']}")
+        else:
+            print(f"[watchdog] BREACH: {payload['breach_reason']}")
+    return exit_code
 
 
 if __name__ == "__main__":

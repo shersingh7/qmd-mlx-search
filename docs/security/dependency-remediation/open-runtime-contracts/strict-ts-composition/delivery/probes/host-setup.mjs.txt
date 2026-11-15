@@ -1,0 +1,2 @@
+import { appendFileSync } from 'node:fs';
+if (process.env.QMD_REVIEW_HOST_RECEIPT) appendFileSync(process.env.QMD_REVIEW_HOST_RECEIPT, JSON.stringify({execPath:process.execPath,versions:process.versions,home:process.env.HOME,tmpdir:process.env.TMPDIR})+'\n');

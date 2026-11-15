@@ -1,0 +1,182 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+/** Offline public-fixture, checkpoint, and restore-equivalence unit tests. */
+const vitest_1 = require("vitest");
+const node_fs_1 = require("node:fs");
+const node_os_1 = require("node:os");
+const node_path_1 = __importDefault(require("node:path"));
+const public_eval_dataset_js_1 = require("./fixtures/public_eval_dataset.js");
+const index_js_1 = require("../src/index.js");
+const llm_js_1 = require("../src/llm.js");
+const phase5_e2e_runner_js_1 = require("../scripts/phase5_e2e_runner.js");
+(0, vitest_1.describe)("Phase 5 Public Fixtures & Recovery Unit Tests", () => {
+    (0, vitest_1.it)("public fixture corpus has 16 distinct documents with self-contained technical facts", () => {
+        (0, vitest_1.expect)(public_eval_dataset_js_1.PUBLIC_CORPUS_DOCS.length).toBe(16);
+        (0, vitest_1.expect)(new Set(public_eval_dataset_js_1.PUBLIC_CORPUS_DOCS.map(d => d.id)).size).toBe(16);
+        for (const doc of public_eval_dataset_js_1.PUBLIC_CORPUS_DOCS) {
+            (0, vitest_1.expect)(doc.content.length).toBeGreaterThan(100);
+            (0, vitest_1.expect)(doc.title.length).toBeGreaterThan(5);
+        }
+    });
+    (0, vitest_1.it)("public held-out queries have 10 frozen judged queries with explicit expected doc IDs", () => {
+        (0, vitest_1.expect)(public_eval_dataset_js_1.PUBLIC_HELD_OUT_QUERIES.length).toBe(10);
+        const ids = new Set(public_eval_dataset_js_1.PUBLIC_CORPUS_DOCS.map(d => d.id));
+        for (const q of public_eval_dataset_js_1.PUBLIC_HELD_OUT_QUERIES) {
+            (0, vitest_1.expect)(q.relevantDocIds.length).toBeGreaterThanOrEqual(1);
+            for (const id of q.relevantDocIds)
+                (0, vitest_1.expect)(ids.has(id)).toBe(true);
+        }
+    });
+    (0, vitest_1.it)("computeIRMetrics calculates Recall@k, MRR, and nDCG@5 for synthetic rankings", () => {
+        const relevant = [["doc-1"], ["doc-3"]];
+        const perfect = (0, public_eval_dataset_js_1.computeIRMetrics)([["doc-1", "doc-2"], ["doc-3", "doc-4"]], relevant, 5);
+        (0, vitest_1.expect)(perfect.recallAt1).toBe(1);
+        (0, vitest_1.expect)(perfect.recallAt5).toBe(1);
+        (0, vitest_1.expect)(perfect.mrr).toBe(1);
+        (0, vitest_1.expect)(perfect.ndcgAt5).toBe(1);
+        const second = (0, public_eval_dataset_js_1.computeIRMetrics)([["doc-other", "doc-1"], ["doc-other", "doc-3"]], relevant, 5);
+        (0, vitest_1.expect)(second.recallAt1).toBe(0);
+        (0, vitest_1.expect)(second.recallAt3).toBe(1);
+        (0, vitest_1.expect)(second.recallAt5).toBe(1);
+        (0, vitest_1.expect)(second.mrr).toBe(0.5);
+        (0, vitest_1.expect)(second.ndcgAt5).toBeGreaterThan(0);
+        (0, vitest_1.expect)(second.ndcgAt5).toBeLessThan(1);
+    });
+    (0, vitest_1.describe)("Isolated Shadow Database Recovery Lifecycle", () => {
+        let tempDir;
+        let store;
+        const mockDescriptor = { version: 1, backend: "mlx", model: "base-embed",
+            pooling: "mean", outputDimensions: 4, nativeDimensions: 4, maxTokens: 128, normalized: true };
+        (0, vitest_1.beforeEach)(async () => {
+            tempDir = (0, node_fs_1.mkdtempSync)(node_path_1.default.join((0, node_os_1.tmpdir)(), "qmd-phase5-unit-"));
+            // These unit tests have no network or model dependency, including the
+            // legacy global tokenizer used by chunkDocumentByTokens.
+            vitest_1.vi.spyOn((0, llm_js_1.getDefaultLlamaCpp)(), "mlxTokenize").mockResolvedValue(null);
+            vitest_1.vi.spyOn((0, llm_js_1.getDefaultLlamaCpp)(), "tokenize").mockImplementation(async (text) => Array.from({ length: Math.ceil(text.length / 4) }, (_, i) => i));
+            store = await (0, index_js_1.createStore)({ dbPath: node_path_1.default.join(tempDir, "shadow-test.sqlite"),
+                config: { collections: { test: { path: tempDir, pattern: "**/*.md" } } } });
+            store.internal.llm = {
+                embedModelName: "base-embed", getDescriptor: async () => mockDescriptor,
+                tokenize: async (text) => Array.from({ length: Math.ceil(text.length / 4) }, (_, i) => i),
+                mlxTokenize: async (texts) => texts.map(text => Math.ceil(text.length / 4)),
+                embed: async () => ({ embedding: [0.1, 0.2, 0.3, 0.4], model: "base-embed" }),
+                embedBatch: async (texts) => texts.map(() => ({ embedding: [0.1, 0.2, 0.3, 0.4], model: "base-embed" })),
+            };
+        });
+        (0, vitest_1.afterEach)(async () => {
+            await store.close();
+            vitest_1.vi.restoreAllMocks();
+            await (0, llm_js_1.disposeDefaultLlamaCpp)();
+            (0, node_fs_1.rmSync)(tempDir, { recursive: true, force: true });
+        });
+        (0, vitest_1.it)("handles durable indexing cancellation and marks checkpoint cancelled", async () => {
+            (0, node_fs_1.writeFileSync)(node_path_1.default.join(tempDir, "test1.md"), "# Doc 1\n\nContent paragraph 1 for test\n");
+            (0, node_fs_1.writeFileSync)(node_path_1.default.join(tempDir, "test2.md"), "# Doc 2\n\nContent paragraph 2 for test\n");
+            await store.update();
+            const controller = new AbortController();
+            const result = await (0, index_js_1.runDurableIndexingJob)(store.internal, { signal: controller.signal, maxDocsPerBatch: 1,
+                onProgress: info => { if (info.chunksEmbedded > 0)
+                    controller.abort(); } });
+            (0, vitest_1.expect)(result.status).toBe("cancelled");
+            (0, vitest_1.expect)((0, index_js_1.getActiveCheckpoint)(store.internal.db)?.status).toBe("cancelled");
+            // Cancellation can unwind the inference session's result counters after
+            // SQLite already committed a batch. Check durable rows, not that return value.
+            (0, vitest_1.expect)(store.internal.db.prepare("SELECT COUNT(*) AS count FROM content_vectors").get().count).toBeGreaterThan(0);
+        });
+        (0, vitest_1.it)("fingerprint mismatch refuses resume without changing existing logical state or vector bytes", async () => {
+            (0, node_fs_1.writeFileSync)(node_path_1.default.join(tempDir, "doc-keep.md"), "# Keep\n\nContent to preserve unchanged\n");
+            await store.update();
+            const seeded = await (0, index_js_1.runDurableIndexingJob)(store.internal, { model: "base-embed" });
+            (0, vitest_1.expect)(seeded.status, JSON.stringify(seeded)).toBe("complete");
+            (0, index_js_1.saveCheckpoint)(store.internal.db, {
+                jobId: "mismatch-invariance-test", fingerprint: { model: "other-model", dimensions: 512,
+                    chunkStrategy: "regex", descriptorSignature: "sig-other" },
+                startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), status: "in_progress",
+                docsTotal: 5, docsCompleted: 1, chunksTotal: 10, chunksCommitted: 1,
+            });
+            const state = () => ({
+                content: store.internal.db.prepare("SELECT * FROM content ORDER BY hash").all(),
+                documents: store.internal.db.prepare("SELECT * FROM documents ORDER BY collection, path").all(),
+                vectors: store.internal.db.prepare("SELECT * FROM content_vectors ORDER BY hash, seq").all(),
+                vectorBytes: store.internal.db.prepare("SELECT hash_seq, hex(embedding) AS embedding FROM vectors_vec ORDER BY hash_seq").all(),
+                checkpoints: store.internal.db.prepare("SELECT * FROM indexing_checkpoints ORDER BY job_id").all(),
+                expectations: store.internal.db.prepare("SELECT * FROM content_chunk_expectations ORDER BY hash, strategy").all(),
+                config: store.internal.db.prepare("SELECT * FROM store_config ORDER BY key").all(),
+            });
+            const before = state();
+            (0, vitest_1.expect)(before.vectors).toHaveLength(1);
+            await (0, vitest_1.expect)((0, index_js_1.runDurableIndexingJob)(store.internal, { model: "base-embed" })).rejects.toThrow(index_js_1.IndexingFingerprintMismatchError);
+            (0, vitest_1.expect)(state()).toEqual(before);
+        });
+    });
+    (0, vitest_1.describe)("Retrieval Equivalence Verification Helper", () => {
+        function stage() {
+            return { recallAt1: 1, recallAt3: 1, recallAt5: 1, mrr: 1, ndcgAt5: 1,
+                avgLatencyMs: 12, p50LatencyMs: 10, p95LatencyMs: 15,
+                queryDetails: [{ queryId: "Q01", query: "test query 1", category: "easy",
+                        expectedDocIds: ["doc-1"], topDocIds: ["doc-1", "doc-2"], scores: [0.9, 0.6],
+                        rank1: 1, hitAt5: true, latencyMs: 10 }] };
+        }
+        (0, vitest_1.it)("passes identical rankings with actual finite scores, ignoring timing", () => {
+            const pre = stage();
+            const post = structuredClone(pre);
+            post.queryDetails[0].latencyMs = 100;
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post)).toMatchObject({ identical: true,
+                details: [{ docOrderMatch: true, scoreToleranceMatch: true }] });
+        });
+        (0, vitest_1.it)("accepts score drift within tolerance and refuses drift outside it", () => {
+            const pre = stage();
+            const post = stage();
+            post.queryDetails[0].scores[0] += 0.00001;
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post).identical).toBe(true);
+            post.queryDetails[0].scores[0] += 0.01;
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post).identical).toBe(false);
+        });
+        (0, vitest_1.it)("refuses changed rankings with otherwise valid scores", () => {
+            const pre = stage();
+            const post = stage();
+            post.queryDetails[0].topDocIds.reverse();
+            post.queryDetails[0].rank1 = 2;
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post)).toMatchObject({ identical: false,
+                details: [{ docOrderMatch: false }] });
+        });
+        // Register named zero-argument tests instead of bare .each array rows.
+        // [] is an empty argument tuple in Bun, which treats the callback's lone
+        // parameter as `done` and waits forever; other arrays are spread scalars.
+        for (const { label, scores } of [
+            { label: "missing", scores: undefined }, { label: "empty", scores: [] },
+            { label: "too few", scores: [0.9] }, { label: "too many", scores: [0.9, 0.6, 0.2] },
+            { label: "NaN", scores: [NaN, 0.6] }, { label: "positive infinity", scores: [Infinity, 0.6] },
+            { label: "negative infinity", scores: [-Infinity, 0.6] },
+        ]) {
+            (0, vitest_1.it)(`refuses ${label} scores in either or both retrieval reports`, () => {
+                for (const invalidSide of ["pre", "post", "both"]) {
+                    const pre = stage();
+                    const post = stage();
+                    if (invalidSide !== "post")
+                        pre.queryDetails[0].scores = scores;
+                    if (invalidSide !== "pre")
+                        post.queryDetails[0].scores = scores;
+                    (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post).identical).toBe(false);
+                }
+            });
+        }
+        (0, vitest_1.it)("refuses duplicate query IDs even when both reports repeat identical successful queries", () => {
+            const pre = stage();
+            pre.queryDetails.push(structuredClone(pre.queryDetails[0]));
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, structuredClone(pre)).identical).toBe(false);
+        });
+        (0, vitest_1.it)("refuses empty or different query sets", () => {
+            const pre = stage();
+            const post = stage();
+            post.queryDetails[0].queryId = "Q02";
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post).identical).toBe(false);
+            post.queryDetails = [];
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(pre, post).identical).toBe(false);
+            (0, vitest_1.expect)((0, phase5_e2e_runner_js_1.verifyRetrievalEquivalence)(post, post).identical).toBe(false);
+        });
+    });
+});

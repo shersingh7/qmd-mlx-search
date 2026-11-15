@@ -1,0 +1,45 @@
+{
+  "status": "REAL_ISOLATED_PACKAGE_INSTALL_SMOKES_PASS",
+  "testedPackageSha256": "224b30bc3057ce706a7f6a444d24d941daab8702337e585d655378cf34614aa0",
+  "runtimes": {
+    "node": {
+      "exitCode": 0,
+      "checks": [
+        "source prepare and prepack (unless --package supplied)",
+        "recursive package inventory",
+        "isolated local dependency install",
+        "real launcher help/collection/status",
+        "SQLite and sqlite-vec load",
+        "installed native MCP stdio initialize, tools/list and status",
+        "installed SDK/SQLite indexing and lexical retrieval",
+        "installed REST retrieval and foreign-origin rejection",
+        "installed MCP initialize and document retrieval",
+        "native fetch consumes SSE without complete-body buffering",
+        "partial upload bounded; 408 or fail-closed connection termination"
+      ],
+      "httpSupported": true
+    },
+    "bun": {
+      "exitCode": 0,
+      "checks": [
+        "source prepare and prepack (unless --package supplied)",
+        "recursive package inventory",
+        "isolated local dependency install",
+        "real launcher help/collection/status",
+        "SQLite and sqlite-vec load",
+        "installed native MCP stdio initialize, tools/list and status",
+        "installed SDK/SQLite indexing and lexical retrieval",
+        "native Bun HTTP fails closed with explicit Node.js remedy (not HTTP feature acceptance)"
+      ],
+      "httpSupported": false
+    }
+  },
+  "bunHttpScope": "explicit refusal with Node.js remedy, not Bun HTTP feature support",
+  "notNativeBunVitestSuiteAcceptance": true,
+  "evidence": {
+    "bundle": "evidence.tar.gz",
+    "sha256": "b851c0a08588201de78d401c08e01d3ddd4056cd15df44df6f27b0be8728b32d",
+    "bytes": 496456,
+    "entriesReadbackVerified": 13
+  }
+}

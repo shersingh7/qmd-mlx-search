@@ -1,0 +1,37 @@
+{
+  "label": "node-root-noemit",
+  "command": [
+    "/Users/shersingh/.hermes/node/bin/node",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/mirror/node_modules/typescript/bin/tsc",
+    "-p",
+    "tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/mirror",
+  "env": {
+    "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/home",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/tmp",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/cache",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/data",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/hermes",
+    "HERMES_ROOT": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/hermes",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/hf",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "CI": "1",
+    "REQUIRE_BUN": "1",
+    "QMD_LLAMA_GPU": "false",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "",
+    "NO_COLOR": "1",
+    "VITE_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/cache/vite",
+    "VITEST_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/cache/vitest-results",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "elapsedSeconds": 3.108359916,
+  "exitCode": 0
+}

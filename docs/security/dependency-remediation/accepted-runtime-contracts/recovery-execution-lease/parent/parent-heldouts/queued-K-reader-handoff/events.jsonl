@@ -1,0 +1,17 @@
+{"kind": "source", "pid": 38123, "owner": 38123, "at": 0.08566625, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 38123, "owner": 38123, "at": 0.08604225, "preparedAt": 0.086035875, "deadline": 0.286035875}
+{"kind": "control-read", "pid": 38123, "owner": 38123, "at": 0.086436458, "dataHex": "533230300a", "preExec": false}
+{"kind": "fork-parent", "pid": 38123, "owner": 38123, "at": 0.087686333, "child": 38124, "inheritedDeadline": 0.286035875}
+{"kind": "setpgid", "pid": 38123, "owner": 38123, "at": 0.088125541, "target": 38124, "group": 38124, "currentGroup": 38123, "currentSession": 38123}
+{"kind": "fork-child", "pid": 38124, "owner": 38123, "at": 0.08776925}
+{"kind": "control-read", "pid": 38123, "owner": 38123, "at": 0.088317208, "dataHex": "45", "preExec": false}
+{"kind": "e-forwarded", "pid": 38123, "owner": 38123, "at": 0.088399541}
+{"kind": "setpgid", "pid": 38124, "owner": 38123, "at": 0.088405375, "target": 0, "group": 0, "currentGroup": 38124, "currentSession": 38123}
+{"kind": "child-gate-enter", "pid": 38124, "owner": 38123, "at": 0.088519041, "deadline": 0.286035875, "fd": 3, "inheritable": false, "blocking": false}
+{"kind": "pre-exec-readable-held", "pid": 38123, "owner": 38123, "at": 0.105947208}
+{"kind": "child-gate-result", "pid": 38124, "owner": 38123, "at": 0.163873125, "allowed": false, "remainingMs": 122.188084, "deadline": 0.286035875}
+{"kind": "refusal-enter", "pid": 38124, "owner": 38123, "at": 0.164100208, "target": 38123, "currentGroup": 38124, "currentSession": 38123}
+{"kind": "setpgid", "pid": 38124, "owner": 38123, "at": 0.164497833, "target": 0, "group": 38123, "currentGroup": 38123, "currentSession": 38123}
+{"kind": "group-signal", "pid": 38124, "owner": 38123, "at": 0.164609166, "group": 38123, "signal": 15, "pinned": true, "currentSession": 38123, "termBlocked": true}
+{"kind": "group-signal", "pid": 38124, "owner": 38123, "at": 0.164771666, "group": 38123, "signal": 19, "pinned": true, "currentSession": 38123, "termBlocked": true}
+{"kind": "waitpid", "pid": 38123, "owner": 38123, "at": 1.589646583, "reaped": 38124, "status": 32000}

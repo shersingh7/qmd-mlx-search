@@ -1,0 +1,145 @@
+{
+  "status": "PARTIAL_NOT_ACCEPTED",
+  "originalIndexSha256": "104aaf1f4b4c56af6415aa2dbce692998d635a38b97abb1762d2397df8e661ac",
+  "sourceCountVerifiedUnchanged": 251,
+  "buildExit": 0,
+  "sparseRed": {
+    "failed": 1,
+    "patternUnselected": 17,
+    "failure": "Phase 5 Public Fixtures & Recovery Unit Tests Retrieval Equivalence Verification Helper refuses missing query slots in either retrieval report without throwing",
+    "actualError": "TypeError: Cannot read properties of undefined (reading topDocIds)"
+  },
+  "typeReproductions": {
+    "types-parent-node": {
+      "exitCode": 2,
+      "diagnostics": 35,
+      "byPath": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 1
+      },
+      "deniedReads": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "host": {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-types-compose-ilo1y_9c/mirror"
+      }
+    },
+    "types-parent-bun": {
+      "exitCode": 2,
+      "diagnostics": 35,
+      "byPath": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 1
+      },
+      "deniedReads": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "host": {
+        "kind": "compiler-host",
+        "execPath": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-types-compose-ilo1y_9c/mirror"
+      }
+    }
+  },
+  "adapters": {
+    "run": {
+      "before": "aea67e708af27247fb97aeb5472a743cfe39b171e0eba2976b5b92ec57e58981",
+      "after": "f9237252d0884a787dc725860a96aaa133bdddf3d89cd0cf56ee319fc7466202",
+      "onlyRootPathRelocated": true
+    },
+    "probes/run.py": {
+      "before": "929843b0f4f7191f53eb892bcde95ca24408b06dbd3e8f82b287875c9facb374",
+      "after": "a0ae27f05ab123fca83d165a86d0c4f0d39ec9e7a1a8be2aa474a5bebf353998",
+      "onlyRootPathRelocated": true
+    }
+  },
+  "liveSourceEdited": false,
+  "T2": "deleg_39d923b8/sa-0-35f370ca",
+  "T3": "deleg_39d923b8/sa-1-53e52231"
+}

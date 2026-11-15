@@ -1,0 +1,15 @@
+{
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav",
+  "copiedSha256": {
+    "mirror/.github/workflows/gguf-native-image-qualification.yml": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+    "mirror/finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "mirror/finetune/tools/qualify_gguf_image.py": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "evidence/control_flow_tests.py": "bb183c83135ba611b68fa28e36e2b4818b0f9d60a674cc1a1b530d65962acb51",
+    "evidence/fake_cli.py": "727bb0965ae08fd653dac009eff9999171300db7adad571e3d34f78f06463f99",
+    "evidence/fixture_adapter.py": "93bd0c61d18c6c63b5091f0711ff709eca65384a4c1fa6c4ddf23211bdbd45c6",
+    "evidence/validate_workflow.py": "d1fe392b5e10e7f8c6737dbea31dcc4454bf21fbe854a17691135ad8a1087bb8",
+    "delivery/proposal.patch": "dd03de5b3075b9a39b0bf2d4ff7cd03199ac34881dbb4d0cf009a0b6251d042c",
+    "delivery/manifest.json": "e84773ff3b1a44694df7fd55d2a1305486185a2f8ee8c41aed0bb0d17f2f1dfe"
+  },
+  "scope": "Synthetic control-flow/syntax only; no real Docker, image, probe or compiler execution"
+}

@@ -1,0 +1,80 @@
+from pathlib import Path
+import os, json, hashlib, difflib, collections, re, shutil
+R=Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+FROZEN=Path('/Users/shersingh/.hermes/cache/scratch/qmd-integration-wave5-sr5w96q5')
+ACCEPT=Path('/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo')
+manifest=json.loads((R/'before-manifest.json').read_text())
+before=manifest['sourceSha256']
+binding=json.loads((R/'reference/source-binding.json').read_text())
+sha=lambda b:hashlib.sha256(b).hexdigest()
+after={rel:sha((R/'mirror'/rel).read_bytes()) for rel in sorted(set(before)|set(binding['integration_paths']))}
+changed=[rel for rel,h in after.items() if before.get(rel)!=h]
+held=['scripts/phase5_e2e_runner.ts','test/phase5-recovery.test.ts']
+assert set(changed)==set(binding['integration_paths'])-set(held)
+assert len(changed)==17
+assert all(after[p]==binding['integration_sha256'][p] for p in changed)
+assert all(after[p]==before[p] for p in held)
+# No generated dist/cache/fixture is an integration source path.
+patch=[];images={}
+for rel in changed:
+    b=(R/'baseline'/rel).read_bytes() if rel in before else b''
+    a=(R/'mirror'/rel).read_bytes()
+    images[rel]={'preimage_sha256':sha(b) if rel in before else None,'preimage_absent':rel not in before,'postimage_sha256':sha(a)}
+    patch.append(f'diff --git a/{rel} b/{rel}\n')
+    if rel not in before: patch.append('new file mode 100644\n')
+    patch.extend(difflib.unified_diff(b.decode().splitlines(True),a.decode().splitlines(True),fromfile='a/'+rel if rel in before else '/dev/null',tofile='b/'+rel,n=3))
+patch_text=''.join(patch)
+(R/'parent-integration.partial.patch').write_text(patch_text)
+(R/'after-manifest.json').write_text(json.dumps({'sourceCount':len(after),'sourceSha256':after,'scope':'248-file frozen baseline plus three accepted new test files; 17 applied paths, two lease-overlap paths held unchanged'},indent=2)+'\n')
+(R/'path-preimages.json').write_text(json.dumps(images,indent=2)+'\n')
+# Fresh source-only replay, never an older complete mirror or a live checkout.
+replay=R/'patch-replay';replay.mkdir()
+for rel,h in before.items():
+    data=(R/'baseline'/rel).read_bytes();assert sha(data)==h
+    p=replay/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
+# Authenticate unchanged readonly source inputs at completion.
+protected=[]
+for rel,h in before.items():
+    assert sha((FROZEN/'baseline'/rel).read_bytes())==h, rel
+for rel,h in binding['integration_sha256'].items():
+    assert sha((ACCEPT/'mirror'/rel).read_bytes())==h,rel
+observer=['.github/workflows/ci.yml','test/audit-recovery-tree.test.ts','test/helpers/recovery-bootstrap-diagnostics.mjs','test/helpers/recovery-bootstrap-diagnostics.selftest.mjs']
+lease=list(json.loads((R/'reference/lease-final-review-receipt.json').read_text())['candidateSha256'])
+protected_groups={}
+for name,paths in [('observer',observer),('lease',lease),('dependency_metadata',['package.json','pnpm-lock.yaml','bun.lock','tsconfig.json','tsconfig.build.json'])]:
+    protected_groups[name]={p:{'before':before[p],'after':after[p],'identical':before[p]==after[p]} for p in paths}
+    assert all(x['identical'] for x in protected_groups[name].values())
+DEP=Path('/Users/shersingh/github/qmd-mlx-search/node_modules')
+dep_before=json.loads((R/'evidence/dependencies-before.json').read_text())
+dep_after={}
+for folder,dirs,names in os.walk(DEP,followlinks=False):
+ for name in dirs+names:
+    p=Path(folder)/name;s=p.lstat()
+    item={'size':s.st_size,'mtime_ns':s.st_mtime_ns,'mode':s.st_mode}
+    if p.is_symlink():item['link']=os.readlink(p)
+    elif p.is_file():item['sha256']=sha(p.read_bytes())
+    dep_after[str(p.relative_to(DEP))]=item
+mismatches={p:{'before':dep_before.get(p),'after':dep_after.get(p)} for p in set(dep_before)|set(dep_after) if dep_before.get(p)!=dep_after.get(p)}
+(R/'evidence/dependencies-after.json').write_text(json.dumps(dep_after,indent=2)+'\n')
+assert not mismatches,json.dumps(mismatches)[:5000]
+# Count actual assertion statuses, not historical or provider-declared suite totals.
+results={}
+for label in ['node-focused','node-focused-final','bun-focused-final','node-sdk','bun-sdk','node-native-bun-wrappers','node-held-sparse']:
+    p=R/'evidence'/f'{label}-results.json'
+    data=json.loads(p.read_text())
+    counts=collections.Counter(a['status'] for f in data['testResults'] for a in f.get('assertionResults',[]))
+    perfile=[{'path':f['name'],'status':f['status'],'counts':dict(collections.Counter(a['status'] for a in f.get('assertionResults',[])))} for f in data['testResults']]
+    results[label]={'exit_code':json.loads((R/'evidence'/f'{label}.json').read_text())['exit_code'],'success':data['success'],'file_count':len(perfile),'assertions':dict(counts),'files':perfile}
+guards=[]
+for p in sorted((R/'evidence').glob('*-compiler-reads-*.jsonl')):
+    rows=[json.loads(line) for line in p.read_text().splitlines()]
+    guards.append({'log':p.name,'reads':sum('operation' in x for x in rows),'denied':[x for x in rows if x.get('allowed') is False],'hosts':[x for x in rows if x.get('kind')=='compiler-host']})
+types={}
+for label in ['types-node-checkpoint','types-node-baseline','types-node-final','types-bun-final']:
+    text=(R/'logs'/f'{label}.stdout.log').read_text()
+    diagnostics=[line for line in text.splitlines() if re.match(r'.+\(\d+,\d+\): error TS\d+:',line)]
+    types[label]={'exit_code':json.loads((R/'evidence'/f'{label}.json').read_text())['exit_code'],'diagnostic_count':len(diagnostics),'per_path':dict(collections.Counter(line.split('(',1)[0] for line in diagnostics)),'diagnostics':diagnostics,'canonical_root_pass':False}
+sourceproof=json.loads((R/'evidence/source-emission-proof.json').read_text())
+proof={'status':'PARTIAL_COMPOSITION_BLOCKED_NOT_ACCEPTED','applied_paths':changed,'applied_count':len(changed),'held_paths':held,'before_source_count':len(before),'after_source_count':len(after),'unchanged_baseline_source_count':sum(after[p]==h for p,h in before.items()),'unchanged_observer_lease_metadata':protected_groups,'readonly_frozen_baseline_sources_authenticated':len(before),'readonly_accepted_sources_authenticated':len(binding['integration_paths']),'dependencies':{'entries':len(dep_before),'mismatches':mismatches,'shared_container_symlink':False,'package_aliases_per_source_tree':len(json.loads((R/'evidence/mirror-package-aliases.json').read_text()))},'patch':{'path':str(R/'parent-integration.partial.patch'),'sha256':sha(patch_text.encode()),'preimages':str(R/'path-preimages.json')},'compiler_read_guards':guards,'types':types,'runtime_results':results,'source_emission_proof':'evidence/source-emission-proof.json','roots_before':len(sourceproof['compilerRoots']['baseline']['files']),'roots_after':len(sourceproof['compilerRoots']['mirror']['files']),'root_diff':sourceproof['rootDiff'],'blockers':[{'id':'B1','path':held,'reason':'Accepted source.patch first five runner hunks add executable missing-slot/score/percentile guards, change iteration and argument evaluation; accepted test adds a behavioral sparse-report regression. These are not type-erased changes. Current scope permits only type-only rebase on these lease-overlap paths. Both source files are therefore held byte-identical; no assertions or suppressions substituted. Real relocated accepted sparse test fails against the unchanged baseline runner.'},{'id':'B2','reason':'Canonical tsconfig allowJs roots include three historical .mjs docs importing /Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts. Lexical+real read guard denied live package.json and server.ts reads. Production root/config/docs were not edited or excluded; no complete isolated canonical-root pass is possible with those forbidden imports.'},{'id':'B3','reason':'Authoritative installed dependency root supplies 274 package aliases, not historical 277: @types/bun, bun-types and @types/picomatch absent. No installs or invented ambient declarations. Final strict-root errors also report bun:sqlite, bun:test, globalThis.Bun and picomatch declaration failures.'}],'C1':'Retained qualification: an artificially paused sole cleanup owner may return truthful incomplete cleanup proof with no forbidden work and later natural reap; never claimed complete cleanup.','no_live_edits':True,'self_approval':False,'parent_gates':['Resolve scope of accepted runtime metric guards on two held paths','Authorize safe canonical-root historical import relocation and missing declaration provenance if appropriate','Independent review and parent full-suite/integration acceptance','No CI/native-model/release qualification claimed']}
+(R/'composition-result.json').write_text(json.dumps(proof,indent=2)+'\n')
+print(json.dumps({'status':proof['status'],'patch':proof['patch'],'source_counts':[len(before),len(after)],'applied_count':len(changed),'held':held,'unchanged_baseline_sources':proof['unchanged_baseline_source_count'],'dependency_entries_unchanged':len(dep_before),'types':{k:{x:v[x] for x in ['exit_code','diagnostic_count','per_path']} for k,v in types.items()},'tests':{k:{x:v[x] for x in ['exit_code','success','file_count','assertions']} for k,v in results.items()}},indent=2))

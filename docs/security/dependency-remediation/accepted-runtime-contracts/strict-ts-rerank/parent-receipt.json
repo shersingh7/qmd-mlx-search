@@ -1,0 +1,265 @@
+{
+  "scope": "Parent fresh isolated replay of independently reviewed frozen proposal, not integration; legacy fallback finding retained open",
+  "snapshot_entries_verified": 242,
+  "original_delivery_files_verified": 20,
+  "supplement_files_verified": 4,
+  "integration_source_sha256": {
+    "scripts/phase5_e2e_runner.ts": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a",
+    "src/bench-rerank.ts": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+    "src/llm/mlx-identity.ts": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa",
+    "src/mcp/server.ts": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+    "src/test-preload.ts": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6",
+    "test/cli.test.ts": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e",
+    "test/eval-bm25.test.ts": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697",
+    "test/eval.test.ts": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d",
+    "test/fixtures/public_eval_dataset.ts": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29",
+    "test/llm.test.ts": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5",
+    "test/multi-collection-filter.test.ts": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b",
+    "test/phase5-recovery.test.ts": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c",
+    "test/rrf-trace.test.ts": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c",
+    "test/store.helpers.unit.test.ts": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253",
+    "src/llm.ts": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d",
+    "test/bench-rerank-lifecycle.test.ts": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520"
+  },
+  "byte_identical_heldout_runner": true,
+  "replayed": [
+    {
+      "host": "node",
+      "argv": [
+        "/Users/shersingh/.hermes/node/bin/node",
+        "--test",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/probes/independent-heldouts.test.mjs"
+      ],
+      "exit_code": 0,
+      "checks": 4,
+      "legacy_symlink_launch": false,
+      "minor_still_open": true,
+      "identity": {
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "sourceSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+        "exactEmittedBodies": true,
+        "dependencyBoundaryOnly": true,
+        "nativeModelRuns": 0,
+        "temporaryDirectory": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/tmp",
+        "output": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/evidence/node-heldout-kI3vXh"
+      },
+      "observations": [
+        {
+          "name": "parallel-arbitrary-values",
+          "leafErrors": [
+            "[undefined]",
+            "secondary-refusal",
+            "dispose-sync",
+            "dispose-async"
+          ],
+          "events": [
+            "rank-start:0",
+            "rank-start:1",
+            "rank-start:2",
+            "rank-end:1",
+            "rank-end:2",
+            "dispose:0",
+            "dispose:1",
+            "dispose:2"
+          ],
+          "activeAtReturn": 0
+        },
+        {
+          "name": "async-cleanup-parent-order",
+          "events": [
+            "child-start",
+            "child-reject",
+            "model",
+            "llama"
+          ],
+          "allErrors": [
+            "child-cleanup-fault",
+            "model-cleanup-fault",
+            "llama-cleanup-fault"
+          ],
+          "summaryPublished": false
+        },
+        {
+          "name": "cli-nested-cleanup",
+          "status": 1,
+          "events": [
+            "llama-acquire",
+            "resolve",
+            "model-acquire",
+            {
+              "options": {
+                "contextSize": 2048,
+                "threads": 4
+              }
+            },
+            "context-release:0",
+            "model-release",
+            "llama-release"
+          ]
+        },
+        {
+          "name": "forced-legacy-branch",
+          "currentRuntimeOnly": true,
+          "nativeOlderNodeNotRun": true,
+          "direct": {
+            "status": 0,
+            "launched": true
+          },
+          "symlink": {
+            "status": 0,
+            "launched": false
+          },
+          "note": "Node fallback compares lexical argv URL to real module URL; Bun currently preserves a matching entry identity"
+        }
+      ]
+    },
+    {
+      "host": "bun",
+      "argv": [
+        "/Users/shersingh/.bun/bin/bun",
+        "test",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/probes/independent-heldouts.test.mjs"
+      ],
+      "exit_code": 0,
+      "checks": 4,
+      "legacy_symlink_launch": true,
+      "minor_still_open": false,
+      "identity": {
+        "execPath": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "sourceSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+        "exactEmittedBodies": true,
+        "dependencyBoundaryOnly": true,
+        "nativeModelRuns": 0,
+        "temporaryDirectory": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/tmp",
+        "output": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/evidence/bun-heldout-EAqXa7"
+      },
+      "observations": [
+        {
+          "name": "parallel-arbitrary-values",
+          "leafErrors": [
+            "[undefined]",
+            "secondary-refusal",
+            "dispose-sync",
+            "dispose-async"
+          ],
+          "events": [
+            "rank-start:0",
+            "rank-start:1",
+            "rank-start:2",
+            "rank-end:1",
+            "rank-end:2",
+            "dispose:0",
+            "dispose:1",
+            "dispose:2"
+          ],
+          "activeAtReturn": 0
+        },
+        {
+          "name": "async-cleanup-parent-order",
+          "events": [
+            "child-start",
+            "child-reject",
+            "model",
+            "llama"
+          ],
+          "allErrors": [
+            "child-cleanup-fault",
+            "model-cleanup-fault",
+            "llama-cleanup-fault"
+          ],
+          "summaryPublished": false
+        },
+        {
+          "name": "cli-nested-cleanup",
+          "status": 1,
+          "events": [
+            "llama-acquire",
+            "resolve",
+            "model-acquire",
+            {
+              "options": {
+                "contextSize": 2048,
+                "threads": 4
+              }
+            },
+            "context-release:0",
+            "model-release",
+            "llama-release"
+          ]
+        },
+        {
+          "name": "forced-legacy-branch",
+          "currentRuntimeOnly": true,
+          "nativeOlderNodeNotRun": true,
+          "direct": {
+            "status": 0,
+            "launched": true
+          },
+          "symlink": {
+            "status": 0,
+            "launched": true
+          },
+          "note": "Node fallback compares lexical argv URL to real module URL; Bun currently preserves a matching entry identity"
+        }
+      ]
+    }
+  ],
+  "protected_cache_bytes_and_mtime_preserved": true,
+  "live_recovery_not_read_or_touched": true
+}

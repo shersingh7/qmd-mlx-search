@@ -1,0 +1,16 @@
+{
+  "label": "accepted-query-snapshot",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "test/audit-query-snapshot.test.ts",
+    "test/audit-query-identity.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 2.867983917,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/accepted-query-snapshot.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/accepted-query-snapshot-b6zh66te"
+}

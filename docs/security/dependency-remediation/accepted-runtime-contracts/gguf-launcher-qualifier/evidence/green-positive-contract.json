@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-m",
+    "pytest",
+    "-c",
+    "/dev/null",
+    "-p",
+    "no:cacheprovider",
+    "--rootdir=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repo",
+    "--confcutdir=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repo/finetune/tests",
+    "--basetemp=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/pytest-tmp/green-positive-contract",
+    "--junitxml=/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/evidence/green-positive-contract.xml",
+    "-q",
+    "--tb=short",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/test_probe_contract_green.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repo",
+  "junit": {
+    "case_names": [
+      "test_uv_release_contract[bare-control-uv 0.11.18-0]",
+      "test_uv_release_contract[upstream-without-commit-uv 0.11.18 (x86_64-unknown-linux-musl)-0]",
+      "test_uv_release_contract[upstream-with-commit-uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)-0]",
+      "test_uv_release_contract[wrong-release-control-uv 0.11.17 (x86_64-unknown-linux-musl)-2]"
+    ],
+    "errors": 0,
+    "failure_cases": [],
+    "failures": 0,
+    "skipped": 0,
+    "tests": 4
+  },
+  "name": "green-positive-contract",
+  "returncode": 0,
+  "seconds": 2.1164409579942003,
+  "stderr": "",
+  "stdout": "....                                                                     [100%]\n4 passed in 1.99s\n"
+}

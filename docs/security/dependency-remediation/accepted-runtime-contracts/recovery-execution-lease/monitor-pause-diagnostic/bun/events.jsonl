@@ -1,0 +1,18 @@
+{"kind": "source", "pid": 13379, "owner": 13379, "at": 0.090907791, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 13379, "owner": 13379, "at": 0.091310291, "preparedAt": 0.091297458, "deadline": 0.291297458}
+{"kind": "control-read", "pid": 13379, "owner": 13379, "at": 0.092354708, "dataHex": "5339320a", "preExec": false}
+{"kind": "fork-parent", "pid": 13379, "owner": 13379, "at": 0.093259375, "child": 13382, "inheritedDeadline": 0.183297458}
+{"kind": "setpgid", "pid": 13379, "owner": 13379, "at": 0.09366075, "target": 13382, "group": 13382, "currentGroup": 13379, "currentSession": 13379}
+{"kind": "fork-child", "pid": 13382, "owner": 13379, "at": 0.093348958}
+{"kind": "control-read", "pid": 13379, "owner": 13379, "at": 0.093952458, "dataHex": "45", "preExec": false}
+{"kind": "setpgid", "pid": 13382, "owner": 13379, "at": 0.094042666, "target": 0, "group": 0, "currentGroup": 13382, "currentSession": 13379}
+{"kind": "e-forwarded", "pid": 13379, "owner": 13379, "at": 0.094120916}
+{"kind": "child-gate-enter", "pid": 13382, "owner": 13379, "at": 0.094158916, "deadline": 0.183297458, "fd": 3, "inheritable": false, "blocking": false}
+{"kind": "pre-exec-readable-held", "pid": 13379, "owner": 13379, "at": 0.10883675}
+{"kind": "child-gate-result", "pid": 13382, "owner": 13379, "at": 0.181050375, "allowed": false, "remainingMs": 2.273124999999987, "deadline": 0.183297458}
+{"kind": "refusal-enter", "pid": 13382, "owner": 13379, "at": 0.181350333, "target": 13379, "currentGroup": 13382, "currentSession": 13379}
+{"kind": "setpgid", "pid": 13382, "owner": 13379, "at": 0.181740625, "target": 0, "group": 13379, "currentGroup": 13379, "currentSession": 13379}
+{"kind": "group-signal", "pid": 13382, "owner": 13379, "at": 0.181878333, "group": 13379, "signal": 15, "pinned": true, "currentSession": 13379, "termBlocked": true}
+{"kind": "group-signal", "pid": 13382, "owner": 13379, "at": 0.182056, "group": 13379, "signal": 19, "pinned": true, "currentSession": 13379, "termBlocked": true}
+{"kind": "control-read", "pid": 13379, "owner": 13379, "at": 1.599105, "dataHex": "4b", "preExec": false}
+{"kind": "waitpid", "pid": 13379, "owner": 13379, "at": 1.603506916, "reaped": 13382, "status": 32000}

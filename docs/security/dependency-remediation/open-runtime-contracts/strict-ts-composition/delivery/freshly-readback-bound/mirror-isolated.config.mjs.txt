@@ -1,0 +1,8 @@
+import { mergeConfig } from './mirror/node_modules/vitest/dist/config.js';
+import project from './mirror/vitest.config.ts';
+import { fileURLToPath } from 'node:url';
+export default mergeConfig(project, {
+  root: fileURLToPath(new URL('./mirror/', import.meta.url)),
+  cacheDir: process.env.VITE_CACHE_DIR,
+  test: { setupFiles: [fileURLToPath(new URL('./probes/test-host-setup.mjs', import.meta.url))] },
+});

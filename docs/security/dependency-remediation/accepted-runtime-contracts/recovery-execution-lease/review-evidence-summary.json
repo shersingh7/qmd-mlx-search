@@ -1,0 +1,255 @@
+{
+  "topLevelVitest": {
+    "numTotalTestSuites": 18,
+    "numPassedTestSuites": 18,
+    "numTotalTests": 114,
+    "numPassedTests": 114,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true,
+    "files": 7
+  },
+  "focusedRecordCounts": {
+    "recovery-execution-admission-before-finally": 15,
+    "recovery-execution-admission-finally": 15,
+    "recovery-fast-timeout-before-finally": 2,
+    "recovery-fast-timeout-finally": 2,
+    "recovery-tree-before-finally": 8,
+    "recovery-tree-finally": 8,
+    "recovery-closed-pipes-before-finally": 4,
+    "recovery-closed-pipes-finally": 4,
+    "recovery-kernel-no-fork": 2,
+    "recovery-cold-supervisor-before-finally": 6,
+    "recovery-cold-supervisor-no-late-work-before-finally": 6,
+    "recovery-cold-supervisor-finally": 6,
+    "recovery-budget-frame-before-finally": 7,
+    "recovery-budget-frame-finally": 7,
+    "recovery-parent-death-before-finally": 22,
+    "recovery-parent-death-finally": 22,
+    "recovery-admission-refusal-before-finally": 8,
+    "recovery-malformed-admission-before-finally": 8,
+    "recovery-execution-gate-before-finally": 14,
+    "recovery-execution-gate-finally": 14,
+    "W13": 1,
+    "W13-integrated-synthetic": 1,
+    "W13-timeout": 1,
+    "recovery-transition-before-finally": 20,
+    "recovery-transition-no-late-work-before-finally": 20,
+    "recovery-transition-finally": 20,
+    "recovery-startup-native-runtime": 1,
+    "recovery-transition-native-runtime": 1,
+    "recovery-tree-native-runtime": 1,
+    "native-recovery-runtime": 4,
+    "native-recovery-before-finally": 13,
+    "native-recovery-call-finally": 13,
+    "native-recovery-passed": 4,
+    "native-recovery-finally": 4
+  },
+  "newCases": {
+    "raw": 15,
+    "frames": 7,
+    "hosts": 22,
+    "total": 44,
+    "finally": 44,
+    "allNegativeNoWork": true,
+    "allSentinelsAlive": true,
+    "allGuardsUnfired": true,
+    "allProcessesAbsentBeforeFinally": true,
+    "fixtureKills": 0,
+    "perRuntime": {
+      "node": {
+        "cases": 11,
+        "modes": {
+          "valid": 1,
+          "alive": 3,
+          "graceful": 3,
+          "hard": 4
+        },
+        "actualRuntime": [
+          {
+            "bun": null,
+            "executable": "/Users/shersingh/.hermes/node/bin/node",
+            "node": "22.22.3"
+          }
+        ]
+      },
+      "bun": {
+        "cases": 11,
+        "modes": {
+          "valid": 1,
+          "alive": 3,
+          "graceful": 3,
+          "hard": 4
+        },
+        "actualRuntime": [
+          {
+            "bun": "1.3.8",
+            "executable": "/Users/shersingh/.bun/bin/bun",
+            "node": "24.3.0"
+          }
+        ]
+      }
+    },
+    "liveHelperTimesMs": {
+      "min": 222.31745800000002,
+      "max": 254.13375000000002,
+      "count": 6
+    },
+    "EOFUnexpired": [
+      {
+        "pid": 11396,
+        "allowed": false,
+        "remainingMs": 197.67191600000004
+      }
+    ],
+    "expiredForwardedOpenParent": [
+      {
+        "pid": 11392,
+        "allowed": false,
+        "remainingMs": -201.991041
+      }
+    ]
+  },
+  "retained": {
+    "transitionObservations": 20,
+    "actualBunNestedTests": {
+      "startup": 18,
+      "transition": 10,
+      "tree": 8
+    },
+    "nativeOwnershipCalls": 13,
+    "nativeOwnershipScenarios": 4,
+    "deliberateEscapedFixtureFinallyKills": [
+      {
+        "evidence": "recovery-tree-finally",
+        "mode": "escaped-pipe",
+        "guardFired": false,
+        "finallyKilled": [
+          11443
+        ],
+        "allFixturePidsAbsent": true,
+        "scratchRemoved": true
+      },
+      {
+        "evidence": "recovery-closed-pipes-finally",
+        "mode": "new-session",
+        "guardFired": false,
+        "finallyKilled": [
+          11455
+        ],
+        "scratchRemoved": true
+      },
+      {
+        "evidence": "recovery-tree-finally",
+        "mode": "escaped-pipe",
+        "guardFired": false,
+        "finallyKilled": [
+          11853
+        ],
+        "allFixturePidsAbsent": true,
+        "scratchRemoved": true
+      },
+      {
+        "evidence": "recovery-closed-pipes-finally",
+        "mode": "new-session",
+        "guardFired": false,
+        "finallyKilled": [
+          11866
+        ],
+        "scratchRemoved": true
+      }
+    ]
+  },
+  "heldoutUniqueCases": 15,
+  "heldoutPasses": 15,
+  "heldoutFalseFixtureErrors": [
+    {
+      "name": "ready-proof-real-EBADF",
+      "reason": "Reviewer wrapper closed proof fd twice on retried READY; corrected only wrapper to close once and reran fresh fixture",
+      "initialArtifact": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts/ready-proof-real-EBADF/harness-or-contract-error.txt",
+      "correctedArtifact": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts-proof-corrected/ready-proof-real-EBADF/before-finally.json"
+    }
+  ],
+  "forkClockControls": 3,
+  "directRealGateControls": 7,
+  "realCrossSessionJoinRefusal": {
+    "exitCode": 125,
+    "join": {
+      "errno": 1,
+      "group": 13217,
+      "currentSession": 13218,
+      "targetSession": 13217
+    },
+    "sentinelPid": 13217,
+    "sentinelAliveBeforeCleanup": true,
+    "signalAttempt": false,
+    "stderr": ""
+  },
+  "monitorPauseDiagnostic": [
+    {
+      "runtime": "node",
+      "helperMs": 921.1487909999998,
+      "supervisorAliveAtReturn": true,
+      "completeProofAtReturn": false,
+      "forcedPipeClose": true,
+      "noWork": true,
+      "naturallyAbsentAfterHold": true,
+      "gateResults": [
+        {
+          "kind": "child-gate-result",
+          "pid": 13367,
+          "owner": 13366,
+          "at": 0.119073916,
+          "allowed": false,
+          "remainingMs": 63.115875,
+          "deadline": 0.182183375
+        }
+      ],
+      "fixtureKills": []
+    },
+    {
+      "runtime": "bun",
+      "helperMs": 926.373459,
+      "supervisorAliveAtReturn": true,
+      "completeProofAtReturn": false,
+      "forcedPipeClose": true,
+      "noWork": true,
+      "naturallyAbsentAfterHold": true,
+      "gateResults": [
+        {
+          "kind": "child-gate-result",
+          "pid": 13382,
+          "owner": 13379,
+          "at": 0.181050375,
+          "allowed": false,
+          "remainingMs": 2.273124999999987,
+          "deadline": 0.183297458
+        }
+      ],
+      "fixtureKills": []
+    }
+  ],
+  "sourceIntegrity": {
+    "head": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+    "candidateFiles": 12,
+    "publicFiles": 244,
+    "unchanged": true
+  },
+  "queuedCancellationRedReplay": {
+    "exitCode": 1,
+    "selectedFailures": 1,
+    "unselectedPending": 43,
+    "actualWork": "actual-user-work",
+    "validation": {
+      "pid": 14061,
+      "allowed": true,
+      "remainingMs": 146.936084
+    },
+    "sourceSha256": {
+      "scripts/phase5_recovery_process.py": "8e4924483fa67545879d6f4583ec6a3b14048b1d5f4ec1be4ef00f1212aaf6ea",
+      "scripts/phase5_e2e_runner.ts": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+      "test/audit-recovery-execution-admission.test.ts": "0792a661fda0e2efb0b276198929b473b20e41c79a8396e58baa9312a83a428d"
+    },
+    "fixtureKills": []
+  }
+}

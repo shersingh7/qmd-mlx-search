@@ -10,15 +10,18 @@ import { openDatabase, loadSqliteVec } from "../src/db.js";
 import type { Database } from "../src/db.js";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getDefaultLlamaCpp, disposeDefaultLlamaCpp } from "../src/llm";
+import { getDefaultLlamaCpp, disposeDefaultLlamaCpp } from "../src/llm.js";
 import { unlinkSync } from "node:fs";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import { mkdtemp, writeFile, readdir, unlink, rmdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import YAML from "yaml";
-import type { CollectionConfig } from "../src/collections";
-import { setConfigIndexName } from "../src/collections";
-import { syncConfigToDb } from "../src/store";
+import type { CollectionConfig } from "../src/collections.js";
+import { setConfigIndexName } from "../src/collections.js";
+import { syncConfigToDb } from "../src/store.js";
 
 // =============================================================================
 // Test Database Setup
@@ -240,8 +243,8 @@ import {
   DEFAULT_RERANK_MODEL,
   DEFAULT_MULTI_GET_MAX_BYTES,
   createStore,
-} from "../src/store";
-import type { RankedResult } from "../src/store";
+} from "../src/store.js";
+import type { RankedResult } from "../src/store.js";
 // Note: searchResultsToMcpCsv no longer used in MCP - using structuredContent instead
 
 // =============================================================================
@@ -276,7 +279,7 @@ describe("MCP Server", () => {
     };
     await writeFile(join(testConfigDir, "index.yml"), YAML.stringify(testConfig));
 
-    testDbPath = `/tmp/qmd-mcp-test-${Date.now()}.sqlite`;
+    testDbPath = join(tmpdir(), `qmd-mcp-test-${Date.now()}.sqlite`);
     testDb = openDatabase(testDbPath);
     initTestDatabase(testDb);
     seedTestData(testDb);
@@ -919,10 +922,26 @@ describe("MCP Server", () => {
 // HTTP Transport Tests
 // =============================================================================
 
-import { startMcpHttpServer, type HttpServerHandle } from "../src/mcp/server";
-import { enableProductionMode } from "../src/store";
+import { startMcpHttpServer, type HttpServerHandle } from "../src/mcp/server.js";
+import { enableProductionMode } from "../src/store.js";
 
-describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
+// HTTP protocol tests use lex-only search with reranking disabled. Bun's
+// node:http cannot provide the listener's cancellation contract; its CI entry
+// still runs these exact protocol assertions using the supported Node route.
+if (process.versions.bun) {
+  test("MCP HTTP Transport runs all protocol assertions on Node when invoked by Bun", async () => {
+    const { stdout } = await promisify(execFile)("node", [
+      "node_modules/vitest/vitest.mjs", "run", "--pool=threads", "--maxWorkers=1",
+      "--cache=false", "--testTimeout=4000", "--reporter=json", "test/mcp.test.ts", "-t", "^MCP HTTP Transport",
+    ], { cwd: fileURLToPath(new URL("../", import.meta.url)), env: { ...process.env, CI: "true", QMD_LLAMA_GPU: "false" }, timeout: 15000, killSignal: "SIGKILL", maxBuffer: 4 * 1024 * 1024 });
+    const report = JSON.parse(stdout);
+    const selected = report.testResults.flatMap((file: any) => file.assertionResults).filter((result: any) => result.fullName.startsWith("MCP HTTP Transport "));
+    expect(selected.length).toBe(6);
+    expect(selected.every((result: any) => result.status === "passed")).toBe(true);
+    expect(report.numFailedTests).toBe(0);
+    console.log(`Node MCP HTTP protocol assertions: ${selected.length}/${selected.length} passed`);
+  }, 20000);
+} else describe("MCP HTTP Transport", () => {
   let handle: HttpServerHandle;
   let baseUrl: string;
   let httpTestDbPath: string;
@@ -933,7 +952,7 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
 
   beforeAll(async () => {
     // Create isolated test database with seeded data
-    httpTestDbPath = `/tmp/qmd-mcp-http-test-${Date.now()}.sqlite`;
+    httpTestDbPath = join(tmpdir(), `qmd-mcp-http-test-${Date.now()}.sqlite`);
     const db = openDatabase(httpTestDbPath);
     initTestDatabase(db);
     seedTestData(db);
@@ -959,7 +978,7 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
     process.env.INDEX_PATH = httpTestDbPath;
     process.env.QMD_CONFIG_DIR = httpTestConfigDir;
 
-    handle = await startMcpHttpServer(0, { quiet: true }); // OS-assigned ephemeral port
+    handle = await startMcpHttpServer(0, { quiet: true, dbPath: httpTestDbPath }); // OS-assigned ephemeral port
     baseUrl = `http://localhost:${handle.port}`;
   });
 
@@ -989,9 +1008,12 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");
-    const body = await res.json();
+    const body = await res.json() as { status: string; uptime: number; pid: number; instanceToken: string };
     expect(body.status).toBe("ok");
     expect(typeof body.uptime).toBe("number");
+    expect(body.pid).toBe(process.pid);
+    expect(typeof body.instanceToken).toBe("string");
+    expect(body.instanceToken.length).toBeGreaterThan(0);
   });
 
   test("GET /other returns 404", async () => {
@@ -1009,6 +1031,8 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
   /** Send a JSON-RPC message to /mcp and return the parsed response.
    * MCP Streamable HTTP requires Accept header with both JSON and SSE. */
   async function mcpRequest(body: object): Promise<{ status: number; json: any; contentType: string | null }> {
+    // Each initialize is a NEW session, not a re-initialize of the last test's.
+    if ((body as { method?: string }).method === "initialize") sessionId = null;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "Accept": "application/json, text/event-stream",
@@ -1075,7 +1099,7 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
 
     const { status, json } = await mcpRequest({
       jsonrpc: "2.0", id: 3, method: "tools/call",
-      params: { name: "query", arguments: { searches: [{ type: "lex", query: "readme" }] } },
+      params: { name: "query", arguments: { searches: [{ type: "lex", query: "readme" }], rerank: false } },
     });
     expect(status).toBe(200);
     expect(json.result).toBeDefined();
@@ -1093,10 +1117,12 @@ describe.skipIf(!!process.env.CI)("MCP HTTP Transport", () => {
 
     const { status, json } = await mcpRequest({
       jsonrpc: "2.0", id: 4, method: "tools/call",
-      params: { name: "get", arguments: { path: "readme.md" } },
+      params: { name: "get", arguments: { file: "readme.md" } },
     });
     expect(status).toBe(200);
     expect(json.result).toBeDefined();
     expect(json.result.content.length).toBeGreaterThan(0);
+    expect(json.result.isError).not.toBe(true);
+    expect(json.result.content[0].resource.text).toContain("Project README");
   });
 });

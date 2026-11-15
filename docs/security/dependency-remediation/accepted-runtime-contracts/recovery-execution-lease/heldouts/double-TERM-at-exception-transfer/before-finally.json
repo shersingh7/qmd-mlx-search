@@ -1,0 +1,76 @@
+{
+  "name": "double-TERM-at-exception-transfer",
+  "guardFired": false,
+  "elapsedMs": 176.71658400000112,
+  "exitCode": 0,
+  "supervisorPid": 12543,
+  "supervisorAbsent": true,
+  "workers": [
+    12544
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    12544
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 12543,
+      "sessionId": 12543
+    },
+    {
+      "type": "ready",
+      "pid": 12544,
+      "sessionId": 12543,
+      "processGroupId": 12544
+    },
+    {
+      "type": "exit",
+      "exitCode": null,
+      "signal": "SIGKILL"
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        12544
+      ],
+      "timedOut": false,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 120.28920900000273
+    },
+    {
+      "action": "actual-parent-TERM",
+      "elapsedMs": 141.1329590000001
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 120.30129200000061
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 123.08504200000314
+    }
+  ],
+  "stderr": "",
+  "eventCount": 14
+}

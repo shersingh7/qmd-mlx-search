@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror
+
+·······························································
+
+ Test Files  3 passed (3)
+      Tests  63 passed (63)
+   Start at  21:26:59
+   Duration  1.80s (transform 313ms, setup 22ms, import 780ms, tests 1.49s, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-node-three-product-files-results.json

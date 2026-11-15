@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-smoke-v1/summary.json",
+    "sha256": "2db5909c6990c241c55a6d001a9bcbe7a84cce8401e391fe521dac42a8a763e3",
+    "cases": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "fresh_execution_by_this_reviewer": false,
+    "part_of_original_518_manifest": false
+  },
+  {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-full-v1/summary.json",
+    "sha256": "9be94024174a19b2eec29ecb279b8ee883fe70104847b1ef4af29f4442d7a045",
+    "cases": 71,
+    "passed": 71,
+    "failed": 0,
+    "skipped": 0,
+    "fresh_execution_by_this_reviewer": false,
+    "part_of_original_518_manifest": false
+  }
+]

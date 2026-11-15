@@ -1,0 +1,75 @@
+{
+  "reviewed_files": [
+    {
+      "path": ".github/workflows/gguf-native-image-qualification.yml",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/.github/workflows/gguf-native-image-qualification.yml",
+      "sha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+      "bytes": 25847,
+      "lines": 418
+    },
+    {
+      "path": "test/security/test_gguf_workflow_controller.py",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/test/security/test_gguf_workflow_controller.py",
+      "sha256": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+      "bytes": 19338,
+      "lines": 371
+    },
+    {
+      "path": "test/security/fixtures/gguf_workflow_fake_cli.py",
+      "delivery_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/candidate/mirror/test/security/fixtures/gguf_workflow_fake_cli.py",
+      "sha256": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78",
+      "bytes": 4697,
+      "lines": 109
+    }
+  ],
+  "repair_baseline": [
+    {
+      "path": ".github/workflows/gguf-native-image-qualification.yml",
+      "preimage": {
+        "status": "existing",
+        "sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+        "bytes": 18224
+      },
+      "final": {
+        "sha256": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+        "bytes": 25847,
+        "lines": 418
+      }
+    },
+    {
+      "path": "test/security/test_gguf_workflow_controller.py",
+      "preimage": {
+        "status": "absent",
+        "sha256": null,
+        "bytes": 0
+      },
+      "final": {
+        "sha256": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+        "bytes": 19338,
+        "lines": 371
+      }
+    },
+    {
+      "path": "test/security/fixtures/gguf_workflow_fake_cli.py",
+      "preimage": {
+        "status": "absent",
+        "sha256": null,
+        "bytes": 0
+      },
+      "final": {
+        "sha256": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78",
+        "bytes": 4697,
+        "lines": 109
+      }
+    }
+  ],
+  "actual_live_preimages": "All three ABSENT is parent-provided context, not a live-tree read by this reviewer. Empty-tree new-file patch replay passed independently.",
+  "accepted_public_static_inputs": {
+    "launcher_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "imported_or_executed": false
+  },
+  "source_before": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/evidence/source-inputs-before.json",
+  "source_after": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/evidence/source-inputs-after.json",
+  "unchanged_hash_records": 12962
+}

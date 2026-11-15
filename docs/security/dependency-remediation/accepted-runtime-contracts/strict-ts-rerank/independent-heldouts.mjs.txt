@@ -1,0 +1,111 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createRequire } from 'node:module';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+const R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const require=createRequire(path.join(R,'mirror/package.json'));
+const ts=require('typescript');
+const host=process.versions.bun?'bun':'node';
+const output=fs.mkdtempSync(path.join(R,'evidence',`${host}-heldout-`));
+const filename=path.join(R,'mirror/src/bench-rerank.ts');
+const source=fs.readFileSync(filename,'utf8');
+const ast=ts.createSourceFile(filename,source,ts.ScriptTarget.Latest,true);
+const deps=ast.statements.filter(n=>ts.isImportDeclaration(n)&&n.moduleSpecifier.text==='node-llama-cpp');
+assert.equal(deps.length,1);
+const stub=path.join(output,'boundary.mjs');
+fs.writeFileSync(stub,`
+import { appendFileSync } from 'node:fs';
+let backend;
+export function setBackend(value){backend=value;}
+const trace=x=>{if(process.env.OWN_TRACE)appendFileSync(process.env.OWN_TRACE,JSON.stringify(x)+'\\n');};
+export const LlamaLogLevel={error:'error'};
+export async function resolveModelFile(){trace('resolve');return '/synthetic.gguf';}
+export async function getLlama(){
+ if(backend)return backend;
+ if(!process.env.OWN_MODE)throw new Error('unconfigured native boundary forbidden');
+ trace('llama-acquire');
+ let i=0;
+ const model={defaultContextFlashAttention:'auto',trainContextSize:4096,
+  async createRankingContext(o){trace({options:o});const n=i++;return {async rankAll(_q,d){return d.map(()=>0.4);},dispose(){trace('context-release:'+n);if(process.env.OWN_MODE==='cascade-fail')throw new Error('context-primary-cleanup');}};},
+  dispose(){trace('model-release');if(process.env.OWN_MODE==='cascade-fail')throw new Error('model-secondary-cleanup');}
+ };
+ return {gpu:false,cpuMathCores:4,async loadModel(){trace('model-acquire');return model;},async dispose(){trace('llama-release');if(process.env.OWN_MODE==='cascade-fail')throw new Error('llama-secondary-cleanup');}};
+}
+`,{flag:'wx'});
+const spec=deps[0].moduleSpecifier;
+const rewrite=source.slice(0,spec.getStart(ast))+JSON.stringify(pathToFileURL(stub).href)+source.slice(spec.end);
+const compile=s=>ts.transpileModule(s,{compilerOptions:{target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.ESNext},reportDiagnostics:true});
+const original=compile(source),compiled=compile(rewrite+'\nexport {benchmarkConfig,main};\n');
+assert.deepEqual(compiled.diagnostics,[]);
+function body(s){const a=ts.createSourceFile('body.mjs',s,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);return a.statements.filter(n=>!ts.isImportDeclaration(n)&&!ts.isExportDeclaration(n)).map(n=>n.getText(a)).join('\n');}
+assert.equal(body(compiled.outputText),body(original.outputText));
+const actual=path.join(output,'whole-actual.mjs');fs.writeFileSync(actual,compiled.outputText,{flag:'wx'});
+const native=await import(pathToFileURL(stub).href);
+const bench=await import(pathToFileURL(actual).href);
+const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
+function flatten(error){if(error instanceof AggregateError)return error.errors.flatMap(flatten);return [error];}
+const observations=[];
+const record=(name,value)=>{observations.push({name,...value});fs.writeFileSync(path.join(output,'observations.json'),JSON.stringify(observations,null,2)+'\n');};
+fs.writeFileSync(path.join(output,'identity.json'),JSON.stringify({execPath:process.execPath,versions:process.versions,sourceSha256:createHash('sha256').update(source).digest('hex'),exactEmittedBodies:true,dependencyBoundaryOnly:true,nativeModelRuns:0,temporaryDirectory:process.env.TMPDIR,output},null,2));
+console.log('HELDOUT_OUTPUT='+output);
+
+await test('independent: arbitrary parallel refusal values, delayed siblings and every rejecting disposal remain visible',async()=>{
+ const events=[],contexts=[];let active=0;
+ const gate=deferred();let created=0;
+ const model={defaultContextFlashAttention:'auto',async createRankingContext(){const id=created++;let calls=0;const c={rankAll(_q,docs){calls++;if(id===0&&calls===1)return Promise.resolve([0.5]);active++;events.push('rank-start:'+id);if(id===0){active--;throw undefined;}if(id===1)return Promise.reject('secondary-refusal').finally(()=>{active--;events.push('rank-end:'+id);});return gate.promise.then(()=>docs.map(()=>0.5)).finally(()=>{active--;events.push('rank-end:'+id);});},dispose(){assert.equal(active,0);events.push('dispose:'+id);if(id===0)throw 'dispose-sync';if(id===1)return Promise.reject('dispose-async');}};contexts.push(c);return c;}};
+ let returned=false;const work=bench.benchmarkConfig(model,{gpu:false,cpuMathCores:12},['a','b','c'],3).finally(()=>returned=true);const outcome=work.then(value=>({value}),error=>({error}));
+ while(!events.includes('rank-start:2'))await new Promise(r=>setImmediate(r));
+ await new Promise(r=>setImmediate(r));assert.equal(returned,false);assert.equal(events.some(e=>e.startsWith('dispose')),false);
+ gate.resolve();const {error}=await outcome;
+ assert.ok(error instanceof AggregateError);assert.deepEqual(flatten(error),[undefined,'secondary-refusal','dispose-sync','dispose-async']);
+ assert.deepEqual(events.slice(-3),['dispose:0','dispose:1','dispose:2']);
+ record('parallel-arbitrary-values',{leafErrors:flatten(error).map(x=>x===undefined?'[undefined]':x),events,activeAtReturn:active});
+});
+
+await test('independent: parent releases wait for asynchronous child release refusal then retain all nested faults',async()=>{
+ const events=[];const cleanupGate=deferred();let releaseStarted=false;let modelClosed=false;let llamaClosed=false;
+ const model={defaultContextFlashAttention:'auto',trainContextSize:4096,async createRankingContext(){return {async rankAll(_q,d){return d.map(()=>0.5);},async dispose(){releaseStarted=true;events.push('child-start');await cleanupGate.promise;events.push('child-reject');throw new Error('child-cleanup-fault');}};},dispose(){modelClosed=true;events.push('model');throw new Error('model-cleanup-fault');}};
+ const llama={gpu:false,cpuMathCores:32,async loadModel(){return model;},dispose(){llamaClosed=true;events.push('llama');return Promise.reject(new Error('llama-cleanup-fault'));}};
+ native.setBackend(llama);
+ const savedLog=console.log;let text='';console.log=(...args)=>text+=args.join(' ')+'\n';
+ try {
+  const outcome=bench.main().then(value=>({value}),error=>({error}));
+  while(!releaseStarted)await new Promise(r=>setImmediate(r));
+  assert.equal(modelClosed,false);assert.equal(llamaClosed,false);assert.equal(text.includes('Results'),false);
+  cleanupGate.resolve();const {error}=await outcome;
+  assert.deepEqual(flatten(error).map(e=>e.message),['child-cleanup-fault','model-cleanup-fault','llama-cleanup-fault']);
+  assert.deepEqual(events,['child-start','child-reject','model','llama']);assert.equal(text.includes('Results'),false);assert.equal(text.includes('[2 ctx'),false);
+  record('async-cleanup-parent-order',{events,allErrors:flatten(error).map(e=>e.message),summaryPublished:false});
+ }finally{console.log=savedLog;}
+});
+
+await test('independent: real complete CLI keeps every cleanup fault and nonzero status',()=>{
+ const trace=path.join(output,'cli.trace');const child=spawnSync(process.execPath,[actual,'--quick'],{env:{...process.env,OWN_MODE:'cascade-fail',OWN_TRACE:trace},encoding:'utf8',timeout:10000});
+ assert.equal(child.error,undefined);assert.equal(child.status,1);assert.doesNotMatch(child.stdout,/Results|Best:/);
+ for(const text of ['context-primary-cleanup','model-secondary-cleanup','llama-secondary-cleanup'])assert.ok(child.stderr.includes(text),text);
+ const events=fs.readFileSync(trace,'utf8').trim().split('\n').map(x=>JSON.parse(x));assert.deepEqual(events.slice(-3),['context-release:0','model-release','llama-release']);
+ fs.writeFileSync(path.join(output,'cli.stdout.log'),child.stdout);fs.writeFileSync(path.join(output,'cli.stderr.log'),child.stderr);
+ record('cli-nested-cleanup',{status:child.status,events});
+});
+
+await test('independent: legacy fallback direct-entry control and symlink characterization (forced missing native main only)',()=>{
+ // Current runtime, not an older-Node qualification. The original emitted body
+ // is unchanged; this extra prefix exposes the existing fallback branch.
+ const legacy=path.join(output,'legacy-forced.mjs');
+ const prefix='Object.defineProperty(import.meta, "main", {value: undefined, configurable:true, writable:true});\n';
+ const lineEnd=compiled.outputText.startsWith('#!')?compiled.outputText.indexOf('\n')+1:0;
+ fs.writeFileSync(legacy,compiled.outputText.slice(0,lineEnd)+prefix+compiled.outputText.slice(lineEnd),{flag:'wx'});
+ const link=path.join(output,'legacy-link.mjs');fs.symlinkSync(legacy,link);
+ const child=p=>spawnSync(process.execPath,[p,'--quick'],{env:{...process.env,OWN_MODE:'success'},encoding:'utf8',timeout:10000});
+ const direct=child(legacy),indirect=child(link);assert.equal(direct.error,undefined);assert.equal(indirect.error,undefined);
+ assert.equal(direct.status,0);assert.ok(direct.stdout.includes('Best:'));
+ // Characterize rather than accepting a silent exit as successful model work.
+ assert.equal(indirect.status,0);
+ if(process.versions.bun) assert.ok(indirect.stdout.includes('Best:'));
+ else assert.equal(indirect.stdout,'');
+ record('forced-legacy-branch',{currentRuntimeOnly:true,nativeOlderNodeNotRun:true,direct:{status:direct.status,launched:true},symlink:{status:indirect.status,launched:indirect.stdout.includes('Best:')},note:'Node fallback compares lexical argv URL to real module URL; Bun currently preserves a matching entry identity'});
+});

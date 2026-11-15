@@ -1,0 +1,75 @@
+{
+  "commands": [
+    {
+      "executable": "/usr/bin/diff",
+      "args": [
+        "-u",
+        "-L",
+        "a/.github/workflows/ci.yml",
+        "-L",
+        "b/.github/workflows/ci.yml",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/original/.github/workflows/ci.yml",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/.github/workflows/ci.yml"
+      ],
+      "exitCode": 1,
+      "stderr": ""
+    },
+    {
+      "executable": "/usr/bin/diff",
+      "args": [
+        "-u",
+        "-L",
+        "a/test/audit-recovery-tree.test.ts",
+        "-L",
+        "b/test/audit-recovery-tree.test.ts",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/original/test/audit-recovery-tree.test.ts",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/audit-recovery-tree.test.ts"
+      ],
+      "exitCode": 1,
+      "stderr": ""
+    },
+    {
+      "executable": "/usr/bin/diff",
+      "args": [
+        "-u",
+        "-L",
+        "/dev/null",
+        "-L",
+        "b/test/helpers/recovery-bootstrap-diagnostics.mjs",
+        "/dev/null",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/helpers/recovery-bootstrap-diagnostics.mjs"
+      ],
+      "exitCode": 1,
+      "stderr": ""
+    },
+    {
+      "executable": "/usr/bin/diff",
+      "args": [
+        "-u",
+        "-L",
+        "/dev/null",
+        "-L",
+        "b/test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+        "/dev/null",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/mirror/test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"
+      ],
+      "exitCode": 1,
+      "stderr": ""
+    }
+  ],
+  "apply": {
+    "executable": "/usr/bin/git",
+    "args": [
+      "-c",
+      "core.hooksPath=/dev/null",
+      "apply",
+      "--no-index",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/diagnostics-proposal.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/patch-application-check",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "allFourAppliedHashesVerified": true
+}

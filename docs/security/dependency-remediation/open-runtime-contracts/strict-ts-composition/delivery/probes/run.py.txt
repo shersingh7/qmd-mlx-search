@@ -1,0 +1,32 @@
+from pathlib import Path
+import os, sys, json, subprocess, time
+ROOT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+label, cwd_arg, *cmd = sys.argv[1:]
+assert label and all(c.isalnum() or c in '-_' for c in label)
+cwd = (ROOT/cwd_arg).resolve()
+assert cwd.is_relative_to(ROOT) and cwd.is_dir(), cwd
+state = ROOT/'state'/label
+state.mkdir(parents=True, exist_ok=False)
+locations = {'HOME':'home','HERMES_HOME':'hermes','HERMES_DIR':'hermes','HERMES_KNOWLEDGE_DIR':'knowledge','KNOWLEDGE_DIR':'knowledge','XDG_CONFIG_HOME':'xdg/config','XDG_CACHE_HOME':'xdg/cache','XDG_DATA_HOME':'xdg/data','XDG_STATE_HOME':'xdg/state','HF_HOME':'hf','TMPDIR':'tmp','TMP':'tmp','TEMP':'tmp','BUN_INSTALL_CACHE_DIR':'cache/bun','BUN_RUNTIME_TRANSPILER_CACHE_PATH':'cache/bun-transpile','npm_config_cache':'cache/npm','PNPM_HOME':'cache/pnpm','UV_CACHE_DIR':'cache/uv','PYTHONPYCACHEPREFIX':'cache/python','NODE_COMPILE_CACHE':'cache/node'}
+env = {key:str(state/value) for key,value in locations.items()}
+for value in env.values(): Path(value).mkdir(parents=True, exist_ok=True)
+env.update({'PATH':str(ROOT/'tools/bin')+':/usr/bin:/bin','LANG':'en_US.UTF-8','PYTHONDONTWRITEBYTECODE':'1','HF_HUB_OFFLINE':'1','TRANSFORMERS_OFFLINE':'1','HF_DATASETS_OFFLINE':'1','UV_OFFLINE':'1','npm_config_offline':'true','CI':'1','REQUIRE_BUN':'1','QMD_LLAMA_GPU':'false','QMD_COMPOSE_ROOT':str(ROOT),'QMD_EVIDENCE_DIR':str(ROOT/'evidence'),'QMD_RUN_LABEL':label,'VITE_CACHE_DIR':str(state/'cache/vite')})
+env.update({'HERMES_ROOT':env['HERMES_HOME'],'HF_HUB_CACHE':str(state/'hf/hub'),'VITEST_CACHE_DIR':str(state/'cache/vitest'),'NO_COLOR':'1','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_OPTIONAL_LOCKS':'0','QMD_REVIEW_HOST_RECEIPT':str(ROOT/'evidence'/f'{label}-hosts.jsonl'),'QMD_BENCH_ENTRYPOINT_RECEIPT':str(ROOT/'evidence'/f'{label}-entrypoint.jsonl'),'QMD_BENCH_TEST_RECEIPT':str(ROOT/'evidence'/f'{label}-lifecycle-host.json')})
+for key in ['HF_HUB_CACHE','VITE_CACHE_DIR','VITEST_CACHE_DIR']: Path(env[key]).mkdir(parents=True,exist_ok=True)
+if label.startswith(('types-','build-')):
+    env['NODE_OPTIONS'] = '--require='+str(ROOT/'probes/compiler-read-guard.cjs')
+# All subprocesses receive this new allowlist, never inherited credentials/context.
+receipt = {'label':label,'cwd':str(cwd),'argv':cmd,'environment':env,'started_monotonic':time.monotonic()}
+path = ROOT/'evidence'/f'{label}.json'
+path.write_text(json.dumps(receipt,indent=2)+'\n')
+with (ROOT/'logs'/f'{label}.stdout.log').open('wb') as stdout, (ROOT/'logs'/f'{label}.stderr.log').open('wb') as stderr:
+    result = subprocess.run(cmd, cwd=cwd, env=env, stdout=stdout, stderr=stderr, timeout=550)
+receipt.update(exit_code=result.returncode,elapsed_seconds=time.monotonic()-receipt['started_monotonic'])
+path.write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({'label':label,'exit_code':result.returncode,'elapsed_seconds':receipt['elapsed_seconds'],'receipt':str(path)},indent=2),flush=True)
+for stream in ['stdout','stderr']:
+    data = (ROOT/'logs'/f'{label}.{stream}.log').read_text(errors='replace')
+    if len(data)>20000:
+        print(f'--- {stream}: {len(data)} characters; complete raw log saved at {ROOT/"logs"/f"{label}.{stream}.log"} ---',flush=True)
+    elif data: print(f'--- {stream} ---\n{data}',end='' if data.endswith('\n') else '\n',flush=True)
+sys.exit(result.returncode)

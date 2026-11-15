@@ -1,0 +1,32 @@
+{
+  "reference": "Hugging Face AutoModel CPU, same cached MiniLM snapshot, float32 mean pooling and L2 normalization",
+  "token_counts": [
+    12,
+    67,
+    242,
+    35
+  ],
+  "comparisons": {
+    "baseline-512-v2": {
+      "cosines": [
+        0.73317551612854,
+        0.8367890119552612,
+        0.5990687608718872,
+        0.433016836643219
+      ],
+      "min_cosine": 0.433016836643219,
+      "max_abs": 0.7205447554588318
+    },
+    "completed-python-512": {
+      "cosines": [
+        0.73317551612854,
+        0.8367890119552612,
+        0.5990687608718872,
+        0.433016836643219
+      ],
+      "min_cosine": 0.433016836643219,
+      "max_abs": 0.7205447554588318
+    }
+  },
+  "passed": false
+}

@@ -1,0 +1,24 @@
+{
+  "reference": "Hugging Face AutoModel, same local weights, CPU float32",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "candidate_vectors": "/Users/shersingh/github/qmd-mlx-search/docs/benchmarks/apple-silicon-audit/rc-core-minilm-float32-512.npz",
+  "pooling": "mean",
+  "token_counts": [
+    12,
+    67,
+    242,
+    35
+  ],
+  "finite": true,
+  "normalized": true,
+  "cosines": [
+    1.0,
+    1.0,
+    0.9999998807907104,
+    1.0
+  ],
+  "min_cosine": 0.9999998807907104,
+  "max_abs": 3.5762786865234375e-07,
+  "passed": true,
+  "scope": "Authored four-text numerical fixture only; not corpus retrieval quality"
+}

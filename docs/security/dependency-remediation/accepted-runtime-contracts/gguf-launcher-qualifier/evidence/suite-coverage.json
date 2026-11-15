@@ -1,0 +1,23 @@
+{
+  "additional_case_count": 13,
+  "all_149_original_cases_executed": true,
+  "new_case_count": 162,
+  "old_case_count": 149,
+  "old_xml_sha256": "e5a51cf3ab392f73eb2796920f57af903c87ddc99f6b730023b5e5bcdec7cf66",
+  "original_real_or_actual_case_names": [
+    "test_native_training_stages_its_actual_shared_exporter",
+    "test_real_cli_is_stdlib_only_and_independent_of_cwd",
+    "test_actual_bootstrap_preserves_argv_and_writable_helper_layout",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/convert_gguf.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train_unsloth.py]",
+    "test_real_cli_image_selection_is_stdlib_only[False-finetune/convert_gguf.py]",
+    "test_real_cli_image_selection_is_stdlib_only[False-finetune/train.py]",
+    "test_real_cli_image_selection_is_stdlib_only[False-finetune/train_unsloth.py]",
+    "test_real_cli_image_selection_is_stdlib_only[False-finetune/dataset/validate_schema.py]",
+    "test_real_cli_image_selection_is_stdlib_only[True-finetune/convert_gguf.py]",
+    "test_real_cli_image_selection_is_stdlib_only[True-finetune/train.py]",
+    "test_real_cli_image_selection_is_stdlib_only[True-finetune/train_unsloth.py]",
+    "test_real_cli_image_selection_is_stdlib_only[True-finetune/dataset/validate_schema.py]"
+  ]
+}

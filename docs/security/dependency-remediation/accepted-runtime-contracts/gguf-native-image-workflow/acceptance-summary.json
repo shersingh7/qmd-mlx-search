@@ -1,0 +1,235 @@
+{
+  "status": "SCOPED_SPEC_QUALITY_ACCEPTED_AND_THREE_FILES_INTEGRATED",
+  "reviewDelegation": "deleg_34d9c9b4",
+  "reviewResultSha256": "e0df7e9cf964736faa506b325b3d47966aa12bee47477c4d31158543d158f921",
+  "reviewManifestSha256": "40d3b0cec481a2697a6a8bcd67b9de0154d5a59e3e2512c773c2253b843a1820",
+  "reviewArtifactsVerified": 5811,
+  "reviewZipRegularEntriesVerified": 5812,
+  "reviewedSourceSha256": {
+    ".github/workflows/gguf-native-image-qualification.yml": "c1439878b3342a7cbdae7fc34ebee7c2db13f91f04c7802af107bffac9486ec7",
+    "test/security/test_gguf_workflow_controller.py": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+    "test/security/fixtures/gguf_workflow_fake_cli.py": "87873345779febe5fdcea6fb162379259bcfacfa243fa5575817c574e2988a78"
+  },
+  "protectedExistingPathsUnchanged": 292,
+  "freshParentIndependentEdges": 20,
+  "freshIntegratedRegressions": 26,
+  "integratedLifetimeCases": 7,
+  "liveActionlintExit": 0,
+  "parentLifecycleSnapshots": [
+    {
+      "case": "test_controller_killed_pipe_revocation",
+      "terminatedAtReturn": false,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.5705678340164013,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_failure_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.062839000020176,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_early_success_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.085134208027739,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_interrupt_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.229557582992129,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_repeated_signals_during_registration",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.18649049999658,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_descendant",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.1280029169865884,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    },
+    {
+      "case": "test_timeout_with_failed_docker_cleanup",
+      "terminatedAtReturn": true,
+      "observation": {
+        "no_late_work": true,
+        "worker_terminated": true,
+        "sentinel_exit": 0,
+        "observation_seconds": 3.12401695799781,
+        "fixture_cleanup_started": false,
+        "all_descendants_reaped_claimed": false
+      }
+    }
+  ],
+  "observedIndependentRunCounts": [
+    {
+      "source": "supplied/evidence/synthetic-independent/summary.json",
+      "cases": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "positive/heldout/summary.json",
+      "cases": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "characterization/heldout/summary.json",
+      "cases": 34,
+      "passed": 33,
+      "failed": 1,
+      "skipped": 0
+    },
+    {
+      "source": "independent-heldouts/summary.json",
+      "cases": 20,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "countsAreSeparateExecutionsNotSummed": true,
+  "oldS3CharacterizationRemainsFailed": true,
+  "dispatchErratumOrigin": "Parent controller formatting error, not a user mistake; raw127 bootstrapfailure retained andcorrectedexecutableverified",
+  "reviewFixtureFailureRetained": true,
+  "reviewBundle": {
+    "path": "review-bundle.zip",
+    "sha256": "fa2976fb3dc4bba25a04b5c7664acc86cbecc8fb5a23539d81abca46deb4e16a",
+    "bytes": 10855606
+  },
+  "parentBundle": {
+    "path": "parent-evidence.tar.gz",
+    "sha256": "37898d69687f5d71b679bd7a71da208613849ac42b2a937becad1c2db370433b",
+    "bytes": 639546,
+    "verifiedRegularEntries": 1130,
+    "index": "parent-index.json.gz",
+    "indexSha256": "f174b6fab4aa669b13a456cf4c4d93c93597f06b983dc0f190a0b3c412519d3a",
+    "specialMetadataOnly": [
+      {
+        "path": "independent-heldouts/lifetime-abrupt-EOF-after-early-CLI-exit/anchor.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "independent-heldouts/lifetime-abrupt-EOF-after-early-CLI-exit/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "independent-heldouts/lifetime-INT-before-registration-first-signal/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "independent-heldouts/lifetime-registration-return-past-original-deadline/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "independent-heldouts/lifetime-early-CLI-exit-group-still-anchored/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "independent-heldouts/receipt-exclusive-collision-ownership/owned/receipt.preseed-symlink",
+        "type": 40960,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_controller_killed_pipe_revocation/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_timeout_with_failed_docker_cleanup/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_timeout_descendant/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_early_failure_descendant/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_repeated_signals_during_registration/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_interrupt_descendant/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      },
+      {
+        "path": "integrated-cases/test_early_success_descendant/lifetime.fifo",
+        "type": 4096,
+        "openedOrFollowed": false
+      }
+    ]
+  },
+  "standaloneSha256": {
+    "REPORT.md": "354401f826f67084c13ba38473380c7f171fddfb4ed5a42fb7f081531bdb0841",
+    "review-result.json": "e0df7e9cf964736faa506b325b3d47966aa12bee47477c4d31158543d158f921",
+    "source-manifest.json": "5f7ce0e09966bb2023daddcd359eab56f5568ed5ffbb79a021831d33671c4fc3",
+    "bundle.json": "1d641b6c6117ac6bec8dd2961f915adef3c553ace11c17f9ab4d77e3a43b78fe",
+    "integration-receipt.json": "68df565b243d6f161e77b829fb3356fc873d9aecfe4d765910e052108e46b4b5",
+    "parent-final-readback.json": "888f0ad472f598ca6b6b3b24666a339c507437c2856e9940383767ab97f39a60",
+    "parent-source-binding.json": "cf79269eb82deba181bc9f696724b8169968ab81231590d04e3efcadb86cb72a"
+  },
+  "nativeImageDockerCIQualified": false,
+  "committedPushedOrMergedByThisStep": false,
+  "remainingGates": [
+    "T2/T3 composition andindependentreview",
+    "Settled canonicaltests/build/strictroot/packaging/securitygraphs",
+    "Exacthead nativeLinuximage andmacOSCIreadback",
+    "Authorizedcommit/push/merge anddefaultbranchalertreadback"
+  ]
+}

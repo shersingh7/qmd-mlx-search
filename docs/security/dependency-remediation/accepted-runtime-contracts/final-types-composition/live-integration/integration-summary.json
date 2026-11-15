@@ -1,0 +1,114 @@
+{
+  "status": "REVIEWED_COMPOSITION_INTEGRATED_WHOLE_ROOT_AND_FULL_NODE_PASS",
+  "changedPaths": 22,
+  "postimagesMatched": 298,
+  "unaffectedBaselineSources": 276,
+  "reviewedPatchSha256": "f2db636f1c6b113f15b44fe28742764dc5c7a3accb67fca9f5119cbe54469f1c",
+  "declarationReview": "docs/security/dependency-remediation/accepted-runtime-contracts/development-declarations/acceptance-summary.json",
+  "install": {
+    "status": "REAL_FROZEN_BUN_INSTALL_PASS",
+    "installed": {
+      "@types/bun": {
+        "version": "1.3.8",
+        "verifiedDeclarationAndMetadataFiles": 4,
+        "totalRegularFiles": 4
+      },
+      "bun-types": {
+        "version": "1.3.8",
+        "verifiedDeclarationAndMetadataFiles": 31,
+        "totalRegularFiles": 354
+      },
+      "@types/picomatch": {
+        "version": "4.0.3",
+        "verifiedDeclarationAndMetadataFiles": 9,
+        "totalRegularFiles": 9
+      }
+    },
+    "verifiedDeclarationFiles": 44,
+    "metadataAndLocksUnchanged": {
+      "package.json": "7607a98a802ec455328ce0452fb2e43fb6c955e774d30e17cc49befac5e7ef1a",
+      "pnpm-lock.yaml": "c8dc5bf3011bef4a9417f49dbb37f47fa8aaa45dad97ba13366709554f2e308e",
+      "bun.lock": "c1dca7fd35ac82ef213872fc997d023218028d51b9fffb92b0e12b0ac070d329"
+    },
+    "existingNativeFilesUnchanged": 50,
+    "allSourcePostimagesUnchanged": 298,
+    "lifecycleScriptsExecuted": false,
+    "nodeTypes": "24.10.1"
+  },
+  "wholeRootTypes": {
+    "status": "ACTUAL_CHECKOUT_WHOLE_ROOT_TYPES_PASS",
+    "hosts": {
+      "node": {
+        "exitCode": 0,
+        "diagnostics": 0,
+        "guardRefusals": 0,
+        "historicalLiveReadsNowAllowed": [
+          "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts"
+        ],
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "nodeVersion": "22.22.3",
+        "bunVersion": null
+      },
+      "bun": {
+        "exitCode": 0,
+        "diagnostics": 0,
+        "guardRefusals": 0,
+        "historicalLiveReadsNowAllowed": [
+          "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts"
+        ],
+        "executable": "/Users/shersingh/.bun/bin/bun",
+        "nodeVersion": "24.3.0",
+        "bunVersion": "1.3.8"
+      }
+    },
+    "identicalOptionsAndRoots": true,
+    "rootCount": 153,
+    "historicalRootsRetained": [
+      "./docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+      "./docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+      "./docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs"
+    ],
+    "allowJsUnchangedTrue": true,
+    "wholeRootAccepted": true
+  },
+  "canonicalBuildExit": 0,
+  "canonicalNodeTests": {
+    "files": 53,
+    "passed": 1495,
+    "failed": 0,
+    "skipped": 66,
+    "exitCode": 0
+  },
+  "extraNativeBunVitest": {
+    "exitCode": -5,
+    "status": "FAILED_NATIVE_PROCESS_NO_SUITE_REPORT",
+    "causeNotEstablished": true,
+    "isolatedAstSuites": {
+      "files": 2,
+      "counts": {
+        "passed": 38
+      }
+    },
+    "realStandaloneAstAndSixGrammarsPassed": true,
+    "nativeSuiteSuccessNotClaimed": true
+  },
+  "otherOpenGates": [
+    "ASTerror-pathownershipfollowup",
+    "Pythonqualification",
+    "actualpackagedNodeBunsmokes",
+    "nativeLinuxGGUFimagequalification",
+    "nativeLinuxDarwinNixhashesandinstalledchecks",
+    "exact-headCI",
+    "authorizedmergeanddefaultbranchalertreadback"
+  ],
+  "C1UniversalCompleteCleanupAccepted": false,
+  "evidence": {
+    "bundle": "parent-evidence.tar.gz",
+    "sha256": "c4e215145f0a8bd4f411c47d77191e4dbd5390f5e55ff5d7125e6081c472bbbc",
+    "bytes": 214465,
+    "entriesReadbackVerified": 25
+  },
+  "privateCrashReportAndChatAuthorityRecordsExcluded": true
+}

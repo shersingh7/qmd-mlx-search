@@ -59,7 +59,7 @@ def test_gguf_rehearsal_pilot_lifecycle_and_strata():
     - Warmup executed and excluded from measured metrics.
     - Token strata verified (short, medium, long, code, exact 2047, 2048, 2049 boundary rejection).
     - Solo baseline interactive latency measured under idle load.
-    - True concurrent load interleaving with barrier handshake measured.
+    - Actual client overlap is reported truthfully; nonoverlap cannot pass qualification.
     - Metrics summary accounts successful tokens ONLY with separate 400 rejection metrics.
     - Measured requests <= 30.
     - Child process cleanly reaped.
@@ -76,7 +76,7 @@ def test_gguf_rehearsal_pilot_lifecycle_and_strata():
     runner = GGUFBenchmarkRunner(config)
     report = runner.run()
 
-    assert report["status"] == "passed"
+    assert report["status"] == "rehearsal_completed"
     assert report["backend"] == "gguf"
     assert report["mode"] == "sustained_pilot"
     assert report["synthetic"] is True
@@ -124,7 +124,10 @@ def test_gguf_rehearsal_pilot_lifecycle_and_strata():
         assert r["finite"] is True
         assert r["l2_normalized"] is True
         assert r["wire_ms"] > 0
-        assert r["effective_tokens_per_sec"] > 0
+        assert r["effective_tokens_per_sec"] is None
+        assert r["token_counts"] is None
+        assert r["total_tokens"] is None
+        assert r["effective_words_per_sec"] > 0
 
     assert len(rejs) >= 1
     for r in rejs:
@@ -135,24 +138,36 @@ def test_gguf_rehearsal_pilot_lifecycle_and_strata():
     inter = report["concurrent_load_interleaving"]
     assert len(inter) >= 1
     for item in inter:
-        assert item["overlap_verified"] is True
+        # A synthetic delay is not a scheduling guarantee on an occupied host.
+        # Verify the recorded evidence and the strict gate, not a fabricated overlap.
+        assert item["overlap_verified"] is (item["bulk_start_mono"] <= item["query_start_mono"] < item["bulk_end_mono"])
         assert item["bulk_wire_ms"] > 0
         assert item["concurrent_interactive_wire_ms"] > 0
         assert item["slowdown_factor"] >= 0.0
+    assert report["qualification_evaluation"]["gates"]["genuine_concurrent_overlap"]["passed"] is all(
+        item["overlap_verified"] for item in inter
+    )
 
     # Summary
     summary = report["metrics_summary"]
     assert summary["total_measured_requests"] == len(reqs) + len(rejs)
     assert summary["successful_embedding_requests"] == len(reqs)
     assert summary["rejected_boundary_requests"] == len(rejs)
-    assert summary["total_successful_embedded_tokens"] > 0
-    assert summary["overall_effective_tokens_per_sec"] > 0
+    assert summary["total_successful_embedded_tokens"] is None
+    assert summary["overall_effective_tokens_per_sec"] is None
+    assert summary["token_metrics_complete"] is False
+    assert summary["overall_effective_words_per_sec"] > 0
     assert summary["cumulative_wall_accounting"]["total_benchmark_elapsed_s"] > 0
 
     # Qualification evaluation
     qual = report["qualification_evaluation"]
-    assert qual["overall_status"] == "passed"
-    assert len(qual["failure_reasons"]) == 0
+    assert qual["overall_status"] == "failed"
+    assert qual["production_qualified"] is False
+    assert qual["gates"]["completed_real_run"]["passed"] is False
+    assert qual["gates"]["process_telemetry_coverage"]["passed"] is True
+    assert qual["gates"]["memory_stability"]["passed"] is False
+    assert report["metal_memory_telemetry"]["measurement_kind"] == "process_rss_proxy"
+    assert report["metal_memory_telemetry"]["peak_active_mb"] is None
 
     # Child cleanup
     cleanup = report["child_cleanup"]

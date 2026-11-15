@@ -1,0 +1,14 @@
+{"kind": "source", "pid": 38142, "owner": 38142, "at": 0.086636583, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 38142, "owner": 38142, "at": 0.089935583, "preparedAt": 0.08991875, "deadline": 0.28991875}
+{"kind": "control-read", "pid": 38142, "owner": 38142, "at": 0.090338708, "dataHex": "533230300a", "preExec": false}
+{"kind": "fork-parent", "pid": 38142, "owner": 38142, "at": 0.091433708, "child": 38143, "inheritedDeadline": 0.28991875}
+{"kind": "fork-child", "pid": 38143, "owner": 38142, "at": 0.091524541}
+{"kind": "setpgid", "pid": 38142, "owner": 38142, "at": 0.09193925, "target": 38143, "group": 38143, "currentGroup": 38142, "currentSession": 38142}
+{"kind": "control-read", "pid": 38142, "owner": 38142, "at": 0.09229875, "dataHex": "45", "preExec": false}
+{"kind": "setpgid", "pid": 38143, "owner": 38142, "at": 0.092344083, "target": 0, "group": 0, "currentGroup": 38143, "currentSession": 38142}
+{"kind": "e-consumed", "pid": 38142, "owner": 38142, "at": 0.09245875}
+{"kind": "interrupt-handler", "pid": 38142, "owner": 38142, "at": 0.097541416, "signal": 15}
+{"kind": "second-term-at-exception-transfer", "pid": 38142, "owner": 38142, "at": 0.097879375}
+{"kind": "interrupt-handler", "pid": 38142, "owner": 38142, "at": 0.098019375, "signal": 15}
+{"kind": "refusal-enter", "pid": 38143, "owner": 38142, "at": 0.09818275, "target": 38142, "currentGroup": 38143, "currentSession": 38142}
+{"kind": "waitpid", "pid": 38142, "owner": 38142, "at": 0.148084791, "reaped": 38143, "status": 9}

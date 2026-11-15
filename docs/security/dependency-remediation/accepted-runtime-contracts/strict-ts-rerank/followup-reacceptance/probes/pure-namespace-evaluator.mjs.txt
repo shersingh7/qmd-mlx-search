@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict';
+import { VitestModuleEvaluator } from '../node_modules/vitest/dist/module-evaluator.js';
+const url=new URL('./namespace-entry.js',import.meta.url).href;
+const native=await import(url);
+const interop=await new VitestModuleEvaluator(undefined,{}).runExternalModule(url);
+console.log(JSON.stringify({execPath:process.execPath,bun:process.versions.bun,node:process.versions.node,url,nativeKeys:Object.keys(native),defaultKeys:Object.keys(native.default),defaultHasEsModule:'__esModule' in native.default,defaultOwnEsModule:Object.hasOwn(native.default,'__esModule'),defaultEsModule:native.default.__esModule,nativeNamed:typeof native.z,interopNamed:typeof interop.z,interopKeys:Object.keys(interop)},null,2));
+assert.equal(typeof interop.z,'object','Vitest must preserve real named namespace export');

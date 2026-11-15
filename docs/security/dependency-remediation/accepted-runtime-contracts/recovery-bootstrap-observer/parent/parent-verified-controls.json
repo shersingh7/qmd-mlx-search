@@ -1,0 +1,26 @@
+{
+  "heldouts": {
+    "tests": 6,
+    "pass": 6,
+    "fail": 0,
+    "skipped": 0
+  },
+  "sourceFilesVerified": 246,
+  "fallback": {
+    "elapsedMs": 1098.928167,
+    "ownerPid": 51584,
+    "closeCounter": {
+      "needed": 4,
+      "got": 2,
+      "scope": "Node-private-read-only-not-kernel-state"
+    },
+    "preDestroyTimestamp": null,
+    "exactPreDestroyProjection": true,
+    "truthfulFailedTransport": true,
+    "cooperativeWriterReleased": true,
+    "artifact": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-observer-review-ebtkt4id/evidence/parent-fallback-artifacts/fast-timeout-node-51583.json"
+  },
+  "actualCiExecuted": false,
+  "completeCleanupCertification": false,
+  "qualification": "Retained C1; runtime observation does not establish historical CI cause"
+}

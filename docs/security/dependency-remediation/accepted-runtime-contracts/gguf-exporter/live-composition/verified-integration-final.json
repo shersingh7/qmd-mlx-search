@@ -1,0 +1,37 @@
+{
+  "sourcePathsApplied": 10,
+  "allReviewedPostimagesMatched": true,
+  "pytest": {
+    "tests": 372,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "deselectedNumericalPeftCases": 6,
+  "caseGroups": {
+    "tests.test_finetune_correctness": 31,
+    "tests.test_gguf_toolchain": 74,
+    "tests.test_gguf_structure": 78,
+    "tests.test_locked_job_submission": 162,
+    "tests.test_qualify_empty_version": 27
+  },
+  "realSourceCaseNames": [
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/convert_gguf.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train.py]",
+    "test_gguf_closure_follows_real_imports_and_export_calls[finetune/train_unsloth.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/convert_gguf.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train.py]",
+    "test_public_gguf_preview_stages_exact_helper_hash_and_preserves_argv[finetune/train_unsloth.py]"
+  ],
+  "graphs": 16,
+  "locksUnchanged": true,
+  "baselineAlertsChecked": 262,
+  "retainedAffectedAlerts": 0,
+  "graphInstances": 1772,
+  "newOnlineScan": false,
+  "defaultBranchAlertsClosed": false,
+  "nativeLinuxImageExecuted": false,
+  "scope": "Current accepted GGUF/launcher composition verified locally; model numerical cases deliberately not rerun, no native conversion/image/training/GPU/cloud qualification",
+  "realSourceCaseCount": 6,
+  "aggregationCorrection": "Initial substring real_source matched no names; actual two source-qualified parametrized methods yield6executed cases. Corrected readback only; original372-pass run retained, not rerun."
+}

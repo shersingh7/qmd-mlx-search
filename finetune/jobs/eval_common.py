@@ -225,6 +225,18 @@ def extract_query_from_prompt(prompt):
     return prompt.strip()
 
 
+def _reward_text(value):
+    """Normalize TRL text or conversational-message reward inputs."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list) and all(
+        isinstance(message, dict) and isinstance(message.get("content"), str)
+        for message in value
+    ):
+        return "\n".join(message["content"] for message in value)
+    raise TypeError("QMD rewards require text or chat messages with string content")
+
+
 class QMDRewardFunction:
     """Reward function wrapper for TRL's GRPOTrainer."""
     __name__ = "qmd_scoring_reward"
@@ -234,8 +246,8 @@ class QMDRewardFunction:
         for i, completion in enumerate(completions):
             query = ""
             if prompts and i < len(prompts):
-                query = extract_query_from_prompt(prompts[i])
-            rewards.append(score_expansion(query, completion))
+                query = extract_query_from_prompt(_reward_text(prompts[i]))
+            rewards.append(score_expansion(query, _reward_text(completion)))
         return rewards
 
 

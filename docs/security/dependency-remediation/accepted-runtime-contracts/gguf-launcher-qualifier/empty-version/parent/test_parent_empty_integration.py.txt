@@ -1,0 +1,127 @@
+"""Exercise the reviewed integrated qualifier; no Linux image or model claim."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import platform
+import shlex
+import shutil
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent
+LIVE = Path('/Users/shersingh/github/qmd-mlx-search')
+BIND = json.loads((ROOT / 'source-binding.json').read_text())
+PROBE = LIVE / 'finetune/tools/qualify_gguf_image.py'
+BASE_PATH = '/opt/homebrew/bin:/usr/bin:/bin'
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def assert_sources():
+    for name, expected in BIND['paths'].items():
+        assert hashlib.sha256((LIVE / name).read_bytes()).hexdigest() == expected
+
+
+def environment(label, tools):
+    env = {'PATH': str(tools) + os.pathsep + BASE_PATH, 'CI': '1', 'QMD_LLAMA_GPU': 'false',
+           'PYTHONDONTWRITEBYTECODE': '1', 'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1',
+           'HF_DATASETS_OFFLINE': '1', 'UV_OFFLINE': '1', 'GIT_CONFIG_NOSYSTEM': '1',
+           'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_TERMINAL_PROMPT': '0'}
+    for key, name in {'HOME':'home', 'HERMES_HOME':'hermes', 'HERMES_DIR':'hermes',
+                      'HERMES_KNOWLEDGE_DIR':'knowledge', 'KNOWLEDGE_DIR':'knowledge',
+                      'XDG_CACHE_HOME':'cache', 'XDG_CONFIG_HOME':'config', 'XDG_DATA_HOME':'data',
+                      'HF_HOME':'hf', 'TMPDIR':'tmp', 'TMP':'tmp', 'TEMP':'tmp'}.items():
+        location = ROOT / 'environments' / label / name
+        location.mkdir(parents=True, exist_ok=True)
+        env[key] = str(location)
+    return env
+
+
+def execute(label, tools):
+    assert_sources()
+    env = environment(label, tools)
+    command = [sys.executable, '-I', '-B', '-S', str(PROBE)]
+    run = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True, timeout=120)
+    receipt = {'command':command, 'environment':env, 'returncode':run.returncode,
+               'stdout':run.stdout, 'stderr':run.stderr, 'linuxImageExecution':False}
+    with (ROOT / 'evidence' / (label + '.json')).open('x') as handle:
+        json.dump(receipt, handle, indent=2)
+        handle.write('\n')
+    assert run.returncode == 0 and not run.stderr, receipt
+    value = json.loads(run.stdout)
+    assert value['status'] == 'pass' and value['native_only'] is False
+    assert value['probe_sha256'] == BIND['paths']['finetune/tools/qualify_gguf_image.py']
+    assert value['outputs'] == ['qmd-c-ok', 'qmd-cxx-ok']
+    assert value['python'] == platform.python_version()
+    assert sys.version_info[:2] == (3, 12)
+    assert value['platform'] == platform.system() + '/' + platform.machine()
+    assert value['locked_python_converter_training_gpu_cloud_qualified'] is False
+    assert set(value['versions']) == {'git', 'cc', 'c++', 'make', 'uv'}
+    assert not list(Path(env['TMPDIR']).iterdir())
+    assert_sources()
+    return value
+
+
+def test_01_integrated_pair_is_exact_reviewed_source():
+    assert_sources()
+    result = Path('/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/review-result.json')
+    assert hashlib.sha256(result.read_bytes()).hexdigest() == BIND['reviewResultSha256']
+    assert read(result)['empty_version_Q1_P3'] == 'CLOSED_ON_EXACT_CANDIDATE'
+
+
+def test_02_real_installed_uv_and_quiet_multiline_host_controls(tmp_path):
+    names = ('git', 'cc', 'c++', 'make', 'uv')
+    actual = {name: shutil.which(name, path=BASE_PATH) for name in names[:-1]}
+    actual['uv'] = '/Users/shersingh/.local/bin/uv'
+    assert all(path and Path(path).is_file() for path in actual.values()), actual
+    tools = tmp_path / 'actual-tools'
+    tools.mkdir()
+    for name, path in actual.items():
+        (tools / name).symlink_to(path)
+    full = execute('integrated-real-full', tools)
+    decorated = tmp_path / 'decorated-tools'
+    decorated.mkdir()
+    log = ROOT / 'evidence/real-decorated-tools.log'
+    for name, path in actual.items():
+        script = '#!/bin/sh\n'
+        script += "printf '%s\\n' " + shlex.quote(name) + '" $*" >> ' + shlex.quote(str(log)) + '\n'
+        script += 'if [ "$#" -eq 1 ] && [ "$1" = "--version" ]; then\n'
+        script += "  printf ' \\t\\n'\n"
+        script += '  ' + shlex.quote(path) + ' "$@" || exit $?\n'
+        script += "  printf '\\nsecond authored version-only line\\n \\t\\n'\n"
+        script += '  exit 0\nfi\n'
+        script += 'exec ' + shlex.quote(path) + ' "$@"' + (' >/dev/null' if name == 'make' else '') + '\n'
+        executable = decorated / name
+        executable.write_text(script)
+        executable.chmod(0o700)
+    quiet = execute('integrated-real-multiline-quiet', decorated)
+    assert quiet == full
+    observed = log.read_text().splitlines()
+    assert observed[:5] == [name + ' --version' for name in names]
+    assert any(line.startswith('make -j2 ') for line in observed)
+    assert any(line.startswith('cc -std=c11 ') for line in observed)
+    assert any(line.startswith('c++ -std=c++17 ') for line in observed)
+    summary = {'fullHost':full, 'multilineQuietReceiptIdentical':True, 'realNativeInvocations':2,
+               'cleanupVerified':True, 'linuxImageExecution':False,
+               'noModelConverterTrainingGpuCloudQualification':True}
+    with (ROOT / 'host-summary.json').open('x') as handle:
+        json.dump(summary, handle, indent=2)
+        handle.write('\n')
+    print(json.dumps(summary))
+
+
+def test_03_acceptance_metadata_keeps_broader_gates_open():
+    ledger = read(Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/integration-gates-wave4.json'))
+    gate = next(item for item in ledger['gates'] if item['id'] == 'gguf-launcher-image-closure')
+    summary = read(LIVE / gate['empty_version_acceptance_archive'])
+    assert summary['reviewResultSha256'] == BIND['reviewResultSha256']
+    assert summary['spec'] == summary['quality'] == 'PASS'
+    assert summary['emptyVersionFinding'] == 'CLOSED_ON_EXACT_CANDIDATE'
+    assert summary['pairIntegrated'] is True and summary['linuxImageExecution'] is False
+    assert summary['fullLauncherHelperDependencyIntegration'] is False
+    assert summary['parentLivePytest']['tests'] == 29 and summary['parentLivePytest']['failures'] == 0
+    assert summary['parentHostControls']['multilineQuietReceiptIdentical'] is True
+    assert_sources()

@@ -4,10 +4,11 @@ runtime.py — Model-aware MLX embedding runtime behind single GPU execution own
 
 from __future__ import annotations
 
-import os
-import sys
+import json
+import math
 import threading
 import time
+from concurrent.futures import Future, TimeoutError as FutureTimeoutError
 from typing import Any, Optional
 import numpy as np
 
@@ -17,8 +18,9 @@ from .adapters import (
     resolve_embedding_adapter,
 )
 from .batching import BatchPlanner
+from .adapters.embedding import EmbeddingPreparation
 from .executor import GPUExecutor
-from .model_manager import ModelResidencyManager
+from .model_manager import ModelResidencyManager, ModelState
 from .protocol import (
     DeadlineExceededError,
     InvalidInputError,
@@ -51,6 +53,22 @@ class AdmissionLease:
     acquired_time: float
 
 
+@dataclass(frozen=True)
+class EmbeddingResult:
+    """Owned CPU output plus the immutable identity captured by its operation.
+
+    Keep this additive to submit_embed's public ndarray contract. Each descriptor
+    access returns a fresh dictionary, never a mutable global 'last descriptor'.
+    """
+
+    embeddings: np.ndarray
+    descriptor_json: str
+
+    @property
+    def descriptor(self) -> dict[str, Any]:
+        return json.loads(self.descriptor_json)
+
+
 class _DummyWorkQueue:
     def __init__(self, executor: GPUExecutor):
         self._executor = executor
@@ -77,6 +95,7 @@ class MLXEmbeddingRuntime:
         executor: Optional[GPUExecutor] = None,
         model_manager: Optional[ModelResidencyManager] = None,
         lazy_load: bool = False,
+        max_bulk_microbatch_tokens: int = 512,
     ):
         self.model_name = model_name
         self.quantization = quantization
@@ -85,13 +104,14 @@ class MLXEmbeddingRuntime:
         self.revision = revision
         self.trust_remote_code = trust_remote_code
 
-        # Shared or private executor & residency manager
-        self.executor = executor or GPUExecutor()
-        self._owns_executor = executor is None
+        # Resolve and validate everything that does not need an owner thread
+        # before allocating one. Unsupported models and bad budgets must not leak
+        # a live executor from an otherwise failed constructor.
+        if model_manager is not None:
+            if executor is not None and model_manager.executor is not executor:
+                raise ValueError("model_manager and runtime must use the same executor")
+            executor = model_manager.executor
 
-        self.model_manager = model_manager or ModelResidencyManager(self.executor)
-
-        # Instantiate explicit model adapter
         self.adapter: BaseEmbeddingAdapter = resolve_embedding_adapter(
             model_name=model_name,
             quantization=quantization,
@@ -104,11 +124,15 @@ class MLXEmbeddingRuntime:
         if not getattr(self.adapter, "synthetic", False) and not _MLX_AVAILABLE:
             raise MLXRuntimeError("MLX is not installed. Please install mlx and mlx-lm.")
 
-        self.model_manager.register_adapter("embed", self.adapter)
+        existing_adapter = model_manager.get_adapter("embed") if model_manager is not None else None
+        if existing_adapter is not None and existing_adapter is not self.adapter:
+            raise ValueError("model_manager already has an embed adapter")
 
-        # Batch planner
+        # Fairness target and model/hardware budget are deliberately independent.
+        # The safe 512-token bulk default is unchanged; higher targets are opt-in.
         self.batch_planner = BatchPlanner(
-            max_batch_tokens=max_batch_tokens if max_batch_tokens > 0 else None
+            max_batch_tokens=max_batch_tokens,
+            max_bulk_microbatch_tokens=max_bulk_microbatch_tokens,
         )
         self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
 
@@ -119,15 +143,44 @@ class MLXEmbeddingRuntime:
         self._current_admitted_requests: int = 0
         self._current_admitted_bytes: int = 0
         self._shutting_down: bool = False
+        self._shutdown_future: Optional[Future] = None
+        self._shutdown_cleanup: Optional[Future] = None
+        self._shutdown_needs_disposal = False
+        self._owns_adapter_registration = False
+        self._owns_executor = executor is None
 
         self.start_time: float = time.time()
         self.total_requests: int = 0
         self.total_latency_ms: float = 0.0
         self.compiled_shapes: set[tuple[int, ...]] = set()
 
-        if not lazy_load:
-            self.model_manager.ensure_loaded("embed")
-            self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
+        self.executor = executor if executor is not None else GPUExecutor()
+        self.model_manager: ModelResidencyManager
+        try:
+            self.model_manager = model_manager if model_manager is not None else ModelResidencyManager(self.executor)
+            if existing_adapter is None:
+                # Acquire bounded teardown capacity before registering/loading
+                # weights. Normal request saturation cannot strand this slot.
+                self._shutdown_cleanup = self.executor.reserve_cleanup(
+                    self._unload_owned_embedding, description="Shutdown embedding runtime",
+                )
+                # Set ownership before registration so a partially successful
+                # register_adapter can also be rolled back safely.
+                self._owns_adapter_registration = True
+                self.model_manager.register_adapter("embed", self.adapter)
+            if not lazy_load:
+                self.model_manager.ensure_loaded("embed")
+                self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
+        except BaseException:
+            try:
+                self.shutdown()
+            except BaseException:
+                # A timed-out native load cannot be interrupted safely. If a
+                # teardown was queued it still owns cleanup after completion.
+                # If setup failed before that was possible, stop only our owner.
+                if self._owns_executor and self._shutdown_future is None:
+                    self.executor.shutdown()
+            raise
 
     @property
     def in_flight_requests(self) -> int:
@@ -236,6 +289,57 @@ class MLXEmbeddingRuntime:
     def is_ready(self) -> bool:
         return self.adapter.is_loaded() and self.executor.is_alive()
 
+    def _check_request_active(self, deadline: float, cancel_event: threading.Event):
+        if self._shutting_down:
+            raise WorkerUnavailableError("Embedding runtime is shutting down")
+        if cancel_event.is_set():
+            raise RequestCancelledError("Embedding request cancelled")
+        if time.monotonic() > deadline:
+            raise DeadlineExceededError("Embedding request deadline exceeded")
+
+    def _prepare_request(
+        self, deadline: float, cancel_event: threading.Event,
+        requested_dims: Optional[int] = None,
+    ) -> EmbeddingPreparation:
+        """Snapshot ready state on CPU, otherwise prepare it on the owner."""
+        self._check_request_active(deadline, cancel_event)
+
+        def _prepare_under_owner():
+            self._check_request_active(deadline, cancel_event)
+            # The lease belongs to native initialization, not its CPU waiter.
+            # Release it before the owner can select a following teardown; a
+            # delayed waiter must not make mandatory cleanup refuse a stale pin.
+            self.model_manager.acquire_lease("embed")
+            try:
+                self._check_request_active(deadline, cancel_event)
+                self.model_manager.ensure_loaded("embed", deadline=deadline, cancel_event=cancel_event)
+                self._check_request_active(deadline, cancel_event)
+                preparation = self.adapter.capture_preparation(requested_dims=requested_dims)
+                self._check_request_active(deadline, cancel_event)
+                return preparation
+            finally:
+                self.model_manager.release_lease("embed")
+
+        # A ready tokenizer needs no owner round trip: interactive callers must
+        # be able to tokenize while a bulk forward runs, then queue their own
+        # forward at the next microbatch boundary. Snapshot acquisition never
+        # waits for the adapter's native load/disposal lock on a CPU caller.
+        preparation = self.adapter.try_capture_preparation(requested_dims=requested_dims)
+        if preparation is None:
+            if self.executor.is_owner_thread():
+                preparation = _prepare_under_owner()
+            else:
+                preparation = self.executor.submit(
+                    _prepare_under_owner,
+                    priority=0,
+                    timeout_s=max(0.0, deadline - time.monotonic()),
+                    cancel_event=cancel_event,
+                    description="Initialize embedding tokenizer",
+                )
+        # A paused CPU waiter can resume after owner-side shutdown completed.
+        self._check_request_active(deadline, cancel_event)
+        return preparation
+
     def tokenize(
         self,
         texts: list[str],
@@ -243,8 +347,8 @@ class MLXEmbeddingRuntime:
         cancel_event: Optional[threading.Event] = None,
     ) -> list[list[int]]:
         """
-        Tokenizes texts into token IDs on CPU without requiring model weights loaded on GPU.
-        Protected by bounded admission controls.
+        Tokenizes on CPU from an atomically captured, verified tokenizer snapshot.
+        Cold initialization is owner-only; no weight lease spans CPU tokenization.
         """
         if not texts:
             return []
@@ -275,29 +379,12 @@ class MLXEmbeddingRuntime:
 
         lease = self.acquire_admission_lease(len(texts), total_bytes, deadline=req_deadline, cancel_event=event)
         try:
-            if getattr(self.adapter, "raw_hf_tokenizer", None) is None:
-                self.model_manager.acquire_lease("embed")
-                try:
-                    if not self.adapter.is_loaded():
-                        self.model_manager.ensure_loaded("embed", deadline=req_deadline, cancel_event=event)
-                        self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
-                finally:
-                    self.model_manager.release_lease("embed")
+            preparation = self._prepare_request(req_deadline, event)
+            self._check_request_active(req_deadline, event)
+            batch = preparation.tokenize_texts(texts)
+            self._check_request_active(req_deadline, event)
 
-            batch = self.adapter.tokenize_texts(texts)
-
-            if event.is_set():
-                raise RequestCancelledError("Tokenize request cancelled after tokenization")
-            if time.monotonic() > req_deadline:
-                raise DeadlineExceededError("Tokenize deadline exceeded after tokenization")
-
-            if isinstance(batch, TokenizedBatch):
-                return batch.token_ids
-            elif hasattr(batch, "token_ids"):
-                return batch.token_ids
-            elif isinstance(batch, list):
-                return batch
-            return list(batch)
+            return batch.token_ids
         finally:
             self.release_admission_lease(lease)
 
@@ -328,13 +415,30 @@ class MLXEmbeddingRuntime:
         cancel_event: Optional[threading.Event] = None,
         deadline: Optional[float] = None,
     ) -> np.ndarray:
+        """Public ndarray interface; identity-aware consumers use the result API."""
+        if not texts:
+            return np.empty((0, self.adapter.native_dims or 0), dtype=np.float32)
+        return self.submit_embed_result(
+            texts, requested_dims=requested_dims, is_query=is_query, timeout=timeout,
+            cancel_event=cancel_event, deadline=deadline,
+        ).embeddings
+
+    def submit_embed_result(
+        self,
+        texts: list[str],
+        requested_dims: Optional[int] = None,
+        is_query: bool = False,
+        timeout: float = 300.0,
+        cancel_event: Optional[threading.Event] = None,
+        deadline: Optional[float] = None,
+    ) -> EmbeddingResult:
         """
         Submits an embedding request through the GPU execution owner.
         Enforces a single monotonic deadline budget across admission lease, tokenize, queue, and micro-batches.
         Supports micro-batch interleaving so interactive requests yield between bulk steps.
         """
         if not texts:
-            return np.empty((0, self.adapter.native_dims or 0), dtype=np.float32)
+            raise InvalidInputError("Embedding result requires at least one text")
 
         # 1. Early bounded input validation
         if len(texts) > 512:
@@ -367,26 +471,14 @@ class MLXEmbeddingRuntime:
         # 2. Acquire bounded admission lease before heavy CPU tokenization
         lease = self.acquire_admission_lease(len(texts), total_bytes, deadline=req_deadline, cancel_event=event)
         try:
-            # 3. Tokenize (CPU side). Ensure tokenizer is loaded under lease if needed.
-            if getattr(self.adapter, "raw_hf_tokenizer", None) is None:
-                self.model_manager.acquire_lease("embed")
-                try:
-                    if not self.adapter.is_loaded():
-                        self.model_manager.ensure_loaded("embed", deadline=req_deadline, cancel_event=event)
-                        self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
-                finally:
-                    self.model_manager.release_lease("embed")
-
-            tokenized_batch = self.adapter.tokenize_texts(texts)
+            # 3. Capture verified state; tokenize on CPU using ONLY that snapshot.
+            preparation = self._prepare_request(req_deadline, event, requested_dims)
+            self._check_request_active(req_deadline, event)
+            tokenized_batch = preparation.tokenize_texts(texts)
+            self._check_request_active(req_deadline, event)
 
             # Retune batch planner with measured model params BEFORE planning micro-batches!
-            if self.adapter.is_loaded() or getattr(self.adapter, "model_params_b", None):
-                self.batch_planner.tune_for_model(getattr(self.adapter, "model_params_b", 0.6))
-
-            if event.is_set():
-                raise RequestCancelledError("Request cancelled after tokenization")
-            if time.monotonic() > req_deadline:
-                raise DeadlineExceededError("Request deadline exceeded after tokenization")
+            self.batch_planner.tune_for_model(preparation.model_params_b)
 
             # Interactive queries get priority 0, bulk document embeddings get priority 1
             work_class = WorkClass.INTERACTIVE if (is_query or len(texts) <= 2) else WorkClass.BULK
@@ -401,34 +493,34 @@ class MLXEmbeddingRuntime:
 
             results: list[np.ndarray] = []
             for batch_idx, sub_batch in enumerate(sub_batches):
-                if event.is_set():
-                    raise RequestCancelledError("Embedding request cancelled")
-                if time.monotonic() > req_deadline:
-                    raise DeadlineExceededError(
-                        f"Deadline exceeded after {batch_idx}/{len(sub_batches)} micro-batches"
-                    )
+                self._check_request_active(req_deadline, event)
 
-                rem_timeout = max(0.01, req_deadline - time.monotonic())
+                rem_timeout = max(0.0, req_deadline - time.monotonic())
 
                 def _forward_sub_batch(sb=sub_batch) -> np.ndarray:
-                    if event.is_set():
-                        raise RequestCancelledError("Embedding request cancelled")
-                    if time.monotonic() > req_deadline:
-                        raise DeadlineExceededError("Micro-batch deadline exceeded")
-
-                    if not self.adapter.is_loaded():
-                        self.model_manager.ensure_loaded("embed", deadline=req_deadline, cancel_event=event)
-                    self.model_manager.touch("embed")
+                    self._check_request_active(req_deadline, event)
 
                     def _run_forward(b: TokenizedBatch) -> np.ndarray:
+                        self._check_request_active(req_deadline, event)
+                        self.adapter.assert_preparation_current(preparation)
                         if len(b) > 0:
                             padded_shape = (len(b), max(b.lengths) if b.lengths else 1)
                             if len(self.compiled_shapes) >= 256:
                                 self.compiled_shapes.clear()
                             self.compiled_shapes.add(padded_shape)
-                        return self.adapter.forward_batch(b, requested_dims=requested_dims)
+                        value = self.adapter.forward_batch(b, requested_dims=requested_dims)
+                        self._check_request_active(req_deadline, event)
+                        self.adapter.assert_preparation_current(preparation)
+                        return value
 
-                    return self.batch_planner.execute_sub_batch_with_retry(sb, _run_forward)
+                    # A short native-only lease protects against reentrant stage
+                    # eviction, not against fair interleaving between owner jobs.
+                    self.model_manager.acquire_lease("embed")
+                    try:
+                        self.adapter.assert_preparation_current(preparation)
+                        return self.batch_planner.execute_sub_batch_with_retry(sb, _run_forward)
+                    finally:
+                        self.model_manager.release_lease("embed")
 
                 batch_res = self.executor.submit(
                     _forward_sub_batch,
@@ -441,13 +533,14 @@ class MLXEmbeddingRuntime:
 
             # 5. Restore original input ordering
             res = self.batch_planner.restore_ordering(results, micro_batches_indices, len(tokenized_batch))
+            self._check_request_active(req_deadline, event)
 
             latency_ms = (time.time() - t0) * 1000
             self.total_requests += 1
             self.total_latency_ms += latency_ms
             self.model_manager.touch("embed")
             self.model_manager.update_peak_memory()
-            return res
+            return EmbeddingResult(res, preparation.descriptor_json)
         except MLXServerError:
             raise
         except Exception as exc:
@@ -471,6 +564,9 @@ class MLXEmbeddingRuntime:
             "uptime_sec": round(uptime, 1),
             "weights_loaded": self.adapter.is_loaded(),
             "idle_unload_s": self.model_manager.idle_unload_s,
+            "max_batch_tokens": self.batch_planner.max_batch_tokens,
+            "max_bulk_microbatch_tokens": self.batch_planner.max_bulk_microbatch_tokens,
+            "effective_bulk_microbatch_tokens": self.batch_planner.effective_bulk_microbatch_tokens,
         }
 
     def stop_admission(self):
@@ -479,18 +575,115 @@ class MLXEmbeddingRuntime:
             self._shutting_down = True
             self._admission_lock.notify_all()
 
+    def _unload_owned_embedding(self):
+        """Unload only this runtime's registration, on owner or after owner exit."""
+        manager = getattr(self, "model_manager", None)
+        if (
+            getattr(self, "_owns_adapter_registration", True)
+            and manager is not None
+            and manager.get_adapter("embed") is self.adapter
+        ):
+            manager.unload("embed")
+            if manager.get_state("embed") != ModelState.UNLOADED:
+                raise ModelUnavailableError(
+                    manager.get_error("embed") or "Embedding adapter did not unload successfully"
+                )
+
+    def _finish_shutdown(self, unload_future: Future, completion: Future):
+        """Done callback: stop an owned executor without allocating a waiter."""
+        error: Optional[BaseException] = None
+        try:
+            unload_future.result()
+        except BaseException as exc:
+            error = exc
+        finally:
+            if self._owns_executor:
+                try:
+                    self.executor.shutdown(timeout=0)
+                except BaseException as exc:
+                    if error is None:
+                        error = exc
+            if error is None:
+                completion.set_result(None)
+            else:
+                completion.set_exception(error)
+
     def shutdown(self, timeout: float = 5.0):
-        """Cleanly terminates the runtime and executor (if owned) under owner-thread serialization."""
+        """Fence new work, unload on its owner, then stop only an owned executor.
+
+        The timeout bounds the caller's wait, not a running Metal kernel. Queued
+        teardown remains live after timeout; a subsequent call waits on the same
+        operation. No helper waits on a stuck owner. Calls on the owner initiate
+        teardown without waiting on self. If owner exit already won admission,
+        a caller joins within its budget, then disposes only after confirmed exit.
+        """
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout < 0:
+            raise ValueError("shutdown timeout must be a finite non-negative number")
+        deadline = time.monotonic() + timeout
         self.stop_admission()
 
-        if self._owns_executor:
-            self.executor.shutdown(timeout=timeout)
-        if self.model_manager:
-            try:
-                self.model_manager.unload("embed")
-            except Exception:
-                if not self.executor.is_worker_alive():
-                    self.adapter.unload()
-        else:
+        no_cleanup = False
+        with self._admission_lock:
+            previous = self._shutdown_future
+            if previous is not None and previous.done() and not self.executor.is_accepting():
+                # A rejected/cancelled old teardown is not a permanent terminal
+                # result. Retry safely once the externally stopped owner exits.
+                if previous.cancelled() or isinstance(
+                    previous.exception(), (WorkerUnavailableError, RequestCancelledError),
+                ):
+                    self._shutdown_future = None
+            if self._shutdown_future is None:
+                completion: Future = Future()
+                completion.set_running_or_notify_cancel()
+                self._shutdown_future = completion
+                cleanup = self._shutdown_cleanup
+                if cleanup is None or cleanup.done():
+                    cleanup = Future()
+                    self._shutdown_cleanup = cleanup
+                    self._shutdown_needs_disposal = self._owns_adapter_registration
+                    no_cleanup = not self._shutdown_needs_disposal
+                else:
+                    try:
+                        self.executor.submit_cleanup(cleanup)
+                    except WorkerUnavailableError:
+                        self._shutdown_needs_disposal = True
+                cleanup.add_done_callback(lambda done: self._finish_shutdown(done, completion))
+            future = self._shutdown_future
+            cleanup = self._shutdown_cleanup
+            needs_disposal = self._shutdown_needs_disposal
+
+        assert future is not None and cleanup is not None
+        if no_cleanup:
+            cleanup.set_result(None)
+        if self.executor.is_owner_thread():
+            return
+        if needs_disposal:
+            self.executor.join_worker(timeout=max(0.0, deadline - time.monotonic()))
             if not self.executor.is_worker_alive():
-                self.adapter.unload()
+                with self._admission_lock:
+                    claim_disposal = self._shutdown_needs_disposal
+                    self._shutdown_needs_disposal = False
+                if claim_disposal:
+                    # Only this caller disposes; other callers wait on completion.
+                    try:
+                        self._unload_owned_embedding()
+                    except BaseException as exc:
+                        cleanup.set_exception(exc)
+                    else:
+                        cleanup.set_result(None)
+        try:
+            future.result(timeout=max(0.0, deadline - time.monotonic()))
+        except FutureTimeoutError:
+            if future.done():
+                # Do not relabel a TimeoutError raised by the unload itself.
+                raise
+            raise DeadlineExceededError(
+                "Runtime shutdown timed out; retry after active owner work exits"
+            ) from None
+        finally:
+            if self._owns_executor and future.done():
+                # Join on both success and unload failure; the done callback can
+                # stop the worker, but cannot join itself on the owner thread.
+                self.executor.join_worker(timeout=max(0.0, deadline - time.monotonic()))
+        if self._owns_executor and self.executor.is_worker_alive():
+            raise DeadlineExceededError("Runtime shutdown timed out waiting for owner exit")

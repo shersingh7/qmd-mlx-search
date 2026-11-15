@@ -1,0 +1,629 @@
+{
+  "accelerator_calls": [],
+  "actual_checkpoint_materializations_common": [
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        248077,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        1,
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    }
+  ],
+  "actual_maintained_reader_calls": [],
+  "after": {
+    "counts": {
+      "directory": 2537,
+      "file": 30255,
+      "symlink": 3
+    },
+    "regular_file_bytes": 1075927846,
+    "state_sha256": "dcf43d083786a5fcdd5276bbf01818a085bcc58832752b195f1f35ba657a4df8",
+    "versions": {
+      "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "packages": {
+        "accelerate": "1.15.0+qmd.2",
+        "cmake": "4.4.4",
+        "gguf": "0.19.0",
+        "numpy": "2.5.4",
+        "peft": "0.21.3",
+        "protobuf": "7.36.2",
+        "sentencepiece": "0.2.3",
+        "torch": "2.15.0",
+        "transformers": "5.22.2"
+      },
+      "prefix": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv",
+      "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]"
+    }
+  },
+  "before": {
+    "counts": {
+      "directory": 2537,
+      "file": 30255,
+      "symlink": 3
+    },
+    "regular_file_bytes": 1075927846,
+    "state_sha256": "dcf43d083786a5fcdd5276bbf01818a085bcc58832752b195f1f35ba657a4df8",
+    "versions": {
+      "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "packages": {
+        "accelerate": "1.15.0+qmd.2",
+        "cmake": "4.4.4",
+        "gguf": "0.19.0",
+        "numpy": "2.5.4",
+        "peft": "0.21.3",
+        "protobuf": "7.36.2",
+        "sentencepiece": "0.2.3",
+        "torch": "2.15.0",
+        "transformers": "5.22.2"
+      },
+      "prefix": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv",
+      "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]"
+    }
+  },
+  "checkpoint_reads": [
+    {
+      "framework": "pt",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/model.safetensors",
+      "requested_device": "cpu",
+      "tensor_devices": [],
+      "tensor_reads": 0
+    },
+    {
+      "framework": "pt",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-sft-adapter/adapter_model.safetensors",
+      "requested_device": "cpu",
+      "tensor_devices": [
+        "cpu"
+      ],
+      "tensor_reads": 2
+    },
+    {
+      "framework": "pt",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-grpo-adapter/adapter_model.safetensors",
+      "requested_device": "cpu",
+      "tensor_devices": [
+        "cpu"
+      ],
+      "tensor_reads": 2
+    }
+  ],
+  "commands": [],
+  "cpu_routing": {
+    "method": "test-process-only lru_cache availability=False preserving __wrapped__/cache APIs",
+    "torch_cuda_is_available": false,
+    "torch_mps_is_available": false
+  },
+  "dispatch_operations": 600,
+  "dispatch_tensor_devices": {
+    "cpu": 466,
+    "meta": 118
+  },
+  "elapsed_seconds": 18.33127216703724,
+  "environment": {
+    "ACCELERATE_USE_CPU": "true",
+    "CUDA_VISIBLE_DEVICES": "",
+    "DO_NOT_TRACK": "1",
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_TERMINAL_PROMPT": "0",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/hermes/knowledge",
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/hf",
+    "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/hf/hub",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "HF_HUB_OFFLINE": "1",
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/home",
+    "LC_ALL": "en_US.UTF-8",
+    "MKL_NUM_THREADS": "1",
+    "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/matplotlib",
+    "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/numba",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+    "QMD_LLAMA_GPU": "false",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/tmp",
+    "TOKENIZERS_PARALLELISM": "false",
+    "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/torch",
+    "TRANSFORMERS_OFFLINE": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "WANDB_MODE": "disabled",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/cache/xdg",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/data",
+    "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/fixture/state",
+    "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+  },
+  "environment_unchanged": true,
+  "fixture": {
+    "adapters": [
+      {
+        "delta_max_abs": 0.023395108059048653,
+        "delta_nonzero": 32768,
+        "device": "cpu",
+        "files": {
+          "README.md": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+          "adapter_config.json": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+          "adapter_model.safetensors": "059fab6dd24390d13c1453c20a29e1bcfe8fb7868a82901e48f64bcadeccc351"
+        },
+        "label": "sft",
+        "nonzero_A": 512,
+        "nonzero_B": 256,
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-sft-adapter"
+      },
+      {
+        "delta_max_abs": 0.026022477075457573,
+        "delta_nonzero": 32768,
+        "device": "cpu",
+        "files": {
+          "README.md": "666399fdae4008131bf5f2685c554b76a99e9c885864341d06f01da1fbf6116e",
+          "adapter_config.json": "a4fffeccdc2eb460a1280cb2efac72f2726e1e50254a0e73eb4f421e739c12bb",
+          "adapter_model.safetensors": "4e0d5fea5b4fd20311a24ce3076a322153a3a7be124deb1d3fea4fb410448a45"
+        },
+        "label": "grpo",
+        "nonzero_A": 512,
+        "nonzero_B": 256,
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-TRAINED-grpo-adapter"
+      }
+    ],
+    "all_ids_covered": true,
+    "config": {
+      "architectures": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "attention_bias": false,
+      "attention_dropout": 0.0,
+      "bos_token_id": null,
+      "dtype": "bfloat16",
+      "eos_token_id": 248046,
+      "head_dim": 64,
+      "hidden_act": "silu",
+      "hidden_size": 256,
+      "initializer_range": 0.02,
+      "intermediate_size": 512,
+      "layer_types": [
+        "linear_attention",
+        "full_attention"
+      ],
+      "linear_conv_kernel_dim": 4,
+      "linear_key_head_dim": 64,
+      "linear_num_key_heads": 2,
+      "linear_num_value_heads": 4,
+      "linear_value_head_dim": 64,
+      "max_position_embeddings": 128,
+      "model_type": "qwen3_5_text",
+      "num_attention_heads": 4,
+      "num_hidden_layers": 2,
+      "num_key_value_heads": 2,
+      "pad_token_id": 248044,
+      "rms_norm_eps": 1e-06,
+      "rope_parameters": {
+        "mrope_section": [
+          3,
+          3,
+          2
+        ],
+        "partial_rotary_factor": 0.25,
+        "rope_theta": 10000.0,
+        "rope_type": "default"
+      },
+      "tie_word_embeddings": true,
+      "transformers_version": "5.22.2",
+      "use_cache": true,
+      "vocab_size": 248077
+    },
+    "files": {
+      "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "config.json": "fd6c4a4c33eb26c2aaaa834dd254bf5879d300851ddb64b423cd7b79b51f438c",
+      "generation_config.json": "1418c1374e32e2a74dc23a9c35d10104a3863820b5a327c855b52b67f583d3a1",
+      "model.safetensors": "569cd85c3573026c60f0ceefcb70bfc18c3f241d8e143ec1149d68b53ad0a8d4",
+      "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "tokenizer_config.json": "7edc959a113834371eebfa2605ad52919fb8a6a8de5fb877ad69c45648c2ca5a"
+    },
+    "input_provenance": "Hash-qualified copy of prior genuine locally random CPU fixture",
+    "max_id": 248076,
+    "no_optimizer_or_training": true,
+    "not_pretrained": true,
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5",
+    "random_seed": 982451653,
+    "special_ids": [
+      248046,
+      248044,
+      248070,
+      248071,
+      248076,
+      248056,
+      248057,
+      248053,
+      248054,
+      248045,
+      248047,
+      248048,
+      248049,
+      248050,
+      248051,
+      248052,
+      248055
+    ],
+    "stock_save_reload_equal": true,
+    "tokenizer_type": "transformers.models.qwen2.tokenization_qwen2.Qwen2Tokenizer",
+    "vocab_size": 248077
+  },
+  "forward": {
+    "finite": true,
+    "included_maximum_token_id": 248076,
+    "input_device": "cpu",
+    "input_ids": [
+      [
+        35904,
+        17034,
+        13540,
+        1228,
+        13,
+        248076
+      ]
+    ],
+    "logits_device": "cpu",
+    "shape": [
+      1,
+      6,
+      248077
+    ]
+  },
+  "installed_gguf_identity": {
+    "init_sha256": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/__init__.py",
+    "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+    "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad",
+    "version": "0.19.0"
+  },
+  "max_rss_bytes_child": 14385152,
+  "max_rss_bytes_self": 1068711936,
+  "model_devices": [
+    {
+      "buffer_devices": [
+        "cpu"
+      ],
+      "hf_device_map": null,
+      "label": "copied_random_fixture_actual_reload",
+      "parameter_bytes": 129648016,
+      "parameter_count": 64824008,
+      "parameter_devices": [
+        "cpu"
+      ]
+    }
+  ],
+  "name": "fixture",
+  "network_attempts": [],
+  "packages": {
+    "accelerate": "1.15.0+qmd.2",
+    "cmake": "4.4.4",
+    "gguf": "0.19.0",
+    "numpy": "2.5.4",
+    "peft": "0.21.3",
+    "protobuf": "7.36.2",
+    "sentencepiece": "0.2.3",
+    "torch": "2.15.0",
+    "transformers": "5.22.2"
+  },
+  "pip_after": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "--version"
+    ],
+    "status": 1,
+    "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python: No module named pip\n"
+  },
+  "pip_before": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "--version"
+    ],
+    "status": 1,
+    "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python: No module named pip\n"
+  },
+  "source_after": {
+    "binding_manifest_sha256": "83872d1719834153c8e1b97fa26d741fca7505bbf9cfa59aa95279100a3a17a0",
+    "composed_files": {
+      "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "finetune/convert_gguf.py": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+      "finetune/convert_gguf.py.lock": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+      "finetune/convert_onnx.py": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+      "finetune/convert_onnx.py.lock": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+      "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/pyproject.toml": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+      "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+      "finetune/train.py": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+      "finetune/train.py.lock": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+      "finetune/train_unsloth.py": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+      "finetune/train_unsloth.py.lock": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+      "finetune/uv.lock": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+      "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+      "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596"
+    }
+  },
+  "source_before": {
+    "binding_manifest_sha256": "83872d1719834153c8e1b97fa26d741fca7505bbf9cfa59aa95279100a3a17a0",
+    "composed_files": {
+      "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "finetune/convert_gguf.py": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+      "finetune/convert_gguf.py.lock": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+      "finetune/convert_onnx.py": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+      "finetune/convert_onnx.py.lock": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+      "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/pyproject.toml": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+      "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+      "finetune/train.py": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+      "finetune/train.py.lock": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+      "finetune/train_unsloth.py": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+      "finetune/train_unsloth.py.lock": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+      "finetune/uv.lock": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+      "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+      "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596"
+    }
+  },
+  "source_unchanged": true,
+  "success": true
+}

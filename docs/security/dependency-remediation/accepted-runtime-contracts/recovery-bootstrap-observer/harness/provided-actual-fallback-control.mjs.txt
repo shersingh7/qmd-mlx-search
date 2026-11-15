@@ -1,0 +1,56 @@
+// Separate AFTER-first-canonical local control, never a cold/CI claim.
+import assert from "node:assert/strict";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { executeRecoveryWorker } from "../mirror/scripts/phase5_e2e_runner.ts";
+import { beginRecoveryBootstrapDiagnostics } from "../mirror/test/helpers/recovery-bootstrap-diagnostics.mjs";
+const root=mkdtempSync(path.join(tmpdir(),"actual-transport-control-"));
+const released=path.join(root,"release"), ready=path.join(root,"ready"), done=path.join(root,"done");
+const writer=`import {existsSync,writeFileSync} from 'node:fs';
+  writeFileSync(${JSON.stringify(ready)},'ready');
+  const end=()=>{writeFileSync(${JSON.stringify(done)},'done');process.exit(0)};
+  setInterval(()=>{if(existsSync(${JSON.stringify(released)}))end()},5);
+  setTimeout(end,2500);`;
+const command=[process.execPath,"--input-type=module","-e",`import {spawn} from 'node:child_process';import {existsSync} from 'node:fs';
+  const writer=spawn(process.execPath,['--input-type=module','-e',${JSON.stringify(writer)}],{detached:true,stdio:['ignore',1,2]});
+  writer.unref();
+  const deadline=performance.now()+1000;
+  while(!existsSync(${JSON.stringify(ready)}) && performance.now()<deadline)await new Promise(resolve=>setTimeout(resolve,5));
+  if(!existsSync(${JSON.stringify(ready)}))process.exit(3);process.exit(0);`];
+const observer=beginRecoveryBootstrapDiagnostics();
+let helper;
+let guard;
+let result;
+try {
+  const started=performance.now();
+  helper=executeRecoveryWorker({dbPath:path.join(root,"unused.sqlite"),docsDir:root,action:"resume",outputJson:path.join(root,"absent.json"),stateRoot:path.join(root,"state"),timeoutMs:5000,command});
+  observer.attachAfterLaunch();
+  result=await Promise.race([helper,new Promise((_,reject)=>{guard=setTimeout(()=>reject(new Error("after-canonical fallback control guard")),3000)})]);
+  clearTimeout(guard);
+  const elapsedMs=performance.now()-started;
+  assert.equal(result.launch.state,"started");
+  assert.equal(result.launch.supervisorReaped,true);
+  assert.equal(result.cleanup.pipesClosed,false);
+  assert.equal(result.cleanup.forcedPipeClose,true);
+  assert.equal(result.cleanup.containmentVerified,false);
+  assert.equal(result.timedOut,false);
+  assert.equal(result.transportFailure.supervisorExited,true);
+  assert.equal(result.transportFailure.supervisorCloseObserved,false);
+  assert.equal(result.transportFailure.stdout.ended,false);
+  assert.equal(result.transportFailure.stderr.ended,false);
+  assert.equal(result.transportFailure.stdout.destroyed,false);
+  assert.equal(result.transportFailure.stderr.destroyed,false);
+  assert.equal(result.transportFailure.proof.ended,true);
+  console.log(JSON.stringify({evidence:"separate-after-first-actual-production-fallback-control",elapsedMs,launch:result.launch,cleanup:result.cleanup,transportFailure:result.transportFailure,coldOrCIProof:false}));
+} finally {
+  if(guard)clearTimeout(guard);
+  try {result??=await helper;}
+  finally {observer.finish(result);}
+  writeFileSync(released,"release");
+  const deadline=performance.now()+3000;
+  while(!existsSync(done) && performance.now()<deadline)await new Promise(resolve=>setTimeout(resolve,5));
+  assert.equal(existsSync(done),true,"known synthetic writer has bounded cooperative release");
+  rmSync(root,{recursive:true,force:true});
+  console.log(JSON.stringify({evidence:"separate-after-first-actual-production-fallback-finally",cooperativeWriterReleased:true,noNumericalPidSignals:true,fixtureRemoved:!existsSync(root)}));
+}

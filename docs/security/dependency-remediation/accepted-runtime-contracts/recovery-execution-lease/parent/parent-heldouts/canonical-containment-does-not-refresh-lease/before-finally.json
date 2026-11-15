@@ -1,0 +1,105 @@
+{
+  "name": "canonical-containment-does-not-refresh-lease",
+  "guardFired": false,
+  "elapsedMs": 625.7210830000001,
+  "exitCode": 0,
+  "supervisorPid": 38105,
+  "supervisorAbsent": true,
+  "workers": [
+    38106
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38106
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38105,
+      "sessionId": 38105
+    },
+    {
+      "type": "ready",
+      "pid": 38106,
+      "sessionId": 38105,
+      "processGroupId": 38106
+    },
+    {
+      "type": "exit",
+      "exitCode": 125,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": true,
+      "sigkillUsed": true,
+      "processGroups": [
+        38106
+      ],
+      "timedOut": true,
+      "errors": [
+        "Recovery worker timed out after 200ms (PID 38106)",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 38106,
+      "owner": 38105,
+      "at": 0.535336291,
+      "allowed": false,
+      "remainingMs": -248.89654199999995,
+      "deadline": 0.28640266600000003
+    }
+  ],
+  "groupSignals": [
+    {
+      "kind": "group-signal",
+      "pid": 38106,
+      "owner": 38105,
+      "at": 0.536954041,
+      "group": 38105,
+      "signal": 15,
+      "pinned": true,
+      "currentSession": 38105,
+      "termBlocked": true
+    },
+    {
+      "kind": "group-signal",
+      "pid": 38106,
+      "owner": 38105,
+      "at": 0.537376125,
+      "group": 38105,
+      "signal": 19,
+      "pinned": true,
+      "currentSession": 38105,
+      "termBlocked": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 112.25937499999984
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 112.27374999999995
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 114.18512499999966
+    }
+  ],
+  "stderr": "",
+  "eventCount": 18
+}

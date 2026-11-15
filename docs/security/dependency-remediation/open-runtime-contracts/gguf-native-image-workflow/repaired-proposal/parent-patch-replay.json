@@ -1,0 +1,57 @@
+{
+  "commands": [
+    {
+      "kind": "repair",
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/workflow-repair.patch"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/parent-patch-replay-repair",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "kind": "repair",
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/workflow-repair.patch"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/parent-patch-replay-repair",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "kind": "new-files",
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/unintegrated-new-files.patch"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/parent-patch-replay-new-files",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "kind": "new-files",
+      "argv": [
+        "/usr/bin/git",
+        "apply",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-w1-repair.WDt8LlYR/delivery/unintegrated-new-files.patch"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-w1-replay-78j5raln/parent-patch-replay-new-files",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "outputPathsPerReplay": 3,
+  "bothOutputsMatchCandidate": true,
+  "liveRepositoryChanged": false
+}

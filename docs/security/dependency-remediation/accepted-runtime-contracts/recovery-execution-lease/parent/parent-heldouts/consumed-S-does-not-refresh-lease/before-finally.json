@@ -1,0 +1,75 @@
+{
+  "name": "consumed-S-does-not-refresh-lease",
+  "guardFired": false,
+  "elapsedMs": 641.5087500000003,
+  "exitCode": 0,
+  "supervisorPid": 38095,
+  "supervisorAbsent": true,
+  "workers": [
+    38096
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38096
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38095,
+      "sessionId": 38095
+    },
+    {
+      "type": "ready",
+      "pid": 38096,
+      "sessionId": 38095,
+      "processGroupId": 38096
+    },
+    {
+      "type": "exit",
+      "exitCode": null,
+      "signal": "SIGKILL"
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        38096
+      ],
+      "timedOut": true,
+      "errors": [
+        "Recovery worker timed out after 200ms (PID 38096)",
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery runner control channel closed or cancelled before execution",
+        "Recovery supervisor interrupted by parent signal or closed proof channel",
+        "Invalid recovery control after execution admission"
+      ]
+    }
+  ],
+  "gates": [],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 122.2732500000001
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 122.30512500000002
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 572.8375829999997
+    }
+  ],
+  "stderr": "",
+  "eventCount": 11
+}

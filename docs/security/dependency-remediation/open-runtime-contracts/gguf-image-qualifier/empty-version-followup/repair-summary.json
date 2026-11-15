@@ -1,0 +1,421 @@
+{
+  "status": "PARENT_REPAIR_VERIFIED; independent review pending",
+  "independentReviewDelegation": "deleg_659bea40",
+  "independentReviewer": "sa-0-a0a36b78",
+  "acceptedForIntegration": false,
+  "imageQualified": false,
+  "patchSha256": "3408d9b639ea3b0cadb1d3522fa0b04b304acacdc00f7d05ce0ab5da5bf9113c",
+  "changedFiles": [
+    {
+      "path": "finetune/tools/qualify_gguf_image.py",
+      "before": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "after": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2"
+    },
+    {
+      "path": "finetune/tests/test_qualify_empty_version.py",
+      "before": null,
+      "after": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8"
+    }
+  ],
+  "sourceBindings": {
+    "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+    "finetune/LOCKED-JOBS.md": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+    "finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "finetune/convert_gguf.py.lock": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+    "finetune/convert_onnx.py": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+    "finetune/convert_onnx.py.lock": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+    "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+    "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+    "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+    "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/schema.py": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+    "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+    "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+    "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+    "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+    "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/evals/queries.txt": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+    "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+    "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+    "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+    "finetune/jobs/eval_common.py": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+    "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+    "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/pyproject.toml": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+    "finetune/reward.py": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+    "finetune/tests/test_locked_job_submission.py": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+    "finetune/tools/qualify_gguf_image.py": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "finetune/tools/submit_locked_job.py": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "finetune/train.py.lock": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+    "finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+    "finetune/train_unsloth.py.lock": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+    "finetune/uv.lock": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+    "finetune/tests/test_qualify_empty_version.py": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8"
+  },
+  "redCases": 27,
+  "greenCases": 252,
+  "caseGroups": {
+    "repo.finetune.tests.test_locked_job_submission": 162,
+    "repo.finetune.tests.test_qualify_empty_version": 27,
+    "test_probe_contract_green": 4,
+    "test_repair_heldouts": 59
+  },
+  "originalLauncherCasesPreserved": 162,
+  "actualHostProbe": {
+    "locked_python_converter_training_gpu_cloud_qualified": false,
+    "native_only": false,
+    "outputs": [
+      "qmd-c-ok",
+      "qmd-cxx-ok"
+    ],
+    "platform": "Darwin/arm64",
+    "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "python": "3.12.13",
+    "scope": "native CPU C/C++ prerequisites only",
+    "status": "pass",
+    "versions": {
+      "c++": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "cc": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "git": "git version 2.53.0",
+      "make": "GNU Make 3.81",
+      "uv": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)"
+    }
+  },
+  "scope": "Only clean empty-version refusal and source-bound regression coverage; not native Linux/container/converter/training/GPU/cloud/whole-workspace acceptance",
+  "archivedFiles": {
+    "base-source-binding.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/base-source-binding.json",
+      "sourceSha256": "9d52764ddc0f0fe8e72414367cc131d619a3e2cae2a8be7eed5a14091d600abe",
+      "archiveSha256": "9d52764ddc0f0fe8e72414367cc131d619a3e2cae2a8be7eed5a14091d600abe",
+      "encoding": "identity"
+    },
+    "baseline/qualify_gguf_image.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/baseline/finetune/tools/qualify_gguf_image.py",
+      "sourceSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "archiveSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "encoding": "identity"
+    },
+    "candidate/finetune/tests/test_qualify_empty_version.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tests/test_qualify_empty_version.py",
+      "sourceSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "archiveSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "encoding": "identity"
+    },
+    "candidate/finetune/tools/qualify_gguf_image.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py",
+      "sourceSha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "archiveSha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "encoding": "identity"
+    },
+    "empty-version.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/empty-version.patch",
+      "sourceSha256": "3408d9b639ea3b0cadb1d3522fa0b04b304acacdc00f7d05ce0ab5da5bf9113c",
+      "archiveSha256": "15b70364522c4c6b549e10b65eb8bd21b3419f4c7c479926a92457f2878f327d",
+      "encoding": "gzip"
+    },
+    "evidence/complete-green.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/complete-green.xml",
+      "sourceSha256": "6719c750560204f47a57fe6c267a7fecd33f053d45a96f16fa841d92b08eceeb",
+      "archiveSha256": "6719c750560204f47a57fe6c267a7fecd33f053d45a96f16fa841d92b08eceeb",
+      "encoding": "identity"
+    },
+    "evidence/contract-bare-control.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/contract-bare-control.json",
+      "sourceSha256": "7cc8525ed6787934343ecd175e25d0e82e9769d0a990cdd212ca6c67a3bc87a5",
+      "archiveSha256": "7cc8525ed6787934343ecd175e25d0e82e9769d0a990cdd212ca6c67a3bc87a5",
+      "encoding": "identity"
+    },
+    "evidence/contract-upstream-with-commit.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/contract-upstream-with-commit.json",
+      "sourceSha256": "98c0628141118db958abfac62b36c4420a346ee07d91e2abc0d126151739c199",
+      "archiveSha256": "98c0628141118db958abfac62b36c4420a346ee07d91e2abc0d126151739c199",
+      "encoding": "identity"
+    },
+    "evidence/contract-upstream-without-commit.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/contract-upstream-without-commit.json",
+      "sourceSha256": "d21294c98e9c97cf38257cf81f8dec8878c1f1def9d67e41674a78aaac49e23d",
+      "archiveSha256": "d21294c98e9c97cf38257cf81f8dec8878c1f1def9d67e41674a78aaac49e23d",
+      "encoding": "identity"
+    },
+    "evidence/contract-wrong-release-control.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/contract-wrong-release-control.json",
+      "sourceSha256": "8ba77c1ff1649f81eaddfa88ce1e948f74ad7ff7b1751334d6f9f8e6e4465cda",
+      "archiveSha256": "8ba77c1ff1649f81eaddfa88ce1e948f74ad7ff7b1751334d6f9f8e6e4465cda",
+      "encoding": "identity"
+    },
+    "evidence/empty-output-red.stdout.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/terminal-output/out-1794631414-25697-5a70.log",
+      "sourceSha256": "c040ca14418dd7d70a119d660b4ebeeb8ee5be60e8e3699c5ec3daf6c8991dbb",
+      "archiveSha256": "b7da72d3c819080a1ba3a0270257fa16e3503d4f14f68ff9e6f55b6bcd7a2f08",
+      "encoding": "gzip"
+    },
+    "evidence/empty-output-red.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/empty-output-red.xml",
+      "sourceSha256": "2731ac2d79317659283ad78cc7f26df0a6ca1784e9cac29ef43117932bbbc39a",
+      "archiveSha256": "2731ac2d79317659283ad78cc7f26df0a6ca1784e9cac29ef43117932bbbc39a",
+      "encoding": "identity"
+    },
+    "evidence/heldout-arguments-00c525a400.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-arguments-00c525a400.json",
+      "sourceSha256": "d4de13fce4886bdcab0e806fe24ee93eb2a65b061b3b0e8375e5710ae4e389bf",
+      "archiveSha256": "d4de13fce4886bdcab0e806fe24ee93eb2a65b061b3b0e8375e5710ae4e389bf",
+      "encoding": "identity"
+    },
+    "evidence/heldout-arguments-2bb55919b3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-arguments-2bb55919b3.json",
+      "sourceSha256": "f55cba9021066c7c68302341839cb7aa0ca8acd9499a813252ceed6b35a67c1b",
+      "archiveSha256": "f55cba9021066c7c68302341839cb7aa0ca8acd9499a813252ceed6b35a67c1b",
+      "encoding": "identity"
+    },
+    "evidence/heldout-arguments-39520c22d3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-arguments-39520c22d3.json",
+      "sourceSha256": "c214d3a84bbf15f6246194d1c305b04e438e2046376586f770f84847bc76e274",
+      "archiveSha256": "c214d3a84bbf15f6246194d1c305b04e438e2046376586f770f84847bc76e274",
+      "encoding": "identity"
+    },
+    "evidence/heldout-arguments-bac5f55e3f.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-arguments-bac5f55e3f.json",
+      "sourceSha256": "d11772bb6a1d4f68d056e6625600ff1af02d2321e3311ab538fa9d93e43c3e0d",
+      "archiveSha256": "d11772bb6a1d4f68d056e6625600ff1af02d2321e3311ab538fa9d93e43c3e0d",
+      "encoding": "identity"
+    },
+    "evidence/heldout-full-missing-uv.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-full-missing-uv.json",
+      "sourceSha256": "937a7c84c47da103314d0e787657725fb40f2525b8bc3aafb7a1be08b9aeca16",
+      "archiveSha256": "937a7c84c47da103314d0e787657725fb40f2525b8bc3aafb7a1be08b9aeca16",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-0.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-0.json",
+      "sourceSha256": "08dc23c2c1a921ad1af0b8e9748877ee56de0ca266247cc74239c0603ca4dcad",
+      "archiveSha256": "08dc23c2c1a921ad1af0b8e9748877ee56de0ca266247cc74239c0603ca4dcad",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-1.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-1.json",
+      "sourceSha256": "2e88dac3e6959122fa0d5717dc7a4b5cf8417df32c4160c93135537b02b54d17",
+      "archiveSha256": "2e88dac3e6959122fa0d5717dc7a4b5cf8417df32c4160c93135537b02b54d17",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-2.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-2.json",
+      "sourceSha256": "248457a3d949a81080e30dde55116b120e0440cb3ef99ae563b7b6bd03301eaa",
+      "archiveSha256": "248457a3d949a81080e30dde55116b120e0440cb3ef99ae563b7b6bd03301eaa",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-3.json",
+      "sourceSha256": "77d16973b7f27f0b56b0f98b74f45b9f823b91793162f580d2d87849f0683909",
+      "archiveSha256": "77d16973b7f27f0b56b0f98b74f45b9f823b91793162f580d2d87849f0683909",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-4.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-4.json",
+      "sourceSha256": "bae350a192511b1a082478a6b3a0f65b97b997e265bec530650743c44dcd0896",
+      "archiveSha256": "bae350a192511b1a082478a6b3a0f65b97b997e265bec530650743c44dcd0896",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-5.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-5.json",
+      "sourceSha256": "b105f866eea5e24cf7fcd5c603dd4d1989b7c6a448488b4f46a95e7d88bbc965",
+      "archiveSha256": "b105f866eea5e24cf7fcd5c603dd4d1989b7c6a448488b4f46a95e7d88bbc965",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-6.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-6.json",
+      "sourceSha256": "fa1a8388d543f737df27bf5cd8fb5328b4979033813c63a907a0ac8656d3422e",
+      "archiveSha256": "fa1a8388d543f737df27bf5cd8fb5328b4979033813c63a907a0ac8656d3422e",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-7.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-7.json",
+      "sourceSha256": "6f45848ea2ff41b685da589f64d3d71afce3ac5b152cee2985bc992583321560",
+      "archiveSha256": "6f45848ea2ff41b685da589f64d3d71afce3ac5b152cee2985bc992583321560",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-8.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-8.json",
+      "sourceSha256": "73357af087863b598751c549a0d9fee2ee6885526315b2e2fac638f479f0e202",
+      "archiveSha256": "73357af087863b598751c549a0d9fee2ee6885526315b2e2fac638f479f0e202",
+      "encoding": "identity"
+    },
+    "evidence/heldout-grammar-9.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-grammar-9.json",
+      "sourceSha256": "638ff5150ac56d671899e3a961bb3896e73eb5eafd19bc34eb5125b505623605",
+      "archiveSha256": "638ff5150ac56d671899e3a961bb3896e73eb5eafd19bc34eb5125b505623605",
+      "encoding": "identity"
+    },
+    "evidence/heldout-help.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-help.json",
+      "sourceSha256": "9c63444e00b7cc1fc62fc3006fac66b593f0a0bde730c6c6cad5d96e7bcbf04d",
+      "archiveSha256": "9c63444e00b7cc1fc62fc3006fac66b593f0a0bde730c6c6cad5d96e7bcbf04d",
+      "encoding": "identity"
+    },
+    "evidence/heldout-native-False.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-native-False.json",
+      "sourceSha256": "b588d8741bbb02c1a56fec92542178281e774c814a81fcc1586ce9ea07617e30",
+      "archiveSha256": "b588d8741bbb02c1a56fec92542178281e774c814a81fcc1586ce9ea07617e30",
+      "encoding": "identity"
+    },
+    "evidence/heldout-native-True.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-native-True.json",
+      "sourceSha256": "18c59a489503d436bd5b13e7f090b99ebb708a2e550bc749c14f87b364e5ef25",
+      "archiveSha256": "18c59a489503d436bd5b13e7f090b99ebb708a2e550bc749c14f87b364e5ef25",
+      "encoding": "identity"
+    },
+    "evidence/heldout-native-simulated-python.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-native-simulated-python.json",
+      "sourceSha256": "44f67f32b35e703c0a9cd3b6ecc99c52fa3a8b549eb1e592453392a1d845cc7b",
+      "archiveSha256": "44f67f32b35e703c0a9cd3b6ecc99c52fa3a8b549eb1e592453392a1d845cc7b",
+      "encoding": "identity"
+    },
+    "evidence/heldout-positive-bare.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-positive-bare.json",
+      "sourceSha256": "e4c139385dd69e38da7629e42b950e725db6f009af69aa77b0998d2d74f17c2c",
+      "archiveSha256": "e4c139385dd69e38da7629e42b950e725db6f009af69aa77b0998d2d74f17c2c",
+      "encoding": "identity"
+    },
+    "evidence/heldout-positive-commit-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-positive-commit-target.json",
+      "sourceSha256": "94ab328865a782ffe2899fa04944f71ddcbc6487a95be2b5f940a10c77e7da60",
+      "archiveSha256": "94ab328865a782ffe2899fa04944f71ddcbc6487a95be2b5f940a10c77e7da60",
+      "encoding": "identity"
+    },
+    "evidence/heldout-positive-darwin-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-positive-darwin-target.json",
+      "sourceSha256": "b0f90045d7e86a8b29c67a87bc2604621864219df4be43f7b20c2798f16c39fa",
+      "archiveSha256": "b0f90045d7e86a8b29c67a87bc2604621864219df4be43f7b20c2798f16c39fa",
+      "encoding": "identity"
+    },
+    "evidence/heldout-positive-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-positive-target.json",
+      "sourceSha256": "20e5c1ac8b31c5420acf41d9fc3c69209d4eb08ecb375d1accca73d04f6bce1e",
+      "archiveSha256": "20e5c1ac8b31c5420acf41d9fc3c69209d4eb08ecb375d1accca73d04f6bce1e",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-0.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-0.json",
+      "sourceSha256": "76af0706d2818c5a6207c2ee85f87f334b4bccb763410ef9a518eb9bbe51db58",
+      "archiveSha256": "76af0706d2818c5a6207c2ee85f87f334b4bccb763410ef9a518eb9bbe51db58",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-1.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-1.json",
+      "sourceSha256": "0a553bda36870d516731e36150fe41bb85a9eff34a9d7926f1516db867d449d2",
+      "archiveSha256": "0a553bda36870d516731e36150fe41bb85a9eff34a9d7926f1516db867d449d2",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-2.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-2.json",
+      "sourceSha256": "59aa288573e82ff1d2b0e42e8a50b68787ec3698899b59ad9c7843abdeb9aba4",
+      "archiveSha256": "59aa288573e82ff1d2b0e42e8a50b68787ec3698899b59ad9c7843abdeb9aba4",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-3.json",
+      "sourceSha256": "0870156d48c8761503fa1fb412199750b3315055e24b7c7857cbaa291214bc64",
+      "archiveSha256": "0870156d48c8761503fa1fb412199750b3315055e24b7c7857cbaa291214bc64",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-4.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-4.json",
+      "sourceSha256": "cfcdc96f17cc6c2701d57a819adf642ae79ba516a852a1293af7a39e1dbc3ad8",
+      "archiveSha256": "cfcdc96f17cc6c2701d57a819adf642ae79ba516a852a1293af7a39e1dbc3ad8",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-5.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-5.json",
+      "sourceSha256": "ae4b57cec35b0b31689c5e55780f2edbf455d5e8ca898114ef6c0ba19584c8ee",
+      "archiveSha256": "ae4b57cec35b0b31689c5e55780f2edbf455d5e8ca898114ef6c0ba19584c8ee",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-6.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-6.json",
+      "sourceSha256": "0a7cb43374415e74f5062f6442182a779855467573724ea3ba035ae81943c088",
+      "archiveSha256": "0a7cb43374415e74f5062f6442182a779855467573724ea3ba035ae81943c088",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-7.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-7.json",
+      "sourceSha256": "e4cc5250d73f4ea4bb22a4155e45563c64a1ba8aa35f513cd99b71f9c19d2dff",
+      "archiveSha256": "e4cc5250d73f4ea4bb22a4155e45563c64a1ba8aa35f513cd99b71f9c19d2dff",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-8.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-8.json",
+      "sourceSha256": "97066e8b9763406def00d124778c243fa1415839c6100028c8b978ea172a1cc2",
+      "archiveSha256": "97066e8b9763406def00d124778c243fa1415839c6100028c8b978ea172a1cc2",
+      "encoding": "identity"
+    },
+    "evidence/heldout-release-9.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-release-9.json",
+      "sourceSha256": "be6243940278d4566a268761faeef821df67ef6d7d85df3d8c5a74db7c7e20aa",
+      "archiveSha256": "be6243940278d4566a268761faeef821df67ef6d7d85df3d8c5a74db7c7e20aa",
+      "encoding": "identity"
+    },
+    "evidence/heldout-wrong-python-11.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-wrong-python-11.json",
+      "sourceSha256": "63d840526ca49bd82ae7d0134ee9fe8a7f6a6ec8ec983eb56615bd1d460534ce",
+      "archiveSha256": "63d840526ca49bd82ae7d0134ee9fe8a7f6a6ec8ec983eb56615bd1d460534ce",
+      "encoding": "identity"
+    },
+    "evidence/heldout-wrong-python-13.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/heldout-wrong-python-13.json",
+      "sourceSha256": "ef1f50dffd84b4e0aac4b3964b8e4d43ab086575470c25fd5f8ba6a061fb94e7",
+      "archiveSha256": "ef1f50dffd84b4e0aac4b3964b8e4d43ab086575470c25fd5f8ba6a061fb94e7",
+      "encoding": "identity"
+    },
+    "evidence/real-installed-uv-full.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/evidence/real-installed-uv-full.json",
+      "sourceSha256": "02c8aa8e27894c0104d3539eb7bc86216858f6f72f7d4d71f78ae1675454a710",
+      "archiveSha256": "02c8aa8e27894c0104d3539eb7bc86216858f6f72f7d4d71f78ae1675454a710",
+      "encoding": "identity"
+    },
+    "repair-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repair-manifest.json",
+      "sourceSha256": "65eb2a3604f4873e1e441eb346aba8eafecf8be335ed45d17f5b556b384471c3",
+      "archiveSha256": "65eb2a3604f4873e1e441eb346aba8eafecf8be335ed45d17f5b556b384471c3",
+      "encoding": "identity"
+    },
+    "review_support.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/review_support.py",
+      "sourceSha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "archiveSha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "encoding": "identity"
+    },
+    "test_probe_contract_green.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/test_probe_contract_green.py",
+      "sourceSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "archiveSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "encoding": "identity"
+    },
+    "test_probe_contract_green.py.binding.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/test_probe_contract_green.py.binding.patch",
+      "sourceSha256": "09a124eb3fcda523c967ae5c581f84ad5c7a8fc2874e46669f394f1f44c96c53",
+      "archiveSha256": "17c3f9c7392e9dea0b077a8f743237648de7030ff8d6bda9a073a4dad07dd022",
+      "encoding": "gzip"
+    },
+    "test_repair_heldouts.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/test_repair_heldouts.py",
+      "sourceSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "archiveSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "encoding": "identity"
+    },
+    "test_repair_heldouts.py.binding.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/test_repair_heldouts.py.binding.patch",
+      "sourceSha256": "3bc5c47aa6b8999934c48bccf5a14143cb3959a53cf31a56b5e49945d600ac04",
+      "archiveSha256": "ae58394603bc53bfef67322811e4853b4a327f296c68e046373454099e27d0db",
+      "encoding": "gzip"
+    }
+  }
+}

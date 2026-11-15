@@ -16,7 +16,12 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { WebStandardStreamableHTTPServerTransport }
   from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import {
+  CancelledNotificationSchema, isInitializeRequest, isJSONRPCRequest,
+  isJSONRPCResultResponse, isJSONRPCErrorResponse, JSONRPCMessageSchema,
+  type JSONRPCMessage, type RequestId,
+} from "@modelcontextprotocol/sdk/types.js";
+import type { Transport, TransportSendOptions } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { z } from "zod";
 import { existsSync } from "fs";
 import {
@@ -30,6 +35,36 @@ import {
   type IndexStatus,
 } from "../index.js";
 import { getConfigPath } from "../collections.js";
+import { validateLexQuery, validateSemanticQuery } from "../store.js";
+
+// Keep REST and MCP validation aligned. Limits bound work as well as JSON size;
+// in particular, never coerce a client-supplied type, collection list or limit.
+const subSearchSchema = z.object({
+  type: z.enum(["lex", "vec", "hyde"]).describe(
+    "lex = BM25 keywords (supports phrases and negation); vec = semantic question; hyde = hypothetical answer passage"
+  ),
+  query: z.string().min(1).max(16384).refine(value => value.trim().length > 0, "Query must not be blank"),
+}).superRefine((search, ctx) => {
+  const error = /[\r\n]/.test(search.query)
+    ? "Queries must be single-line"
+    : search.type === "lex" ? validateLexQuery(search.query) : validateSemanticQuery(search.query);
+  if (error) ctx.addIssue({ code: "custom", path: ["query"], message: error });
+});
+const searchInputShape = {
+  searches: z.array(subSearchSchema).min(1).max(10).describe("Typed sub-queries (lex/vec/hyde). First gets 2x weight."),
+  limit: z.number().int().min(1).max(100).optional().default(10).describe("Max results, 1-100 (default: 10)"),
+  minScore: z.number().min(0).max(1).optional().default(0).describe("Min relevance, 0-1 (default: 0)"),
+  candidateLimit: z.number().int().min(1).max(1000).optional().describe("Maximum candidates to rerank"),
+  collections: z.array(z.string().min(1).max(256)).max(100).optional().describe("Filter to collections (OR match)"),
+  intent: z.string().max(16384).optional().describe("Background context to disambiguate the query and improve snippets"),
+  rerank: z.boolean().optional().default(true).describe("Rerank with LLM; false avoids reranking (default: true)"),
+};
+const searchInputSchema = z.object(searchInputShape);
+const documentPathSchema = z.string().min(1).max(4096).refine(file => {
+  const suffix = file.match(/:(\d+)$/)?.[1];
+  return suffix === undefined || (Number.isSafeInteger(Number(suffix)) && Number(suffix) >= 1);
+}, "Line suffix must be a positive safe integer");
+const maxLinesSchema = z.number().int().min(1).max(100000).optional();
 
 // =============================================================================
 // Types for structured content
@@ -169,14 +204,22 @@ async function buildInstructions(store: QMDStore): Promise<string> {
  * Create an MCP server with all QMD tools, resources, and prompts registered.
  * Shared by both stdio and HTTP transports.
  */
-async function createMcpServer(store: QMDStore): Promise<McpServer> {
+async function createMcpServer(store: QMDStore, ownership: McpRequestOwnership): Promise<McpServer> {
+  // Resolve fallible store reads before allocating an SDK server.
+  const instructions = await buildInstructions(store);
+  const defaultCollectionNames = await store.getDefaultCollectionNames();
   const server = new McpServer(
     { name: "qmd", version: getPackageVersion() },
-    { instructions: await buildInstructions(store) },
+    { instructions },
   );
-
-  // Pre-fetch default collection names for search tools
-  const defaultCollectionNames = await store.getDefaultCollectionNames();
+  // SDK 1.32.2's cancellation handler treats 0/"" as absent and suppresses
+  // replies, leaving JSON HTTP requests pending. Use our per-operation owner
+  // through the public notification API instead. QMD callbacks finish normally
+  // (with an isError tool result on cancellation), so transport cleanup and ID
+  // reuse wait for actual completion rather than merely signalling abort.
+  server.server.setNotificationHandler(CancelledNotificationSchema, notification => {
+    ownership.cancel(notification.params.requestId, notification.params.reason);
+  });
 
   // ---------------------------------------------------------------------------
   // Resource: qmd://{path} - read-only access to documents by path
@@ -191,13 +234,16 @@ async function createMcpServer(store: QMDStore): Promise<McpServer> {
       description: "A markdown document from your QMD knowledge base. Use search tools to discover documents.",
       mimeType: "text/markdown",
     },
-    async (uri, { path }) => {
+    async (uri, { path }, extra) => {
+      const signal = ownership.signal(extra);
+      signal.throwIfAborted();
       // Decode URL-encoded path (MCP clients send encoded URIs)
       const pathStr = Array.isArray(path) ? path.join('/') : (path || '');
       const decodedPath = decodeURIComponent(pathStr);
 
       // Use SDK to find document — findDocument handles collection/path resolution
       const result = await store.get(decodedPath, { includeBody: true });
+      signal.throwIfAborted();
 
       if ("error" in result) {
         return { contents: [{ uri: uri.href, text: `Document not found: ${decodedPath}` }] };
@@ -224,16 +270,6 @@ async function createMcpServer(store: QMDStore): Promise<McpServer> {
   // Tool: query (Primary search tool)
   // ---------------------------------------------------------------------------
 
-  const subSearchSchema = z.object({
-    type: z.enum(['lex', 'vec', 'hyde']).describe(
-      "lex = BM25 keywords (supports \"phrase\" and -negation); " +
-      "vec = semantic question; hyde = hypothetical answer passage"
-    ),
-    query: z.string().describe(
-      "The query text. For lex: use keywords, \"quoted phrases\", and -negation. " +
-      "For vec: natural language question. For hyde: 50-100 word answer passage."
-    ),
-  });
 
   server.registerTool(
     "query",
@@ -297,25 +333,11 @@ Intent-aware lex (C++ performance, not sports):
 ]
 \`\`\``,
       annotations: { readOnlyHint: true, openWorldHint: false },
-      inputSchema: {
-        searches: z.array(subSearchSchema).min(1).max(10).describe(
-          "Typed sub-queries to execute (lex/vec/hyde). First gets 2x weight."
-        ),
-        limit: z.number().optional().default(10).describe("Max results (default: 10)"),
-        minScore: z.number().optional().default(0).describe("Min relevance 0-1 (default: 0)"),
-        candidateLimit: z.number().optional().describe(
-          "Maximum candidates to rerank (default: 40, lower = faster but may miss results)"
-        ),
-        collections: z.array(z.string()).optional().describe("Filter to collections (OR match)"),
-        intent: z.string().optional().describe(
-          "Background context to disambiguate the query. Example: query='performance', intent='web page load times and Core Web Vitals'. Does not search on its own."
-        ),
-        rerank: z.boolean().optional().default(true).describe(
-          "Rerank results using LLM (default: true). Set to false for faster results on CPU-only machines."
-        ),
-      },
+      inputSchema: searchInputShape,
     },
-    async ({ searches, limit, minScore, candidateLimit, collections, intent, rerank }) => {
+    async ({ searches, limit, minScore, candidateLimit, collections, intent, rerank }, extra) => {
+      const signal = ownership.signal(extra);
+      signal.throwIfAborted();
       // Map to internal format
       const queries: ExpandedQuery[] = searches.map(s => ({
         type: s.type,
@@ -332,7 +354,9 @@ Intent-aware lex (C++ performance, not sports):
         minScore,
         rerank,
         intent,
+        signal,
       });
+      signal.throwIfAborted();
 
       // Use first lex or vec query for snippet extraction
       const primaryQuery = searches.find(s => s.type === 'lex')?.query
@@ -369,13 +393,15 @@ Intent-aware lex (C++ performance, not sports):
       description: "Retrieve the full content of a document by its file path or docid. Use paths or docids (#abc123) from search results. Suggests similar files if not found.",
       annotations: { readOnlyHint: true, openWorldHint: false },
       inputSchema: {
-        file: z.string().describe("File path or docid from search results (e.g., 'pages/meeting.md', '#abc123', or 'pages/meeting.md:100' to start at line 100)"),
-        fromLine: z.number().optional().describe("Start from this line number (1-indexed)"),
-        maxLines: z.number().optional().describe("Maximum number of lines to return"),
+        file: documentPathSchema.describe("File path or docid from search results (e.g., 'pages/meeting.md', '#abc123', or 'pages/meeting.md:100' to start at line 100)"),
+        fromLine: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional().describe("Start from this line number (1-indexed)"),
+        maxLines: maxLinesSchema.describe("Maximum number of lines to return (1-100000)"),
         lineNumbers: z.boolean().optional().default(false).describe("Add line numbers to output (format: 'N: content')"),
       },
     },
-    async ({ file, fromLine, maxLines, lineNumbers }) => {
+    async ({ file, fromLine, maxLines, lineNumbers }, extra) => {
+      const signal = ownership.signal(extra);
+      signal.throwIfAborted();
       // Support :line suffix in `file` (e.g. "foo.md:120") when fromLine isn't provided
       let parsedFromLine = fromLine;
       let lookup = file;
@@ -386,6 +412,7 @@ Intent-aware lex (C++ performance, not sports):
       }
 
       const result = await store.get(lookup, { includeBody: false });
+      signal.throwIfAborted();
 
       if ("error" in result) {
         let msg = `Document not found: ${file}`;
@@ -399,6 +426,7 @@ Intent-aware lex (C++ performance, not sports):
       }
 
       const body = await store.getDocumentBody(result.filepath, { fromLine: parsedFromLine, maxLines }) ?? "";
+      signal.throwIfAborted();
       let text = body;
       if (lineNumbers) {
         const startLine = parsedFromLine || 1;
@@ -434,14 +462,17 @@ Intent-aware lex (C++ performance, not sports):
       description: "Retrieve multiple documents by glob pattern (e.g., 'journals/2025-05*.md') or comma-separated list. Skips files larger than maxBytes.",
       annotations: { readOnlyHint: true, openWorldHint: false },
       inputSchema: {
-        pattern: z.string().describe("Glob pattern or comma-separated list of file paths"),
-        maxLines: z.number().optional().describe("Maximum lines per file"),
-        maxBytes: z.number().optional().default(10240).describe("Skip files larger than this (default: 10240 = 10KB)"),
+        pattern: z.string().min(1).max(16384).describe("Glob pattern or comma-separated list of file paths"),
+        maxLines: maxLinesSchema.describe("Maximum lines per file (1-100000)"),
+        maxBytes: z.number().int().min(1).max(10485760).optional().default(10240).describe("Skip files larger than this (default: 10240 = 10KB, max: 10MB)"),
         lineNumbers: z.boolean().optional().default(false).describe("Add line numbers to output (format: 'N: content')"),
       },
     },
-    async ({ pattern, maxLines, maxBytes, lineNumbers }) => {
+    async ({ pattern, maxLines, maxBytes, lineNumbers }, extra) => {
+      const signal = ownership.signal(extra);
+      signal.throwIfAborted();
       const { docs, errors } = await store.multiGet(pattern, { includeBody: true, maxBytes: maxBytes || DEFAULT_MULTI_GET_MAX_BYTES });
+      signal.throwIfAborted();
 
       if (docs.length === 0 && errors.length === 0) {
         return {
@@ -508,8 +539,11 @@ Intent-aware lex (C++ performance, not sports):
       annotations: { readOnlyHint: true, openWorldHint: false },
       inputSchema: {},
     },
-    async () => {
+    async (_args, extra) => {
+      const signal = ownership.signal(extra);
+      signal.throwIfAborted();
       const status: StatusResult = await store.getStatus();
+      signal.throwIfAborted();
 
       const summary = [
         `QMD Index Status:`,
@@ -543,9 +577,10 @@ export async function startMcpServer(): Promise<void> {
     dbPath: getDefaultDbPath(),
     ...(existsSync(configPath) ? { configPath } : {}),
   });
-  const server = await createMcpServer(store);
+  const ownership = new McpRequestOwnership();
+  const server = await createMcpServer(store, ownership);
   const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await server.connect(new OwnedMcpTransport(transport, ownership, false));
 }
 
 // =============================================================================
@@ -558,274 +593,780 @@ export type HttpServerHandle = {
   stop: () => Promise<void>;
 };
 
-/**
- * Start MCP server over Streamable HTTP (JSON responses, no SSE).
- * Binds to localhost only. Returns a handle for shutdown and port discovery.
- */
-export async function startMcpHttpServer(port: number, options?: { quiet?: boolean; store?: QMDStore; dbPath?: string }): Promise<HttpServerHandle> {
-  const configPath = getConfigPath();
-  const isOwnedStore = !options?.store;
-  const store = options?.store ?? await createStore({
-    dbPath: options?.dbPath ?? getDefaultDbPath(),
-    ...(existsSync(configPath) ? { configPath } : {}),
-  });
+/** Additive controls for embedders and short, deterministic offline tests. */
+export type HttpServerOptions = {
+  quiet?: boolean;
+  /** Per-listener daemon ownership marker, NOT an authentication credential. */
+  instanceToken?: string;
+  store?: QMDStore;
+  dbPath?: string;
+  /** Maximum JSON body size, including chunked uploads (default: 1 MiB). */
+  maxBodyBytes?: number;
+  /** Concurrent data uploads, released as soon as receipt finishes (default: 32). */
+  maxPendingUploads?: number;
+  /** Data HTTP handlers, including REST processing and GET SSE (default: 256). */
+  maxHttpRequests?: number;
+  /** Separate slots for health, DELETE and small cancellation uploads (default: 16).
+   * At data/upload capacity, existing-session MCP POSTs may use this reserve with
+   * a body of at most 4 KiB, but ONLY cancellation notifications are dispatched.
+   * The reserve is bounded too: overload returns 503, never a fake 202.
+   */
+  maxControlRequests?: number;
+  /** All TCP connections, including idle sockets and incomplete headers (default: 512). */
+  maxConnections?: number;
+  /** Parser-level header byte ceiling, before application allocation (default: 16 KiB). */
+  maxHeaderBytes?: number;
+  /** Absolute header-receipt deadline, 1..300000 ms (default: 10s). */
+  headersTimeoutMs?: number;
+  /** Absolute body-receipt deadline, not reset by trickling bytes (default: 10s). */
+  bodyTimeoutMs?: number;
+  /** Processing deadline; does not limit an established GET SSE stream (default: 120s). */
+  requestTimeoutMs?: number;
+  /** Bound initialized AND initializing sessions (default: 100). */
+  maxSessions?: number;
+  /** Bound active JSON-RPC request IDs per session, including whole batches (default: 128). */
+  maxActiveRequestsPerSession?: number;
+  /** Bound active JSON-RPC request IDs across this listener (default: 1024). */
+  maxActiveRequests?: number;
+  /** Expire sessions without MCP requests, even with an open SSE stream (default: 30 min). */
+  sessionIdleTimeoutMs?: number;
+  sessionSweepIntervalMs?: number;
+  /** SSE comment interval; zero disables keepalive (default: 15s). */
+  sseKeepAliveMs?: number;
+  /** Maximum wait for a backpressured client to drain (default: 10s). */
+  streamWriteTimeoutMs?: number;
+};
 
-  // Pre-fetch default collection names for REST endpoint
-  const defaultCollectionNames = await store.getDefaultCollectionNames();
+class HttpRequestError extends Error {
+  constructor(readonly status: number, message: string, readonly rpcCode = -32000) {
+    super(message);
+  }
+}
 
-  // Session map: each client gets its own McpServer + Transport pair (MCP spec requirement).
-  // The store is shared — it's stateless SQLite, safe for concurrent access.
-  const sessions = new Map<string, WebStandardStreamableHTTPServerTransport>();
+class RequestAdmissionError extends HttpRequestError {}
 
-  async function createSession(): Promise<WebStandardStreamableHTTPServerTransport> {
-    const transport = new WebStandardStreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
-      enableJsonResponse: true,
-      onsessioninitialized: (sessionId: string) => {
-        sessions.set(sessionId, transport);
-        log(`${ts()} New session ${sessionId} (${sessions.size} active)`);
-      },
-    });
-    const server = await createMcpServer(store);
-    await server.connect(transport);
+class RequestIdConflictError extends RequestAdmissionError {
+  constructor() { super(409, "Duplicate active JSON-RPC request ID", -32600); }
+}
 
-    transport.onclose = () => {
-      if (transport.sessionId) {
-        sessions.delete(transport.sessionId);
+/** Per-session owners: Map keys deliberately retain number/string identity. */
+class McpRequestOwnership {
+  private readonly active = new Map<RequestId, AbortController>();
+  private closed = false;
+
+  constructor(
+    private readonly maxActive = 128,
+    private readonly budget = { active: 0, maxActive: 1024 },
+  ) {}
+
+  /** Validate the ENTIRE batch, then reserve synchronously before SDK dispatch. */
+  reserve(messages: JSONRPCMessage[]): () => void {
+    if (this.closed) throw new HttpRequestError(404, "Session closed", -32001);
+    const ids = new Set<RequestId>();
+    for (const message of messages) {
+      if (!isJSONRPCRequest(message)) continue;
+      if (ids.has(message.id) || this.active.has(message.id)) throw new RequestIdConflictError();
+      ids.add(message.id);
+    }
+    // Admission precedes controller allocation and is atomic across the entire
+    // batch and the listener. Rejected work cannot consume or steal a slot.
+    if (this.active.size + ids.size > this.maxActive) {
+      throw new RequestAdmissionError(429, "Session active request capacity reached; retry later");
+    }
+    if (this.budget.active + ids.size > this.budget.maxActive) {
+      throw new RequestAdmissionError(503, "Server active request capacity reached; retry later");
+    }
+    const reserved = new Map<RequestId, AbortController>();
+    for (const id of ids) {
+      const controller = new AbortController();
+      reserved.set(id, controller);
+      this.active.set(id, controller);
+    }
+    this.budget.active += reserved.size;
+    return () => {
+      for (const [id, controller] of reserved) {
+        if (this.active.get(id) === controller) {
+          this.active.delete(id);
+          this.budget.active--;
+        }
       }
     };
-
-    return transport;
   }
 
-  const startTime = Date.now();
-  const quiet = options?.quiet ?? false;
-
-  /** Format timestamp for request logging */
-  function ts(): string {
-    return new Date().toISOString().slice(11, 23); // HH:mm:ss.SSS
+  signal(extra: { requestId: RequestId; signal: AbortSignal }): AbortSignal {
+    const controller = this.active.get(extra.requestId);
+    if (!controller) throw new Error("MCP request has no cancellation owner");
+    // SDK close/disconnect and explicit notifications both reach the real store
+    // operation; neither depends on the SDK's private controller map.
+    return AbortSignal.any([extra.signal, controller.signal]);
   }
 
-  /** Extract a human-readable label from a JSON-RPC body */
-  function describeRequest(body: any): string {
-    const method = body?.method ?? "unknown";
-    if (method === "tools/call") {
-      const tool = body.params?.name ?? "?";
-      const args = body.params?.arguments;
-      // Show query string if present, truncated
-      if (args?.query) {
-        const q = String(args.query).slice(0, 80);
-        return `tools/call ${tool} "${q}"`;
-      }
-      if (args?.path) return `tools/call ${tool} ${args.path}`;
-      if (args?.pattern) return `tools/call ${tool} ${args.pattern}`;
-      return `tools/call ${tool}`;
-    }
-    return method;
+  cancel(id: RequestId | undefined, reason?: string): void {
+    if (id !== undefined) this.active.get(id)?.abort(new DOMException(reason ?? "Request cancelled", "AbortError"));
   }
 
-  function log(msg: string): void {
-    if (!quiet) console.error(msg);
+  close(): void {
+    this.closed = true;
+    const controllers = [...this.active.values()];
+    this.budget.active -= this.active.size;
+    this.active.clear();
+    for (const controller of controllers) controller.abort(new DOMException("Session closed", "AbortError"));
   }
+}
 
-  // Helper to collect request body
-  async function collectBody(req: IncomingMessage): Promise<string> {
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) chunks.push(chunk as Buffer);
-    return Buffer.concat(chunks).toString();
-  }
+/** Only public Transport callbacks; do not patch SDK methods or dependency bytes. */
+class OwnedMcpTransport implements Transport {
+  onmessage?: Transport["onmessage"];
+  onclose?: Transport["onclose"];
+  onerror?: Transport["onerror"];
+  private readonly stdioReservations = new Map<RequestId, () => void>();
 
-  const httpServer = createServer(async (nodeReq: IncomingMessage, nodeRes: ServerResponse) => {
-    const reqStart = Date.now();
-    const pathname = nodeReq.url || "/";
+  constructor(
+    private readonly delegate: Transport,
+    private readonly ownership: McpRequestOwnership,
+    private readonly httpReservations: boolean,
+  ) {}
 
-    try {
-      if (pathname === "/health" && nodeReq.method === "GET") {
-        const body = JSON.stringify({ status: "ok", uptime: Math.floor((Date.now() - startTime) / 1000) });
-        nodeRes.writeHead(200, { "Content-Type": "application/json" });
-        nodeRes.end(body);
-        log(`${ts()} GET /health (${Date.now() - reqStart}ms)`);
-        return;
-      }
+  get sessionId(): string | undefined { return this.delegate.sessionId; }
+  setProtocolVersion(version: string): void { this.delegate.setProtocolVersion?.(version); }
 
-      // REST endpoint: POST /search — structured search without MCP protocol
-      // REST endpoint: POST /query (alias: /search) — structured search without MCP protocol
-      if ((pathname === "/query" || pathname === "/search") && nodeReq.method === "POST") {
-        const rawBody = await collectBody(nodeReq);
-        const params = JSON.parse(rawBody);
-
-        // Validate required fields
-        if (!params.searches || !Array.isArray(params.searches)) {
-          nodeRes.writeHead(400, { "Content-Type": "application/json" });
-          nodeRes.end(JSON.stringify({ error: "Missing required field: searches (array)" }));
+  async start(): Promise<void> {
+    this.delegate.onmessage = (message, extra) => {
+      if (!this.httpReservations && isJSONRPCRequest(message)) {
+        try { this.stdioReservations.set(message.id, this.ownership.reserve([message])); }
+        catch (error) {
+          if (!(error instanceof RequestAdmissionError)) throw error;
+          // An uncorrelated MCP error (no id) cannot settle the original owner.
+          void this.delegate.send({ jsonrpc: "2.0", error: {
+            code: error.rpcCode, message: error.message,
+          } }).catch(failure => {
+            this.onerror?.(failure);
+            void this.close().catch(error => this.onerror?.(error));
+          });
           return;
         }
+      }
+      this.onmessage?.(message, extra);
+    };
+    this.delegate.onerror = error => this.onerror?.(error);
+    this.delegate.onclose = () => {
+      this.ownership.close();
+      this.stdioReservations.clear();
+      this.onclose?.(); // Preserve the SDK's abort/timer/handler cleanup.
+    };
+    await this.delegate.start();
+  }
 
-        // Map to internal format
-        const queries: ExpandedQuery[] = params.searches.map((s: any) => ({
-          type: s.type as 'lex' | 'vec' | 'hyde',
-          query: String(s.query || ""),
+  async send(message: JSONRPCMessage, options?: TransportSendOptions): Promise<void> {
+    const terminal = isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message);
+    const id = terminal ? message.id : undefined;
+    const release = !this.httpReservations && id !== undefined ? this.stdioReservations.get(id) : undefined;
+    try { await this.delegate.send(message, options); }
+    catch (error) { await this.close(); throw error; }
+    if (release && id !== undefined) {
+      release();
+      this.stdioReservations.delete(id);
+    }
+    // HTTP reservations belong to the whole POST, not individual batch members.
+    // The HTTP finally releases them only after response/stream cleanup.
+  }
+
+  async close(): Promise<void> {
+    this.ownership.close();
+    await this.delegate.close();
+  }
+}
+
+function boundedOption(value: number | undefined, fallback: number, name: string, min = 1, max = 2147483647): number {
+  const result = value ?? fallback;
+  if (!Number.isSafeInteger(result) || result < min || result > max) {
+    throw new RangeError(`${name} must be an integer in ${min}..${max}`);
+  }
+  return result;
+}
+
+/** Stop awaiting work on disconnect/deadline without leaving abort listeners behind. */
+function abortable<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const onAbort = () => { signal.removeEventListener("abort", onAbort); reject(signal.reason); };
+    signal.addEventListener("abort", onAbort, { once: true });
+    work.then(value => {
+      signal.removeEventListener("abort", onAbort);
+      resolve(value);
+    }, error => {
+      signal.removeEventListener("abort", onAbort);
+      reject(error);
+    });
+    if (signal.aborted) onAbort();
+  });
+}
+
+/** Event-based collection avoids async-iterator destruction before a 4xx can flush. */
+function collectBody(req: IncomingMessage, maxBytes: number, timeoutMs: number, signal: AbortSignal): Promise<string> {
+  const length = req.headers["content-length"];
+  if (length !== undefined && Number(length) > maxBytes) {
+    return Promise.reject(new HttpRequestError(413, "Request body too large"));
+  }
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let size = 0;
+    const cleanup = () => {
+      clearTimeout(timer);
+      req.off("data", onData);
+      req.off("end", onEnd);
+      req.off("error", onError);
+      signal.removeEventListener("abort", onAbort);
+    };
+    const fail = (error: unknown) => {
+      cleanup();
+      chunks.length = 0;
+      req.pause();
+      reject(error);
+    };
+    const onError = () => fail(new HttpRequestError(400, "Incomplete request body", -32700));
+    const onAbort = () => fail(signal.reason);
+    const onData = (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > maxBytes) fail(new HttpRequestError(413, "Request body too large"));
+      else chunks.push(chunk);
+    };
+    const onEnd = () => {
+      cleanup();
+      try {
+        resolve(new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks, size)));
+      } catch {
+        reject(new HttpRequestError(400, "Invalid UTF-8 JSON body", -32700));
+      }
+    };
+    const timer = setTimeout(() => fail(new HttpRequestError(408, "Request body timed out")), timeoutMs);
+    timer.unref();
+    req.on("data", onData);
+    req.once("end", onEnd);
+    req.once("error", onError);
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) onAbort();
+  });
+}
+
+function requireJson(req: IncomingMessage): void {
+  if (req.headers["content-type"]?.split(";")[0]?.trim().toLowerCase() !== "application/json") {
+    throw new HttpRequestError(415, "Content-Type must be application/json");
+  }
+  if (req.headers["content-encoding"] && req.headers["content-encoding"].toLowerCase() !== "identity") {
+    throw new HttpRequestError(415, "Compressed request bodies are not supported");
+  }
+}
+
+function parseJson(raw: string): unknown {
+  try { return JSON.parse(raw); }
+  catch { throw new HttpRequestError(400, "Invalid JSON body", -32700); }
+}
+
+function waitForDrain(res: ServerResponse, signal: AbortSignal, timeoutMs: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      clearTimeout(timer);
+      res.off("drain", onDrain);
+      signal.removeEventListener("abort", onAbort);
+    };
+    const onDrain = () => { cleanup(); resolve(); };
+    const onAbort = () => { cleanup(); reject(signal.reason); };
+    const timer = setTimeout(() => {
+      cleanup(); reject(new HttpRequestError(504, "Response client did not drain"));
+    }, timeoutMs);
+    timer.unref();
+    res.once("drain", onDrain);
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) onAbort();
+  });
+}
+
+/** One Web-stream chunk at a time; never buffer a whole (possibly infinite) response. */
+async function writeWebResponse(response: Response, res: ServerResponse, signal: AbortSignal, timeoutMs: number): Promise<void> {
+  signal.throwIfAborted();
+  res.writeHead(response.status, Object.fromEntries(response.headers));
+  res.flushHeaders(); // GET SSE must return headers before the first event/keepalive.
+  const end = () => abortable(new Promise<void>(resolve => res.end(resolve)), signal);
+  if (!response.body) { await end(); return; }
+  const reader = response.body.getReader();
+  const cancel = () => { void reader.cancel(signal.reason).catch(() => {}); };
+  signal.addEventListener("abort", cancel, { once: true });
+  let complete = false;
+  try {
+    if (signal.aborted) cancel();
+    while (true) {
+      const { done, value } = await abortable(reader.read(), signal);
+      signal.throwIfAborted();
+      if (done) { complete = true; break; }
+      if (!res.write(value)) await waitForDrain(res, signal, timeoutMs);
+    }
+    await end();
+  } finally {
+    signal.removeEventListener("abort", cancel);
+    if (!complete) await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
+type HttpSession = {
+  transport: WebStandardStreamableHTTPServerTransport;
+  ownership: McpRequestOwnership;
+  server?: McpServer;
+  id?: string;
+  lastUsed: number;
+  inFlight: number;
+  closed: boolean;
+  disposePromise?: Promise<void>;
+  requests: Set<AbortController>;
+  deleteRequest?: AbortController;
+};
+
+/**
+ * Loopback-only MCP/REST listener. POST replies remain JSON; GET uses real SSE.
+ * Browser Origins are restricted to this listener, not every localhost port.
+ */
+export async function startMcpHttpServer(port: number, options: HttpServerOptions = {}): Promise<HttpServerHandle> {
+  // Bun 1.3.8's node:http compatibility does not reliably emit response/socket
+  // close after a completed POST disconnects, and can retain incomplete uploads
+  // despite Connection: close. Do not advertise bounded/cancellable HTTP on a
+  // transport that cannot provide that contract. Stdio is unaffected.
+  if (process.versions.bun) {
+    throw new Error(
+      "QMD MCP HTTP requires Node.js >=22: Bun's node:http cannot reliably cancel disconnected requests. " +
+      "Run QMD_RUNTIME=node qmd mcp --http (source checkout: node --import tsx src/cli/qmd.ts mcp --http). " +
+      "Bun remains supported for MCP stdio.",
+    );
+  }
+  const maxBodyBytes = boundedOption(options.maxBodyBytes, 1048576, "maxBodyBytes");
+  const maxPendingUploads = boundedOption(options.maxPendingUploads, 32, "maxPendingUploads");
+  const maxHttpRequests = boundedOption(options.maxHttpRequests, 256, "maxHttpRequests");
+  const maxControlRequests = boundedOption(options.maxControlRequests, 16, "maxControlRequests");
+  const maxConnections = boundedOption(options.maxConnections, 512, "maxConnections");
+  const maxHeaderBytes = boundedOption(options.maxHeaderBytes, 16384, "maxHeaderBytes");
+  // Keep Node's default 300s request timeout as an additional parser safeguard.
+  const headersTimeoutMs = boundedOption(options.headersTimeoutMs, 10000, "headersTimeoutMs", 1, 300000);
+  const controlBodyBytes = Math.min(maxBodyBytes, 4096);
+  const bodyTimeoutMs = boundedOption(options.bodyTimeoutMs, 10000, "bodyTimeoutMs");
+  const requestTimeoutMs = boundedOption(options.requestTimeoutMs, 120000, "requestTimeoutMs");
+  const maxSessions = boundedOption(options.maxSessions, 100, "maxSessions");
+  const maxActivePerSession = boundedOption(options.maxActiveRequestsPerSession, 128, "maxActiveRequestsPerSession");
+  const requestBudget = { active: 0, maxActive: boundedOption(options.maxActiveRequests, 1024, "maxActiveRequests") };
+  const idleTimeoutMs = boundedOption(options.sessionIdleTimeoutMs, 1800000, "sessionIdleTimeoutMs");
+  const sweepIntervalMs = boundedOption(options.sessionSweepIntervalMs, Math.min(60000, Math.max(1, Math.floor(idleTimeoutMs / 2))), "sessionSweepIntervalMs");
+  const keepAliveMs = boundedOption(options.sseKeepAliveMs, 15000, "sseKeepAliveMs", 0);
+  const writeTimeoutMs = boundedOption(options.streamWriteTimeoutMs, 10000, "streamWriteTimeoutMs");
+  const instanceToken = options.instanceToken ?? process.env.QMD_MCP_INSTANCE_TOKEN ?? randomUUID();
+  const configPath = getConfigPath();
+  const isOwnedStore = !options.store;
+  const store = options.store ?? await createStore({
+    dbPath: options.dbPath ?? getDefaultDbPath(),
+    ...(existsSync(configPath) ? { configPath } : {}),
+  });
+  let defaultCollectionNames: string[];
+  try { defaultCollectionNames = await store.getDefaultCollectionNames(); }
+  catch (error) { if (isOwnedStore) await store.close(); throw error; }
+
+  const sessions = new Map<string, HttpSession>();
+  const liveSessions = new Set<HttpSession>(); // Includes initialization reservations.
+  const closingSessions = new Set<Promise<void>>();
+  const requests = new Set<AbortController>();
+  let activeHttpRequests = 0;
+  let activeControlRequests = 0;
+  let pendingUploads = 0;
+  const startTime = Date.now();
+  let actualPort = 0;
+  let stopping = false;
+  let stopPromise: Promise<void> | undefined;
+  const log = (message: string) => { if (!options.quiet) console.error(message); };
+  const allowedHosts = () => ["localhost", "127.0.0.1", "[::1]"].map(host => new URL(`http://${host}:${actualPort}`).host);
+  const allowedOrigins = () => allowedHosts().map(host => `http://${host}`);
+
+  function disposeSession(session: HttpSession, except?: AbortController): Promise<void> {
+    if (session.disposePromise) return session.disposePromise;
+    session.closed = true;
+    liveSessions.delete(session);
+    if (session.id) sessions.delete(session.id);
+    for (const controller of session.requests) {
+      if (controller !== except) controller.abort(new HttpRequestError(404, "Session closed", -32001));
+    }
+    session.ownership.close();
+    // Defer until the promise is assigned: server.close() invokes onclose itself.
+    session.disposePromise = Promise.resolve().then(async () => {
+      try { await session.server?.close(); }
+      finally { await session.transport.close(); }
+    }).catch(error => { log(`Session cleanup error: ${String(error)}`); });
+    closingSessions.add(session.disposePromise);
+    void session.disposePromise.finally(() => closingSessions.delete(session.disposePromise!));
+    return session.disposePromise;
+  }
+
+  function expireSessions(): void {
+    const now = performance.now();
+    for (const session of liveSessions) {
+      if (session.inFlight === 0 && now - session.lastUsed >= idleTimeoutMs) void disposeSession(session);
+    }
+  }
+
+  function reserveSession(ownership: McpRequestOwnership): HttpSession {
+    expireSessions();
+    if (liveSessions.size >= maxSessions) {
+      let oldest: HttpSession | undefined;
+      for (const candidate of liveSessions) {
+        if (candidate.inFlight === 0 && (!oldest || candidate.lastUsed < oldest.lastUsed)) oldest = candidate;
+      }
+      if (!oldest) throw new RequestAdmissionError(503, "Session capacity reached; retry later");
+      void disposeSession(oldest); // Removes the slot synchronously, before any await.
+    }
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(), enableJsonResponse: true,
+      maxRequestBodySize: maxBodyBytes, keepAliveMs,
+      enableDnsRebindingProtection: true, allowedHosts: allowedHosts(), allowedOrigins: allowedOrigins(),
+      onsessioninitialized: (id: string) => {
+        if (session.closed || stopping) throw new Error("Session initialization was cancelled");
+        session.id = id;
+        sessions.set(id, session);
+      },
+    });
+    const session: HttpSession = {
+      transport, ownership,
+      lastUsed: performance.now(), inFlight: 0, closed: false, requests: new Set(),
+    };
+    liveSessions.add(session);
+    return session;
+  }
+
+  async function connectSession(session: HttpSession, controller: AbortController): Promise<void> {
+    try {
+      session.server = await createMcpServer(store, session.ownership);
+      // A deadline/stop may have disposed the reservation while building instructions.
+      if (session.closed || stopping) {
+        await session.server.close();
+        throw new HttpRequestError(503, "Server/session closed during initialization");
+      }
+      // Do not overwrite transport.onclose after connect: the SDK owns that callback
+      // and uses it to abort handlers and clear request/timer state.
+      session.server.server.onclose = () => { void disposeSession(session, session.deleteRequest); };
+      await session.server.connect(new OwnedMcpTransport(session.transport, session.ownership, true));
+    } catch (error) {
+      await disposeSession(session, controller);
+      throw error;
+    }
+  }
+
+  function guardLoopbackRequest(req: IncomingMessage): void {
+    // Node otherwise merges duplicate Origin headers and silently picks one Host.
+    for (const name of ["host", "origin"]) {
+      let count = 0;
+      for (let i = 0; i < req.rawHeaders.length; i += 2) {
+        if (req.rawHeaders[i]?.toLowerCase() === name) count++;
+      }
+      if (count > 1) throw new HttpRequestError(403, `Duplicate ${name} header`);
+    }
+    if (!req.headers.host || !allowedHosts().includes(req.headers.host.toLowerCase())) {
+      throw new HttpRequestError(403, "Untrusted Host header");
+    }
+    const origin = req.headers.origin;
+    // Missing Origin is valid for native CLI clients; null, foreign, malformed,
+    // and other loopback ports are NOT trusted browser origins.
+    if (origin !== undefined && !allowedOrigins().includes(origin)) {
+      throw new HttpRequestError(403, "Untrusted Origin header");
+    }
+  }
+
+  const httpServer = createServer({
+    maxHeaderSize: maxHeaderBytes, headersTimeout: headersTimeoutMs,
+    connectionsCheckingInterval: Math.min(headersTimeoutMs, 1000),
+  }, async (nodeReq: IncomingMessage, nodeRes: ServerResponse) => {
+    let controller: AbortController | undefined;
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    let cleanupRequest: (() => void) | undefined;
+    let releaseHttpRequest: (() => void) | undefined;
+    let releaseUpload: (() => void) | undefined;
+    let session: HttpSession | undefined;
+    let created = false;
+    let registered = false;
+    let releaseOwnership: (() => void) | undefined;
+    let pathname = "/";
+    try {
+      guardLoopbackRequest(nodeReq); // Before JSON, store calls, session allocation, or route dispatch.
+      if (stopping) throw new HttpRequestError(503, "Server is stopping");
+      if (!nodeReq.url?.startsWith("/")) throw new HttpRequestError(400, "Invalid request target");
+      const listenerOrigin = `http://localhost:${actualPort}`;
+      let requestUrl: URL;
+      try { requestUrl = new URL(nodeReq.url, listenerOrigin); }
+      catch { throw new HttpRequestError(400, "Invalid request target"); }
+      if (requestUrl.origin !== new URL(listenerOrigin).origin) throw new HttpRequestError(400, "Foreign request target");
+      pathname = requestUrl.pathname;
+      const isSearchPost = (pathname === "/query" || pathname === "/search") && nodeReq.method === "POST";
+      const isMcpPost = pathname === "/mcp" && nodeReq.method === "POST";
+      const isUpload = isSearchPost || isMcpPost;
+      if (isUpload) requireJson(nodeReq);
+      if (pathname === "/mcp") {
+        if (!["POST", "GET", "DELETE"].includes(nodeReq.method ?? "")) {
+          nodeRes.setHeader("Allow", "GET, POST, DELETE");
+          throw new HttpRequestError(405, "Method not allowed");
+        }
+        if (isMcpPost) {
+          const accept = nodeReq.headers.accept;
+          if (!accept?.includes("application/json") || !accept.includes("text/event-stream")) {
+            throw new HttpRequestError(406, "Client must accept application/json and text/event-stream");
+          }
+        }
+      }
+      if ((pathname === "/mcp" || pathname === "/health") && ["GET", "DELETE"].includes(nodeReq.method ?? "")
+        && (nodeReq.headers["transfer-encoding"] || Number(nodeReq.headers["content-length"] ?? 0) > 0)) {
+        throw new HttpRequestError(400, "GET/DELETE request bodies are not supported");
+      }
+      const length = nodeReq.headers["content-length"];
+      if (isUpload && length !== undefined && Number(length) > maxBodyBytes) {
+        throw new HttpRequestError(413, "Request body too large");
+      }
+      const overload = activeHttpRequests >= maxHttpRequests
+        ? "Server HTTP request capacity reached; retry later"
+        : isUpload && pendingUploads >= maxPendingUploads ? "Pending upload capacity reached; retry later" : undefined;
+      let controlOnly = false;
+      let controlRequest = (pathname === "/health" && nodeReq.method === "GET")
+        || (pathname === "/mcp" && nodeReq.method === "DELETE");
+      if (!controlRequest && overload) {
+        // A standard MCP cancellation is itself a POST: provide a small reserve
+        // without trusting a header's claim that arbitrary work is control work.
+        // Unknown/chunked lengths are allowed, but collected under the 4 KiB cap.
+        const sid = nodeReq.headers["mcp-session-id"];
+        if (isMcpPost && typeof sid === "string" && sessions.has(sid)
+          && (length === undefined || Number(length) <= controlBodyBytes)) {
+          controlRequest = controlOnly = true;
+        } else throw new HttpRequestError(503, overload);
+      }
+      if (controlRequest) {
+        if (activeControlRequests >= maxControlRequests) {
+          throw new HttpRequestError(503, "Server control request capacity reached; retry later");
+        }
+        activeControlRequests++;
+        releaseHttpRequest = () => { activeControlRequests--; };
+      } else {
+        activeHttpRequests++;
+        releaseHttpRequest = () => { activeHttpRequests--; };
+        if (isUpload) {
+          pendingUploads++;
+          let held = true;
+          releaseUpload = () => { if (held) { held = false; pendingUploads--; } };
+        }
+      }
+      // All counters are reserved synchronously BEFORE controllers, timers, body
+      // chunks or SDK objects. REST and MCP share these pre-body HTTP bounds.
+      const admittedController = new AbortController();
+      controller = admittedController;
+      const signal = admittedController.signal;
+      requests.add(admittedController);
+      const onDisconnect = () => admittedController.abort(new HttpRequestError(400, "Client disconnected"));
+      const onClose = () => { if (!nodeRes.writableFinished) onDisconnect(); };
+      nodeReq.once("aborted", onDisconnect);
+      nodeRes.once("close", onClose);
+      nodeRes.once("error", onDisconnect);
+      deadline = setTimeout(() => admittedController.abort(new HttpRequestError(504, "Request processing timed out")), requestTimeoutMs);
+      deadline.unref();
+      cleanupRequest = () => {
+        requests.delete(admittedController);
+        nodeReq.off("aborted", onDisconnect);
+        nodeRes.off("close", onClose);
+        nodeRes.off("error", onDisconnect);
+      };
+      const receiveBody = async () => {
+        try { return await collectBody(nodeReq, controlOnly ? controlBodyBytes : maxBodyBytes, bodyTimeoutMs, signal); }
+        finally { releaseUpload?.(); } // Upload slots must not be held by long-running queries.
+      };
+      if (pathname === "/health" && nodeReq.method === "GET") {
+        nodeRes.writeHead(200, { "Content-Type": "application/json" });
+        nodeRes.end(JSON.stringify({
+          status: "ok", uptime: Math.floor((Date.now() - startTime) / 1000), pid: process.pid, instanceToken,
         }));
-
-        // Use default collections if none specified
+        return;
+      }
+      if (isSearchPost) {
+        const body = parseJson(await receiveBody());
+        const parsed = searchInputSchema.safeParse(body);
+        if (!parsed.success) {
+          throw new HttpRequestError(400, `Invalid search parameters: ${parsed.error.issues.slice(0, 5).map(issue => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
+        }
+        const params = parsed.data;
         const effectiveCollections = params.collections ?? defaultCollectionNames;
-
-        const results = await store.search({
-          queries,
+        const results = await abortable(store.search({
+          queries: params.searches,
           collections: effectiveCollections.length > 0 ? effectiveCollections : undefined,
-          limit: params.limit ?? 10,
-          minScore: params.minScore ?? 0,
-          intent: params.intent,
-        });
-
-        // Use first lex or vec query for snippet extraction
-        const primaryQuery = params.searches.find((s: any) => s.type === 'lex')?.query
-          || params.searches.find((s: any) => s.type === 'vec')?.query
-          || params.searches[0]?.query || "";
-
+          limit: params.limit, minScore: params.minScore, intent: params.intent, rerank: params.rerank,
+          signal,
+        }), signal);
+        signal.throwIfAborted();
+        const primaryQuery = params.searches.find(s => s.type === "lex")?.query
+          || params.searches.find(s => s.type === "vec")?.query || params.searches[0]!.query;
         const formatted = results.map(r => {
-          const { line, snippet } = extractSnippet(r.bestChunk, primaryQuery, 300);
+          const { line, snippet } = extractSnippet(r.bestChunk, primaryQuery, 300, undefined, undefined, params.intent);
           return {
-            docid: `#${r.docid}`,
-            file: r.displayPath,
-            title: r.title,
-            score: Math.round(r.score * 100) / 100,
-            context: r.context,
-            snippet: addLineNumbers(snippet, line),
+            docid: `#${r.docid}`, file: r.displayPath, title: r.title,
+            score: Math.round(r.score * 100) / 100, context: r.context, snippet: addLineNumbers(snippet, line),
           };
         });
-
         nodeRes.writeHead(200, { "Content-Type": "application/json" });
         nodeRes.end(JSON.stringify({ results: formatted }));
-        log(`${ts()} POST /query ${params.searches.length} queries (${Date.now() - reqStart}ms)`);
         return;
       }
-
-      if (pathname === "/mcp" && nodeReq.method === "POST") {
-        const rawBody = await collectBody(nodeReq);
-        const body = JSON.parse(rawBody);
-        const label = describeRequest(body);
-        const url = `http://localhost:${port}${pathname}`;
-        const headers: Record<string, string> = {};
-        for (const [k, v] of Object.entries(nodeReq.headers)) {
-          if (typeof v === "string") headers[k] = v;
+      if (pathname !== "/mcp") {
+        nodeRes.writeHead(404); nodeRes.end("Not Found"); return;
+      }
+      let rawBody: string | undefined;
+      let body: unknown;
+      let messages: JSONRPCMessage[] = [];
+      if (nodeReq.method === "POST") {
+        rawBody = await receiveBody();
+        body = parseJson(rawBody);
+        const rawMessages = Array.isArray(body) ? body : [body];
+        if (rawMessages.length === 0 || rawMessages.length > 100) {
+          throw new HttpRequestError(400, "Invalid JSON-RPC message or batch", -32600);
         }
-
-        // Route to existing session or create new one on initialize
-        const sessionId = headers["mcp-session-id"];
-        let transport: WebStandardStreamableHTTPServerTransport;
-
-        if (sessionId) {
-          const existing = sessions.get(sessionId);
-          if (!existing) {
-            nodeRes.writeHead(404, { "Content-Type": "application/json" });
-            nodeRes.end(JSON.stringify({
-              jsonrpc: "2.0",
-              error: { code: -32001, message: "Session not found" },
-              id: body?.id ?? null,
-            }));
-            return;
+        const parsedMessages = rawMessages.map(message => JSONRPCMessageSchema.safeParse(message));
+        if (parsedMessages.some(message => !message.success)) {
+          throw new HttpRequestError(400, "Invalid JSON-RPC message or batch", -32600);
+        }
+        messages = parsedMessages.map(message => message.data!);
+      }
+      const sessionId = nodeReq.headers["mcp-session-id"];
+      if (typeof sessionId === "string") {
+        expireSessions();
+        session = sessions.get(sessionId);
+        if (!session) throw new HttpRequestError(404, "Session not found", -32001);
+        if (nodeReq.method === "POST") releaseOwnership = session.ownership.reserve(messages);
+      } else if (nodeReq.method === "POST" && isInitializeRequest(body)) {
+        // Hold the ACTUAL global budget before any session allocation/eviction,
+        // including across connectSession's asynchronous instruction reads.
+        const ownership = new McpRequestOwnership(maxActivePerSession, requestBudget);
+        releaseOwnership = ownership.reserve(messages);
+        session = reserveSession(ownership);
+        created = true;
+      } else {
+        throw new HttpRequestError(400, "Bad Request: Missing session ID");
+      }
+      // Check ID conflicts first so data saturation cannot turn an existing
+      // owner's duplicate 409 into a 503 or accidentally dispatch its cancel.
+      if (controlOnly && !messages.every(message => !isJSONRPCRequest(message)
+        && CancelledNotificationSchema.safeParse(message).success)) {
+        throw new RequestAdmissionError(503, overload!);
+      }
+      session.lastUsed = performance.now();
+      session.requests.add(controller);
+      registered = true;
+      // Long-lived GET streams do not prevent idle expiry or capacity eviction.
+      if (nodeReq.method !== "GET") session.inFlight++;
+      if (created) await abortable(connectSession(session, controller), signal);
+      signal.throwIfAborted();
+      if (nodeReq.method === "DELETE") session.deleteRequest = controller;
+      const headers = new Headers();
+      for (const [key, value] of Object.entries(nodeReq.headers)) {
+        if (typeof value === "string") headers.set(key, key === "host" ? value.toLowerCase() : value);
+      }
+      const request = new Request(requestUrl.href, {
+        method: nodeReq.method, headers, signal, ...(rawBody !== undefined ? { body: rawBody } : {}),
+      });
+      const responseTask = session.transport.handleRequest(request, { parsedBody: body });
+      // A late Response must not orphan an SSE reader after the HTTP client left.
+      void responseTask.then(response => {
+        if (signal.aborted) void response.body?.cancel().catch(() => {});
+      }, () => {});
+      const response = await abortable(responseTask, signal);
+      if (created && (response.status >= 400 || !session.id)) await disposeSession(session, controller);
+      if (nodeReq.method === "GET") clearTimeout(deadline);
+      await writeWebResponse(response, nodeRes, signal, writeTimeoutMs);
+      if (nodeReq.method === "DELETE" && response.status < 300) await disposeSession(session, controller);
+    } catch (error) {
+      // Rejected admission never reached the SDK and must not cancel the
+      // original request, close its session, or release its reservation.
+      if (session && (created || !(error instanceof RequestAdmissionError))
+        && (created || nodeReq.method !== "GET" || !controller?.signal.aborted)) await disposeSession(session, controller);
+      if (!nodeRes.destroyed) {
+        if (nodeRes.headersSent) nodeRes.destroy();
+        else {
+          const failure = error instanceof HttpRequestError ? error : new HttpRequestError(500, "Internal Server Error");
+          if (failure.status === 500) log(`HTTP handler error: ${String(error)}`);
+          nodeReq.pause();
+          // Admission errors have a fully received, validated body. Do not
+          // destroy their socket: an earlier pipelined POST on that connection
+          // may still own the original operation which we deliberately kept.
+          const closeConnection = !(failure instanceof RequestAdmissionError);
+          // Do not drain an untrusted/incomplete upload indefinitely. Closing after
+          // the response lets clients receive a valid 4xx, unlike req.destroy().
+          nodeRes.writeHead(failure.status, {
+            "Content-Type": "application/json", ...(closeConnection ? { Connection: "close" } : {}),
+          });
+          nodeRes.end(JSON.stringify(pathname === "/mcp" ? {
+            jsonrpc: "2.0", error: { code: failure.rpcCode, message: failure.message }, id: null,
+          } : { error: failure.message }));
+          // Give errors a bounded flush window, then close this connection even
+          // if a peer stops reading or never finishes its untrusted upload.
+          if (closeConnection) {
+            const socket = nodeReq.socket;
+            setTimeout(() => {
+              nodeRes.destroy();
+              socket.destroy();
+              nodeReq.destroy();
+            }, 50).unref();
           }
-          transport = existing;
-        } else if (isInitializeRequest(body)) {
-          transport = await createSession();
-        } else {
-          nodeRes.writeHead(400, { "Content-Type": "application/json" });
-          nodeRes.end(JSON.stringify({
-            jsonrpc: "2.0",
-            error: { code: -32000, message: "Bad Request: Missing session ID" },
-            id: body?.id ?? null,
-          }));
-          return;
         }
-
-        const request = new Request(url, { method: "POST", headers, body: rawBody });
-        const response = await transport.handleRequest(request, { parsedBody: body });
-
-        nodeRes.writeHead(response.status, Object.fromEntries(response.headers));
-        nodeRes.end(Buffer.from(await response.arrayBuffer()));
-        log(`${ts()} POST /mcp ${label} (${Date.now() - reqStart}ms)`);
-        return;
       }
-
-      if (pathname === "/mcp") {
-        const headers: Record<string, string> = {};
-        for (const [k, v] of Object.entries(nodeReq.headers)) {
-          if (typeof v === "string") headers[k] = v;
-        }
-
-        // GET/DELETE must have a valid session
-        const sessionId = headers["mcp-session-id"];
-        if (!sessionId) {
-          nodeRes.writeHead(400, { "Content-Type": "application/json" });
-          nodeRes.end(JSON.stringify({
-            jsonrpc: "2.0",
-            error: { code: -32000, message: "Bad Request: Missing session ID" },
-            id: null,
-          }));
-          return;
-        }
-        const transport = sessions.get(sessionId);
-        if (!transport) {
-          nodeRes.writeHead(404, { "Content-Type": "application/json" });
-          nodeRes.end(JSON.stringify({
-            jsonrpc: "2.0",
-            error: { code: -32001, message: "Session not found" },
-            id: null,
-          }));
-          return;
-        }
-
-        const url = `http://localhost:${port}${pathname}`;
-        const rawBody = nodeReq.method !== "GET" && nodeReq.method !== "HEAD" ? await collectBody(nodeReq) : undefined;
-        const request = new Request(url, { method: nodeReq.method || "GET", headers, ...(rawBody ? { body: rawBody } : {}) });
-        const response = await transport.handleRequest(request);
-        nodeRes.writeHead(response.status, Object.fromEntries(response.headers));
-        nodeRes.end(Buffer.from(await response.arrayBuffer()));
-        return;
+    } finally {
+      releaseOwnership?.();
+      releaseUpload?.();
+      releaseHttpRequest?.();
+      clearTimeout(deadline);
+      cleanupRequest?.();
+      if (registered && session && controller) {
+        session.requests.delete(controller);
+        if (nodeReq.method !== "GET") session.inFlight--;
+        if (!session.closed) session.lastUsed = performance.now();
+        if (session.deleteRequest === controller) session.deleteRequest = undefined;
       }
-
-      nodeRes.writeHead(404);
-      nodeRes.end("Not Found");
-    } catch (err) {
-      console.error("HTTP handler error:", err);
-      nodeRes.writeHead(500);
-      nodeRes.end("Internal Server Error");
     }
   });
+  httpServer.maxConnections = maxConnections;
 
-  await new Promise<void>((resolve, reject) => {
-    httpServer.on("error", reject);
-    httpServer.listen(port, "localhost", () => resolve());
-  });
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const onError = (error: Error) => reject(error);
+      httpServer.once("error", onError);
+      httpServer.listen(port, "localhost", () => { httpServer.off("error", onError); resolve(); });
+    });
+  } catch (error) {
+    if (isOwnedStore) await store.close();
+    throw error;
+  }
+  actualPort = (httpServer.address() as import("net").AddressInfo).port;
+  const sweep = setInterval(expireSessions, sweepIntervalMs);
+  sweep.unref();
 
-  const actualPort = (httpServer.address() as import("net").AddressInfo).port;
-
-  let stopping = false;
-  const stop = async () => {
-    if (stopping) return;
+  const stop = (): Promise<void> => {
+    if (stopPromise) return stopPromise;
     stopping = true;
-    for (const transport of sessions.values()) {
-      await transport.close();
-    }
-    sessions.clear();
-    httpServer.close();
-    if (isOwnedStore) {
-      await store.close();
-    }
+    clearInterval(sweep);
+    process.off("SIGTERM", onSigterm);
+    process.off("SIGINT", onSigint);
+    stopPromise = (async () => {
+      const closed = new Promise<void>((resolve, reject) => httpServer.close(error => error ? reject(error) : resolve()));
+      for (const controller of requests) controller.abort(new HttpRequestError(503, "Server is stopping"));
+      await Promise.all([...liveSessions].map(session => disposeSession(session)));
+      await Promise.all(closingSessions); // Include evictions/expiry already removed from the live map.
+      // close() alone waits forever for SSE/partial uploads. These are our own
+      // listener's sockets, not a process-global service or injected store.
+      httpServer.closeAllConnections();
+      await closed;
+      if (isOwnedStore) await store.close();
+    })();
+    return stopPromise;
   };
-
-  process.on("SIGTERM", async () => {
-    console.error("Shutting down (SIGTERM)...");
-    await stop();
-    process.exit(0);
-  });
-  process.on("SIGINT", async () => {
-    console.error("Shutting down (SIGINT)...");
-    await stop();
-    process.exit(0);
-  });
-
+  function onSignal(): void {
+    void stop().then(() => process.exit(0), error => { console.error(error); process.exit(1); });
+  }
+  const onSigterm = onSignal;
+  const onSigint = onSignal;
+  process.on("SIGTERM", onSigterm);
+  process.on("SIGINT", onSigint);
   log(`QMD MCP server listening on http://localhost:${actualPort}/mcp`);
   return { httpServer, port: actualPort, stop };
 }

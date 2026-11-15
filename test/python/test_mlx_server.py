@@ -3,6 +3,7 @@ test_mlx_server.py — Integration tests for bounded HTTP MLX embedding server
 """
 
 import socket
+import json
 import threading
 import time
 import requests
@@ -10,6 +11,7 @@ import numpy as np
 import pytest
 from scripts.qmd_mlx.server import start_server
 from scripts.qmd_mlx.protocol import decode_binary_embeddings
+from scripts.qmd_mlx.runtime import EmbeddingResult
 
 
 def get_free_port() -> int:
@@ -59,9 +61,10 @@ def mlx_server():
         dims = requested_dims or 384
         arr = np.ones((len(texts), dims), dtype=np.float32)
         arr = arr / np.linalg.norm(arr, axis=-1, keepdims=True)
-        return arr
+        descriptor = dict(mock_runtime.get_descriptor.return_value, outputDimensions=dims)
+        return EmbeddingResult(arr, json.dumps(descriptor))
 
-    mock_runtime.submit_embed.side_effect = mock_submit_embed
+    mock_runtime.submit_embed_result.side_effect = mock_submit_embed
     mock_runtime.tokenize.side_effect = lambda texts, **kwargs: [[101, 202, 102] for _ in texts]
 
     server.runtime = mock_runtime
@@ -303,11 +306,16 @@ def test_production_start_server_composition_stop_lifecycle_real_executor_runtim
     from unittest.mock import MagicMock, patch
     from typing import Optional, Any
     from scripts.qmd_mlx.adapters.tokenization import TokenizedBatch
+    from scripts.qmd_mlx.adapters.embedding import BaseEmbeddingAdapter
+    from types import SimpleNamespace
     from scripts.qmd_mlx.protocol import WorkerUnavailableError
     from scripts.qmd_mlx.server import ServerState
 
-    class FakeEmbeddingAdapter:
+    class FakeEmbeddingAdapter(BaseEmbeddingAdapter):
+        synthetic = True
+
         def __init__(self, model_name="fake-model", **kwargs):
+            super().__init__(model_name, max_length=512)
             self.model_name = model_name
             self.native_dims = 384
             self.max_length = 512
@@ -320,7 +328,7 @@ def test_production_start_server_composition_stop_lifecycle_real_executor_runtim
             self.forward_count = 0
             self.call_history: list[tuple[str, float]] = []
             self.raw_hf_tokenizer = MagicMock()
-            self._lock = threading.Lock()
+            self._lock = self._init_lock
 
         def is_loaded(self) -> bool:
             with self._lock:
@@ -328,6 +336,12 @@ def test_production_start_server_composition_stop_lifecycle_real_executor_runtim
 
         def load(self):
             with self._lock:
+                tokenizer = SimpleNamespace(pad_token_id=0, encode=lambda text, **kw: [101, 202, 102])
+                self._publish_loaded(
+                    object(), tokenizer, tokenizer, {"hidden_size": 384, "num_parameters": 100_000_000},
+                    "fixture-server-source", "float32", "none", 0,
+                )
+                self.model_memory_mb = 50.0
                 self._loaded = True
                 self.load_count += 1
                 self.call_history.append(("load", time.monotonic()))
@@ -335,16 +349,12 @@ def test_production_start_server_composition_stop_lifecycle_real_executor_runtim
         def unload(self):
             with self._lock:
                 self._loaded = False
+                super().unload()
                 self.unload_count += 1
                 self.call_history.append(("unload", time.monotonic()))
 
-        def tokenize_texts(self, texts: list[str]) -> TokenizedBatch:
-            token_ids = [[101, 202, 102] for _ in texts]
-            lengths = [3 for _ in texts]
-            indices = list(range(len(texts)))
-            return TokenizedBatch(token_ids=token_ids, lengths=lengths, original_indices=indices, pad_token_id=0, texts=list(texts))
-
-        def forward_batch(self, batch: TokenizedBatch, requested_dims: Optional[int] = None) -> np.ndarray:
+        def forward_batch(self, tokenized_batch: TokenizedBatch, requested_dims: Optional[int] = None) -> np.ndarray:
+            batch = tokenized_batch
             with self._lock:
                 self.forward_count += 1
                 self.call_history.append(("forward", time.monotonic()))
@@ -355,16 +365,7 @@ def test_production_start_server_composition_stop_lifecycle_real_executor_runtim
             return arr
 
         def get_descriptor(self, requested_dims: Optional[int] = None) -> dict[str, Any]:
-            return {
-                "version": 1,
-                "backend": "mlx",
-                "model": self.model_name,
-                "nativeDimensions": self.native_dims,
-                "outputDimensions": requested_dims or self.native_dims,
-                "normalized": True,
-                "maxSequenceLength": self.max_length,
-                "pooling": self.pooling_strategy,
-            }
+            return super().get_descriptor(requested_dims=requested_dims)
 
     fake_adapter = FakeEmbeddingAdapter()
     port = get_free_port()
@@ -441,6 +442,8 @@ def test_server_stop_blocked_noncooperative_forward_timeout_and_subsequent_stop(
     from scripts.qmd_mlx.server import ServerState
 
     class FakeAdapter:
+        synthetic = True
+
         def __init__(self):
             self.model_name = "blocked-model"
             self.native_dims = 384

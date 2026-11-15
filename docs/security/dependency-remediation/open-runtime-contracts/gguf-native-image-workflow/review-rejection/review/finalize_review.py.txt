@@ -1,0 +1,211 @@
+"""Finalize read-only independent SPEC review; verify originals before reporting."""
+from pathlib import Path
+import ast
+import hashlib
+import json
+import os
+import stat
+
+ROOT = Path(__file__).parent
+SOURCE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav')
+sha = lambda raw: hashlib.sha256(raw).hexdigest()
+auth = json.loads((ROOT / 'evidence/authentication.json').read_text())
+originals = []
+for item in auth['files']:
+    path = SOURCE / item['path']
+    info = path.lstat()
+    raw = path.read_bytes()
+    ok = stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and len(raw) == item['bytes'] and sha(raw) == item['sha256']
+    originals.append({'path': str(path), 'unchanged': ok})
+assert len(originals) == 518 and all(row['unchanged'] for row in originals)
+manifest_hash = sha((SOURCE / 'delivery/manifest.json').read_bytes())
+assert manifest_hash == auth['expected']['manifest']
+preservation = json.loads((ROOT / 'evidence/preservation-before.json').read_text())
+after = []
+for item in preservation:
+    path = Path(item['path'])
+    actual = sha(path.read_bytes())
+    after.append({**item, 'after_sha256': actual, 'unchanged_during_review': actual == item['actual_sha256']})
+assert all(row['unchanged_during_review'] for row in after)
+preserve = {'original_manifest_sha256': manifest_hash, 'original_delivery_paths': len(originals),
+            'all_original_delivery_paths_unchanged': True, 'external_inputs': after,
+            'all_external_inputs_unchanged_during_review': True,
+            'note': 'Nine original protected-input hashes match. The plan has the authorized parent-only section 1b addition; removing exactly that span reconstructs the prior hash. No restoration attempted.'}
+(ROOT / 'evidence/preservation-after.json').write_text(json.dumps(preserve, indent=2) + '\n')
+validation = json.loads((ROOT / 'evidence/validation-final.json').read_text())
+baseline = json.loads((ROOT / 'evidence/synthetic-final-v2/summary.json').read_text())
+heldout = json.loads((ROOT / 'heldout/summary.json').read_text())
+for summary in (baseline, heldout):
+    rows = summary['results']
+    assert len(rows) == summary['cases'] == len({x['case'] for x in rows})
+    assert sum(x['passed'] for x in rows) == summary['passed']
+    assert sum(not x['passed'] for x in rows) == summary['failed']
+assert baseline['cases'] == baseline['passed'] == 74
+assert heldout['cases'] == 34 and heldout['passed'] == 30 and heldout['failed'] == 4 and heldout['fixture_errors'] == 0
+counts = {'fresh_supplied_suite': {'cases': baseline['cases'], 'passed': baseline['passed'], 'failed': baseline['failed'],
+                                  'skipped': baseline['skipped'], 'expected_nonzero': sum(row['expected_exit'] != 0 for row in baseline['results'])},
+          'independent_heldouts': {'cases': heldout['cases'], 'passed': heldout['passed'], 'failed': heldout['failed'],
+                                   'fixture_errors': heldout['fixture_errors'], 'skipped': heldout['skipped'],
+                                   'expected_nonzero': sum(row['expected_exit'] != 0 for row in heldout['results']),
+                                   'actual_nonzero': sum(row['actual_exit'] != 0 for row in heldout['results'])}}
+workflow = ROOT / 'mirror/.github/workflows/gguf-native-image-qualification.yml'
+assert sha(workflow.read_bytes()) == auth['expected']['workflow']
+step = (ROOT / 'evidence/generated-step.bash').read_text()
+controller_body = step.split("<<'PY'\n", 1)[1].rsplit('\nPY\n', 1)[0]
+controller_file = (ROOT / 'evidence/generated-controller.py').read_bytes()
+assert (controller_body + '\n').encode() == controller_file
+assert sha(controller_body.encode()) == 'b0cc257ab4ede6c2e6ea9e887e4a4e5747edea9ba43d5ed52a86f19590606df4'
+probe = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py')
+probe_raw = probe.read_bytes()
+assert sha(probe_raw) == '292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2'
+probe_ast = ast.parse(probe_raw)
+qualify = next(n for n in probe_ast.body if isinstance(n, ast.FunctionDef) and n.name == 'qualify')
+returned = next(n.value for n in ast.walk(qualify) if isinstance(n, ast.Return) and isinstance(n.value, ast.Dict))
+interface = {'sha256': sha(probe_raw), 'path': str(probe), 'inspection': 'text/AST only; never imported or executed',
+             'receipt_keys': [k.value for k in returned.keys if isinstance(k, ast.Constant)],
+             'full_mode_default': qualify.args.kw_defaults[0].value is False,
+             'workflow_passes_no_probe_cli_options': "image, '-I', '-B', '-S', '/probe.py'" in step}
+(ROOT / 'evidence/repaired-probe-interface.json').write_text(json.dumps(interface, indent=2) + '\n')
+findings = [
+    {'id': 'S1', 'severity': 'P2', 'location': '.github/workflows/gguf-native-image-qualification.yml:206-214',
+     'title': 'Direct pattern-matching capture can rebind GGUF_IMAGE without being detected',
+     'scope': 'The frozen current launcher is correctly selected; the defect is the claimed unambiguous binding guard for a concrete future syntactic rebind, not arbitrary Python runtime immutability.',
+     'evidence_cases': ['ast-match-direct-capture', 'ast-match-mapping-capture'],
+     'observed': 'Both expected-refusal fixtures exit 0 and qualify the original literal although a tiny isolated match-capture reproducer proves the inserted direct binding selects a different immutable image.',
+     'recommendation': 'Account for direct pattern-capture binders (MatchAs, MatchStar and MatchMapping.rest as applicable) or explicitly restrict the supported source shape and fail closed. Do not import/execute the launcher or promise arbitrary runtime immutability.'},
+    {'id': 'S2', 'severity': 'P2', 'location': '.github/workflows/gguf-native-image-qualification.yml:279-285',
+     'title': 'Success receipt is emitted before a required receipt write can fail',
+     'evidence_cases': ['receipt-write-failure'],
+     'observed': 'A synthetic storage failure produces process exit 1 / IsADirectoryError, but the already-emitted final receipt says final_exit=0 and status=qualified-native-amd64-prerequisites. The job is red; the success receipt is false.',
+     'recommendation': 'Resolve required receipt storage first, catch its errors while preserving a prior primary failure, and emit a final nonqualification receipt consistent with the actual exit.'},
+    {'id': 'S3', 'severity': 'P2', 'location': '.github/workflows/gguf-native-image-qualification.yml:128-138',
+     'title': 'Timeout handling stops after the group leader exits, leaving a TERM-resistant group member',
+     'evidence_cases': ['timeout-group-descendant'],
+     'observed': 'The owned synthetic Popen leader exits on TERM; wait returns and breaks before group KILL. A same-group descendant that ignores TERM survives controller return and writes a later owned fixture marker. Primary exit 124 and Docker absence receipt remain nonzero/truthful; host CLI group drainage is not established.',
+     'scope': 'Concrete synthetic controller-lifetime counterexample, not evidence that actual Docker forks this child or that a real container leaked. No guessed PID/PGID was signaled by the test; the bounded fixture reaches its natural completion point.',
+     'recommendation': 'Keep an owned lifetime anchor while terminating/draining the command group. Do not fix this with a delayed unanchored killpg after the leader has been reaped, because that can target a recycled group ID.'},
+]
+result = {'spec': 'FAIL', 'quality': 'NOT_RUN_SPEC_GATE', 'approval': 'CHANGES_REQUIRED', 'findings': findings,
+          'workflow_sha256': sha(workflow.read_bytes()), 'patch_sha256': auth['expected']['patch'],
+          'manifest_sha256': manifest_hash, 'manifest_bound_unique_paths': len(originals),
+          'controller_body_sha256_no_final_newline': sha(controller_body.encode()),
+          'generated_controller_file_sha256_with_final_newline': sha(controller_file),
+          'syntax_and_actionlint_passed': validation['passed'], 'shellcheck_pyflakes_run': False,
+          'synthetic_results': counts, 'native_image_execution_performed': False,
+          'real_docker_or_ci_execution': False, 'physical_test_host': baseline['physical_test_host'],
+          'all_original_delivery_paths_unchanged': True, 'all_external_inputs_unchanged_during_review': True,
+          'report': str(ROOT / 'REPORT.md'), 'evidence': str(ROOT / 'evidence'),
+          'independent_heldout_summary': str(ROOT / 'heldout/summary.json'),
+          'remaining_gates': ['Repair/re-review workflow findings', 'Parent final accepted repaired-probe integration and source binding',
+                              'Actual native Linux amd64 candidate CI/readback including Docker --rm/--cidfile behavior, digest/platform and compiler results',
+                              'Combined build/tests and exact-head CI; no arm64/converter/training/GPU/cloud qualification']}
+(ROOT / 'review-result.json').write_text(json.dumps(result, indent=2) + '\n')
+archives = []
+for phase in ('synthetic-smoke-v1', 'synthetic-full-v1'):
+    path = SOURCE / 'evidence' / phase / 'summary.json'
+    raw = path.read_bytes()
+    archived = json.loads(raw)
+    archives.append({'path': str(path), 'sha256': sha(raw),
+                     'cases': archived['cases'], 'passed': archived['passed'],
+                     'failed': archived['failed'], 'skipped': archived['skipped'],
+                     'fresh_execution_by_this_reviewer': False,
+                     'part_of_original_518_manifest': False})
+(ROOT / 'evidence/retained-archive-summaries.json').write_text(json.dumps(archives, indent=2) + '\n')
+report = f'''# Independent GGUF workflow review
+
+## SPEC: FAIL — changes required
+
+**QUALITY: not started**, because SPEC did not pass. Three P2 findings below arise from four failed independent synthetic contracts. The supplied 74-case suite still passes; no negative result has been relabeled green. No proposal/source changes were made.
+
+Reviewed merge target: `.github/workflows/gguf-native-image-qualification.yml` (one new file only).
+
+- Workflow SHA-256: `{result['workflow_sha256']}`.
+- Patch SHA-256: `{result['patch_sha256']}`.
+- Manifest SHA-256: `{result['manifest_sha256']}`.
+- Independently authenticated **{len(originals)} unique manifest-bound paths**, with matching hashes/sizes. Single new-file patch reconstructed byte-for-byte and `git apply --check` / owned fresh apply both exited 0.
+- Embedded controller body (without terminating newline): `{result['controller_body_sha256_no_final_newline']}`. The generated `.py` file adds one newline and hashes to `{result['generated_controller_file_sha256_with_final_newline']}`. These are distinct encodings of the same extracted controller; fixture execution leaves the embedded production bytes unchanged.
+
+## Findings
+
+### S1 — P2: pattern capture escapes the source-binding ambiguity guard
+
+**Location:** workflow lines 206–214. `ast.MatchAs.name` stores capture names as strings, not `ast.Name(Store)`. The current scanner checks Name stores/deletes, definitions/args, imports and exception targets, but omits direct pattern binders. Inserting this immediately after the literal assignment is accepted:
+
+```python
+match 'ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:' + 'd' * 64:
+    case GGUF_IMAGE:
+        pass
+```
+
+The retained executable **synthetic-only** snippet uses the fully spelled-out string; it contains only the original literal assignment and this match, never launcher/probe code. It confirms the post-match value is the `d` digest. Both `ast-match-direct-capture` and `ast-match-mapping-capture` then run the unmodified controller over the synthetic source variant: it pulls/runs the original `c8fe...` literal, exits 0 and prints qualification. Expected behavior is ambiguity refusal before pull.
+
+**Scope:** the actual frozen launcher `f61076c5...` has one Store at line 49 and a Load at line 285; its existing literal is selected correctly. This finding is a concrete direct syntactic rebinding hole in the claimed guard, not a claim that the present launcher chooses a different image and not a demand to prove arbitrary Python runtime immutability.
+
+**Repair direction:** recognize direct pattern-capture binders, or define a narrow source grammar and fail closed outside it, without importing/executing the launcher.
+
+Reproducers/readbacks: `heldout/cases/ast-match-*/{{syntactic-rebinding-reproducer.py,syntactic-rebinding-result.json,observed-receipt.json,stdout.log}}`.
+
+### S2 — P2: required receipt write can contradict the emitted success receipt
+
+**Location:** workflow lines 279–285. Success status and `final_exit=0` are printed before `receipt.json` is written. `receipt-write-failure` uses only the fake CLI to occupy the owned output path with a directory, a deterministic storage-error fixture. The controller prints a qualified/final-0 receipt, then `write_text` raises `IsADirectoryError` and the process exits 1.
+
+**Impact/scope:** this is not a green CI job; it is a false success receipt in the chosen CI-log evidence channel, with an unhandled final-write error. Equivalent write failures can arise from storage exhaustion or permissions. Required receipt persistence must be resolved/caught before publishing final qualification; preserve any earlier primary failure and log a consistent nonqualified exit on storage failure.
+
+Evidence: `heldout/cases/receipt-write-failure/{{observed-receipt.json,stdout.log,stderr.log}}`.
+
+### S3 — P2: timeout group cleanup stops when only the leader has exited
+
+**Location:** workflow lines 128–138. The TERM/KILL loop breaks as soon as `child.wait()` reaps the direct leader. A group member ignoring TERM is therefore never sent KILL. `timeout-group-descendant` creates only a bounded Python fixture in that same owned process group, accelerates the fake 180-second wait to 0.3 seconds using the supplied adapter, and records the descendant alive at controller return, with an owned marker written afterward.
+
+**Scope:** exit 124 remains preserved and the simulated Docker cleanup readback is not misreported as real Docker evidence. This demonstrates missing host-command group drainage, not an actual Docker/container leak. No guessed/recycled PID signals were sent by the test; the child is bounded to its natural completion point. Real Docker may never spawn this exact child, which this offline review cannot establish.
+
+**Repair direction:** retain a reliable owned lifetime anchor through group termination/drainage. Do not add a blind delayed `killpg` after leader reap; that introduces recycled-PGID risk.
+
+Evidence: `heldout/cases/timeout-group-descendant/{{descendant-ready.json,descendant-late-side-effect.json,observed-receipt.json}}`, plus timestamps in `heldout/summary.json`.
+
+## Checks that passed / boundaries retained
+
+- Fresh Bash `-n`, stdlib inline-Python `compile`, and checksum-authenticated **actionlint 1.7.12** all pass. Optional shellcheck/pyflakes were disabled and not run.
+- Fresh relocated supplied suite: **{counts['fresh_supplied_suite']['passed']}/{counts['fresh_supplied_suite']['cases']} passed**, {counts['fresh_supplied_suite']['expected_nonzero']} expected nonzero, 0 skipped. This is the latest 74-case suite, not a sum of archived runs.
+- Independent heldouts: **{counts['independent_heldouts']['passed']}/{counts['independent_heldouts']['cases']} passed**, **{counts['independent_heldouts']['failed']} failed contracts**, 0 fixture errors/skips; {counts['independent_heldouts']['expected_nonzero']} expected nonzero and {counts['independent_heldouts']['actual_nonzero']} actual nonzero. The two false-green AST cases are the difference; receipt failure and timeout both still return nonzero but violate their additional contracts.
+- Duplicate JSON keys and malformed/unexpected object/array types fail closed across engine, image, probe, cleanup identity/list. CID directory/FIFO/oversize cases are refused without removal. Harmless extra fields/digests and duplicate unrelated list IDs remain valid controls rather than arbitrary new rejection requirements.
+- Correct pre-merge PR event types, candidate-branch push and manual triggers; `contents: read`; supplied checkout v6 SHA; no persisted credentials; exactly the two public sparse-checkout files. Quoted event environment and JSON-escaped raw command logs do not become shell/workflow commands.
+- Current launcher image derives from AST, not a second pin; pull/run use that exact input. Full RepoDigest membership is tested as JSON, not substring. Host, runner, daemon and image platform gates are separate. Distinct event head/context/checkout plus both source hashes are retained.
+- Only the frozen no-follow, bounded, singly linked regular public probe copy is mounted read-only. Credential-empty Docker configuration, fixed local Unix endpoint, stripped/allowlisted environment, no network, nonroot 65534, read-only root, cap drop, no-new-privileges, CPU/memory/PID bounds and owned exec tmpfs are present. No workspace/socket/credential/GPU mount or install.
+- Primary refusal/nonzero/signal/timeout paths stay nonzero; cleanup requires no-follow owned CID, full-ID/label readback before removal and successful full-ID daemon listing for absence. Wrong ownership/daemon errors/missing CID remain nonqualification. A benign rm race plus proven absence is distinct from rm success alone. These are synthetic control-flow observations, not proof of actual Docker `--rm`/`--cidfile` behavior.
+- Full probe mode is mandatory: no `--native-only` or banner-parser bypass. Python 3.12, Linux/x86_64, exact outputs, source-hash agreement and nonempty tool-version strings are checked. The repaired public qualifier owns exact uv-release gating. Static text/AST inspection of parent followup `292f01ce...` confirms the same CLI/receipt interface; it was never imported or executed.
+
+## Evidence honesty, preservation and remaining gates
+
+All daemon/image/probe/compiler-looking answers in this review are explicitly **SYNTHETIC**. Physical host is Darwin/arm64, approved Python is actual 3.12.13. No real Docker CLI/daemon, CI, image, registry, compiler, application launcher, qualifier, model, SDK, GPU, cloud, install or download was executed. Only local syntax tools, owned git patch replay and Python synthetic subprocess fixtures ran.
+
+All **518 original manifest-bound paths** and the manifest itself remain unchanged after review, including the original RED receipt and current 74-case receipts. Archived smoke/71-case summaries, which are outside those 518 paths, remain present and are recorded separately in `evidence/retained-archive-summaries.json`; their archived counts are not added to fresh results. Nine protected input hashes still match their original handoff values. The only pre-existing exception is the parent-authorized live plan section 1b: removing exactly that span independently reconstructs `be37fc5d96af167b87fb396561c4791d511d95f3affdae5327d0a6f372b6ed58`. All ten actual before/after protected-input hashes remain unchanged during this review. No live/shared source, proposal, config, services, docs, skills, locks or other agent artifacts were modified.
+
+The copied old qualifier `6717b377...` remained interface data only; its known banner refusal is not a workflow-source failure. Parent acceptance record for R1 `72ef9788...` was read, not re-executed; the empty-version followup and final accepted source handoff remain parent-owned.
+
+One review-fixture preflight failed before any cases because a newline-terminated controller file was compared with the body-without-newline hash. `evidence/heldout-preflight-red.json` retains both hashes; only the fixture hash boundary was corrected, not controller/product behavior or a test expectation.
+
+Before acceptance: repair/re-review S1–S3; finish accepted qualifier integration; run and read back actual native Linux amd64 candidate CI (source/checkout hashes, immutable digest/platform, compiler/uv results, real Docker lifecycle); then complete combined build/tests and exact-head CI. **No arm64, locked converter, training, GPU or cloud qualification is granted.**
+
+Machine-readable result: `review-result.json`. Main receipts: `evidence/validation-final.json`, `evidence/synthetic-final-v2/summary.json`, `heldout/summary.json`, `evidence/authentication.json`, `evidence/preservation-after.json`.
+'''
+(ROOT / 'REPORT.md').write_text(report)
+artifacts = [ROOT / 'REPORT.md', ROOT / 'review-result.json', ROOT / 'authenticate_and_copy.py', ROOT / 'finalize_review.py',
+             ROOT / 'run-isolated.bash', ROOT / 'heldout/heldout_tests.py', ROOT / 'heldout/fake_cli.py',
+             ROOT / 'heldout/fixture_adapter.py', ROOT / 'heldout/descendant_worker.py', workflow,
+             ROOT / 'evidence/generated-controller.py', ROOT / 'evidence/generated-step.bash',
+             ROOT / 'evidence/authentication.json', ROOT / 'evidence/preservation-before.json', ROOT / 'evidence/preservation-after.json',
+             ROOT / 'evidence/heldout-preflight-red.json', ROOT / 'evidence/focused-source-and-counts.json',
+             ROOT / 'evidence/retained-archive-summaries.json', ROOT / 'evidence/repaired-probe-interface.json', ROOT / 'evidence/final-checks.json', ROOT / 'evidence/validation-final.json',
+             ROOT / 'evidence/synthetic-final-v2/summary.json', ROOT / 'heldout/summary.json']
+for row in heldout['results']:
+    case = ROOT / 'heldout/cases' / row['case']
+    artifacts.extend(path for path in case.iterdir() if stat.S_ISREG(path.lstat().st_mode))
+entries = [{'path': str(p.relative_to(ROOT)), 'bytes': p.stat().st_size, 'sha256': sha(p.read_bytes())} for p in artifacts]
+assert len(entries) == len({entry['path'] for entry in entries})
+(ROOT / 'review-manifest.json').write_text(json.dumps({'root': str(ROOT), 'bound_paths': len(entries), 'files': entries}, indent=2) + '\n')
+print(json.dumps({'spec': result['spec'], 'quality': result['quality'], 'findings': [{'id': f['id'], 'severity': f['severity'], 'location': f['location']} for f in findings],
+                  'results': counts, 'preservation': '518 manifest paths unchanged; ten before/after protected paths unchanged; authorized plan delta authenticated',
+                  'report': str(ROOT / 'REPORT.md'), 'report_sha256': sha((ROOT / 'REPORT.md').read_bytes()),
+                  'review_result': str(ROOT / 'review-result.json'), 'review_manifest': str(ROOT / 'review-manifest.json'),
+                  'review_manifest_bound_paths': len(entries)}, indent=2))

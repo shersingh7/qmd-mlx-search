@@ -1,0 +1,94 @@
+"""Read-only source authentication; copies only to this review's owned scratch."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import shutil
+import stat
+import subprocess
+import sys
+
+ROOT = Path(__file__).parent
+SOURCE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav')
+EXPECTED = {
+    'manifest': 'e84773ff3b1a44694df7fd55d2a1305486185a2f8ee8c41aed0bb0d17f2f1dfe',
+    'workflow': 'a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306',
+    'patch': 'dd03de5b3075b9a39b0bf2d4ff7cd03199ac34881dbb4d0cf009a0b6251d042c',
+}
+sha = lambda raw: hashlib.sha256(raw).hexdigest()
+mraw = (SOURCE / 'delivery/manifest.json').read_bytes()
+assert sha(mraw) == EXPECTED['manifest']
+m = json.loads(mraw)
+checks = []
+paths = []
+for item in m['files']:
+    rel = Path(item['path'])
+    assert not rel.is_absolute() and '..' not in rel.parts
+    path = SOURCE / rel
+    info = path.lstat()
+    raw = path.read_bytes()
+    assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1, str(path)
+    assert len(raw) == item['bytes'] and sha(raw) == item['sha256'], str(path)
+    paths.append(str(rel))
+    checks.append({'path': str(rel), 'bytes': len(raw), 'sha256': sha(raw)})
+assert len(paths) == len(set(paths)) == 518
+assert len(m['proposed_files']) == 1
+assert m['proposed_files'][0]['target'] == '.github/workflows/gguf-native-image-qualification.yml'
+workflow = SOURCE / 'mirror/.github/workflows/gguf-native-image-qualification.yml'
+patch = SOURCE / 'delivery/proposal.patch'
+assert sha(workflow.read_bytes()) == EXPECTED['workflow']
+assert sha(patch.read_bytes()) == EXPECTED['patch']
+# Reconstruct the single new-file payload, then apply/check in owned empty replay.
+pt = patch.read_text()
+assert pt.count('diff --git ') == 1 and '\nnew file mode 100644\n' in pt
+assert '--- /dev/null\n+++ b/.github/workflows/gguf-native-image-qualification.yml\n' in pt
+body = pt.split('\n@@ ', 1)[1].split('\n', 1)[1]
+assert all(line.startswith('+') for line in body.splitlines())
+payload = ''.join(line[1:] + '\n' for line in body.splitlines())
+assert payload.encode() == workflow.read_bytes()
+replay = ROOT / 'patch-replay'
+replay.mkdir()
+commands = []
+for argv in (['/usr/bin/git', 'apply', '--check', str(patch)], ['/usr/bin/git', 'apply', str(patch)]):
+    out = subprocess.run(argv, env=dict(os.environ), cwd=replay, capture_output=True, text=True, timeout=15)
+    commands.append({'argv': argv, 'exit': out.returncode, 'stdout': out.stdout, 'stderr': out.stderr})
+    assert out.returncode == 0
+assert (replay / '.github/workflows/gguf-native-image-qualification.yml').read_bytes() == workflow.read_bytes()
+copy_paths = [
+    'mirror/.github/workflows/gguf-native-image-qualification.yml',
+    'mirror/finetune/tools/submit_locked_job.py',
+    'mirror/finetune/tools/qualify_gguf_image.py',
+    'evidence/validate_workflow.py', 'evidence/control_flow_tests.py',
+    'evidence/fixture_adapter.py', 'evidence/fake_cli.py', 'evidence/run_final_checks.py',
+]
+for rel in copy_paths:
+    target = ROOT / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(SOURCE / rel, target)
+# Preserve baseline hashes. The old evidence and all source originals remain read-only.
+(ROOT / 'evidence/authentication.json').write_text(json.dumps({
+    'expected': EXPECTED, 'manifest_bound_paths': len(paths), 'unique_paths': len(set(paths)),
+    'all_hashes_and_sizes_match': True, 'patch_replay': commands,
+    'copied_paths': copy_paths, 'files': checks,
+}, indent=2) + '\n')
+protected = json.loads((SOURCE / 'evidence/unchanged-inputs.json').read_text())
+results = []
+for item in protected['files']:
+    path = Path(item['path'])
+    raw = path.read_bytes()
+    entry = {'path': str(path), 'expected_sha256': item['sha256'], 'actual_sha256': sha(raw), 'unchanged': sha(raw) == item['sha256']}
+    if not entry['unchanged']:
+        assert str(path) == '/Users/shersingh/github/qmd-mlx-search/docs/plans/gguf-image-qualification.md'
+        text = raw.decode()
+        start = text.index('## 1b. Close the remaining empty-version diagnostic edge case')
+        end = text.index('## 2. Bind the actual integrated closure', start)
+        reconstructed = text[:start] + text[end:]
+        entry['authorized_parent_section_1b_delta_only'] = sha(reconstructed.encode()) == item['sha256']
+        assert entry['authorized_parent_section_1b_delta_only']
+    results.append(entry)
+(ROOT / 'evidence/preservation-before.json').write_text(json.dumps(results, indent=2) + '\n')
+probe = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv/repo/finetune/tools/qualify_gguf_image.py')
+probe_raw = probe.read_bytes()
+assert sha(probe_raw) == '292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2'
+(ROOT / 'evidence/repaired-probe-interface.json').write_text(json.dumps({'path': str(probe), 'sha256': sha(probe_raw), 'read_only_text_interface_inspection': True, 'executed_or_imported': False}, indent=2) + '\n')
+print(json.dumps({'review_root': str(ROOT), 'manifest_bound_paths': len(paths), 'patch_replay_exits': [c['exit'] for c in commands], 'preserved_inputs': sum(x['unchanged'] for x in results), 'authorized_plan_delta': sum(x.get('authorized_parent_section_1b_delta_only', False) for x in results), 'copied': len(copy_paths)}, indent=2))

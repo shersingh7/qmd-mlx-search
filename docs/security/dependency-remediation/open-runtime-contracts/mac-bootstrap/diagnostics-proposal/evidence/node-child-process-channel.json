@@ -1,0 +1,17 @@
+{
+  "node": "22.22.3",
+  "matches": [
+    {
+      "line": 58,
+      "text": "const { isArrayBufferView } = require('internal/util/types');\nlet debug = require('internal/util/debuglog').debuglog(\n  'child_process',\n  (fn) => {\n    debug = fn;"
+    },
+    {
+      "line": 88,
+      "text": "  validateString,\n} = require('internal/validators');\nconst child_process = require('internal/child_process');\nconst {\n  getValidStdio,"
+    },
+    {
+      "line": 94,
+      "text": "  ChildProcess,\n  stdioStringToArray,\n} = child_process;\n\nconst MAX_BUFFER = 1024 * 1024;"
+    }
+  ]
+}

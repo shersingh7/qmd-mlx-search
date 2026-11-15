@@ -1,0 +1,113 @@
+{
+  "scope": "fresh focused verification only; not canonical build/full-suite or CI qualification",
+  "patchSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+  "sourceHashesUnchanged": true,
+  "fast": {
+    "passed": 1,
+    "failed": 0,
+    "filtered": 7,
+    "elapsedMs": 253,
+    "closeCounter": {
+      "needed": 4,
+      "got": 4,
+      "scope": "Node-private-read-only-not-kernel-state"
+    },
+    "guardFired": false,
+    "sentinelAlive": true,
+    "finallyKilled": []
+  },
+  "selftests": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actionlint": {
+    "version": "1.7.12",
+    "exitCode": 0
+  },
+  "helperStrictTypeCheckExitCode": 0,
+  "harnessSyntax": [
+    {
+      "executable": "/Users/shersingh/.hermes/node/bin/node",
+      "argv": [
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/actual-fallback-control.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "executable": "/Users/shersingh/.hermes/node/bin/node",
+      "argv": [
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/finalize.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "executable": "/Users/shersingh/.hermes/node/bin/node",
+      "argv": [
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/run-local.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "executable": "/Users/shersingh/.hermes/node/bin/node",
+      "argv": [
+        "--check",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/validate.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "executable": "/bin/sh",
+      "argv": [
+        "-n",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/harness/run-clean.sh"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "environment": {
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/home",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/hermes",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/hermes",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/knowledge",
+    "KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/knowledge",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/cache",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/data",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/hf",
+    "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/hf/hub",
+    "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/hf/transformers",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/tmp",
+    "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/tmp",
+    "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/tmp",
+    "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/bun",
+    "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-ci-observer-mTSwsD/environments/verification-gate-types/npm",
+    "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8",
+    "CI": "1",
+    "REQUIRE_BUN": "1",
+    "QMD_LLAMA_GPU": "false",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "UV_OFFLINE": "1",
+    "npm_config_offline": "true",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "TOKENIZERS_PARALLELISM": "false"
+  }
+}

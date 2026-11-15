@@ -1,0 +1,17 @@
+{
+  "label": "phase5-prelaunch-readiness-red",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "test/python/test_qualification_http_status.py",
+    "-q",
+    "-k",
+    "unsupported_node or missing_node or missing_local_tsx"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 1,
+  "elapsed_seconds": 0.7112440839999999,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz"
+}

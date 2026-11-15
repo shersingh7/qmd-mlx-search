@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+    "-I",
+    "-B",
+    "-S",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tools/qualify_gguf_image.py"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2",
+  "name": "independent-real-installed-uv-full",
+  "returncode": 0,
+  "seconds": 0.5723728339653462,
+  "stderr": "",
+  "stdout": "{\n  \"locked_python_converter_training_gpu_cloud_qualified\": false,\n  \"native_only\": false,\n  \"outputs\": [\n    \"qmd-c-ok\",\n    \"qmd-cxx-ok\"\n  ],\n  \"platform\": \"Darwin/arm64\",\n  \"probe_sha256\": \"292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2\",\n  \"python\": \"3.12.13\",\n  \"scope\": \"native CPU C/C++ prerequisites only\",\n  \"status\": \"pass\",\n  \"versions\": {\n    \"c++\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"cc\": \"Apple clang version 21.0.0 (clang-2100.4.1.1)\",\n    \"git\": \"git version 2.53.0\",\n    \"make\": \"GNU Make 3.81\",\n    \"uv\": \"uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)\"\n  }\n}\n"
+}

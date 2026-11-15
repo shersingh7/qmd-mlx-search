@@ -1,0 +1,31 @@
+{
+  "pytest": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focusedOn": {
+    "passed": 1,
+    "filtered": 7
+  },
+  "focusedOff": {
+    "passed": 1,
+    "filtered": 7
+  },
+  "selftests": {
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "skipped": 0
+  },
+  "sourcePreservation": {
+    "originalTestRecoveredByteForByte": true,
+    "proposedSourceCount": 246,
+    "strictHelperTypes": "pass",
+    "actionlint": "pass",
+    "ciAccepted": false
+  },
+  "originalCause": "UNPROVEN",
+  "ciExecuted": false
+}

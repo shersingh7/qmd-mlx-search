@@ -1,0 +1,319 @@
+"""Read-only qualification instrumentation for the composed accepted source."""
+from pathlib import Path
+import functools
+import hashlib
+import importlib.metadata
+import importlib.util
+import json
+import os
+import resource
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import traceback
+from compose import inventory, state_digest, ENVIRONMENT, split_header
+
+ROOT = Path(__file__).resolve().parent
+FROZEN = ROOT / 'repo'
+SOURCE_REVISION = '5193ef1d4f7c95b006ab3b9f857ed27be9a63235'
+SOURCE_URL = 'https://github.com/ggml-org/llama.cpp.git'
+assert Path(sys.prefix) == ENVIRONMENT
+assert Path(os.environ['HOME']).is_relative_to(ROOT)
+assert Path(os.environ['TMPDIR']).is_relative_to(ROOT)
+assert os.environ['HF_HUB_OFFLINE'] == '1' and os.environ['TRANSFORMERS_OFFLINE'] == '1'
+assert os.environ['PYTHONDONTWRITEBYTECODE'] == '1'
+assert not any(key in os.environ for key in ('PYTHONPATH', 'PYTHONHOME', 'NO_LOCAL_GGUF', 'HF_TOKEN', 'GITHUB_TOKEN'))
+assert not any('SECRET' in key or 'PROXY' in key for key in os.environ)
+sys.path.insert(0, str(FROZEN / 'finetune'))
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def dump(path, value):
+    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True))
+
+
+def versions():
+    return {'python': sys.version, 'executable': sys.executable, 'prefix': sys.prefix,
+            'packages': {name: importlib.metadata.version(name) for name in
+            ('torch', 'transformers', 'accelerate', 'gguf', 'sentencepiece', 'protobuf', 'numpy', 'peft', 'cmake')}}
+
+
+def snapshot(name, side):
+    inv = inventory(ENVIRONMENT)
+    baseline = json.loads((ROOT / 'environment-before.json').read_text())
+    destination = ROOT / f'environment-{name}-{side}.json'
+    dump(destination, inv)
+    assert inv == baseline, f'Complete environment state differs: {destination}'
+    return {'state_sha256': state_digest(inv), 'counts': inv['counts'],
+            'regular_file_bytes': inv['regular_file_bytes'], 'versions': versions()}
+
+
+def source_facts():
+    manifest = json.loads((ROOT / 'source-header-environment-manifest.json').read_text())
+    files = {rel: sha256(FROZEN / rel) for rel in manifest['composed_files_sha256']}
+    assert files == manifest['composed_files_sha256']
+    assert files['finetune/gguf_toolchain.py'] == '5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028'
+    for item in manifest['reviewed_overlay']:
+        if item.get('every_nonheader_byte_unchanged'):
+            left, header, right = split_header((FROZEN / item['path']).read_bytes())
+            assert hashlib.sha256(left + right).hexdigest() == item['reviewed_body_sha256']
+            assert hashlib.sha256(header).hexdigest() == item['new_header_sha256']
+    return {'composed_files': files, 'binding_manifest_sha256': sha256(ROOT / 'source-header-environment-manifest.json')}
+
+
+ORIGINAL_RUN = subprocess.run
+class Qualification:
+    def __init__(self, name):
+        self.name = name
+        self.logdir = ROOT / 'logs' / name
+        self.logdir.mkdir(parents=True)
+        self.receipt = {'name': name, 'before': snapshot(name, 'before'), 'source_before': source_facts(),
+                        'environment': dict(os.environ), 'commands': [], 'checkpoint_reads': [],
+                        'model_devices': [], 'network_attempts': [], 'accelerator_calls': [],
+                        'started_monotonic': time.monotonic()}
+        probe = ORIGINAL_RUN([sys.executable, '-s', '-B', '-m', 'pip', '--version'], capture_output=True, text=True)
+        assert probe.returncode == 1 and 'No module named pip' in probe.stderr
+        self.receipt['pip_before'] = {'argv': probe.args, 'status': probe.returncode, 'stderr': probe.stderr}
+        assert importlib.util.find_spec('pip') is None
+        import gguf
+        import gguf.gguf_reader as reader_module
+        assert Path(gguf.__file__).is_relative_to(ENVIRONMENT)
+        self.receipt['installed_gguf_identity'] = {'version': importlib.metadata.version('gguf'),
+            'path': gguf.__file__, 'init_sha256': sha256(gguf.__file__),
+            'reader_path': reader_module.__file__, 'reader_sha256': sha256(reader_module.__file__)}
+        self.receipt['actual_maintained_reader_calls'] = []
+        original_reader_init = gguf.GGUFReader.__init__
+        def observed_reader_init(reader, path, *args, **kwargs):
+            result = original_reader_init(reader, path, *args, **kwargs)
+            self.receipt['actual_maintained_reader_calls'].append({'path': str(path), 'mode': kwargs.get('mode', 'r'),
+                'tensors': len(reader.tensors), 'module': reader_module.__file__, 'status': 'real reader returned'})
+            return result
+        gguf.GGUFReader.__init__ = observed_reader_init
+        self.original_connect = socket.socket.connect
+        def connect(sock, address):
+            if sock.family == socket.AF_UNIX:
+                return self.original_connect(sock, address)
+            self.receipt['network_attempts'].append(repr(address))
+            raise AssertionError('Qualification denies Python network access')
+        socket.socket.connect = connect
+        def create_connection(*args, **kwargs):
+            self.receipt['network_attempts'].append(repr((args, kwargs)))
+            raise AssertionError('Qualification denies Python network access')
+        socket.create_connection = create_connection
+        subprocess.run = self.audited_run
+
+    def audited_run(self, argv, **kwargs):
+        argv = list(map(str, argv))
+        assert not kwargs.get('shell', False)
+        assert not any(x in argv for x in ('pip', 'apt', 'apt-get', 'uv', 'ensurepip'))
+        executable = Path(argv[0]).name
+        env = dict(kwargs.get('env', os.environ))
+        assert env['PATH'] == str(ENVIRONMENT / 'bin') + ':/usr/bin:/bin'
+        assert env['HF_HUB_OFFLINE'] == '1'
+        assert all(not value or Path(value).is_relative_to(ROOT) for key, value in env.items()
+                   if key in {'HOME', 'TMPDIR', 'HF_HOME', 'HERMES_HOME', 'HERMES_DIR', 'HERMES_KNOWLEDGE_DIR'})
+        if executable == 'git':
+            assert all(not x.startswith(('http://', 'https://', 'ssh://', 'git@')) or x == SOURCE_URL for x in argv)
+            assert env['GIT_CONFIG_GLOBAL'] == '/dev/null' and env['GIT_CONFIG_NOSYSTEM'] == '1' and env['GIT_TERMINAL_PROMPT'] == '0'
+            assert 'credential.helper=' in argv and 'core.hooksPath=/dev/null' in argv
+            if 'fetch' in argv:
+                assert argv[-2:] == [SOURCE_URL, SOURCE_REVISION] and '--depth' in argv
+            effective = argv
+        else:
+            effective = ['/usr/bin/sandbox-exec', '-p', '(version 1) (allow default) (deny network*)', *argv]
+        if executable == 'cmake':
+            assert Path(argv[0]) == ENVIRONMENT / 'bin/cmake'
+            if '--build' in argv:
+                assert argv[-2:] == ['-j', '2']
+            else:
+                assert all(flag in argv for flag in ('-DGGML_CUDA=OFF', '-DGGML_METAL=OFF', '-DGGML_OPENMP=OFF'))
+        script = next((Path(x) for x in argv if x.endswith('/convert_hf_to_gguf.py')), None)
+        index = len(self.receipt['commands']) + 1
+        item = {'argv': argv, 'effective_argv': effective, 'timeout': kwargs.get('timeout'),
+                'cwd': str(kwargs.get('cwd', Path.cwd())), 'environment': env, 'status': 'started'}
+        self.receipt['commands'].append(item)
+        if script:
+            assert script.is_relative_to(ROOT) and Path(argv[0]) == ENVIRONMENT / 'bin/python'
+            item['source_module_sha256'] = {rel: sha256(script.parent / rel) for rel in
+                ('convert_hf_to_gguf.py', 'conversion/base.py', 'conversion/qwen.py',
+                 'gguf-py/gguf/__init__.py', 'gguf-py/gguf/gguf_reader.py', 'gguf-py/gguf/gguf_writer.py')}
+            expected_blobs = json.loads(Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/evidence/intake.json').read_text())['upstream_blobs']
+            assert all(item['source_module_sha256'][rel] == digest for rel, digest in expected_blobs.items())
+            # Retain public maintained reader bytes from this actual fresh call, not an old build.
+            retained = ROOT / 'actual-pinned-reader' / self.name / 'gguf'
+            if not retained.exists():
+                retained.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(script.parent / 'gguf-py/gguf', retained,
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+            item['actual_pinned_gguf_identity'] = {'source': str(script.parent / 'gguf-py/gguf'),
+                'retained': str(retained), 'files_sha256': {str(p.relative_to(retained)): sha256(p)
+                for p in retained.rglob('*') if p.is_file()}}
+        started = time.monotonic()
+        dump(ROOT / f'{self.name}-progress.json', self.receipt)
+        try:
+            result = ORIGINAL_RUN(effective, **kwargs)
+            item['returncode'] = result.returncode
+            item['status'] = 'completed'
+            for field in ('stdout', 'stderr'):
+                value = getattr(result, field)
+                destination = self.logdir / f'{index:02d}.{field}'
+                if isinstance(value, str):
+                    destination.write_text(value)
+                elif isinstance(value, bytes):
+                    destination.write_bytes(value)
+                else:
+                    stream = kwargs.get(field)
+                    if hasattr(stream, 'name') and Path(stream.name).is_file():
+                        stream.flush()
+                        destination.write_bytes(Path(stream.name).read_bytes())
+                if destination.is_file():
+                    item[field + '_log'] = str(destination)
+            if executable == 'git' and 'rev-parse' in argv and result.returncode == 0:
+                item['source_revision_stdout'] = result.stdout.strip()
+                assert item['source_revision_stdout'] == SOURCE_REVISION
+            if executable == 'cmake' and '--build' in argv and result.returncode == 0:
+                build = Path(argv[argv.index('--build') + 1])
+                binary = build / 'bin/llama-quantize'
+                item['quantizer_sha256'] = sha256(binary)
+                item['cmake_cache_sha256'] = sha256(build / 'CMakeCache.txt')
+                shutil.copy2(build / 'CMakeCache.txt', self.logdir / 'CMakeCache.txt')
+            return result
+        except BaseException as exc:
+            item['exception'] = repr(exc)
+            item['status'] = 'exception'
+            raise
+        finally:
+            item['elapsed_seconds'] = time.monotonic() - started
+            dump(ROOT / f'{self.name}-progress.json', self.receipt)
+
+    def initialize_ml(self):
+        import torch
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+        # CPU routing is confined to this test process; preserve Dynamo's cached-callable API.
+        for owner, attribute in ((torch.cuda, 'is_available'), (torch.backends.mps, 'is_available')):
+            original = getattr(owner, attribute)
+            @functools.lru_cache(None)
+            @functools.wraps(original)
+            def unavailable():
+                return False
+            setattr(owner, attribute, unavailable)
+            assert hasattr(unavailable, '__wrapped__') and hasattr(unavailable, 'cache_clear') and unavailable() is False
+        self.receipt['cpu_routing'] = {'torch_cuda_is_available': torch.cuda.is_available(),
+                                      'torch_mps_is_available': torch.backends.mps.is_available(),
+                                      'method': 'test-process-only lru_cache availability=False preserving __wrapped__/cache APIs'}
+        def deny_accelerator(name):
+            def denied(*args, **kwargs):
+                self.receipt['accelerator_calls'].append(name)
+                raise AssertionError('Accelerator operation forbidden: ' + name)
+            return denied
+        for owner, attribute, name in ((torch.cuda, '_lazy_init', 'cuda._lazy_init'),
+                                        (torch.Tensor, 'cuda', 'Tensor.cuda'),
+                                        (torch.nn.Module, 'cuda', 'Module.cuda')):
+            setattr(owner, attribute, deny_accelerator(name))
+        # Observe real dispatch, rejecting accelerator requests before allocation.
+        from torch.utils._python_dispatch import TorchDispatchMode
+        from torch.utils._pytree import tree_flatten
+        self.receipt['dispatch_tensor_devices'] = {}
+        self.receipt['dispatch_operations'] = 0
+        qualification = self
+        class CpuOnlyDispatch(TorchDispatchMode):
+            def __torch_dispatch__(self, func, types, args=(), kwargs=None):
+                kwargs = kwargs or {}
+                requested = kwargs.get('device')
+                if requested is not None and torch.device(requested).type not in {'cpu', 'meta'}:
+                    qualification.receipt['accelerator_calls'].append(str(func) + ':' + str(requested))
+                    raise AssertionError('Non-CPU dispatch request: ' + str(requested))
+                result = func(*args, **kwargs)
+                qualification.receipt['dispatch_operations'] += 1
+                for value in tree_flatten(result)[0]:
+                    if isinstance(value, torch.Tensor):
+                        device = value.device.type
+                        assert device in {'cpu', 'meta'}, device
+                        counts = qualification.receipt['dispatch_tensor_devices']
+                        counts[device] = counts.get(device, 0) + 1
+                return result
+        self.dispatch_mode = CpuOnlyDispatch()
+        self.dispatch_mode.__enter__()
+        import safetensors
+        import safetensors.torch
+        real_safe_open = safetensors.safe_open
+        qualification = self
+        class ObservedOpen:
+            def __init__(self, *args, **kwargs):
+                self.entry = {'path': str(args[0] if args else kwargs.get('filename')),
+                              'framework': args[1] if len(args) > 1 else kwargs.get('framework'),
+                              'requested_device': str(args[2] if len(args) > 2 else kwargs.get('device', 'cpu')),
+                              'tensor_reads': 0, 'tensor_devices': []}
+                assert self.entry['requested_device'] == 'cpu', self.entry
+                self.inner = real_safe_open(*args, **kwargs)
+                qualification.receipt['checkpoint_reads'].append(self.entry)
+            def __enter__(self):
+                self.inner.__enter__()
+                return self
+            def __exit__(self, *args):
+                return self.inner.__exit__(*args)
+            def __getattr__(self, name):
+                return getattr(self.inner, name)
+            def get_tensor(self, key):
+                tensor = self.inner.get_tensor(key)
+                assert tensor.device.type == 'cpu'
+                self.entry['tensor_reads'] += 1
+                self.entry['tensor_devices'] = ['cpu']
+                return tensor
+        safetensors.safe_open = ObservedOpen
+        safetensors.torch.safe_open = ObservedOpen
+        import transformers.core_model_loading as core_loading
+        real_materialize = core_loading._materialize_copy
+        self.receipt['actual_checkpoint_materializations_common'] = []
+        def observed_materialize(*args, **kwargs):
+            tensor = real_materialize(*args, **kwargs)
+            assert tensor.device.type == 'cpu'
+            self.receipt['actual_checkpoint_materializations_common'].append({'device': str(tensor.device),
+                'shape': list(tensor.shape), 'dtype': str(tensor.dtype)})
+            return tensor
+        core_loading._materialize_copy = observed_materialize
+        self.receipt['packages'] = versions()['packages']
+        return torch
+
+    def model_cpu(self, label, model):
+        devices = sorted({str(p.device) for p in model.parameters()})
+        buffers = sorted({str(p.device) for p in model.buffers()})
+        assert devices == ['cpu'] and set(buffers) <= {'cpu'}, (label, devices, buffers)
+        facts = {'label': label, 'parameter_devices': devices, 'buffer_devices': buffers,
+                 'parameter_count': sum(p.numel() for p in model.parameters()),
+                 'parameter_bytes': sum(p.numel() * p.element_size() for p in model.parameters()),
+                 'hf_device_map': getattr(model, 'hf_device_map', None)}
+        self.receipt['model_devices'].append(facts)
+        return facts
+
+    def finish(self, error=None):
+        if hasattr(self, 'dispatch_mode'):
+            self.dispatch_mode.__exit__(None, None, None)
+        subprocess.run = ORIGINAL_RUN
+        self.receipt['after'] = snapshot(self.name, 'after')
+        self.receipt['source_after'] = source_facts()
+        self.receipt['environment_unchanged'] = self.receipt['before'] == self.receipt['after']
+        self.receipt['source_unchanged'] = self.receipt['source_before'] == self.receipt['source_after']
+        probe = ORIGINAL_RUN([sys.executable, '-s', '-B', '-m', 'pip', '--version'], capture_output=True, text=True)
+        self.receipt['pip_after'] = {'argv': probe.args, 'status': probe.returncode, 'stderr': probe.stderr}
+        self.receipt['elapsed_seconds'] = time.monotonic() - self.receipt.pop('started_monotonic')
+        self.receipt['max_rss_bytes_self'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        self.receipt['max_rss_bytes_child'] = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        self.receipt['success'] = error is None
+        if error is not None:
+            self.receipt['error'] = ''.join(traceback.format_exception(error))
+        dump(ROOT / f'{self.name}-receipt.json', self.receipt)
+        assert self.receipt['environment_unchanged'] and self.receipt['source_unchanged']
+        assert probe.returncode == 1 and 'No module named pip' in probe.stderr
+        assert not self.receipt['network_attempts'] and not self.receipt['accelerator_calls']
+        return self.receipt

@@ -1,0 +1,18 @@
+{
+  "typescript": "5.9.3",
+  "only_declared_comment_changed": true,
+  "emitted_javascript_identical": true,
+  "reviewed_source_sha256": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67",
+  "clarified_source_sha256": "3eca3db4a16a4bb576da007db6b845cb2f976e17789f7f6c186b105b9318807c",
+  "identical_javascript_sha256": "e1264ae2fbb67b37672e22767ae2ea3ef99f2d549c99ad29b6ac0a8575d6f9ed",
+  "policy": "Bun-only Zod-prefix inline behavior retained, not package-exclusive",
+  "command": [
+    "/Users/shersingh/.hermes/node/bin/node",
+    "-e",
+    "const fs=require(\"node:fs\"),assert=require(\"node:assert/strict\"),crypto=require(\"node:crypto\"),ts=require(process.argv[1]);const a=fs.readFileSync(process.argv[2],\"utf8\"),b=fs.readFileSync(process.argv[3],\"utf8\");assert.equal(b,a.replace(\"// Transform only Zod on that test host; leave native product imports alone.\",\"// Transform Zod-prefixed packages only on Bun; native product imports stay untouched.\"));const emit=s=>ts.transpileModule(s,{fileName:\"vitest.config.ts\",compilerOptions:{removeComments:true,sourceMap:false,target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext},reportDiagnostics:true});const x=emit(a),y=emit(b);assert.deepEqual(x.diagnostics,[]);assert.deepEqual(y.diagnostics,[]);assert.equal(x.outputText,y.outputText);const sha=s=>crypto.createHash(\"sha256\").update(s).digest(\"hex\");console.log(JSON.stringify({typescript:ts.version,only_declared_comment_changed:true,emitted_javascript_identical:true,reviewed_source_sha256:sha(a),clarified_source_sha256:sha(b),identical_javascript_sha256:sha(x.outputText),policy:\"Bun-only Zod-prefix inline behavior retained, not package-exclusive\"},null,2));",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-sdk-boundary-06bmne1i/mirror/node_modules/typescript/lib/typescript.js",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-sdk-boundary-06bmne1i/mirror/vitest.config.ts",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-sdk-boundary-06bmne1i/comment-clarification/vitest.config.ts"
+  ],
+  "exit_code": 0
+}

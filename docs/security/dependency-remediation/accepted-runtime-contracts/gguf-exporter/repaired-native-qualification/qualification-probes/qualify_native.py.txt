@@ -1,0 +1,54 @@
+"""Exercise actual native export with the same unmodified stock tokenizer."""
+from qual_common import *
+q = Qualification('native')
+error = None
+try:
+    torch = q.initialize_ml()
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    import transformers.core_model_loading as core_loading
+    real_materialize = core_loading._materialize_copy
+    q.receipt['actual_checkpoint_materializations'] = []
+    def observed_materialize(*args, **kwargs):
+        tensor = real_materialize(*args, **kwargs)
+        assert tensor.device.type == 'cpu'
+        q.receipt['actual_checkpoint_materializations'].append({'device': str(tensor.device),
+                                                               'shape': list(tensor.shape),
+                                                               'dtype': str(tensor.dtype)})
+        return tensor
+    core_loading._materialize_copy = observed_materialize
+    import train
+    import gguf_toolchain
+    assert Path(train.__file__) == FROZEN / 'finetune/train.py'
+    assert Path(gguf_toolchain.__file__) == FROZEN / 'finetune/gguf_toolchain.py'
+    q.receipt['actual_composed_imports'] = {module.__name__: {'path': module.__file__, 'sha256': sha256(module.__file__)}
+        for module in (train, gguf_toolchain)}
+    fixture = ROOT / 'RANDOM-NOT-PRETRAINED-Qwen3.5'
+    model = AutoModelForCausalLM.from_pretrained(fixture, local_files_only=True, trust_remote_code=False,
+                                               dtype=torch.bfloat16, device_map={'': 'cpu'})
+    q.model_cpu('actual_native_model_load', model)
+    tokenizer = AutoTokenizer.from_pretrained(fixture, local_files_only=True, trust_remote_code=False)
+    assert type(tokenizer).__module__.startswith('transformers.')
+    assert len(tokenizer) == model.config.vocab_size
+    q.receipt['tokenizer'] = {'class': type(tokenizer).__module__ + '.' + type(tokenizer).__name__,
+                              'length': len(tokenizer), 'stock_save_pretrained_unmodified': True,
+                              'trust_remote_code': False}
+    output = ROOT / 'actual-native-stock-tokenizer'
+    q.receipt['entrypoint'] = {'function': 'train.export_gguf', 'output_dir': str(output),
+                               'model_name': 'RANDOM-Qwen3.5-native'}
+    train.export_gguf(model, tokenizer, str(output), 'RANDOM-Qwen3.5-native')
+    paths = sorted((output / 'gguf').glob('*.gguf'))
+    assert len(paths) == 3
+    assert {p.name for p in paths} == {'RANDOM-Qwen3.5-native-' + suffix + '.gguf'
+                                      for suffix in ('q4_k_m', 'q6_k', 'q8_0')}
+    assert not list(output.glob('.gguf-convert-*'))
+    assert all(item['returncode'] == 0 for item in q.receipt['commands'])
+    converter = next(item for item in q.receipt['commands'] if '--outfile' in item['argv'])
+    assert '--no-mtp' in converter['argv']
+    q.receipt['artifacts'] = [{'path': str(p), 'bytes': p.stat().st_size, 'sha256': sha256(p)} for p in paths]
+except BaseException as exc:
+    error = exc
+    raise
+finally:
+    receipt = q.finish(error)
+    print(json.dumps({key: receipt.get(key) for key in ('success', 'environment_unchanged', 'source_unchanged',
+                     'artifacts', 'error', 'max_rss_bytes_self', 'max_rss_bytes_child')}, indent=2))

@@ -1,0 +1,150 @@
+"""SYNTHETIC Docker/git CLI ONLY. Never contacts a daemon, registry or network."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import signal
+import sys
+import time
+
+config_path = Path(sys.argv[1])
+cfg = json.loads(config_path.read_text())
+root = config_path.parent
+original = sys.argv[2:]
+with (root / 'calls.jsonl').open('a') as stream:
+    stream.write(json.dumps({'synthetic': True, 'argv': original, 'environment': dict(os.environ)}) + '\n')
+if original[0] == 'git':
+    assert original[1:] == ['-C', cfg['workspace'], 'rev-parse', '--verify', 'HEAD']
+    print(cfg.get('checkout', '1' * 40))
+    raise SystemExit(cfg.get('git_exit', 0))
+assert original[0] == 'docker', original
+args = original[1:]
+assert args[0] == '--config' and args[2:4] == ['--host', 'unix:///var/run/docker.sock'], args
+assert json.loads((Path(args[1]) / 'config.json').read_text()) == {'auths': {}}
+args = args[4:]
+CID = 'a' * 64
+SENTINEL = 'b' * 64
+state_path = root / 'state.json'
+state = json.loads(state_path.read_text()) if state_path.exists() else {'present': False, 'ps_count': 0, 'removed': []}
+
+def save():
+    state_path.write_text(json.dumps(state))
+
+def emit(value):
+    print(json.dumps(value), flush=True)
+
+def finish(code=0):
+    save()
+    raise SystemExit(code)
+
+if args[0] == 'version':
+    assert args[1:] == ['--format', '{{json .}}']
+    if cfg.get('engine_bad_json'):
+        print('not json')
+    else:
+        emit({'Client': {'Version': 'SYNTHETIC-client', 'Os': 'linux', 'Arch': 'amd64'},
+              'Server': {'Version': 'SYNTHETIC-engine', 'Os': cfg.get('daemon_os', 'linux'),
+                         'Arch': cfg.get('daemon_arch', 'amd64')}})
+    finish(cfg.get('engine_exit', 0))
+if args[0] == 'pull':
+    assert args[1:3] == ['--platform', 'linux/amd64'] and len(args) == 4
+    state['image_input'] = args[3]
+    print('SYNTHETIC public pull, no image pulled')
+    finish(cfg.get('pull_exit', 0))
+if args[:2] == ['image', 'inspect']:
+    assert args[2] == '--format' and len(args) == 5
+    selected = args[-1]
+    assert selected == state['image_input']
+    tagged, digest = selected.split('@')
+    expected = tagged.rsplit(':', 1)[0] + '@' + digest
+    digests = cfg.get('digests', [expected])
+    if cfg.get('digest_suffix'):
+        digests = [expected + 'extra']
+    value = {'Id': cfg.get('image_id', 'sha256:' + 'c' * 64), 'Os': cfg.get('image_os', 'linux'),
+             'Architecture': cfg.get('image_arch', 'amd64'), 'RepoDigests': digests}
+    if cfg.get('image_bad_json'):
+        print('[not json]')
+    elif cfg.get('image_duplicate_json'):
+        print(json.dumps(value)[:-1] + ',"Architecture":"amd64"}')
+    else:
+        emit(value)
+    finish(cfg.get('image_exit', 0))
+if args[0] == 'run':
+    assert args[-5:] == [state['image_input'], '-I', '-B', '-S', '/probe.py'], args
+    assert args[args.index('--entrypoint') + 1] == 'python'
+    cidfile = Path(args[args.index('--cidfile') + 1])
+    owner_label = args[args.index('--label') + 1]
+    state.update(present=cfg.get('keep_container', False), label=owner_label)
+    mount = args[args.index('--mount') + 1]
+    assert mount.startswith('type=bind,src=') and mount.endswith(',dst=/probe.py,readonly')
+    source = Path(mount.removeprefix('type=bind,src=').removesuffix(',dst=/probe.py,readonly'))
+    raw = source.read_bytes()
+    mode = cfg.get('cid_mode', 'normal')
+    if mode == 'normal':
+        cidfile.write_text(CID + '\n')
+    elif mode == 'invalid':
+        cidfile.write_text('sentinel-container-name\n')
+    elif mode == 'empty':
+        cidfile.write_text('')
+    elif mode == 'symlink':
+        other = root / 'cid-target'
+        other.write_text(CID)
+        cidfile.symlink_to(other)
+    elif mode == 'hardlink':
+        other = root / 'cid-target'
+        other.write_text(CID)
+        os.link(other, cidfile)
+    elif mode != 'missing':
+        raise AssertionError(mode)
+    save()
+    if cfg.get('probe_timeout') or cfg.get('probe_signal'):
+        state['present'] = True
+        save()
+        if cfg.get('probe_signal'):
+            os.kill(os.getppid(), signal.SIGTERM)
+        time.sleep(60)
+    value = {'status': 'pass', 'native_only': False, 'platform': 'Linux/x86_64', 'python': '3.12.13',
+             'versions': {name: 'SYNTHETIC ' + name for name in ('git', 'cc', 'c++', 'make', 'uv')},
+             'outputs': ['qmd-c-ok', 'qmd-cxx-ok'], 'probe_sha256': hashlib.sha256(raw).hexdigest(),
+             'fixture_notice': 'SYNTHETIC receipt only; probe/C/C++/image NOT EXECUTED'}
+    value.update(cfg.get('probe_update', {}))
+    if cfg.get('probe_bad_json'):
+        print('SYNTHETIC invalid probe receipt')
+    else:
+        emit(value)
+    if cfg.get('probe_exit'):
+        print(cfg.get('probe_stderr', 'SYNTHETIC probe failure'), file=sys.stderr)
+    finish(cfg.get('probe_exit', 0))
+if args[:2] == ['container', 'ls']:
+    assert args[2:] == ['--all', '--no-trunc', '--format', '{{json .ID}}']
+    state['ps_count'] += 1
+    if cfg.get('cleanup_daemon_failure') or (cfg.get('final_daemon_failure') and state['ps_count'] >= 2):
+        print('SYNTHETIC unreachable daemon', file=sys.stderr)
+        finish(29)
+    if cfg.get('list_bad_json'):
+        print('SYNTHETIC NOT JSON')
+    elif cfg.get('list_short_id'):
+        emit(CID[:12])
+    else:
+        emit(SENTINEL)
+        if state['present']:
+            emit(CID)
+    finish()
+if args[:2] == ['container', 'inspect']:
+    assert args[-1] == CID
+    if cfg.get('inspect_race_absent'):
+        state['present'] = False
+        print('SYNTHETIC already auto-removed', file=sys.stderr)
+        finish(1)
+    key, value = state['label'].split('=', 1)
+    emit({'Id': SENTINEL if cfg.get('identity_wrong_id') else CID,
+          'Labels': {key: 'wrong-owner' if cfg.get('identity_wrong_label') else value}})
+    finish()
+if args[:2] == ['container', 'rm']:
+    assert args[2:] == ['--force', CID], 'never remove sentinel or a name'
+    state['removed'].append(CID)
+    if cfg.get('remove_effect', True):
+        state['present'] = False
+    print('SYNTHETIC removal; no actual container')
+    finish(cfg.get('remove_exit', 0))
+raise AssertionError(args)

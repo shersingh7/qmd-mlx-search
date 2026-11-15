@@ -1,0 +1,5 @@
+{
+  "probe_exit": 37,
+  "cleanup_daemon_failure": true,
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/evidence/synthetic-parent/probe-nonzero-preserved-cleanup-failure/public work space"
+}

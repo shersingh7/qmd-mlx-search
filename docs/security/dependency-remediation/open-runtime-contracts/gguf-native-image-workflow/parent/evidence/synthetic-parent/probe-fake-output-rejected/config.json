@@ -1,0 +1,9 @@
+{
+  "probe_update": {
+    "outputs": [
+      "not-C",
+      "not-C++"
+    ]
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-workflow-q8wv8811/evidence/synthetic-parent/probe-fake-output-rejected/public work space"
+}

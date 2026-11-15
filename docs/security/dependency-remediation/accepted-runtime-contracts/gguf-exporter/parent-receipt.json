@@ -1,0 +1,221 @@
+{
+  "scope": "Parent acceptance replay:119independentcasesperreader; no native converter/model execution",
+  "records": {
+    "independent-v2-installed": {
+      "passed": 119,
+      "exit_code": 0,
+      "exit_evidence": "retained controller command.json",
+      "source_receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v2-installed/source-receipt.json",
+      "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad",
+      "resources": [
+        {
+          "all_closed": true,
+          "cut": 5,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 7,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 8,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 15,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 16,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 23,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "metadata",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "tensor-info",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "last-tensor",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        }
+      ]
+    },
+    "independent-v3-pinned": {
+      "passed": 119,
+      "exit_code": 0,
+      "exit_evidence": "direct foreground terminal invocation returned exit0 after119passed",
+      "source_receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/independent-v3-pinned/source-receipt.json",
+      "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+      "resources": [
+        {
+          "all_closed": true,
+          "cut": 5,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 7,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 8,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 15,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 16,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": 23,
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "metadata",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "tensor-info",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        },
+        {
+          "all_closed": true,
+          "cut": "last-tensor",
+          "fd_after": 12,
+          "fd_before": 12,
+          "gc_disabled": true,
+          "mapping_count": 17,
+          "repeats": 17,
+          "retained": 17
+        }
+      ]
+    }
+  },
+  "input_sha256": {
+    "mirror/finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "mirror/finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "mirror/finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+    "mirror/finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+    "mirror/finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+    "mirror/finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "mirror/finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+    "mirror/finetune/tests/conftest.py": "039fe2c7452d861a11fc4b5833e4cb456300fe1e768ec5c8439e11ad072df097",
+    "run_checks.py": "ab5a428604444a2cfab5b3082eec7e8a96349ae2f85bf5272fc9c45db0194eea",
+    "test_independent_contracts.py": "1d13ccb0318465518ea393d954e673dfc1af7247f236fbcf1d5dd281bc59f45c"
+  },
+  "adapted_harness_sha256": "06f96d9708da502a62dead057d9e08ef0019010913c793470de775b3cd6ff8d9",
+  "adaptation": "Only explicit pytest config/root confinement; test bytes unchanged",
+  "retained_negative_setup": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-reaccepted-dfq3wjhf/setup-failure.json",
+  "retained_outer_timeout": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/timeout-disposition.json",
+  "protected_hashes_unchanged": true,
+  "live_runtime_code_untouched": true
+}

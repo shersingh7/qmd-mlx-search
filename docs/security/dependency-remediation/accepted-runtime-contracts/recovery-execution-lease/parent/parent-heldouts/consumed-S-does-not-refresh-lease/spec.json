@@ -1,0 +1,6 @@
+{
+  "name": "consumed-S-does-not-refresh-lease",
+  "s_read_delay": 0.3,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/parent-heldouts/consumed-S-does-not-refresh-lease",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_recovery_process.py"
+}

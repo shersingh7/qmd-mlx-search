@@ -1,0 +1,78 @@
+from __future__ import annotations
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parent
+PYTHON = Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python')
+REPO = ROOT / 'repo'
+SOURCE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1')
+
+def digest(content):
+    return hashlib.sha256(content).hexdigest()
+
+def environment(tag, *, path=None):
+    r = ROOT / 'environments' / tag
+    for n in ('home', 'hermes', 'knowledge', 'cache', 'hf', 'tmp', 'xdg-config', 'xdg-data', 'uv', 'torch', 'pycache'):
+        (r / n).mkdir(parents=True, exist_ok=True)
+    return {
+        'PATH': path or '/opt/homebrew/opt/llvm/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+        'HOME': str(r / 'home'), 'HERMES_HOME': str(r / 'hermes'), 'HERMES_DIR': str(r / 'hermes'),
+        'HERMES_KNOWLEDGE_DIR': str(r / 'knowledge'), 'XDG_CACHE_HOME': str(r / 'cache'),
+        'XDG_CONFIG_HOME': str(r / 'xdg-config'), 'XDG_DATA_HOME': str(r / 'xdg-data'),
+        'HF_HOME': str(r / 'hf'), 'HF_HUB_CACHE': str(r / 'hf' / 'hub'),
+        'HUGGINGFACE_HUB_CACHE': str(r / 'hf' / 'hub'), 'HF_DATASETS_CACHE': str(r / 'hf' / 'datasets'),
+        'TRANSFORMERS_CACHE': str(r / 'hf' / 'transformers'), 'TORCH_HOME': str(r / 'torch'),
+        'UV_CACHE_DIR': str(r / 'uv'), 'PYTHONPYCACHEPREFIX': str(r / 'pycache'), 'TMPDIR': str(r / 'tmp'),
+        'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_DATASETS_OFFLINE': '1',
+        'UV_OFFLINE': '1', 'PIP_NO_INDEX': '1', 'CI': '1', 'QMD_LLAMA_GPU': 'false',
+        'PYTHONDONTWRITEBYTECODE': '1', 'PYTEST_DISABLE_PLUGIN_AUTOLOAD': '1',
+        'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_TERMINAL_PROMPT': '0',
+    }
+
+def run_case(name, command, *, cwd=None, env=None, timeout=180):
+    start = time.monotonic()
+    p = subprocess.run([str(x) for x in command], cwd=cwd or ROOT, env=env or environment(name),
+                       capture_output=True, text=True, timeout=timeout)
+    receipt = {'name': name, 'command': [str(x) for x in command], 'cwd': str(cwd or ROOT),
+               'returncode': p.returncode, 'seconds': time.monotonic() - start,
+               'stdout': p.stdout, 'stderr': p.stderr}
+    (ROOT / 'evidence' / (name + '.json')).write_text(json.dumps(receipt, indent=2, sort_keys=True))
+    return receipt
+
+def junit(path):
+    # XML is generated locally by the hash-verified pytest suite, not untrusted input.
+    tree = ET.parse(path)
+    cases = list(tree.iter('testcase'))
+    return {'tests': len(cases), 'failures': sum(len(x.findall('failure')) for x in cases),
+            'errors': sum(len(x.findall('error')) for x in cases),
+            'skipped': sum(len(x.findall('skipped')) for x in cases),
+            'case_names': [x.attrib.get('name') for x in cases],
+            'failure_cases': [{'name': x.attrib.get('name'), 'message': x.find('failure').attrib.get('message'),
+                               'text': x.find('failure').text} for x in cases if x.find('failure') is not None]}
+
+def suite(name, repo=REPO, *, selected=None):
+    (ROOT / 'pytest-tmp').mkdir(exist_ok=True)
+    xml = ROOT / 'evidence' / (name + '.xml')
+    command = [PYTHON, '-I', '-B', '-m', 'pytest', '-c', '/dev/null', '-p', 'no:cacheprovider',
+               '--rootdir=' + str(repo), '--confcutdir=' + str(repo / 'finetune/tests'),
+               '--basetemp=' + str(ROOT / 'pytest-tmp' / name), '--junitxml=' + str(xml), '-q', '--tb=short']
+    command += selected or [repo / 'finetune/tests/test_locked_job_submission.py']
+    receipt = run_case(name, command, cwd=repo)
+    receipt['junit'] = junit(xml)
+    (ROOT / 'evidence' / (name + '.json')).write_text(json.dumps(receipt, indent=2, sort_keys=True))
+    return receipt
+
+if __name__ == '__main__':
+    receipt = suite('frozen-suite')
+    print(json.dumps({k: v for k, v in receipt.items() if k not in ('stdout', 'stderr', 'junit')}, indent=2))
+    print(json.dumps({k: v for k, v in receipt['junit'].items() if k != 'case_names'}, indent=2))
+    print(receipt['stdout'])
+    print(receipt['stderr'])
+    raise SystemExit(receipt['returncode'])

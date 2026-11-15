@@ -1,0 +1,1245 @@
+{
+  "workflow_sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+  "generated_bash_sha256": "138ccd871697dcd4a103aa6bb71d35e5e4f69fe45d4400b05864928c3178bfba",
+  "controller_sha256": "b0cc257ab4ede6c2e6ea9e887e4a4e5747edea9ba43d5ed52a86f19590606df4",
+  "physical_test_host": {
+    "os": "Darwin",
+    "architecture": "arm64"
+  },
+  "scope": "Owned offline control-flow tests. ALL Docker/host/native receipts are SYNTHETIC.\n\nNo real Docker binary/daemon, registry, probe, launcher, model, SDK or compiler is\nexecuted. Generated Bash runs with one test-only Python-executable substitution;\nits embedded production controller is unchanged. The adapter substitutes two\nCLI destinations (Docker/git), host answers and one short timeout in that case.\n",
+  "cases": 74,
+  "passed": 74,
+  "failed": 0,
+  "skipped": 0,
+  "native_image_execution_performed": false,
+  "results": [
+    {
+      "case": "success-auto-removed",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-auto-removed/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-auto-removed/stderr.log"
+    },
+    {
+      "case": "success-owned-removal",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "absence-confirmed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-owned-removal/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-owned-removal/stderr.log"
+    },
+    {
+      "case": "success-inspect-race-absent",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "absence-confirmed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 8,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-inspect-race-absent/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-inspect-race-absent/stderr.log"
+    },
+    {
+      "case": "success-rm-nonzero-but-readback-absent",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "absence-confirmed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-rm-nonzero-but-readback-absent/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/success-rm-nonzero-but-readback-absent/stderr.log"
+    },
+    {
+      "case": "push-distinct-shas",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/push-distinct-shas/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/push-distinct-shas/stderr.log"
+    },
+    {
+      "case": "dispatch-no-event-head",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/dispatch-no-event-head/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/dispatch-no-event-head/stderr.log"
+    },
+    {
+      "case": "quoted-event-data",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/quoted-event-data/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/quoted-event-data/stderr.log"
+    },
+    {
+      "case": "bind-updated-literal-without-second-pin",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/bind-updated-literal-without-second-pin/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/bind-updated-literal-without-second-pin/stderr.log"
+    },
+    {
+      "case": "literal-missing",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-missing/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-missing/stderr.log"
+    },
+    {
+      "case": "literal-duplicate",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-duplicate/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-duplicate/stderr.log"
+    },
+    {
+      "case": "literal-dynamic-never-execute",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-dynamic-never-execute/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-dynamic-never-execute/stderr.log"
+    },
+    {
+      "case": "literal-import-overwrite",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-import-overwrite/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-import-overwrite/stderr.log"
+    },
+    {
+      "case": "literal-conditional-overwrite",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-conditional-overwrite/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-conditional-overwrite/stderr.log"
+    },
+    {
+      "case": "literal-nonstring",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-nonstring/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/literal-nonstring/stderr.log"
+    },
+    {
+      "case": "image-wrong-registry",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-wrong-registry/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-wrong-registry/stderr.log"
+    },
+    {
+      "case": "image-no-digest",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-no-digest/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-no-digest/stderr.log"
+    },
+    {
+      "case": "image-slim",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-slim/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-slim/stderr.log"
+    },
+    {
+      "case": "image-leading-space",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-leading-space/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-leading-space/stderr.log"
+    },
+    {
+      "case": "image-trailing-newline",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-trailing-newline/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-trailing-newline/stderr.log"
+    },
+    {
+      "case": "image-uppercase-digest",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-uppercase-digest/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-uppercase-digest/stderr.log"
+    },
+    {
+      "case": "image-invalid-digest-length",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-invalid-digest-length/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-invalid-digest-length/stderr.log"
+    },
+    {
+      "case": "source-probe-symlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-symlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-symlink/stderr.log"
+    },
+    {
+      "case": "source-probe-hardlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-hardlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-hardlink/stderr.log"
+    },
+    {
+      "case": "source-probe-fifo",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-fifo/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-fifo/stderr.log"
+    },
+    {
+      "case": "source-probe-directory",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-directory/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-probe-directory/stderr.log"
+    },
+    {
+      "case": "source-ancestor-symlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-ancestor-symlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-ancestor-symlink/stderr.log"
+    },
+    {
+      "case": "source-launcher-symlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-launcher-symlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/source-launcher-symlink/stderr.log"
+    },
+    {
+      "case": "invalid-checkout-sha",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-checkout-sha/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-checkout-sha/stderr.log"
+    },
+    {
+      "case": "invalid-context-sha",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-context-sha/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-context-sha/stderr.log"
+    },
+    {
+      "case": "invalid-event-head",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-event-head/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/invalid-event-head/stderr.log"
+    },
+    {
+      "case": "host-arm64",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/host-arm64/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/host-arm64/stderr.log"
+    },
+    {
+      "case": "host-darwin",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/host-darwin/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/host-darwin/stderr.log"
+    },
+    {
+      "case": "runner-arm64",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 1,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/runner-arm64/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/runner-arm64/stderr.log"
+    },
+    {
+      "case": "daemon-arm64",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 2,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-arm64/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-arm64/stderr.log"
+    },
+    {
+      "case": "daemon-windows",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 2,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-windows/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-windows/stderr.log"
+    },
+    {
+      "case": "daemon-version-failure",
+      "passed": true,
+      "expected_exit": 17,
+      "actual_exit": 17,
+      "primary_exit": 17,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 2,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-version-failure/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-version-failure/stderr.log"
+    },
+    {
+      "case": "daemon-malformed-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 2,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-malformed-json/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/daemon-malformed-json/stderr.log"
+    },
+    {
+      "case": "pull-failure",
+      "passed": true,
+      "expected_exit": 23,
+      "actual_exit": 23,
+      "primary_exit": 23,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 3,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/pull-failure/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/pull-failure/stderr.log"
+    },
+    {
+      "case": "image-arm64",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-arm64/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-arm64/stderr.log"
+    },
+    {
+      "case": "image-windows",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-windows/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-windows/stderr.log"
+    },
+    {
+      "case": "image-inspect-failure",
+      "passed": true,
+      "expected_exit": 25,
+      "actual_exit": 25,
+      "primary_exit": 25,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-inspect-failure/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-inspect-failure/stderr.log"
+    },
+    {
+      "case": "image-malformed-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-malformed-json/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-malformed-json/stderr.log"
+    },
+    {
+      "case": "image-duplicate-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-duplicate-json/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-duplicate-json/stderr.log"
+    },
+    {
+      "case": "image-invalid-id",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-invalid-id/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/image-invalid-id/stderr.log"
+    },
+    {
+      "case": "digest-loose-substring-control",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digest-loose-substring-control/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digest-loose-substring-control/stderr.log"
+    },
+    {
+      "case": "digest-wrong-repository",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digest-wrong-repository/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digest-wrong-repository/stderr.log"
+    },
+    {
+      "case": "digests-not-list",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": null,
+        "status": "container-command-not-attempted"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 4,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digests-not-list/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/digests-not-list/stderr.log"
+    },
+    {
+      "case": "probe-nonzero",
+      "passed": true,
+      "expected_exit": 37,
+      "actual_exit": 37,
+      "primary_exit": 37,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonzero/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonzero/stderr.log"
+    },
+    {
+      "case": "probe-version-refusal-propagates",
+      "passed": true,
+      "expected_exit": 2,
+      "actual_exit": 2,
+      "primary_exit": 2,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-version-refusal-propagates/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-version-refusal-propagates/stderr.log"
+    },
+    {
+      "case": "container-start-failure-unknown-cid",
+      "passed": true,
+      "expected_exit": 125,
+      "actual_exit": 125,
+      "primary_exit": 125,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "FileNotFoundError: [Errno 2] No such file or directory: 'container.cid'",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/container-start-failure-unknown-cid/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/container-start-failure-unknown-cid/stderr.log"
+    },
+    {
+      "case": "probe-nonzero-preserved-cleanup-failure",
+      "passed": true,
+      "expected_exit": 37,
+      "actual_exit": 37,
+      "primary_exit": 37,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: cleanup-before failed",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonzero-preserved-cleanup-failure/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonzero-preserved-cleanup-failure/stderr.log"
+    },
+    {
+      "case": "probe-timeout-owned-cleanup",
+      "passed": true,
+      "expected_exit": 124,
+      "actual_exit": 124,
+      "primary_exit": 124,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "absence-confirmed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-timeout-owned-cleanup/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-timeout-owned-cleanup/stderr.log"
+    },
+    {
+      "case": "probe-signal-owned-cleanup",
+      "passed": true,
+      "expected_exit": 143,
+      "actual_exit": 143,
+      "primary_exit": 143,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "absence-confirmed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-signal-owned-cleanup/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-signal-owned-cleanup/stderr.log"
+    },
+    {
+      "case": "probe-invalid-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-invalid-json/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-invalid-json/stderr.log"
+    },
+    {
+      "case": "probe-native-only-bypass-rejected",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-native-only-bypass-rejected/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-native-only-bypass-rejected/stderr.log"
+    },
+    {
+      "case": "probe-wrong-python",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-python/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-python/stderr.log"
+    },
+    {
+      "case": "probe-wrong-platform",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-platform/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-platform/stderr.log"
+    },
+    {
+      "case": "probe-fake-output-rejected",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-fake-output-rejected/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-fake-output-rejected/stderr.log"
+    },
+    {
+      "case": "probe-wrong-source-hash",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-source-hash/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-wrong-source-hash/stderr.log"
+    },
+    {
+      "case": "probe-missing-version",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-missing-version/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-missing-version/stderr.log"
+    },
+    {
+      "case": "probe-nonpass-receipt",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 1,
+      "cleanup": {
+        "absence_verified": true,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "already-absent"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonpass-receipt/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/probe-nonpass-receipt/stderr.log"
+    },
+    {
+      "case": "cid-malformed",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "Refused: missing/invalid call-owned CID; absence unproven",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-malformed/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-malformed/stderr.log"
+    },
+    {
+      "case": "cid-empty",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "Refused: missing/invalid call-owned CID; absence unproven",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-empty/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-empty/stderr.log"
+    },
+    {
+      "case": "cid-missing-unknown-not-absence",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "FileNotFoundError: [Errno 2] No such file or directory: 'container.cid'",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-missing-unknown-not-absence/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-missing-unknown-not-absence/stderr.log"
+    },
+    {
+      "case": "cid-symlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "OSError: [Errno 62] Too many levels of symbolic links: 'container.cid'",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-symlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-symlink/stderr.log"
+    },
+    {
+      "case": "cid-hardlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "error": "Refused: unsafe/nonregular/oversize public file",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 5,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-hardlink/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cid-hardlink/stderr.log"
+    },
+    {
+      "case": "cleanup-daemon-unreachable",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: cleanup-before failed",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/stderr.log"
+    },
+    {
+      "case": "cleanup-identity-wrong-label",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: CID ownership readback mismatch; will not remove",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 7,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-identity-wrong-label/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-identity-wrong-label/stderr.log"
+    },
+    {
+      "case": "cleanup-identity-wrong-id",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: CID ownership readback mismatch; will not remove",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 7,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-identity-wrong-id/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-identity-wrong-id/stderr.log"
+    },
+    {
+      "case": "cleanup-rm-success-not-proof",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: owned container still present",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-rm-success-not-proof/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-rm-success-not-proof/stderr.log"
+    },
+    {
+      "case": "cleanup-rm-failure-still-present",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: owned container still present",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-rm-failure-still-present/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-rm-failure-still-present/stderr.log"
+    },
+    {
+      "case": "cleanup-final-daemon-unreachable",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: cleanup-after failed",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 9,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-final-daemon-unreachable/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-final-daemon-unreachable/stderr.log"
+    },
+    {
+      "case": "cleanup-list-malformed-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-list-malformed-json/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-list-malformed-json/stderr.log"
+    },
+    {
+      "case": "cleanup-list-truncated-id",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "primary_exit": 0,
+      "cleanup": {
+        "absence_verified": false,
+        "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "error": "Refused: malformed container-list readback",
+        "status": "unproven-or-failed"
+      },
+      "synthetic_only": true,
+      "native_image_execution_performed": false,
+      "fixture_call_count": 6,
+      "raw_stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-list-truncated-id/stdout.log",
+      "raw_stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-list-truncated-id/stderr.log"
+    }
+  ]
+}

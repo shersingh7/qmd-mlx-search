@@ -22,6 +22,7 @@ from scripts.qmd_mlx.protocol import (
     WorkerUnavailableError,
 )
 from scripts.qmd_mlx.server import ThreadedMLXServer, start_server
+from scripts.qmd_mlx.runtime import EmbeddingResult
 
 
 def test_exception_status_code_mappings():
@@ -133,9 +134,10 @@ def test_ephemeral_server_fault_responses():
         arr = np.ones((len(texts), requested_dims or 384), dtype=np.float32)
         # Normalize
         arr = arr / np.linalg.norm(arr, axis=-1, keepdims=True)
-        return arr
+        descriptor = dict(mock_runtime.get_descriptor.return_value, outputDimensions=arr.shape[1])
+        return EmbeddingResult(arr, json.dumps(descriptor))
 
-    mock_runtime.submit_embed.side_effect = mock_submit_embed
+    mock_runtime.submit_embed_result.side_effect = mock_submit_embed
     server.runtime = mock_runtime
     server.state = ServerState.READY
 

@@ -1,0 +1,41 @@
+{
+  "name": "ready-proof-real-EBADF",
+  "guardFired": false,
+  "elapsedMs": 147.9295829999998,
+  "exitCode": 0,
+  "supervisorPid": 38137,
+  "supervisorAbsent": true,
+  "workers": [
+    38138
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38138
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38137,
+      "sessionId": 38137
+    }
+  ],
+  "gates": [],
+  "groupSignals": [],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 114.70100000000016
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 114.71066600000057
+    }
+  ],
+  "stderr": "",
+  "eventCount": 9
+}

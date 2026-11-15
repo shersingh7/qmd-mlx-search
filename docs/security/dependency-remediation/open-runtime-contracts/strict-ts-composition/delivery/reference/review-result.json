@@ -1,0 +1,1269 @@
+{
+  "spec": "PASS for exact frozen four-file delta composed with the reviewed 19-path source proposal; not live integration or release acceptance",
+  "quality": "APPROVE_WITH_MINOR_FINDING",
+  "resolved_prior_finding": "Legacy fallback symlink finding resolved on current installed Node/Bun branches, with no older-Node binary qualification",
+  "findings": [
+    {
+      "id": "Q1",
+      "severity": "minor/P3",
+      "file": "vitest.config.ts",
+      "line": 13,
+      "title": "Vitest string matcher is prefix-based, not package-exclusive",
+      "detail": "Installed Vitest 4.1.12 matchPattern uses id.includes(join(moduleDirectory, pattern)). inline:[\"zod\"] also transforms directly imported zod-to-json-schema 3.25.2 under Bun. Fresh real converter identity and conversion/non-coercion controls pass, SDK remains external, and no validation regression was found. This is a test-harness breadth/maintenance caveat, not a native production defect. Use an explicitly package-boundary RegExp if literal Zod-only scope is required. No candidate change made.",
+      "evidence": [
+        "logs/bun-config-default-merge.stdout.log",
+        "evidence/bun-zod-prefix-scope-hosts.jsonl",
+        "evidence/bun-zod-prefix-scope-results.json"
+      ]
+    }
+  ],
+  "source_binding": "source-binding.json",
+  "four_file_sha256": {
+    "src/bench-rerank.ts": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+    "vitest.config.ts": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67",
+    "test/bench-rerank-entrypoint.test.ts": "aa4c8ee3cfcd48afc87488afb4abc31e4375a8a38c5161784c8628ea789042b7",
+    "test/zod-import.test.ts": "f890cb6d81bda481c0c823436a922dca50bf5fda6a6d4c91acc6bd5bbba835d1"
+  },
+  "integration_source_count": 19,
+  "integration_sha256": {
+    "scripts/phase5_e2e_runner.ts": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a",
+    "src/bench-rerank.ts": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+    "src/llm.ts": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d",
+    "src/llm/mlx-identity.ts": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa",
+    "src/mcp/server.ts": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+    "src/test-preload.ts": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6",
+    "test/bench-rerank-entrypoint.test.ts": "aa4c8ee3cfcd48afc87488afb4abc31e4375a8a38c5161784c8628ea789042b7",
+    "test/bench-rerank-lifecycle.test.ts": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520",
+    "test/cli.test.ts": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e",
+    "test/eval-bm25.test.ts": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697",
+    "test/eval.test.ts": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d",
+    "test/fixtures/public_eval_dataset.ts": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29",
+    "test/llm.test.ts": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5",
+    "test/multi-collection-filter.test.ts": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b",
+    "test/phase5-recovery.test.ts": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c",
+    "test/rrf-trace.test.ts": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c",
+    "test/store.helpers.unit.test.ts": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253",
+    "test/zod-import.test.ts": "f890cb6d81bda481c0c823436a922dca50bf5fda6a6d4c91acc6bd5bbba835d1",
+    "vitest.config.ts": "074023cdd45f955f17cc28569b98073b82ee90642984489a86309c1132aefb67"
+  },
+  "source_inventory_count": 245,
+  "results": {
+    "node": {
+      "baseline-guard": {
+        "file_count": 1,
+        "counts": {
+          "passed": 40,
+          "failed": 4
+        },
+        "success": false,
+        "failed_files": 1,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/bench-rerank-entrypoint.test.ts",
+            "status": "failed",
+            "counts": {
+              "passed": 40,
+              "failed": 4
+            },
+            "message": ""
+          }
+        ]
+      },
+      "baseline-zod-phase5": {
+        "file_count": 2,
+        "counts": {
+          "passed": 19
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/phase5-recovery.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 18
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/zod-import.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "composed-focused": {
+        "file_count": 13,
+        "counts": {
+          "passed": 246,
+          "skipped": 40
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-cleanup-review.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 21
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-deadline-review.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 22
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-lifecycle.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 27
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/bench-rerank-entrypoint.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 44
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/bench-rerank-lifecycle.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 34
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/eval-bm25.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 4
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/eval.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 4,
+              "skipped": 9
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/llm.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 20,
+              "skipped": 31
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/multi-collection-filter.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 14
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/phase5-recovery.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 18
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/rrf-trace.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 2
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/store.helpers.unit.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 35
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/zod-import.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "sdk-inlined-zod": {
+        "file_count": 1,
+        "counts": {
+          "passed": 3
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/test/sdk-inlined-zod.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 3
+            },
+            "message": ""
+          }
+        ]
+      },
+      "zod-prefix-scope": {
+        "file_count": 1,
+        "counts": {
+          "passed": 1
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/test/zod-prefix-scope.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "guard_matrix": {
+        "case_count": 44,
+        "groups": {
+          "fallback/default": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          },
+          "fallback/preserve-symlinks-main": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          },
+          "native/default": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          },
+          "native/preserve-symlinks-main": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          }
+        },
+        "source_sha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+        "actual_host": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "complete_emitted_body_identity": true
+      },
+      "source_proof": {
+        "execPath": "/Users/shersingh/.hermes/node/bin/node",
+        "versions": {
+          "node": "22.22.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.6",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.3.1",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.64.0",
+          "openssl": "3.5.6",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026a",
+          "undici": "6.24.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.56",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "typescript": "5.9.3",
+        "beforeSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+        "afterSha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+        "allFunctionsUnchanged": true,
+        "functionNames": [
+          "generateDocs",
+          "formatBytes",
+          "getMemUsage",
+          "median",
+          "disposeOwned",
+          "benchmarkConfig",
+          "main"
+        ],
+        "nonImportNonGuardStatementsUnchanged": true,
+        "catchBodyUnchanged": true,
+        "nativeBooleanGuardControls": {
+          "checks": 2,
+          "argvReads": 0,
+          "fsCalls": 0,
+          "urlCalls": 0,
+          "exactEmittedCondition": true
+        },
+        "compilerRoots": {
+          "base": 147,
+          "composed": 149,
+          "removed": [],
+          "added": [
+            "test/bench-rerank-entrypoint.test.ts",
+            "test/zod-import.test.ts"
+          ],
+          "files": [
+            "dist/ast.d.ts",
+            "dist/ast.js",
+            "dist/bench/bench.d.ts",
+            "dist/bench/bench.js",
+            "dist/bench/score.d.ts",
+            "dist/bench/score.js",
+            "dist/bench/types.d.ts",
+            "dist/bench/types.js",
+            "dist/cli/formatter.d.ts",
+            "dist/cli/formatter.js",
+            "dist/cli/qmd.d.ts",
+            "dist/cli/qmd.js",
+            "dist/collections.d.ts",
+            "dist/collections.js",
+            "dist/db.d.ts",
+            "dist/db.js",
+            "dist/embedded-skills.d.ts",
+            "dist/embedded-skills.js",
+            "dist/embedding/config.d.ts",
+            "dist/embedding/config.js",
+            "dist/embedding/contract.d.ts",
+            "dist/embedding/contract.js",
+            "dist/embedding/protocol.d.ts",
+            "dist/embedding/protocol.js",
+            "dist/expansion/protocol.d.ts",
+            "dist/expansion/protocol.js",
+            "dist/index.d.ts",
+            "dist/index.js",
+            "dist/indexing/checkpoint.d.ts",
+            "dist/indexing/checkpoint.js",
+            "dist/indexing/job.d.ts",
+            "dist/indexing/job.js",
+            "dist/indexing/pending.d.ts",
+            "dist/indexing/pending.js",
+            "dist/llm.d.ts",
+            "dist/llm.js",
+            "dist/llm/lifecycle.d.ts",
+            "dist/llm/lifecycle.js",
+            "dist/llm/mlx-identity.d.ts",
+            "dist/llm/mlx-identity.js",
+            "dist/maintenance.d.ts",
+            "dist/maintenance.js",
+            "dist/mcp/server.d.ts",
+            "dist/mcp/server.js",
+            "dist/mlx.d.ts",
+            "dist/mlx.js",
+            "dist/store.d.ts",
+            "dist/store.js",
+            "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+            "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+            "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs",
+            "migrate-schema.ts",
+            "scripts/build.mjs",
+            "scripts/expansion_bridge.ts",
+            "scripts/gguf_embed_server.mjs",
+            "scripts/pack-result.mjs",
+            "scripts/phase5_e2e_runner.ts",
+            "scripts/phase5_recovery_process_loader.mjs",
+            "scripts/phase5_recovery_worker.ts",
+            "scripts/prepare.mjs",
+            "scripts/smoke-installed-http.mjs",
+            "scripts/smoke-installed-stdio.mjs",
+            "scripts/smoke-package.mjs",
+            "scripts/timing-embed-4b-gguf.ts",
+            "scripts/timing-gguf-baseline.ts",
+            "scripts/verify_local_stack.ts",
+            "src/ast.ts",
+            "src/bench-rerank.ts",
+            "src/bench/bench.ts",
+            "src/bench/score.ts",
+            "src/bench/types.ts",
+            "src/cli/formatter.ts",
+            "src/cli/qmd.ts",
+            "src/collections.ts",
+            "src/db.ts",
+            "src/embedded-skills.ts",
+            "src/embedding/config.ts",
+            "src/embedding/contract.ts",
+            "src/embedding/protocol.ts",
+            "src/expansion/protocol.ts",
+            "src/index.ts",
+            "src/indexing/checkpoint.ts",
+            "src/indexing/job.ts",
+            "src/indexing/pending.ts",
+            "src/llm.ts",
+            "src/llm/lifecycle.ts",
+            "src/llm/mlx-identity.ts",
+            "src/maintenance.ts",
+            "src/mcp/server.ts",
+            "src/mlx.ts",
+            "src/store.ts",
+            "src/test-preload.ts",
+            "test/ast-chunking.test.ts",
+            "test/ast.test.ts",
+            "test/audit-cli-ipc.test.ts",
+            "test/audit-daemon-entrypoints.test.ts",
+            "test/audit-llm-cleanup-review.test.ts",
+            "test/audit-llm-deadline-review.test.ts",
+            "test/audit-llm-lifecycle.test.ts",
+            "test/audit-mcp-admission.test.ts",
+            "test/audit-mcp-http.test.ts",
+            "test/audit-mcp-request-ownership.test.ts",
+            "test/audit-mcp-runtime-review.test.ts",
+            "test/audit-native-bun-recovery.test.ts",
+            "test/audit-query-identity.test.ts",
+            "test/audit-query-snapshot.test.ts",
+            "test/audit-recovery-startup.test.ts",
+            "test/audit-recovery-tree.test.ts",
+            "test/audit-recovery.test.ts",
+            "test/audit-sdk.test.ts",
+            "test/audit-store-quality-regressions.test.ts",
+            "test/audit-store-review.test.ts",
+            "test/audit-store.test.ts",
+            "test/audit-transport-review.test.ts",
+            "test/audit-transport.test.ts",
+            "test/bench-rerank-entrypoint.test.ts",
+            "test/bench-rerank-lifecycle.test.ts",
+            "test/bench-score.test.ts",
+            "test/cli.test.ts",
+            "test/collections-config.test.ts",
+            "test/dependency-locks.test.ts",
+            "test/embed-outcome.test.ts",
+            "test/embedding-contract.test.ts",
+            "test/embedding-index.test.ts",
+            "test/eval-bm25.test.ts",
+            "test/eval-deep-research.ts",
+            "test/eval-harness.ts",
+            "test/eval.test.ts",
+            "test/expansion.test.ts",
+            "test/fixtures/bun_recovery_ownership.ts",
+            "test/fixtures/public_eval_dataset.ts",
+            "test/formatter.test.ts",
+            "test/helpers/source-cli.ts",
+            "test/indexing-resume.test.ts",
+            "test/intent.test.ts",
+            "test/llm.test.ts",
+            "test/mcp.test.ts",
+            "test/mlx.test.ts",
+            "test/multi-collection-filter.test.ts",
+            "test/phase5-recovery.test.ts",
+            "test/rrf-trace.test.ts",
+            "test/sdk.test.ts",
+            "test/semantic-hyphens.test.ts",
+            "test/store-paths.test.ts",
+            "test/store.helpers.unit.test.ts",
+            "test/store.test.ts",
+            "test/structured-search.test.ts",
+            "test/zod-import.test.ts",
+            "vitest.config.ts"
+          ]
+        },
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noEmit": true
+      },
+      "evaluator": {
+        "native_named_z": "object",
+        "default_evaluator_named_z": "object",
+        "no_interop_identity": true,
+        "default_namespace_marker_membership": false,
+        "default_namespace_marker_own": false,
+        "actual_host": "/Users/shersingh/.hermes/node/bin/node",
+        "resolved_zod": "file:///Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod/index.js",
+        "exit_code": 0
+      },
+      "sdk_interaction": {
+        "test_checks": 3,
+        "external_sdk_identity_verified": true,
+        "same_inlined_and_external_zod_instance": true,
+        "schema_forms": [
+          "object",
+          "raw-shape"
+        ],
+        "tool_calls": 20,
+        "positive_inputs": 4,
+        "negative_inputs": 14,
+        "negative_outputs": 2,
+        "socket_network_native_attempts": 0,
+        "scope": "Real SDK public registration/listTools/callTool/input and output validation over InMemoryTransport; not QMD request/server/backend qualification"
+      },
+      "config_semantics": {
+        "baseline_and_candidate": [
+          {
+            "layout": "baseline",
+            "maxWorkers": 2,
+            "testTimeout": 30000,
+            "include": [
+              "test/**/*.test.ts"
+            ],
+            "inline": null,
+            "interopDefault": null,
+            "serverDeps": {},
+            "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/node-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "setupFiles": [
+              "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+            ]
+          },
+          {
+            "layout": "mirror",
+            "maxWorkers": 2,
+            "testTimeout": 30000,
+            "include": [
+              "test/**/*.test.ts"
+            ],
+            "inline": [],
+            "interopDefault": null,
+            "serverDeps": {
+              "inline": []
+            },
+            "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/node-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "setupFiles": [
+              "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+            ]
+          }
+        ],
+        "real_cjs_positive_negative": {
+          "id": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch/index.js",
+          "defaultType": "function",
+          "positive": true,
+          "negative": true
+        },
+        "ssr_noexternal_merge": [
+          {
+            "layout": "baseline",
+            "ssrNoExternal": [
+              "review-sentinel"
+            ],
+            "effectiveInline": [
+              "review-sentinel"
+            ]
+          },
+          {
+            "layout": "mirror",
+            "ssrNoExternal": [
+              "review-sentinel"
+            ],
+            "effectiveInline": [
+              "review-sentinel"
+            ]
+          }
+        ],
+        "string_prefix_matching": {
+          "zod/index.js": true,
+          "zod/v4/core/index.js": true,
+          "zod-to-json-schema/dist/esm/index.js": true,
+          "picomatch/index.js": false,
+          "@modelcontextprotocol/sdk/dist/esm/server/mcp.js": false
+        }
+      },
+      "strict_root_exit_code": 0
+    },
+    "bun": {
+      "baseline-guard": {
+        "file_count": 1,
+        "counts": {
+          "passed": 22
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/bench-rerank-entrypoint.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 22
+            },
+            "message": ""
+          }
+        ]
+      },
+      "baseline-zod-phase5": {
+        "file_count": 2,
+        "counts": {
+          "failed": 1
+        },
+        "success": false,
+        "failed_files": 2,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/phase5-recovery.test.ts",
+            "status": "failed",
+            "counts": {},
+            "message": "undefined is not an object (evaluating 'z.object')"
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/baseline/test/zod-import.test.ts",
+            "status": "failed",
+            "counts": {
+              "failed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "composed-focused": {
+        "file_count": 13,
+        "counts": {
+          "passed": 224,
+          "skipped": 40
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/multi-collection-filter.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 14
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/phase5-recovery.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 18
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-lifecycle.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 27
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/store.helpers.unit.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 35
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/bench-rerank-entrypoint.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 22
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/eval-bm25.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 4
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/eval.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 4,
+              "skipped": 9
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-cleanup-review.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 21
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/bench-rerank-lifecycle.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 34
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/llm.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 20,
+              "skipped": 31
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/audit-llm-deadline-review.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 22
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/rrf-trace.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 2
+            },
+            "message": ""
+          },
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/mirror/test/zod-import.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "sdk-inlined-zod": {
+        "file_count": 1,
+        "counts": {
+          "passed": 3
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/test/sdk-inlined-zod.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 3
+            },
+            "message": ""
+          }
+        ]
+      },
+      "zod-prefix-scope": {
+        "file_count": 1,
+        "counts": {
+          "passed": 1
+        },
+        "success": true,
+        "failed_files": 0,
+        "files": [
+          {
+            "file": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe/test/zod-prefix-scope.test.ts",
+            "status": "passed",
+            "counts": {
+              "passed": 1
+            },
+            "message": ""
+          }
+        ]
+      },
+      "guard_matrix": {
+        "case_count": 22,
+        "groups": {
+          "fallback/default": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          },
+          "native/default": {
+            "mains_launched_once": 6,
+            "imports_inert": 5,
+            "scenarios": [
+              "direct",
+              "symlink",
+              "multihop",
+              "relative-direct",
+              "relative-symlink",
+              "relative-multihop",
+              "normal",
+              "missing-argv",
+              "missing-path",
+              "dangling-symlink",
+              "invalid-path"
+            ]
+          }
+        },
+        "source_sha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+        "actual_host": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "complete_emitted_body_identity": true
+      },
+      "source_proof": {
+        "execPath": "/Users/shersingh/.bun/bin/bun",
+        "versions": {
+          "node": "24.3.0",
+          "bun": "1.3.8",
+          "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+          "openssl": "1.1.0",
+          "llhttp": "9.3.0",
+          "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+          "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+          "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+          "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+          "zig": "0.14.1",
+          "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+          "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+          "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+          "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+          "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+          "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+          "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+          "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+          "v8": "13.6.233.10-node.18",
+          "uv": "1.48.0",
+          "napi": "10",
+          "icu": "74.2",
+          "unicode": "15.1",
+          "modules": "137"
+        },
+        "typescript": "5.9.3",
+        "beforeSha256": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+        "afterSha256": "e08a533e35bf4a15bd084e4e9389bb84f4beef57d5f4aa0375ee6a06f8131ade",
+        "allFunctionsUnchanged": true,
+        "functionNames": [
+          "generateDocs",
+          "formatBytes",
+          "getMemUsage",
+          "median",
+          "disposeOwned",
+          "benchmarkConfig",
+          "main"
+        ],
+        "nonImportNonGuardStatementsUnchanged": true,
+        "catchBodyUnchanged": true,
+        "nativeBooleanGuardControls": {
+          "checks": 2,
+          "argvReads": 0,
+          "fsCalls": 0,
+          "urlCalls": 0,
+          "exactEmittedCondition": true
+        },
+        "compilerRoots": {
+          "base": 147,
+          "composed": 149,
+          "removed": [],
+          "added": [
+            "test/bench-rerank-entrypoint.test.ts",
+            "test/zod-import.test.ts"
+          ],
+          "files": [
+            "dist/ast.d.ts",
+            "dist/ast.js",
+            "dist/bench/bench.d.ts",
+            "dist/bench/bench.js",
+            "dist/bench/score.d.ts",
+            "dist/bench/score.js",
+            "dist/bench/types.d.ts",
+            "dist/bench/types.js",
+            "dist/cli/formatter.d.ts",
+            "dist/cli/formatter.js",
+            "dist/cli/qmd.d.ts",
+            "dist/cli/qmd.js",
+            "dist/collections.d.ts",
+            "dist/collections.js",
+            "dist/db.d.ts",
+            "dist/db.js",
+            "dist/embedded-skills.d.ts",
+            "dist/embedded-skills.js",
+            "dist/embedding/config.d.ts",
+            "dist/embedding/config.js",
+            "dist/embedding/contract.d.ts",
+            "dist/embedding/contract.js",
+            "dist/embedding/protocol.d.ts",
+            "dist/embedding/protocol.js",
+            "dist/expansion/protocol.d.ts",
+            "dist/expansion/protocol.js",
+            "dist/index.d.ts",
+            "dist/index.js",
+            "dist/indexing/checkpoint.d.ts",
+            "dist/indexing/checkpoint.js",
+            "dist/indexing/job.d.ts",
+            "dist/indexing/job.js",
+            "dist/indexing/pending.d.ts",
+            "dist/indexing/pending.js",
+            "dist/llm.d.ts",
+            "dist/llm.js",
+            "dist/llm/lifecycle.d.ts",
+            "dist/llm/lifecycle.js",
+            "dist/llm/mlx-identity.d.ts",
+            "dist/llm/mlx-identity.js",
+            "dist/maintenance.d.ts",
+            "dist/maintenance.js",
+            "dist/mcp/server.d.ts",
+            "dist/mcp/server.js",
+            "dist/mlx.d.ts",
+            "dist/mlx.js",
+            "dist/store.d.ts",
+            "dist/store.js",
+            "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+            "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+            "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs",
+            "migrate-schema.ts",
+            "scripts/build.mjs",
+            "scripts/expansion_bridge.ts",
+            "scripts/gguf_embed_server.mjs",
+            "scripts/pack-result.mjs",
+            "scripts/phase5_e2e_runner.ts",
+            "scripts/phase5_recovery_process_loader.mjs",
+            "scripts/phase5_recovery_worker.ts",
+            "scripts/prepare.mjs",
+            "scripts/smoke-installed-http.mjs",
+            "scripts/smoke-installed-stdio.mjs",
+            "scripts/smoke-package.mjs",
+            "scripts/timing-embed-4b-gguf.ts",
+            "scripts/timing-gguf-baseline.ts",
+            "scripts/verify_local_stack.ts",
+            "src/ast.ts",
+            "src/bench-rerank.ts",
+            "src/bench/bench.ts",
+            "src/bench/score.ts",
+            "src/bench/types.ts",
+            "src/cli/formatter.ts",
+            "src/cli/qmd.ts",
+            "src/collections.ts",
+            "src/db.ts",
+            "src/embedded-skills.ts",
+            "src/embedding/config.ts",
+            "src/embedding/contract.ts",
+            "src/embedding/protocol.ts",
+            "src/expansion/protocol.ts",
+            "src/index.ts",
+            "src/indexing/checkpoint.ts",
+            "src/indexing/job.ts",
+            "src/indexing/pending.ts",
+            "src/llm.ts",
+            "src/llm/lifecycle.ts",
+            "src/llm/mlx-identity.ts",
+            "src/maintenance.ts",
+            "src/mcp/server.ts",
+            "src/mlx.ts",
+            "src/store.ts",
+            "src/test-preload.ts",
+            "test/ast-chunking.test.ts",
+            "test/ast.test.ts",
+            "test/audit-cli-ipc.test.ts",
+            "test/audit-daemon-entrypoints.test.ts",
+            "test/audit-llm-cleanup-review.test.ts",
+            "test/audit-llm-deadline-review.test.ts",
+            "test/audit-llm-lifecycle.test.ts",
+            "test/audit-mcp-admission.test.ts",
+            "test/audit-mcp-http.test.ts",
+            "test/audit-mcp-request-ownership.test.ts",
+            "test/audit-mcp-runtime-review.test.ts",
+            "test/audit-native-bun-recovery.test.ts",
+            "test/audit-query-identity.test.ts",
+            "test/audit-query-snapshot.test.ts",
+            "test/audit-recovery-startup.test.ts",
+            "test/audit-recovery-tree.test.ts",
+            "test/audit-recovery.test.ts",
+            "test/audit-sdk.test.ts",
+            "test/audit-store-quality-regressions.test.ts",
+            "test/audit-store-review.test.ts",
+            "test/audit-store.test.ts",
+            "test/audit-transport-review.test.ts",
+            "test/audit-transport.test.ts",
+            "test/bench-rerank-entrypoint.test.ts",
+            "test/bench-rerank-lifecycle.test.ts",
+            "test/bench-score.test.ts",
+            "test/cli.test.ts",
+            "test/collections-config.test.ts",
+            "test/dependency-locks.test.ts",
+            "test/embed-outcome.test.ts",
+            "test/embedding-contract.test.ts",
+            "test/embedding-index.test.ts",
+            "test/eval-bm25.test.ts",
+            "test/eval-deep-research.ts",
+            "test/eval-harness.ts",
+            "test/eval.test.ts",
+            "test/expansion.test.ts",
+            "test/fixtures/bun_recovery_ownership.ts",
+            "test/fixtures/public_eval_dataset.ts",
+            "test/formatter.test.ts",
+            "test/helpers/source-cli.ts",
+            "test/indexing-resume.test.ts",
+            "test/intent.test.ts",
+            "test/llm.test.ts",
+            "test/mcp.test.ts",
+            "test/mlx.test.ts",
+            "test/multi-collection-filter.test.ts",
+            "test/phase5-recovery.test.ts",
+            "test/rrf-trace.test.ts",
+            "test/sdk.test.ts",
+            "test/semantic-hyphens.test.ts",
+            "test/store-paths.test.ts",
+            "test/store.helpers.unit.test.ts",
+            "test/store.test.ts",
+            "test/structured-search.test.ts",
+            "test/zod-import.test.ts",
+            "vitest.config.ts"
+          ]
+        },
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noEmit": true
+      },
+      "evaluator": {
+        "native_named_z": "object",
+        "default_evaluator_named_z": "undefined",
+        "no_interop_identity": true,
+        "default_namespace_marker_membership": true,
+        "default_namespace_marker_own": false,
+        "actual_host": "/Users/shersingh/.bun/bin/bun",
+        "resolved_zod": "file:///Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/zod/index.js",
+        "exit_code": 1
+      },
+      "sdk_interaction": {
+        "test_checks": 3,
+        "external_sdk_identity_verified": true,
+        "same_inlined_and_external_zod_instance": false,
+        "schema_forms": [
+          "object",
+          "raw-shape"
+        ],
+        "tool_calls": 20,
+        "positive_inputs": 4,
+        "negative_inputs": 14,
+        "negative_outputs": 2,
+        "socket_network_native_attempts": 0,
+        "scope": "Real SDK public registration/listTools/callTool/input and output validation over InMemoryTransport; not QMD request/server/backend qualification"
+      },
+      "config_semantics": {
+        "baseline_and_candidate": [
+          {
+            "layout": "baseline",
+            "maxWorkers": 2,
+            "testTimeout": 30000,
+            "include": [
+              "test/**/*.test.ts"
+            ],
+            "inline": null,
+            "interopDefault": null,
+            "serverDeps": {},
+            "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/bun-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "setupFiles": [
+              "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+            ]
+          },
+          {
+            "layout": "mirror",
+            "maxWorkers": 2,
+            "testTimeout": 30000,
+            "include": [
+              "test/**/*.test.ts"
+            ],
+            "inline": [
+              "zod"
+            ],
+            "interopDefault": null,
+            "serverDeps": {
+              "inline": [
+                "zod"
+              ]
+            },
+            "cacheDir": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/state/bun-effective-config/cache/vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "setupFiles": [
+              "/Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/host-setup.mjs"
+            ]
+          }
+        ],
+        "real_cjs_positive_negative": {
+          "id": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/picomatch/index.js",
+          "defaultType": "function",
+          "positive": true,
+          "negative": true
+        },
+        "ssr_noexternal_merge": [
+          {
+            "layout": "baseline",
+            "ssrNoExternal": [
+              "review-sentinel"
+            ],
+            "effectiveInline": [
+              "review-sentinel"
+            ]
+          },
+          {
+            "layout": "mirror",
+            "ssrNoExternal": [
+              "review-sentinel"
+            ],
+            "effectiveInline": [
+              "zod",
+              "review-sentinel"
+            ]
+          }
+        ],
+        "string_prefix_matching": {
+          "zod/index.js": true,
+          "zod/v4/core/index.js": true,
+          "zod-to-json-schema/dist/esm/index.js": true,
+          "picomatch/index.js": false,
+          "@modelcontextprotocol/sdk/dist/esm/server/mcp.js": false
+        }
+      },
+      "strict_root_exit_code": 0
+    }
+  },
+  "preservation": "evidence/preservation-final.json",
+  "actual_dependencies": "evidence/actual-dependencies.json",
+  "issues": [
+    {
+      "classification": "own-harness-only",
+      "receipt": "evidence/node-source-proof.json",
+      "correction": "Restored only owned omitted generated baseline dist to source replay for root-inventory comparison; candidate compiler roots never removed or edited; final source proof both hosts passed."
+    }
+  ],
+  "remaining_gates": [
+    "Parent-only acceptance/integration/replay/durable archive",
+    "Current live recovery owner rebase and acceptance; old frozen prefix must never replace live implementation",
+    "Canonical full package test/build, metadata/lock/real-declaration/audit/Nix integration",
+    "Installed native library/model/GPU/inference/disposal behavior and CI",
+    "Older Node binary qualification",
+    "Full native Bun suite/HTTP qualification (HTTP remains documented Node-only)"
+  ],
+  "no_model_or_network_or_live_operations": true
+}

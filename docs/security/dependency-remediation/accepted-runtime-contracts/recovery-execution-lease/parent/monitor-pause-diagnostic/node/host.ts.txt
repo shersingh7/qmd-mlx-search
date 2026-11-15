@@ -1,0 +1,18 @@
+import cp from 'node:child_process';
+import {syncBuiltinESMExports} from 'node:module';
+import {writeFileSync} from 'node:fs';
+import {executeRecoveryWorker} from "file:///Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_e2e_runner.ts";
+const source="/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_recovery_process.py",wrapper="/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/heldout_wrapper.py",spec="/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/monitor-pause-diagnostic/node/spec.json",root="/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/monitor-pause-diagnostic/node";
+if ((process.versions as any).bun) {
+ const bun=(globalThis as any).Bun,original=bun.spawn;
+ bun.spawn=function(command:any,options:any){return original.call(bun,command[3]===source?[...command.slice(0,3),wrapper,...command.slice(4),spec]:command,options);};
+} else {
+ const original=cp.spawn;
+ (cp as any).spawn=function(executable:any,args:any,options:any){return original(executable,args[2]===source?[...args.slice(0,2),wrapper,...args.slice(3),spec]:args,options);};
+ syncBuiltinESMExports();
+}
+writeFileSync(root+'/host-started.json',JSON.stringify({executable:process.execPath,versions:process.versions}));
+const started=performance.now();
+const result=await executeRecoveryWorker({dbPath:root+'/unused.sqlite',docsDir:root,outputJson:root+'/absent-report.json',stateRoot:root+'/state',timeoutMs:200,
+ command:['/usr/bin/python3','-B','-S','-c',"from pathlib import Path;Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/monitor-pause-diagnostic/node/work').write_text(\"actual-user-work\")"]});
+writeFileSync(root+'/helper.json',JSON.stringify({elapsedMs:performance.now()-started,result}));

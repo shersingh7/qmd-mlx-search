@@ -1,0 +1,19 @@
+{
+  "ci-43587714173-failed.log": "e749ad82d7695563dfe6bd2b7fe06b2a165ca7c7f59b73696a6f9755298c47a0",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-bun-macos-15-1/after-canonical-selftests.tap": "a958b25073a9955a04834ab8093fabc9110f1d9be0b4775fd05778a5b748422b",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-bun-macos-15-1/fast-timeout-bun-4892.json": "28928290dccf6ff352fe4b0173c0049cc548481cbe5a92b50938ca4df69fc83a",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-bun-macos-15-1/fast-timeout-node-1564.json": "f9f2fb1abfb06263715ec068a6ccb902d06b9c972f01bd2e50550efaf8195166",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-bun-macos-15-1/runner-metadata.json": "f901a42459cfbb6111445ff2951d30f2da78ed9a4f53e59dffbc721bbce51d22",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-node-macos-15-1/after-canonical-selftests.tap": "9b389246d848ad1849707a144e8905bb02a451710453b4cd102df08b2f88b2c2",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-node-macos-15-1/fast-timeout-bun-5547.json": "28928290dccf6ff352fe4b0173c0049cc548481cbe5a92b50938ca4df69fc83a",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-node-macos-15-1/fast-timeout-node-1806.json": "6e5c41ca1e4f2cf1a1dbf575094245d2d85f2aa57aac9f3937637db8be28055c",
+  "ci-mac-bootstrap-43587714173/recovery-bootstrap-node-macos-15-1/runner-metadata.json": "77000a051dd9f540f5887251813bcb809589115511d8902afc54ec471a2a3e5d",
+  "ci-mac-failure-summary.json": "304f3d2471c258e286afa5069106688d631bd7a2fdeb3d9b42c2cab1ac489c7d",
+  "ci-native-gguf-43587714085-readback.json": "f643474f21cc09630c6fcf64640c12f7f26f32af12c7c6028fb1741a62380a6e",
+  "ci-native-gguf-43587714085-receipt.json": "58b311d08f5d2b2cdf888f7a84110a6a2125e48ff28aad64eb5d52711cc17a08",
+  "ci-native-gguf-43587714085.log": "9d754df45f1fd07b04e5215d0a412c124b42cd53b7a788a41cc09c3859dbf5f7",
+  "ci-nix-43587714131-failed.log": "86b3eaf5ed6fae2e3956e1ca61d55621287775444c38a91319eeb228ee234dd2",
+  "ci-nix-43587714131-full.log": "0e86c8d1f2cd1000e37187ba04b5734561d8d5cd284c6e907ea2b7efd11213ee",
+  "ci-nix-43587714131-measured-hashes.json": "7f19eb22adaf0f2ab71e5d1a9152f653328eff479fc87adb807d59cc44d49681",
+  "nix-hash-contract-recheck.json": "7f4ee8429ce6fc49f0f0081aba2f7abecf42127c783a96d9d304951703e851da"
+}

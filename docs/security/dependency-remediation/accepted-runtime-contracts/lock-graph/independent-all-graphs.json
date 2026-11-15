@@ -1,0 +1,434 @@
+[
+  {
+    "lock": "finetune/uv.lock",
+    "instances": 104,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--project",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Using CPython 3.12.13 interpreter at: /Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12\nResolved 104 packages in 23ms\n"
+    }
+  },
+  {
+    "lock": "finetune/convert_gguf.py.lock",
+    "instances": 71,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/convert_gguf.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 71 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/convert_onnx.py.lock",
+    "instances": 72,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/convert_onnx.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 72 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/dataset/analyze_data.py.lock",
+    "instances": 5,
+    "accelerate": 0,
+    "torch": 0,
+    "static_graph": "accepted",
+    "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/dataset/analyze_data.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/dataset/prepare_data.py.lock",
+    "instances": 36,
+    "accelerate": 0,
+    "torch": 0,
+    "static_graph": "accepted",
+    "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/dataset/prepare_data.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 36 packages in 1ms\n"
+    }
+  },
+  {
+    "lock": "finetune/dataset/prepare_data_lfm2.py.lock",
+    "instances": 36,
+    "accelerate": 0,
+    "torch": 0,
+    "static_graph": "accepted",
+    "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/dataset/prepare_data_lfm2.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 36 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/dataset/score_data.py.lock",
+    "instances": 5,
+    "accelerate": 0,
+    "torch": 0,
+    "static_graph": "accepted",
+    "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/dataset/score_data.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 1ms\n"
+    }
+  },
+  {
+    "lock": "finetune/dataset/validate_schema.py.lock",
+    "instances": 5,
+    "accelerate": 0,
+    "torch": 0,
+    "static_graph": "accepted",
+    "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/dataset/validate_schema.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 5 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/eval.py.lock",
+    "instances": 64,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/eval.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/eval_retrieval.py.lock",
+    "instances": 64,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/eval_retrieval.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/experiments/grpo/grpo.py.lock",
+    "instances": 74,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/experiments/grpo/grpo.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/experiments/lfm2/sft_lfm2.py.lock",
+    "instances": 74,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/experiments/lfm2/sft_lfm2.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/jobs/eval.py.lock",
+    "instances": 64,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/jobs/eval.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 64 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/jobs/sft.py.lock",
+    "instances": 74,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/jobs/sft.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 74 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/train.py.lock",
+    "instances": 92,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/train.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 92 packages in 2ms\n"
+    }
+  },
+  {
+    "lock": "finetune/train_unsloth.py.lock",
+    "instances": 91,
+    "accelerate": 1,
+    "torch": 1,
+    "static_graph": "accepted",
+    "sha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+    "unchanged": true,
+    "uv": {
+      "argv": [
+        "/Users/shersingh/.local/bin/uv",
+        "lock",
+        "--check",
+        "--no-build",
+        "--offline",
+        "--no-config",
+        "--python",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python3.12",
+        "--script",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482/frozen/finetune/train_unsloth.py"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/independent-r2-quality-1e6b6482",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Resolved 91 packages in 2ms\n"
+    }
+  }
+]

@@ -1,0 +1,706 @@
+"""Bounded recovery-session supervisor; never trust a recyclable numeric PGID.
+
+The session leader stays alive until teardown. The worker and joined group
+anchors are direct children retained with WNOWAIT until all group signalling is
+over. Joining another group with setpgid is the kernel's same-session ownership
+check, not a racy ps/PPID inference. Only then may that group be signalled.
+
+Arbitrary injected commands are diagnostic fixtures, NOT contained workloads:
+setsid can escape observation even before our first sample. They always return
+an explicit uncontained-command failure. The canonical worker instead runs with
+OS-enforced no-fork containment (Seatbelt on Darwin, seccomp on Linux). Threads,
+SQLite and HTTP are supported; subprocesses and daemonization are not.
+
+Bootstrap is not launch permission. S carries a conservatively anchored budget
+and allows creation of a gated child, not execution. E acknowledges READY, but
+is not a durable capability: the child checks the inherited lease and the live
+parent channel after containment, at the last trusted execution gate.
+TERM/INT interrupt startup, including the fork/registration interval. Gated
+children are authenticated with kernel waitid before taking anchored cleanup.
+The runtime-owned exact
+supervisor handle remains cancellation authority, with CONT releasing STOP.
+Only an unadmitted supervisor can be killed outright without losing anchors.
+"""
+from __future__ import annotations
+
+import ctypes
+import errno
+import json
+import os
+import select
+import signal
+import stat
+import sys
+import time
+
+from qmd_mlx.process_anchor import require_waitid_support, wait_child_without_reaping
+
+TERM_GRACE = 0.100
+TEARDOWN = 0.650
+MAX_GROUPS = 64
+_control_broken = False
+_worker_announced = False
+
+
+class StartupCancelled(Exception):
+    """Interrupt startup without discarding any registered direct-child owner."""
+
+
+def send(message):
+    global _control_broken, _worker_announced
+    data = (json.dumps(message, separators=(",", ":")) + "\n").encode()
+    # Publish READY and its local commit bit atomically with respect to our
+    # interrupting startup handler. A scheduling pause in a caller of send must
+    # not turn cancellation into a duplicate/missing worker identity message.
+    previous_mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})
+    try:
+        # Parent death must not abort cleanup while a worker still exists.
+        # These bounded messages fit within a pipe buffer, including when the
+        # runner stops consuming. fd 3 never survives worker exec.
+        try:
+            while data:
+                written = os.write(3, data)
+                data = data[written:]
+            if message.get("type") == "ready":
+                _worker_announced = True
+        except OSError:
+            # Terminal proof-channel errors cancel; they must not unwind past
+            # a retained worker/group ownership anchor.
+            _control_broken = True
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, previous_mask)
+
+
+def no_fork():
+    """Apply before exec, fail closed on unsupported platforms/ABIs."""
+    if sys.platform == "darwin":
+        sandbox = ctypes.CDLL("/usr/lib/libsandbox.dylib", use_errno=True)
+        init = sandbox.sandbox_init
+        init.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(ctypes.c_char_p)]
+        init.restype = ctypes.c_int
+        error = ctypes.c_char_p()
+        if init(b"(version 1) (allow default) (deny process-fork)", 0, ctypes.byref(error)):
+            raise RuntimeError(f"Seatbelt no-fork containment refused: {error.value!r}")
+        return
+    if sys.platform != "linux":
+        raise RuntimeError("Recovery no-fork containment requires Darwin Seatbelt or Linux seccomp")
+    # Deny process creation, while preserving pthreads. Returning ENOSYS for
+    # clone3 lets libc use clone, whose CLONE_THREAD bit can be inspected.
+    import platform
+    machine = platform.machine()
+    if machine == "x86_64":
+        audit_arch, clone, clone3, fork, vfork = 0xC000003E, 56, 435, 57, 58
+    elif machine in ("aarch64", "arm64"):
+        audit_arch, clone, clone3, fork, vfork = 0xC00000B7, 220, 435, -1, -1
+    else:
+        raise RuntimeError(f"Unsupported seccomp architecture: {machine}")
+    class Filter(ctypes.Structure):
+        _fields_ = [("code", ctypes.c_ushort), ("jt", ctypes.c_ubyte), ("jf", ctypes.c_ubyte), ("k", ctypes.c_uint)]
+    class Program(ctypes.Structure):
+        _fields_ = [("len", ctypes.c_ushort), ("filter", ctypes.POINTER(Filter))]
+    rules = [
+        (0x20, 0, 0, 4), (0x15, 1, 0, audit_arch), (0x06, 0, 0, 0x80000000),
+        (0x20, 0, 0, 0),
+    ]
+    if machine == "x86_64":
+        # Reject the x32 alternate syscall namespace as well.
+        rules += [(0x45, 0, 1, 0x40000000), (0x06, 0, 0, 0x00050000 | errno.EPERM)]
+    for number, error in [(fork, errno.EPERM), (vfork, errno.EPERM), (clone3, errno.ENOSYS)]:
+        if number >= 0:
+            rules += [(0x15, 0, 1, number), (0x06, 0, 0, 0x00050000 | error)]
+    rules += [(0x15, 0, 3, clone), (0x20, 0, 0, 16),
+              (0x45, 1, 0, 0x00010000), (0x06, 0, 0, 0x00050000 | errno.EPERM),
+              (0x06, 0, 0, 0x7FFF0000)]
+    filters = (Filter * len(rules))(*(Filter(*rule) for rule in rules))
+    program = Program(len(rules), filters)
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(38, 1, 0, 0, 0) or libc.prctl(22, 2, ctypes.byref(program), 0, 0):
+        error = ctypes.get_errno()
+        raise OSError(error, f"seccomp no-fork containment failed: {os.strerror(error)}")
+
+
+def session_groups(session_id):
+    """Read membership only; a listing never grants permission to signal."""
+    if sys.platform == "darwin":
+        library = ctypes.CDLL("/usr/lib/libproc.dylib", use_errno=True)
+        list_pids = library.proc_listallpids
+        list_pids.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        list_pids.restype = ctypes.c_int
+        capacity = list_pids(None, 0) + 256
+        if capacity <= 256:
+            raise RuntimeError("Recovery session PID inspection failed")
+        while True:
+            buffer = (ctypes.c_int * capacity)()
+            count = list_pids(buffer, ctypes.sizeof(buffer))
+            if count < 0:
+                raise RuntimeError("Recovery session PID inspection failed")
+            if count < capacity:
+                pids = buffer[:count]
+                break
+            capacity *= 2
+    elif sys.platform == "linux":
+        pids = [int(name) for name in os.listdir("/proc") if name.isdigit()]
+    else:
+        raise RuntimeError("Recovery session inspection is unsupported on this platform")
+    result = {}
+    for pid in pids:
+        if pid < 1:
+            continue
+        try:
+            if os.getsid(pid) == session_id:
+                result[pid] = os.getpgid(pid)
+        except ProcessLookupError:
+            pass
+    return result
+
+
+def anchor_group(group_id, deadline):
+    """Atomically join this session's group before acquiring signal authority."""
+    read_fd, write_fd = os.pipe()
+    pid = os.fork()
+    if pid == 0:
+        try:
+            os.close(read_fd)
+            # Do not keep the worker's output or the control pipes alive.
+            null = os.open(os.devnull, os.O_RDWR)
+            for fd in (0, 1, 2, 3):
+                os.dup2(null, fd)
+            if null > 3:
+                os.close(null)
+            signal.signal(signal.SIGTERM, signal.SIG_IGN)
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            os.setpgid(0, group_id)  # Fails if absent or in any other session.
+            os.write(write_fd, b"1")
+            os.close(write_fd)
+            while True:
+                signal.pause()
+        except BaseException:
+            try:
+                os.write(write_fd, b"0")
+            except OSError:
+                pass
+            os._exit(1)
+    os.close(write_fd)
+    try:
+        remaining = max(0, min(0.050, deadline - time.monotonic()))
+        ready, _, _ = select.select([read_fd], [], [], remaining)
+        joined = bool(ready and os.read(read_fd, 1) == b"1")
+    finally:
+        os.close(read_fd)
+    if not joined:
+        # Direct child is not reaped yet: its PID cannot be reused.
+        os.kill(pid, signal.SIGKILL)
+        while wait_child_without_reaping(pid) is None and time.monotonic() < deadline:
+            time.sleep(0.001)
+        if wait_child_without_reaping(pid) is None:
+            raise RuntimeError("Recovery joining anchor could not be reaped within teardown budget")
+        os.waitpid(pid, 0)
+        return None
+    return pid
+
+
+def read_control(limit=4096):
+    """Terminal transport errors are EOF/cancellation, never an owner unwind."""
+    global _control_broken
+    try:
+        return os.read(0, limit)
+    except BlockingIOError:
+        return None
+    except OSError:
+        _control_broken = True
+        return b""
+
+
+def execution_allowed(parent_read, deadline):
+    """Last trusted child gate, after E and potentially slow containment.
+
+    This fd is a CLOEXEC duplicate of the caller channel, not a new reader until
+    the supervisor has consumed E. EOF persists even if the supervisor also
+    observes it; ANY queued byte/error refuses execution. Deadline checks share
+    only the already-initialized Python clock inherited through this fork.
+    Admission is revocable: the independently scheduled supervisor owns deadline
+    and EOF cleanup if the child is delayed after this validation, before exec.
+    """
+    if time.monotonic() >= deadline:
+        return False
+    try:
+        os.read(parent_read, 1)
+    except BlockingIOError:
+        return time.monotonic() < deadline
+    except OSError:
+        pass
+    return False
+
+
+def refuse_execution(session_id):
+    """Wake an interrupted/stopped owner without a live caller or PID guess.
+
+    Successful setpgid joins an EXISTING group in our own session, exactly as
+    joining anchors do. Our membership pins that group through both signals.
+    No signal is authorized if the kernel join fails. No direct numerical
+    parent-PID fallback is safe after reparenting/reuse. This child has executed
+    no workload and exits without unblocking its own pending TERM.
+    """
+    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})
+    try:
+        os.setpgid(0, session_id)
+        os.killpg(session_id, signal.SIGTERM)
+        os.killpg(session_id, signal.SIGCONT)
+    except OSError:
+        pass
+    os._exit(125)
+
+
+def main():
+    config = json.loads(sys.argv[1])
+    command = config["command"]
+    timeout = config["timeoutMs"] / 1000
+    contained = config["contained"]
+    require_waitid_support()  # Before any workload is launched.
+    session_id = os.getsid(0)
+    if session_id != os.getpid() or os.getpgrp() != os.getpid():
+        raise RuntimeError("Recovery supervisor must own a fresh anchored session")
+    stop_signal = [False]
+    startup_interruptible = [True]
+    worker = None
+    launch_read = launch_write = gate_read = gate_write = None
+    startup_error = None
+    startup_timed_out = False
+    worker_was_reaped = False
+    recovered_exit_code = None
+    # Fail closed if an interruption occurs before PREPARED initializes the
+    # lease. No creation path is allowed to use a fresh timeout later.
+    admission_deadline = 0.0
+
+    def interrupted(*_):
+        if os.getpid() != session_id:
+            # A just-forked child can inherit this handler before it installs
+            # defaults. It has not passed the execution gate and owns no work.
+            os._exit(125)
+        stop_signal[0] = True
+        if startup_interruptible[0]:
+            # Parent cancellation and the child's autonomous refusal can race.
+            # Interrupt only once; a second TERM must not escape the exception
+            # handler/finally that is transferring ownership into cleanup.
+            startup_interruptible[0] = False
+            if sys.exc_info()[0] is None:
+                raise StartupCancelled()
+
+    signal.signal(signal.SIGTERM, interrupted)
+    signal.signal(signal.SIGINT, interrupted)
+
+    def not_started(reason):
+        send({"type": "not-started", "supervisorPid": os.getpid(),
+              "sessionId": session_id, "reason": reason})
+
+    def ready():
+        if not _worker_announced:
+            send({"type": "ready", "pid": worker, "sessionId": session_id, "processGroupId": worker})
+
+    try:
+        try:
+            executable_stat = os.stat(command[0])
+            if not stat.S_ISREG(executable_stat.st_mode) or not os.access(command[0], os.X_OK):
+                raise PermissionError("worker executable is not an executable regular file")
+        except OSError as error:
+            send({"type": "spawn-error", "error": f"Recovery worker spawn failed: {error}"})
+            not_started("spawn-error")
+            return
+
+        os.set_blocking(0, False)
+        # PREPARED precedes the caller's remaining-budget calculation. Anchoring
+        # its duration here charges transport conservatively, without comparing
+        # Node/Bun/Python monotonic epochs or restarting a startup timeout.
+        prepared_at = time.monotonic()
+        admission_deadline = prepared_at + timeout
+        admission_frame = b""
+        send({"type": "prepared", "supervisorPid": os.getpid(), "sessionId": session_id})
+        while True:
+            if stop_signal[0] or _control_broken:
+                raise StartupCancelled()
+            remaining = admission_deadline - time.monotonic()
+            if remaining <= 0:
+                not_started("admission-timeout")
+                return
+            readable, _, _ = select.select([0], [], [], min(remaining, 0.010))
+            if not readable:
+                continue
+            data = read_control(16)
+            if data is None:
+                continue
+            if not data:
+                not_started("parent-channel-closed")
+                return
+            if b"T" in data or b"K" in data:
+                not_started("cancelled")
+                return
+            admission_frame += data
+            if len(admission_frame) > 12:
+                raise RuntimeError("Invalid recovery launch admission")
+            if b"\n" not in admission_frame:
+                continue
+            budget = admission_frame[1:-1]
+            if (not admission_frame.startswith(b"S") or not admission_frame.endswith(b"\n")
+                    or not budget.isdigit() or budget.startswith(b"0")
+                    or not 1 <= int(budget) <= config["timeoutMs"]):
+                raise RuntimeError("Invalid recovery launch admission")
+            admission_deadline = min(admission_deadline, prepared_at + int(budget) / 1000)
+            # This drain rejects already-queued cancellation/EOF. It is NOT the
+            # ownership boundary: cancellation can interrupt later startup too.
+            pending = read_control()
+            if pending is not None or stop_signal[0] or _control_broken:
+                not_started("cancelled")
+                return
+            break
+
+        launch_read, launch_write = os.pipe()
+        gate_read, gate_write = os.pipe()
+        # Do not defer cancellation across creation: Python can deliver a
+        # signal between the kernel fork and storing its return value. A gated
+        # child is recoverable through kernel waitid ownership below even in
+        # that interval; no user code or descendants can escape beforehand.
+        worker = os.fork()
+        if worker == 0:
+            try:
+                signal.signal(signal.SIGTERM, signal.SIG_DFL)
+                signal.signal(signal.SIGINT, signal.SIG_DFL)
+                os.close(gate_write)
+                os.close(launch_read)
+                os.close(3)
+                parent_read = os.dup(0)  # CLOEXEC, same persistent caller EOF.
+                null = os.open(os.devnull, os.O_RDONLY)
+                os.dup2(null, 0)
+                if null > 2:
+                    os.close(null)
+                os.setpgid(0, 0)
+                # Creation is not execution. No user code (including an
+                # injected command) runs until READY is acknowledged by
+                # the live runner within its original execution deadline.
+                os.set_blocking(gate_read, False)
+                while True:
+                    remaining = admission_deadline - time.monotonic()
+                    if remaining <= 0:
+                        refuse_execution(session_id)
+                    readable, _, _ = select.select([gate_read], [], [], min(remaining, 0.010))
+                    if not readable:
+                        continue
+                    if os.read(gate_read, 2) != b"E":
+                        refuse_execution(session_id)
+                    break
+                os.close(gate_read)
+                if contained:
+                    no_fork()
+                    os.write(launch_write, b"contained\n")
+                if not execution_allowed(parent_read, admission_deadline):
+                    refuse_execution(session_id)
+                os.close(parent_read)
+                os.execvpe(command[0], command, os.environ)
+            except BaseException as error:
+                try:
+                    os.write(launch_write, f"Recovery worker spawn failed: {error}\n".encode())
+                finally:
+                    os._exit(127)
+        # The child and this retained direct-child anchor both establish the
+        # group before any exec. Neither relies on a sampled numerical PGID.
+        assert worker is not None
+        try:
+            os.setpgid(worker, worker)
+        except OSError as error:
+            if error.errno not in (errno.EACCES, errno.ESRCH, errno.EPERM):
+                raise
+        ready()
+        while True:
+            if stop_signal[0] or _control_broken:
+                raise StartupCancelled()
+            remaining = admission_deadline - time.monotonic()
+            if remaining <= 0:
+                startup_timed_out = True
+                raise StartupCancelled()
+            readable, _, _ = select.select([0], [], [], min(remaining, 0.010))
+            if not readable:
+                continue
+            data = read_control()
+            if data is None:
+                continue
+            if not data or b"T" in data or b"K" in data:
+                raise StartupCancelled()
+            if data != b"E":
+                raise RuntimeError("Invalid recovery execution admission")
+            os.write(gate_write, b"E")
+            break
+    except StartupCancelled:
+        stop_signal[0] = True
+        startup_timed_out |= admission_deadline > 0 and time.monotonic() >= admission_deadline
+    except BaseException as error:
+        if worker is None and launch_read is None:
+            raise
+        # Once creation has happened, every startup error must go through the
+        # anchored cleanup below; never unwind past the direct-child owner.
+        startup_error = f"Recovery worker startup failed: {error}"
+        stop_signal[0] = True
+    finally:
+        startup_interruptible[0] = False
+        for fd in (launch_write, gate_read, gate_write):
+            if fd is not None:
+                os.close(fd)
+
+    if worker is None:
+        if launch_read is not None:
+            owned_children = []
+            for candidate in session_groups(session_id):
+                if candidate == os.getpid():
+                    continue
+                try:
+                    # A listing does not authorize a signal. Successful
+                    # non-consuming waitid authenticates this exact direct
+                    # child and keeps its PID reserved until our own waitpid.
+                    wait_child_without_reaping(candidate)
+                    owned_children.append(candidate)
+                except OSError as error:
+                    if error.errno != errno.ECHILD:
+                        raise
+            if len(owned_children) > 1:
+                raise RuntimeError("Unexpected children before recovery execution admission")
+            if owned_children:
+                worker = owned_children[0]
+        if worker is None:
+            try:
+                reaped, status = os.waitpid(-1, os.WNOHANG)
+            except ChildProcessError:
+                # Kernel ECHILD, not an absent protocol PID, proves no child.
+                if launch_read is not None:
+                    os.close(launch_read)
+                not_started("parent-interrupted")
+                return
+            if not reaped:
+                raise RuntimeError("Recovery gated-child ownership could not be established")
+            # If it exited before listing, waitpid itself supplies the exact
+            # identity/reap proof. This gated child could not execute/fork; do
+            # not acquire any numerical-group signal authority after its reap.
+            worker, worker_was_reaped = reaped, True
+            recovered_exit_code = os.waitstatus_to_exitcode(status)
+    # A child may have been created just before interruption of READY. Publish
+    # its real identity before exit/cleanup, even if execution was never allowed.
+    ready()
+    assert launch_read is not None
+    os.set_blocking(launch_read, False)
+    errors = []
+    if startup_error:
+        errors.append(startup_error)
+    if startup_timed_out:
+        errors.append(f"Recovery worker timed out after {config['timeoutMs']}ms (PID {worker})")
+    if not contained:
+        errors.append("Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified")
+    launch_output = b""
+    launch_eof = False
+    worker_code = recovered_exit_code
+    exit_sent = False
+    timed_out = startup_timed_out
+    sigkill_used = False
+    stopped = None
+    requested_kill = False
+    anchors = {} if worker_was_reaped else {worker: worker}
+    signalled_term = set()
+    signalled_kill = set()
+    worker_term_sent = False
+    worker_kill_sent = False
+
+
+    def add_error(message):
+        if message not in errors:
+            errors.append(message)
+
+    def observe_owned_exit(pid):
+        try:
+            return wait_child_without_reaping(pid)
+        except RuntimeError as failure:
+            # Darwin can report a non-exit event for a genuinely stopped child
+            # even with WEXITED. That is NOT exit/reap proof. Fail closed and
+            # terminate the still-retained direct child, then observe again;
+            # never unwind around its anchor or modify the canonical observer.
+            add_error(f"Recovery child exit observation failed: {failure}")
+            stop_signal[0] = True
+            return None
+
+    def signal_group(group, number):
+        nonlocal sigkill_used
+        # Every group has a direct, non-reaped ownership anchor. No anchor is
+        # released while signalling remains possible, even if it has exited.
+        if group not in anchors:
+            raise RuntimeError("Refusing unanchored recovery group signal")
+        try:
+            os.killpg(group, number)
+            if number == signal.SIGKILL:
+                sigkill_used = True
+        except ProcessLookupError:
+            pass
+        except PermissionError as failure:
+            raise RuntimeError(f"Recovery anchored group {group} signal {number} failed: {failure}") from failure
+
+    while True:
+        now = time.monotonic()
+        if not launch_eof:
+            try:
+                chunk = os.read(launch_read, 4096)
+                launch_output += chunk
+                launch_eof = not chunk
+            except BlockingIOError:
+                pass
+        if not worker_was_reaped:
+            worker_code = observe_owned_exit(worker)
+        if worker_code is not None and not exit_sent:
+            send({"type": "exit", "exitCode": max(0, worker_code) if worker_code >= 0 else None,
+                  "signal": signal.Signals(-worker_code).name if worker_code < 0 else None})
+            exit_sent = True
+            stopped = stopped if stopped is not None else now
+        data = None
+        if launch_eof:
+            # CLOEXEC launch-writer EOF means the child has crossed exec (or
+            # exited). Only now may the supervisor consume teardown commands.
+            data = read_control()
+        else:
+            # Until the last child gate, cancellation bytes belong to that
+            # gate. Consuming K/T here could erase revocation, then stall before
+            # signalling while the child sees an empty, still-live channel.
+            # Poll without consumption: readability/error cancels anchored work,
+            # and the pending byte/EOF remains independently visible to child.
+            try:
+                readable, _, _ = select.select([0], [], [], 0)
+            except (OSError, ValueError) as failure:
+                add_error(f"Recovery pre-execution control channel failed: {failure}")
+                readable = [0]
+            if readable:
+                add_error("Recovery runner control channel closed or cancelled before execution")
+                stopped = stopped if stopped is not None else now
+                requested_kill = True
+        if data is not None:
+            if not data:
+                add_error("Recovery runner control channel closed before teardown")
+                stopped = stopped if stopped is not None else now
+                requested_kill = True
+            elif b"K" in data:
+                stopped = stopped if stopped is not None else now
+                requested_kill = True
+            elif b"T" in data:
+                stopped = stopped if stopped is not None else now
+            else:
+                add_error("Invalid recovery control after execution admission")
+                stopped = stopped if stopped is not None else now
+                requested_kill = True
+        if stop_signal[0] or _control_broken:
+            add_error("Recovery supervisor interrupted by parent signal or closed proof channel")
+            stopped = stopped if stopped is not None else now
+            requested_kill = True
+        if stopped is None and now >= admission_deadline:
+            timed_out = True
+            add_error(f"Recovery worker timed out after {config['timeoutMs']}ms (PID {worker})")
+            stopped = now
+        if stopped is not None:
+            # This exact direct child is retained even if it moves to another
+            # group/session itself. PID signalling is safe until our own reap.
+            if worker_code is None:
+                if requested_kill or now - stopped >= TERM_GRACE:
+                    if not worker_kill_sent:
+                        os.kill(worker, signal.SIGKILL)
+                        worker_kill_sent = True
+                        sigkill_used = True
+                elif not worker_term_sent:
+                    os.kill(worker, signal.SIGTERM)
+                    worker_term_sent = True
+            try:
+                last_members = session_groups(session_id)
+                own_pids = {os.getpid(), worker, *anchors.values()}
+                remaining = {pid: group for pid, group in last_members.items() if pid not in own_pids}
+                # Only same-session groups are considered. A numerical PID or
+                # PPID sampled after leader exit is never sufficient authority.
+                for group in set(remaining.values()) - anchors.keys():
+                    if time.monotonic() >= stopped + TEARDOWN:
+                        raise RuntimeError("Recovery group discovery exhausted bounded teardown")
+                    if group == session_id:
+                        add_error("Recovery descendant joined the supervisor's protected anchor group")
+                        continue
+                    if len(anchors) >= MAX_GROUPS:
+                        add_error("Recovery session exceeded bounded ownership-anchor capacity")
+                        break
+                    anchor = anchor_group(group, stopped + TEARDOWN)
+                    if anchor is not None:
+                        anchors[group] = anchor
+                if worker_code is not None and not remaining:
+                    break
+                for group in anchors:
+                    if group == worker and group not in remaining.values():
+                        continue
+                    if group not in signalled_term:
+                        signal_group(group, signal.SIGTERM)
+                        signalled_term.add(group)
+                    if (requested_kill or now - stopped >= TERM_GRACE) and group not in signalled_kill:
+                        signal_group(group, signal.SIGKILL)
+                        signalled_kill.add(group)
+            except (OSError, RuntimeError) as failure:
+                add_error(f"Recovery session inspection/cleanup failed: {failure}")
+            if now - stopped >= TEARDOWN:
+                add_error("Recovery owned session did not terminate within teardown budget")
+                break
+        time.sleep(0.005)
+
+    # Stop all retained joining anchors before reaping any of them. A failed
+    # membership inspection cannot authorize signalling a newly sampled group.
+    for group, anchor_pid in anchors.items():
+        if group not in signalled_kill and (anchor_pid != worker or observe_owned_exit(worker) is None):
+            signal_group(group, signal.SIGKILL)
+            signalled_kill.add(group)
+    # Exit observation is non-consuming until the last possible group signal.
+    reap_deadline = time.monotonic() + 0.050
+    for pid in set(anchors.values()):
+        while observe_owned_exit(pid) is None and time.monotonic() < reap_deadline:
+            time.sleep(0.001)
+    try:
+        final_members = session_groups(session_id)
+        owned_anchors = {os.getpid(), worker, *anchors.values()}
+        session_terminated = not any(pid not in owned_anchors for pid in final_members)
+    except (OSError, RuntimeError) as failure:
+        add_error(f"Recovery final session inspection failed: {failure}")
+        session_terminated = False
+    if not session_terminated:
+        add_error("Recovery owned-session descendants remain after bounded teardown")
+    child_reaped = worker_was_reaped
+    all_reaped = True
+    for pid in set(anchors.values()):
+        if observe_owned_exit(pid) is not None:
+            os.waitpid(pid, 0)
+            if pid == worker:
+                child_reaped = True
+        else:
+            all_reaped = False
+            add_error(f"Recovery ownership anchor {pid} could not be reaped within teardown budget")
+    if not launch_eof:
+        try:
+            launch_output += os.read(launch_read, 4096)
+        except BlockingIOError:
+            pass
+    os.close(launch_read)
+    launch_lines = launch_output.decode(errors="replace").splitlines()
+    verified = contained and "contained" in launch_lines
+    for line in launch_lines:
+        if line != "contained":
+            add_error(line)
+    if contained and not verified:
+        add_error("Recovery no-fork containment was not established; cleanup cannot be certified")
+    send({"type": "cleanup", "childReaped": child_reaped,
+          "groupTerminated": session_terminated and all_reaped,
+          "sessionTerminated": session_terminated and all_reaped,
+          "containmentVerified": verified, "sigkillUsed": sigkill_used,
+          "processGroups": sorted(anchors), "timedOut": timed_out, "errors": errors})
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BaseException as failure:
+        # No numerical-group fallback here: after an ownership failure a PID
+        # listing is not permission to signal. The caller receives failed proof.
+        try:
+            send({"type": "supervisor-error", "error": f"Recovery supervisor failed: {failure}"})
+        except OSError:
+            pass
+        sys.exit(1)

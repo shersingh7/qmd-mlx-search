@@ -1,0 +1,1341 @@
+{
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e",
+  "bound_paths": 267,
+  "files": [
+    {
+      "path": "REPORT.md",
+      "bytes": 10502,
+      "sha256": "7894f0da5854f0cf8a0e46858789c2b92c87e290f755413e913bd5f399f3364b"
+    },
+    {
+      "path": "review-result.json",
+      "bytes": 4960,
+      "sha256": "624159cf2c039dabab145556b3f0d90657e553552efe980f0c129b04e7490394"
+    },
+    {
+      "path": "authenticate_and_copy.py",
+      "bytes": 5310,
+      "sha256": "237d5c0649c0a5ff0aed912ffd19e0a06af4977532e06eacce1d6b283ce594e5"
+    },
+    {
+      "path": "finalize_review.py",
+      "bytes": 22592,
+      "sha256": "bd343f11183fb34f14c9566e60ec3687ebfe1302a30e540a542f7517db0d5f16"
+    },
+    {
+      "path": "run-isolated.bash",
+      "bytes": 750,
+      "sha256": "7622d1f555a9965a533ab3ca70f334ef1e33f7c30a6a855d7090d5bb5cae885d"
+    },
+    {
+      "path": "heldout/heldout_tests.py",
+      "bytes": 12697,
+      "sha256": "8f1fe9bb77b205061ac0f8f31bc8d687ed1e3d8dc68ac192b7a2182db29848ba"
+    },
+    {
+      "path": "heldout/fake_cli.py",
+      "bytes": 6125,
+      "sha256": "c26574eda5fd33302c909f17c94ccf4c86ebdaaf53135e4ef33c60d57370bd4e"
+    },
+    {
+      "path": "heldout/fixture_adapter.py",
+      "bytes": 1471,
+      "sha256": "93bd0c61d18c6c63b5091f0711ff709eca65384a4c1fa6c4ddf23211bdbd45c6"
+    },
+    {
+      "path": "heldout/descendant_worker.py",
+      "bytes": 826,
+      "sha256": "bedd7949b7843d4634776fd3487d3dbf0e4b1c9d84efc64fe95d7f22719d3d57"
+    },
+    {
+      "path": "mirror/.github/workflows/gguf-native-image-qualification.yml",
+      "bytes": 18224,
+      "sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306"
+    },
+    {
+      "path": "evidence/generated-controller.py",
+      "bytes": 13387,
+      "sha256": "606e0ea2d8389f1cb57cc3f5360f411e7ed047c00cb2c83a797f5a0f93c51d98"
+    },
+    {
+      "path": "evidence/generated-step.bash",
+      "bytes": 14455,
+      "sha256": "138ccd871697dcd4a103aa6bb71d35e5e4f69fe45d4400b05864928c3178bfba"
+    },
+    {
+      "path": "evidence/authentication.json",
+      "bytes": 105554,
+      "sha256": "c6c3278b09507925b583bce96987f843675f13db6d57c02bcb6e2fae2b2ff188"
+    },
+    {
+      "path": "evidence/preservation-before.json",
+      "bytes": 3251,
+      "sha256": "b046e4adce3e2daab888742472d9299703c8c1eb27dab94df9eebc0e0485f412"
+    },
+    {
+      "path": "evidence/preservation-after.json",
+      "bytes": 5126,
+      "sha256": "d03bdc1ccfa095ad9fb493e5b8eb9c7233df79fc6e54d2f1299d501fa1594c8e"
+    },
+    {
+      "path": "evidence/heldout-preflight-red.json",
+      "bytes": 635,
+      "sha256": "92ac9da5005ae6ac881fb85ad8929bc6eda636646ad0196fb95bdc93fd55db15"
+    },
+    {
+      "path": "evidence/focused-source-and-counts.json",
+      "bytes": 641,
+      "sha256": "8acb75aef9ee07da9a66a8a0ef542ff2bae109b3cf801b8cc1488100706dffbc"
+    },
+    {
+      "path": "evidence/retained-archive-summaries.json",
+      "bytes": 746,
+      "sha256": "5dbc178540d1b19adad78e733d7da904c3e82524976e8bc6732bbf5ee4c060c7"
+    },
+    {
+      "path": "evidence/repaired-probe-interface.json",
+      "bytes": 560,
+      "sha256": "cb00fc36f18cc5411839e34f33170f7eca02ebfcce1b77ff9dcdc04b9713fd12"
+    },
+    {
+      "path": "evidence/final-checks.json",
+      "bytes": 1581,
+      "sha256": "140a26cf2092ef153b71a7a0c9fcb5c67d2554906a78cbea16951ea62a59a843"
+    },
+    {
+      "path": "evidence/validation-final.json",
+      "bytes": 1223,
+      "sha256": "d28ca0fd04bd3fca4f2febd808ddb24dd4298d4b9e2194e7028952b835e24e87"
+    },
+    {
+      "path": "evidence/synthetic-final-v2/summary.json",
+      "bytes": 54029,
+      "sha256": "533be674e774aca60d6a7ab8386e6bc704df485521f22c098e3da63ca2710c8a"
+    },
+    {
+      "path": "heldout/summary.json",
+      "bytes": 28387,
+      "sha256": "a0f4a1d3c270d7740ef7e1e9d20784346646925df7d6bad1fe9c780c1fe127f2"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/state.json",
+      "bytes": 428,
+      "sha256": "8dd15c4e045b85b03705c4f91fd2dce8a524eeb977faea45eed70b1800ae939f"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/config.json",
+      "bytes": 138,
+      "sha256": "36a4edda717ecb489d3274571ec20fa58a99bfc0c8fd1bfed9e951197b75ed02"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/stdout.log",
+      "bytes": 15746,
+      "sha256": "5d5ba73047631fb8802b4d6881c6621828efbb06abd7019e353f127510b62539"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/observed-receipt.json",
+      "bytes": 8580,
+      "sha256": "33c5237e9e9e0f621f965eb5fdcd31825dd1c16cb36ef76863274b6f80923e40"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/calls.jsonl",
+      "bytes": 17510,
+      "sha256": "31c40958abba7b1289fcec018c0ada68cdc4c457da012f62d271f75bbc078907"
+    },
+    {
+      "path": "heldout/cases/control-current-launcher/step.bash",
+      "bytes": 14750,
+      "sha256": "e0f052f75f557efa14cf5e475aa3251d4050d76a83f81bf856bb79d3b35d8171"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/state.json",
+      "bytes": 429,
+      "sha256": "03f1b78828d75083b4cc64989842de8d54f11029ab20844f7ad67d9cc54b4930"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/config.json",
+      "bytes": 274,
+      "sha256": "96974ef5b291af401f19ecb1f5209f4f43114cd369d4a3ae5b737b0c640ecadf"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/stdout.log",
+      "bytes": 15770,
+      "sha256": "35e3da26063a55f909536f04ee6021b4415ad33b542f739bfad98997880346c8"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/observed-receipt.json",
+      "bytes": 8588,
+      "sha256": "bd241a8c6954bb3814913a544a508902e2a973f557afba5a81ec7479d1fb208a"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/calls.jsonl",
+      "bytes": 17578,
+      "sha256": "03980ba6f8e094a6c5105374c77c8928f3992756b9a62869a1a53b3a99c19148"
+    },
+    {
+      "path": "heldout/cases/control-valid-new-literal/step.bash",
+      "bytes": 14751,
+      "sha256": "15313aa5a7d48e828fd536680852caa252ac862fae8c4dbd4a1ecdc913d2b2de"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/state.json",
+      "bytes": 430,
+      "sha256": "466dbfc76ffadce0836cfdc7dcbb2f81dae0f006fa48753a924a0a6df704e0d7"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/config.json",
+      "bytes": 205,
+      "sha256": "0f1566e910de621e197d4f4a849148cd5759c08c2160ed63e157379958267854"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/stdout.log",
+      "bytes": 15794,
+      "sha256": "40ef285be5e14ae3eb7c9c5a7db06158a80f8e2b71b524271fd51251e203e4ed"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/observed-receipt.json",
+      "bytes": 8596,
+      "sha256": "04191d99060de1f8c875633159737ff411273db02c36190c1413f17afd298741"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/calls.jsonl",
+      "bytes": 17646,
+      "sha256": "fd83e3dcfd0412d621d51f407f67274dab29cde84a7d007dc846d6c233c8346f"
+    },
+    {
+      "path": "heldout/cases/control-dynamic-probe-hash/step.bash",
+      "bytes": 14752,
+      "sha256": "be1a67400a70a6da7781d7201009e03d24ed0fcd3e7becf5d7d16b770c7681a0"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/state.json",
+      "bytes": 433,
+      "sha256": "1541e09295670f2c74547e57d8e6cc368bc45cbaa2a0bb91fb041732bff89a67"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/config.json",
+      "bytes": 292,
+      "sha256": "ff1aaf7267d16b1ba993b0ef64daaf93002baffa8f6328b1ba2a88c87f91b3c6"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/stdout.log",
+      "bytes": 16067,
+      "sha256": "d7cd121d79e017e9f6ec9f9760e8a855c8753b2d19c1dc6e2db0a4c9023be03a"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/observed-receipt.json",
+      "bytes": 8790,
+      "sha256": "e7b6fb25ff504df5e920bc1c40fe1393cfe36eb3582b7a2bbc9986ce77c24916"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/calls.jsonl",
+      "bytes": 17850,
+      "sha256": "caacd597ef4bfd77e4cfb6406e1bbf187268d75205773e68f92538f88e40bc1d"
+    },
+    {
+      "path": "heldout/cases/control-extra-readback-fields/step.bash",
+      "bytes": 14755,
+      "sha256": "5d23e71cb575d534421022f12822ae4cea70e8b9b7cd522f56ad028d39ad7843"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/state.json",
+      "bytes": 425,
+      "sha256": "7a9167356a39ac9a8e433132e8a2740a1ee3a28705177f50bcb267f3830f3686"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/config.json",
+      "bytes": 391,
+      "sha256": "b8570d249445376f2625aa9627b53c03f67cb64c6d26893e3dcb7cbecb249e39"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/stdout.log",
+      "bytes": 15969,
+      "sha256": "7ebe8a83809df8472b2b6741f6eb79d30a8a9aa0fb2e6f85fff5fecdec7fe052"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/observed-receipt.json",
+      "bytes": 8758,
+      "sha256": "1682a75393c892a56e86cdd5e9adc248110aa0dbfc1beb296da41dc9c7180fa0"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/calls.jsonl",
+      "bytes": 17306,
+      "sha256": "4cf6e7b6a920a7a17aec3aa3dc61484c5ebf5d0f4deb438bebb9e4c99cb04749"
+    },
+    {
+      "path": "heldout/cases/control-extra-digests/step.bash",
+      "bytes": 14747,
+      "sha256": "2d79c15f6ee1c1876e97494334b4e31ee615e6b28b3260c4713f4d77a733b1e0"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/state.json",
+      "bytes": 432,
+      "sha256": "1f51301261573f0e1b30d3c7fe200dabb2d463348af1556ac83076cd56d097a7"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/config.json",
+      "bytes": 250,
+      "sha256": "9637198a46d1e936fa0da4a19c0f2dd4b0f41be42f44fd94d75069e311561675"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/stdout.log",
+      "bytes": 16002,
+      "sha256": "80a0969be043d50ddcfff941589fd10b4cd3af2e51b979c7a319e12b45ed70f3"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/observed-receipt.json",
+      "bytes": 8692,
+      "sha256": "cd5370df2542f2e7f8c79bb2f744d1353b63bf3db21e91521ed028f4e68fab33"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/calls.jsonl",
+      "bytes": 17782,
+      "sha256": "647235227e19e57cefc50dc6921a8be4567098045a3ca7fe1c8a2c74526f82d4"
+    },
+    {
+      "path": "heldout/cases/control-escaped-workflow-log/step.bash",
+      "bytes": 14754,
+      "sha256": "c0b316331c1fe0df94067a65cb1c1ef4ff2a4c5d3eac1c6d5f6bcc836b49aa8f"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/state.json",
+      "bytes": 428,
+      "sha256": "3e721ac5fea45442bde520f06d59f89572fad363dfda6d8e8ff2c8ed02a86c29"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/syntactic-rebinding-result.json",
+      "bytes": 369,
+      "sha256": "9f52153aac2e724dae84d53b155ec1cd04120740e79eac7f05149abb3efabdaf"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/config.json",
+      "bytes": 175,
+      "sha256": "3bde737ea6455a48aa9cd93d29549fff2fe5aefca91f4e5b5f08fa06eaa67953"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/stdout.log",
+      "bytes": 15746,
+      "sha256": "ba1be67fc9b4f5ca363de3f621074a168dabd91832640507de3e2aecf569e414"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/syntactic-rebinding-reproducer.py",
+      "bytes": 297,
+      "sha256": "3b8ea923eaae8ece11ae287477a387ecd9f8e3cfbce9a3ead0d8e1a854bd2558"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/observed-receipt.json",
+      "bytes": 8580,
+      "sha256": "8a9fcdf36152ee990c56dd17c900b122e965b9ff96a1edeb93a84c0687c9a2b9"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/calls.jsonl",
+      "bytes": 17510,
+      "sha256": "fb7e5ac9db5e0115503919bde7615a4475737c290d73508b91bcb5e63db5a404"
+    },
+    {
+      "path": "heldout/cases/ast-match-direct-capture/step.bash",
+      "bytes": 14750,
+      "sha256": "df044e0e5515e7c75225a2eabeca91e4f7b04447d3c81d16732bf598b38a804f"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/state.json",
+      "bytes": 429,
+      "sha256": "8e9a47192dffba63eb5f890d872d214093055b0b43908542f44b1942e3501a2c"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/syntactic-rebinding-result.json",
+      "bytes": 369,
+      "sha256": "9f52153aac2e724dae84d53b155ec1cd04120740e79eac7f05149abb3efabdaf"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/config.json",
+      "bytes": 176,
+      "sha256": "a8dcc715cc869c0fc21f4f11c3472db94895084e0bfcc8a3fc7646a7c85e6081"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/stdout.log",
+      "bytes": 15770,
+      "sha256": "07e33cf6fc639f631d786bcd3f38858bc0aedf5394ef7eb297eaffc1964b83a3"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/syntactic-rebinding-reproducer.py",
+      "bytes": 319,
+      "sha256": "c9055a7fca41e36ff3e924fc5939706c52f839c71611c969869ce07a8638f232"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/observed-receipt.json",
+      "bytes": 8588,
+      "sha256": "30a93a7dc4212dc3848ad958b7ee2e3eee716f8f785eb00ce399f0ab50ec6f19"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/calls.jsonl",
+      "bytes": 17578,
+      "sha256": "0fb512b00bdfad5a04be7a39c21958ef46186651085e263969e752cc82921c9e"
+    },
+    {
+      "path": "heldout/cases/ast-match-mapping-capture/step.bash",
+      "bytes": 14751,
+      "sha256": "4fdf1a0265d77066909d915661b5eeeecf69b2944204fca980b982b6e61c193f"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/state.json",
+      "bytes": 48,
+      "sha256": "4f98d8d409632245bcbcc4cf28ab0fe3cb2e75ca9f4d7e2ce9b110356062abc0"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/config.json",
+      "bytes": 273,
+      "sha256": "8e76246d43c3db6737b23fef02815a727c55408eca86cde4721f8b810b005b28"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/stdout.log",
+      "bytes": 3700,
+      "sha256": "16ed7c786948fd82a8039bd1f6e9012d070d60afacf335e0a4833facc30b3d14"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/observed-receipt.json",
+      "bytes": 2551,
+      "sha256": "5bd5f27327e3263a8e3968a1b862046d9ba240192711a8eb45e6951e7c5830ed"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/calls.jsonl",
+      "bytes": 5055,
+      "sha256": "64fc99c93e667b15a4a0b340b28a6ed97c79b72d2369b5d300bee9a16e359430"
+    },
+    {
+      "path": "heldout/cases/engine-root-array/step.bash",
+      "bytes": 14743,
+      "sha256": "8dfbb920a8e025e03581559d372ef2f31cfa14d5c05b9ba8f928051037e27aed"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/state.json",
+      "bytes": 48,
+      "sha256": "4f98d8d409632245bcbcc4cf28ab0fe3cb2e75ca9f4d7e2ce9b110356062abc0"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/config.json",
+      "bytes": 209,
+      "sha256": "5efd70eb265b623bcedf0ac57b776939466a5248c21370dc80491992f0b227f4"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/stdout.log",
+      "bytes": 3576,
+      "sha256": "6cde72bbef676ada9d6c0c274c3c36698da0ea9758c7896f8bf045d07029add0"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/observed-receipt.json",
+      "bytes": 2441,
+      "sha256": "945b7d2e5118146028075f18d9d60353413b88c8ceb446389d0fb77bd711eb6f"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/calls.jsonl",
+      "bytes": 5099,
+      "sha256": "cfae2e39a2630bbd07db694652fccf5d93d5dd4dddc84c50279c2b269b880f34"
+    },
+    {
+      "path": "heldout/cases/engine-server-array/step.bash",
+      "bytes": 14745,
+      "sha256": "7bf810f1931f4d6b84db7185a99019f676049bffc1df9f93347594b240688ffc"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/state.json",
+      "bytes": 48,
+      "sha256": "4f98d8d409632245bcbcc4cf28ab0fe3cb2e75ca9f4d7e2ce9b110356062abc0"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/config.json",
+      "bytes": 256,
+      "sha256": "561cc60b4ba44b92d660165e4c05505f78d0afe3ef32ee1af207164764f6fed9"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/stdout.log",
+      "bytes": 3644,
+      "sha256": "c9377d63f6af9674dcdaacd993827b56e2f2475717365062439c2e9bae47501a"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/observed-receipt.json",
+      "bytes": 2402,
+      "sha256": "3bc95eff677fa408a8927fb710bc4f57d090b64b0bd4289923e3f8e6313e2d36"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/calls.jsonl",
+      "bytes": 5187,
+      "sha256": "bb9e769966af6e203e10d607135c2272de6dc5d3529fd9b3f9da3692af3945f7"
+    },
+    {
+      "path": "heldout/cases/engine-duplicate-server/step.bash",
+      "bytes": 14749,
+      "sha256": "46d60079535d30c3055aadefeb6c8f477b41a4e44241e9dfebc0381e44304eb0"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/state.json",
+      "bytes": 48,
+      "sha256": "4f98d8d409632245bcbcc4cf28ab0fe3cb2e75ca9f4d7e2ce9b110356062abc0"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/config.json",
+      "bytes": 255,
+      "sha256": "7f16e96dac19ad028e753de7d74875955424b559c3ba17696d3c9fb3d0980f04"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/stdout.log",
+      "bytes": 3677,
+      "sha256": "3401c47a9a15972e46a5f966faef0a2d70d9e50c2d0172f4bda1d439315047a2"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/observed-receipt.json",
+      "bytes": 2494,
+      "sha256": "a983237403e43237e996b37eb06e954717ef6a1e3ef145695a837b86b3208afc"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/calls.jsonl",
+      "bytes": 5143,
+      "sha256": "af1ded2313b4e3afe36e732635464ef2d293ff24381e9fc5e45e300e47b37a3d"
+    },
+    {
+      "path": "heldout/cases/engine-missing-server/step.bash",
+      "bytes": 14747,
+      "sha256": "ae88f623e5fc07c992c054e36128827ab17a11cf1ce7cfca3bc88087d29a3882"
+    },
+    {
+      "path": "heldout/cases/image-root-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/image-root-array/state.json",
+      "bytes": 179,
+      "sha256": "251e3aeff640bfbf5b78a36a2d3cc41c4d5b4c707e5cb0f80c02069f592092b9"
+    },
+    {
+      "path": "heldout/cases/image-root-array/config.json",
+      "bytes": 439,
+      "sha256": "d0c0b6b383fb79be675f6428ceef1dcb447e5874630f8f3536d3d4158c5ca543"
+    },
+    {
+      "path": "heldout/cases/image-root-array/stdout.log",
+      "bytes": 7974,
+      "sha256": "180e0531fa9466e8c94a6efebeceb382c662693b129f3b053dd6d221e6ff6081"
+    },
+    {
+      "path": "heldout/cases/image-root-array/observed-receipt.json",
+      "bytes": 4694,
+      "sha256": "73fe1e98606d00889346af7a08db4bc920c9cf9a765d035992015717a1b579cf"
+    },
+    {
+      "path": "heldout/cases/image-root-array/calls.jsonl",
+      "bytes": 10517,
+      "sha256": "a273d1c5d5244a1d2d4c7464d640515e450e45398ed41779b7d1b12c9db6998e"
+    },
+    {
+      "path": "heldout/cases/image-root-array/step.bash",
+      "bytes": 14742,
+      "sha256": "75fc348bd4ec5526e4244afd8df03094eec32cf9eda51abe07d770d8e05715c1"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/state.json",
+      "bytes": 179,
+      "sha256": "251e3aeff640bfbf5b78a36a2d3cc41c4d5b4c707e5cb0f80c02069f592092b9"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/config.json",
+      "bytes": 525,
+      "sha256": "2009dd06f4124666cc79396ee25382380b1ed8fb23af83f88b237aa2b9f56a02"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/stdout.log",
+      "bytes": 8044,
+      "sha256": "d0e2b1fc4135c315de6a60e5174eea6a067561c1047f362933920cbb4ffa9a3b"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/observed-receipt.json",
+      "bytes": 4507,
+      "sha256": "24af83f212276f1e395262e409c5d5edd1fb392f5a71c533e0334e2953a61d28"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/calls.jsonl",
+      "bytes": 11001,
+      "sha256": "97d77d830871629234fb8443a5516fec17e61a4eed9e78ae322c4fc908db3752"
+    },
+    {
+      "path": "heldout/cases/image-duplicate-repodigests/step.bash",
+      "bytes": 14753,
+      "sha256": "74d4d97f36fb4748adc7248391df3839ef70a4d26dee4ecba86802974ec1e3be"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/state.json",
+      "bytes": 179,
+      "sha256": "251e3aeff640bfbf5b78a36a2d3cc41c4d5b4c707e5cb0f80c02069f592092b9"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/config.json",
+      "bytes": 297,
+      "sha256": "7382d2d54df8d5b55977a0470741d94ea42a9806bea24b72b541e7f5ca044d2f"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/stdout.log",
+      "bytes": 8089,
+      "sha256": "d6a51240ba3d11578e7aac3a104371bdf1fc62547609f3f4d65a54491f8d62c1"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/observed-receipt.json",
+      "bytes": 4719,
+      "sha256": "3d7bacc55c63f000d9a6548768c9ea6dcf5d6b5e7c8614b6c58f1acec8a7ae12"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/calls.jsonl",
+      "bytes": 10869,
+      "sha256": "c49bd97e215caabd1e54b5d8c5465e5f35114c20a373435d5d3330bc8e63f43e"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-object/step.bash",
+      "bytes": 14750,
+      "sha256": "4552dcae2bf2286fba2fe9606a27258e077d4ecc4bcd0b7234b623136fdb05ec"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/state.json",
+      "bytes": 179,
+      "sha256": "251e3aeff640bfbf5b78a36a2d3cc41c4d5b4c707e5cb0f80c02069f592092b9"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/config.json",
+      "bytes": 313,
+      "sha256": "035277f8240a8c53f642f504ccda050491e61667167669be8fe4e91580900911"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/stdout.log",
+      "bytes": 8209,
+      "sha256": "4464504595550360151661ae750845a8a19d3619f36cb6ef901f3d92703b5b7d"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/observed-receipt.json",
+      "bytes": 4765,
+      "sha256": "648eb22f3853e6ea90980a9d7f2eb42bdc954da1252d63d3d10cab7f1e7a86aa"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/calls.jsonl",
+      "bytes": 11309,
+      "sha256": "379aaefe59161c55ddcff6c2f6a90c00582dd5e4bfe3228cd39f42b9bd0da1fb"
+    },
+    {
+      "path": "heldout/cases/image-repodigests-nonstring-member/step.bash",
+      "bytes": 14760,
+      "sha256": "7069bf4508ab5b6c39122a4ca9528190c23f6b0c4fed54d4a9d0986d66999438"
+    },
+    {
+      "path": "heldout/cases/image-id-object/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/image-id-object/state.json",
+      "bytes": 179,
+      "sha256": "251e3aeff640bfbf5b78a36a2d3cc41c4d5b4c707e5cb0f80c02069f592092b9"
+    },
+    {
+      "path": "heldout/cases/image-id-object/config.json",
+      "bytes": 255,
+      "sha256": "9702ee8063c48863560439ceb63abda4011b9f8476317128272e2275ab947989"
+    },
+    {
+      "path": "heldout/cases/image-id-object/stdout.log",
+      "bytes": 7975,
+      "sha256": "beeace3c872243594fc49c2f3eeedd3b48d11bd50dfc762b83e110ec7f6a5cb5"
+    },
+    {
+      "path": "heldout/cases/image-id-object/observed-receipt.json",
+      "bytes": 4688,
+      "sha256": "9a45c02b7c43206f96759f2dd6c8da0c8f54a1f034e037323c32475b6cee59b8"
+    },
+    {
+      "path": "heldout/cases/image-id-object/calls.jsonl",
+      "bytes": 10473,
+      "sha256": "253f4837c750a179d0159af58ed24ebd00deb6b50a19dd4841a5f1938e3f15fa"
+    },
+    {
+      "path": "heldout/cases/image-id-object/step.bash",
+      "bytes": 14741,
+      "sha256": "bff27bf6f14bad7eda0546e4ed7f75060d6929ace2bfdc466ee413e56f2748d9"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/state.json",
+      "bytes": 420,
+      "sha256": "a8229e7b132a5de87f87511939e4800db700a47c36b6ff49ce6f3d1d3001ed40"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/config.json",
+      "bytes": 151,
+      "sha256": "12185cc75362c8a81bad23a6020604046ac412652a96a40aec58d9e38de40aa8"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/stdout.log",
+      "bytes": 14267,
+      "sha256": "73d04d9e6cefacf283d7ca729116b2c6bf5d839671400fb62a41934c1e7519f2"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/observed-receipt.json",
+      "bytes": 7603,
+      "sha256": "37ec0ae4a61c098ee8cf67079ef594814f155138cb03c09d378fc2ce7575d05d"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/calls.jsonl",
+      "bytes": 16966,
+      "sha256": "63819202134951a9dbd3ba1585b0c04975df2d9ade48da635ee54f165b8f5c89"
+    },
+    {
+      "path": "heldout/cases/probe-root-array/step.bash",
+      "bytes": 14742,
+      "sha256": "8dd7eb8e4ce78994b18e186b62d0e227bd17ff6a4aa5e4d7a826d9f6e5151a31"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/state.json",
+      "bytes": 426,
+      "sha256": "0575bc9603a4190accc05d094dc8b981aca46ebfa3a7349664f591cb002a9421"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/config.json",
+      "bytes": 170,
+      "sha256": "2fcab9e5aa9febc3d25ba53e9cfd6602608646184ac24f0fbc1f47deb7f23cb7"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/stdout.log",
+      "bytes": 15322,
+      "sha256": "1fe8f01949dcdffb724d8809222050d9eb2a1e93851de39364c9ab9af328ea98"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/observed-receipt.json",
+      "bytes": 8078,
+      "sha256": "36fd64f43d0d27e9c0966ba4c20d00029e689d8583e5693028d45a0e35179101"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/calls.jsonl",
+      "bytes": 17374,
+      "sha256": "6a0da5b75c4bca49bd82c116aebb475c363ed6393150dfa4f19b01fad998cc64"
+    },
+    {
+      "path": "heldout/cases/probe-duplicate-status/step.bash",
+      "bytes": 14748,
+      "sha256": "0c820610a97b4f7c493f4e3df18f16396ffad6f6ef15dd0d22703c46f11b62fd"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/state.json",
+      "bytes": 424,
+      "sha256": "c9f96360408bf6da5d7acb0a8093a8cd5cd575b3e8e0eff63db6c36427752735"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/config.json",
+      "bytes": 246,
+      "sha256": "48f86db570f6c2794279adeb4112705fe59b470862f89fe8de672e6db8c00e24"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/stdout.log",
+      "bytes": 15427,
+      "sha256": "cffa587123b8c329eb92f35ebe6edde95e32542404e9228823c35233929f6831"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/observed-receipt.json",
+      "bytes": 8421,
+      "sha256": "8fe682f116416c7384c2585c232c260008392c3ff5821587e670257b6e4c8a85"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/calls.jsonl",
+      "bytes": 17238,
+      "sha256": "bc6edd167cde0ea7dfca23f921bd05b0589476829a8c887d0f09ee64cbcd8741"
+    },
+    {
+      "path": "heldout/cases/probe-versions-array/step.bash",
+      "bytes": 14746,
+      "sha256": "0a7725b17712ebfce61588428f0761c025ef2a08c9ca9a203142018e79136246"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/state.json",
+      "bytes": 423,
+      "sha256": "1c2944d4250de24285f9acd2e0082f39aa3e159d50c07796861ebe23cc184367"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/config.json",
+      "bytes": 301,
+      "sha256": "411f3970ee301c6f3e27a6d39e03b733cb7ecaedb0e5564cf89e1e89ccb8bd2a"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/stdout.log",
+      "bytes": 15586,
+      "sha256": "d2182717558381a8347739fb98549838cbc9e6d5d3244d4822d34a5474818622"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/observed-receipt.json",
+      "bytes": 8530,
+      "sha256": "c9dba18448d25fba760bdd8fd475f8cf363c226a75d8cdc378bcee6c07234690"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/calls.jsonl",
+      "bytes": 17170,
+      "sha256": "38d18720acc71c8cc9cf5ff14fcad0f93f3b507f24ae6cfb6a77974b77a1cee3"
+    },
+    {
+      "path": "heldout/cases/probe-empty-version/step.bash",
+      "bytes": 14745,
+      "sha256": "6b20f8f69e3539be0a85fc0e4746d589cde41bb807cb42e201270d9efc46c3b0"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/state.json",
+      "bytes": 428,
+      "sha256": "fcdca7079e9790268e715ff3a58bbbf1bc36ecb05fc083ecaeca52d845d1a322"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/config.json",
+      "bytes": 184,
+      "sha256": "92b98133fc9ba6374f0655db10b16875ab51afa7be3bd2b9fdef86e44093b71c"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/stdout.log",
+      "bytes": 15766,
+      "sha256": "c9668bb3dd75d14e43394a47bfd4a8e45da128ac3332b4c456be3b6cc83f8114"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/observed-receipt.json",
+      "bytes": 8606,
+      "sha256": "303a253a8d76762e31e8e10b25596ae5e08a9c19b746cbcdaac07f63c3f109ec"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/calls.jsonl",
+      "bytes": 17510,
+      "sha256": "e6640342521bfd76e9039163ca0c2e2991da60e78dc2f1b062f6ef5809ff6e1f"
+    },
+    {
+      "path": "heldout/cases/probe-false-like-integer/step.bash",
+      "bytes": 14750,
+      "sha256": "e4998fb47829f9ec79f90ecdad2a21024ca54bbd3dc8aed44278d1c69bf35ee4"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/state.json",
+      "bytes": 433,
+      "sha256": "e5601be6ef2842fbc550e780bceae636256406f074e6dc2e6a9d6ef666436de7"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/config.json",
+      "bytes": 194,
+      "sha256": "8754c5c0e907b2eff233e32508a3e84f85c5cd87c4e3625e57d91c60a1bc730a"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/stdout.log",
+      "bytes": 15906,
+      "sha256": "c29368417edf52b59f2228b925120e677e674394d263c356aed144a8c4179cfd"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/observed-receipt.json",
+      "bytes": 8659,
+      "sha256": "dc58858164325d32cfe9d1e97607ebbf2b0be17e1b68a5349ff7be1ce0624998"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/calls.jsonl",
+      "bytes": 17850,
+      "sha256": "2f81653ae7fcdbe6a8aa129e66b1d98a0f32133439c19b265fec549fb8ff607d"
+    },
+    {
+      "path": "heldout/cases/probe-python-trailing-newline/step.bash",
+      "bytes": 14755,
+      "sha256": "db18ba5a585d4f32852755cb5e0eac10a9f19fb16d15d239554d56da8d67a034"
+    },
+    {
+      "path": "heldout/cases/cid-directory/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cid-directory/state.json",
+      "bytes": 416,
+      "sha256": "9f85d91118acf7cf3c188ca2e120fd7d955ac8c8f325aa0e47b8e20a2bfbeb81"
+    },
+    {
+      "path": "heldout/cases/cid-directory/config.json",
+      "bytes": 180,
+      "sha256": "9f9e4f33c270b13b42a2324e9a595ddc610fff019362f16fff9e917e407208ac"
+    },
+    {
+      "path": "heldout/cases/cid-directory/stdout.log",
+      "bytes": 14160,
+      "sha256": "90e78491aa2df9a1e40ee9ff7a03373d32c1c9614df3a65930f4651f37f38167"
+    },
+    {
+      "path": "heldout/cases/cid-directory/observed-receipt.json",
+      "bytes": 7845,
+      "sha256": "292ef54a485522f2d70caa0712c6f3c1aae5d508a1261df73ee74d9332c68956"
+    },
+    {
+      "path": "heldout/cases/cid-directory/calls.jsonl",
+      "bytes": 14201,
+      "sha256": "cc36ad71c6808efa9c2cd0bf4052950446ab916e7efaa421b19ab5d4ab3d1c04"
+    },
+    {
+      "path": "heldout/cases/cid-directory/step.bash",
+      "bytes": 14739,
+      "sha256": "eb6cd3a4e89de7cc85eaf4fde5e00c76d25ef32939e0cb5d0d50f41da992d062"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/state.json",
+      "bytes": 411,
+      "sha256": "3143a9b32d181808aab9468ab92614baab4df0a876183401282239853332851e"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/config.json",
+      "bytes": 170,
+      "sha256": "6422cafdd4b2ec1c8ea924a44987b756e30dd2e510205afce71bcffed864b0fa"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/stdout.log",
+      "bytes": 14055,
+      "sha256": "eb742c494fda999bc4be4336f4f5370af669b2c7ee0cadd9c2c5ee999cdd65ca"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/observed-receipt.json",
+      "bytes": 7810,
+      "sha256": "2ebb308ccc9fa518753bd60af47e7fff6eb181720cc02a23e458e538eb67e4c4"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/calls.jsonl",
+      "bytes": 13916,
+      "sha256": "06607df21ed0ba6fc7d04bbc3b935a53dfbc68fca8c4de4f3c78a3390f7d8525"
+    },
+    {
+      "path": "heldout/cases/cid-fifo/step.bash",
+      "bytes": 14734,
+      "sha256": "576aedfbb9022f57aec35b8419f4a6759c3322943e9ee2d214ce541c94fc09b3"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/state.json",
+      "bytes": 415,
+      "sha256": "fc4ad82319859e57e172a5df7676ec77fb19e3f176198ccfc7d12e5245f5481a"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/config.json",
+      "bytes": 178,
+      "sha256": "f02bb8eb302d70618fadc53954179bed93ecb3d96bf5b986d05b757726986b5b"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/stdout.log",
+      "bytes": 14139,
+      "sha256": "bddf0dbf0c69c7fbf35ed3130013c536cef52da6a0a4bc8d4b3ef599a0759969"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/observed-receipt.json",
+      "bytes": 7838,
+      "sha256": "7d62d41c35f99b08d3c17692e400e8a53b91b38100864a6359eadc065740548e"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/calls.jsonl",
+      "bytes": 14144,
+      "sha256": "35b72f39fcdc904f2a707982b2ec8cc3a84e870bb3dbc5ebb634586f5e20d28f"
+    },
+    {
+      "path": "heldout/cases/cid-oversize/step.bash",
+      "bytes": 14738,
+      "sha256": "f0ca99e655aac7cb9a858583798ee4bb2631418aa8255b3fe78e0dff88af2989"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/state.json",
+      "bytes": 435,
+      "sha256": "c0237eb31be6a0af1a5dfd4e6ca1dbb96ec3f859474e46811e8b7ec91b7f2c1a"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/config.json",
+      "bytes": 206,
+      "sha256": "1c14f4a27686d6cf7f4e2a6ab5269911a2d8b408d3445a2fe6261e22b56f7d81"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/stdout.log",
+      "bytes": 18066,
+      "sha256": "b09eaf1318e134759c1020baab1921de01f9b963a20303f86d8755fea0593d17"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/observed-receipt.json",
+      "bytes": 9627,
+      "sha256": "8fcbdd565583650adb52dd132e8b005daee4307a080593c49b19a409ca98ba7d"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/calls.jsonl",
+      "bytes": 20918,
+      "sha256": "68215ff4bcd79cdc44b2880be24a45901e4a4ad9604d777705cd9701f0595531"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-duplicate-label/step.bash",
+      "bytes": 14758,
+      "sha256": "32ac28e615e57fe112888d97e37a1d625782062d0b55390507a090432d89e174"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/state.json",
+      "bytes": 425,
+      "sha256": "79080146bb6bede865c08a8939026a98b2f674692869644499495a7a1a6240f7"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/config.json",
+      "bytes": 193,
+      "sha256": "0b007909dc371016e3f1e3e7c020bf2cb420e4c85cd74416c6698c3445003c5a"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/stdout.log",
+      "bytes": 17689,
+      "sha256": "3c8dcf63c1ced8882a10dc30628413455f9ed7227faac83ef5bf9676ae48365c"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/observed-receipt.json",
+      "bytes": 9496,
+      "sha256": "8e2b4ff7c9440dbbe6cbab6a7c0d746ec609261bc2d9adc280a3d80760ec81c2"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/calls.jsonl",
+      "bytes": 20128,
+      "sha256": "5284c785a2739a5b54cb10e5fd9583d7b11ab39f92018b2ff7d7d31c279354e3"
+    },
+    {
+      "path": "heldout/cases/cleanup-identity-array/step.bash",
+      "bytes": 14748,
+      "sha256": "adb4e4cfb72c9743d8ceecc1d6771fe1a2d6425ee3eaf995605d8fb4fb07d8d8"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/state.json",
+      "bytes": 432,
+      "sha256": "a994e3903999356242855d069f8f3efc8b5ce569beb0fc4879895016bab88655"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/config.json",
+      "bytes": 191,
+      "sha256": "a499c092385204ed85ec17767b312ee77fdfb75b57fbb3f48e7a04cd367f1cf0"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/stdout.log",
+      "bytes": 19334,
+      "sha256": "a46636b1c415aa1163e2691a7202c0898dd4324fc0ee71552bf410cb870ae1ff"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/observed-receipt.json",
+      "bytes": 10242,
+      "sha256": "a6066a7c8d7012422235d71973e441604b33e57e28293bfcc9e08c22bac93452"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/calls.jsonl",
+      "bytes": 23418,
+      "sha256": "b005ead1e8a482dd408e59482c6e8f27a8179e4653169ba8541c0e1d5650eacf"
+    },
+    {
+      "path": "heldout/cases/cleanup-inspect-error-present/step.bash",
+      "bytes": 14755,
+      "sha256": "f4646a51d86e8ea41e59ba1296c6979914b07f7bdb9b7654b2a541ef0acd0a5a"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/state.json",
+      "bytes": 427,
+      "sha256": "d193fe4b1a2286e80c62f3041e3549112d916e28521ef13ef5c2ef4ceccb052f"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/config.json",
+      "bytes": 155,
+      "sha256": "ae18b1317830134f60bd22eb8d548909e8e5488562ae18ab08daeeff24a17bee"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/stdout.log",
+      "bytes": 15643,
+      "sha256": "930368232282a3f4821bb085141bbf9d4614bc19a65b926c6118bd0b7ce7720d"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/observed-receipt.json",
+      "bytes": 8563,
+      "sha256": "beaed3667b088ec27b0d618c2c74181b98859284fa1ad699928e6e5a9631a9a5"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/calls.jsonl",
+      "bytes": 17442,
+      "sha256": "e57f1fbac10066cc2210e911647260ef324f8c26e8d22521370d35abdba1b2ad"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-empty-line/step.bash",
+      "bytes": 14749,
+      "sha256": "a279913d6045d49c4d2a3ea41999ef9574bec65a04786042b42555d8eb0f5635"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/state.json",
+      "bytes": 434,
+      "sha256": "71feb3f677594041bb40d3fddeed47b9a9edc04c4f23e28abf3034f4ba65f86f"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/config.json",
+      "bytes": 162,
+      "sha256": "63f28ea80a2d3cc555235cbb860cfefaa2cf81503e196b6cd4d51d4b2d5037b7"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/stdout.log",
+      "bytes": 15795,
+      "sha256": "db89ff43ad345421bc77901f0358adafa2ff405aaeb8e8a716c5774cd67ea63b"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/observed-receipt.json",
+      "bytes": 8603,
+      "sha256": "e927aba28abd7d2f885495040c74f312df097be1f3e7497ae1c75c0d07a0880a"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/calls.jsonl",
+      "bytes": 17918,
+      "sha256": "78dad649b5080a12cdb501b0ba968bb15ca1ba9f0fbc275588b0009de9bc91a4"
+    },
+    {
+      "path": "heldout/cases/cleanup-list-json-array-not-id/step.bash",
+      "bytes": 14756,
+      "sha256": "3055285dd0792e3b8c677df99dafba1cbef972eb033ff29dead25c5936839672"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/state.json",
+      "bytes": 441,
+      "sha256": "f64620ec91992a97f7231dadd23e91834b44c60edc37f6b252d1181a43ec54fb"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/config.json",
+      "bytes": 180,
+      "sha256": "cca502842a3f1681bbeb0cb14703bca2cd20dfaf1ee3dad45d93e73e4c6c8f54"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/stdout.log",
+      "bytes": 16198,
+      "sha256": "348366ec6563f0178bcef29a8d3565dae3e908799df52323163c0dfb30f20dbc"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/observed-receipt.json",
+      "bytes": 8754,
+      "sha256": "fe3d5a468b5594d011ec40174aa1c72e0c13997755f1867277e2147312ab5ab6"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/calls.jsonl",
+      "bytes": 18394,
+      "sha256": "e07851ca16accb7708026098931fcee1099323befdf80eb1d82b9d90a90861bd"
+    },
+    {
+      "path": "heldout/cases/control-duplicate-list-id-is-harmless/step.bash",
+      "bytes": 14763,
+      "sha256": "e38c75910c60c44b293cb5fbcb1acd49024ac886c062e05293f9862d4e4c816b"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/stderr.log",
+      "bytes": 1105,
+      "sha256": "a03b8c1964020a79c542092c51ac6c7c2cbf3c358886c97869198161f574e4e9"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/state.json",
+      "bytes": 425,
+      "sha256": "ba918d06d0b53c9d871d812311f411f7db52d61a68bba5ce9b1b942f985cef85"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/config.json",
+      "bytes": 168,
+      "sha256": "cfe65940b43981fc4b80fdbb63fc22e8d6ab7e83acc481a4df20f8e262d8845e"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/stdout.log",
+      "bytes": 15674,
+      "sha256": "394a587ad9ca5f93df31ab36971d9e44ec68fd752e71343f326db8907161beff"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/observed-receipt.json",
+      "bytes": 8556,
+      "sha256": "e9e0a54ebe587cfee3975f8b23bdd23d4adba767d356837a5e09bd243ea4b1c8"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/calls.jsonl",
+      "bytes": 17306,
+      "sha256": "84aadef94aa94312c3dbd71d2bc36a533696ab053a20c34143ec02d4a24bddfb"
+    },
+    {
+      "path": "heldout/cases/receipt-write-failure/step.bash",
+      "bytes": 14747,
+      "sha256": "68ede24af7df710ec235e06760f4206cea521d8f8dd9869ba315228bbcd99664"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/state.json",
+      "bytes": 494,
+      "sha256": "047061ecca63395acd3e912ab67fb18c76d73d4ea08b10e42fa69bad1d05ec51"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/config.json",
+      "bytes": 196,
+      "sha256": "20ffe123d9d740ebefdd15d2f3120a840ead279237e9a8533d1769882a3bf494"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/descendant-late-side-effect.json",
+      "bytes": 143,
+      "sha256": "4bd806cf1f64627c07df6c3a5bb66750d851bee6c1576b2b53b77a0de2693085"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/stdout.log",
+      "bytes": 19020,
+      "sha256": "969cfd097dd1af7968da312c724e24af04a33c81c43a9ba1402fa12a000c17a4"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/descendant-ready.json",
+      "bytes": 168,
+      "sha256": "464525b8db17dd6fdd9017d815b0043465093cc0dbe73918314423c1cdaeb812"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/observed-receipt.json",
+      "bytes": 9727,
+      "sha256": "f2eaf1d0267566a0fe424d1c4f3ce5c7000ade1cc717d46339b78dbc24fe5372"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/calls.jsonl",
+      "bytes": 25678,
+      "sha256": "5a115ca70a31ec4e609559f68f74e5e926fa9a156b745feda0b3069d685fbfeb"
+    },
+    {
+      "path": "heldout/cases/timeout-group-descendant/step.bash",
+      "bytes": 14750,
+      "sha256": "b84710251d91ee38ad7196f869833795ea5fa3d0e381f4a8539b5af26046af79"
+    }
+  ]
+}

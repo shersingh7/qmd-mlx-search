@@ -1,0 +1,69 @@
+{
+  "status": "SELECTED_FULL_PYTHON_SUITES_PASS_AFTER_RETAINED_SETUP_AND_COLLECTION_FIXES",
+  "checks": {
+    "runtime": {
+      "tests": 1489,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "passed": 1487,
+      "deselected": 13,
+      "skipReasons": {
+        "Local test model directory not present": 2
+      }
+    },
+    "security-repaired-full": {
+      "tests": 500,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 500,
+      "deselected": 0,
+      "skipReasons": {}
+    },
+    "finetune-activated-full": {
+      "tests": 1836,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 49,
+      "passed": 1787,
+      "deselected": 0,
+      "skipReasons": {
+        "collection skipped": 1,
+        "separate unmodified-wheel baseline run": 48
+      }
+    }
+  },
+  "workflowCollectionFix": {
+    "source": "test/security/test_gguf_workflow_controller.py",
+    "change": "Only rename the module-level generated helper and its setattr reference; class test names/bodies/assertions preserved",
+    "beforeSha256": "9c62c564bcaaf9c671f6b73fb88c91259e1dc48e1d7f8e8ff27689309e3e75ee",
+    "afterSha256": "d199af912ac6954607c1d6243d569c76c5ea9f6fbd1ad040359ed10333f84258",
+    "pytestCasesPassed": 26,
+    "unittestCasesPassed": 26,
+    "firstErroneousFreeFunctionSetupErrorRetained": true
+  },
+  "fineTunePathRepair": "Actual locked environment bin directory added to PATH; same58compatibility tests then passed and full suite reran without test changes",
+  "pipFreeEnvironments": "Original python -m pip failures retained; actual uv pip check passed on all3envs",
+  "security": {
+    "retainedAlerts": 262,
+    "affected": 0,
+    "graphInstances": 1780,
+    "freshNpmVersions": 375,
+    "freshOsvQueries": 489,
+    "freshFindings": 0,
+    "defaultBranchClosureNotClaimed": true
+  },
+  "evidence": {
+    "bundle": "evidence.tar.gz",
+    "sha256": "1735d7728e84ab7ae2999a4ae9e30309a7c699356671a9d2b058e37146d3a542",
+    "bytes": 117533,
+    "entriesReadbackVerified": 40
+  },
+  "pending": [
+    "ASTownershipfollowup",
+    "packagedsmokes",
+    "nativeCI/Nix",
+    "merge/defaultbranchreadback"
+  ]
+}

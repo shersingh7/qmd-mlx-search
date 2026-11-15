@@ -1,0 +1,152 @@
+{
+  "status": "SCOPED_SPEC_PASS_WITH_OPEN_MINOR_FINDING; NOT_INTEGRATED_OR_RELEASE_ACCEPTED",
+  "independent_delegation": "deleg_c578e440",
+  "authenticated_source_files": 242,
+  "combined_integration_source_sha256": {
+    "scripts/phase5_e2e_runner.ts": "91cc28f4cf8fede94e947bec51c59c24ab8d42ef3d68c9fca593a129e600486a",
+    "src/bench-rerank.ts": "e92a9edb69fb5b6c38782ad1460854c4bbf5d95debc5d47da93e30f955c3905d",
+    "src/llm/mlx-identity.ts": "6fe31e63bd9c2f2aacb8650b511ce35f48a7e99974cde241b4faa978ba43b6fa",
+    "src/mcp/server.ts": "dcf569ba82cd980c8bcd3c44d1e23bd5fcce226de8702b0c3df6c05e8b521930",
+    "src/test-preload.ts": "35445c5ebaa4e2e617b92e20040413ceef529f7873a56f2c7e9885398e7286b6",
+    "test/cli.test.ts": "a5171bb2ae4f5dc8816ac85d736fd6726f74162918a7fe7088432ff183dcba8e",
+    "test/eval-bm25.test.ts": "7f002365e4af4d74997552128bf1003e4e8fb719b00ec2db9a9d7141c5010697",
+    "test/eval.test.ts": "0875e528a4f2884df33919a6541bc215175ef4ad86a04136dd440c66284a3b4d",
+    "test/fixtures/public_eval_dataset.ts": "ec6499c0a2c9ced2b3885d010c890ace0484cd3464e385c4b8814e02a0eddf29",
+    "test/llm.test.ts": "00e4d199648535bf3d712ea5737203962630e8b4a09d1866783298a58bf17ce5",
+    "test/multi-collection-filter.test.ts": "59ef0b06186b590daebf43b4419914243127e0ca379f745d9ccf119cc61db13b",
+    "test/phase5-recovery.test.ts": "8cb9052208d525552aca5705acc984a97fb9da732336031c86bcc4886038452c",
+    "test/rrf-trace.test.ts": "d36eb1aaad9e5eb73a439c79ac9992b1c357527eae34bf582a37865e7f44797c",
+    "test/store.helpers.unit.test.ts": "59a080d631c646ff6363776e22484c9d7156413445ac714404957e421f13a253",
+    "src/llm.ts": "66dbd0a43320019a2fbb0b0d5fd7c5ad25df9414942d5ca4ee479cac477ea50d",
+    "test/bench-rerank-lifecycle.test.ts": "4615b486b22011036132a2ab94012a773fefa80072469a6e2053e4c69ff4c520"
+  },
+  "parent_fresh_independent_heldout_replays": {
+    "node": 4,
+    "bun": 4
+  },
+  "synthetic_backends_only": true,
+  "minor_open": "Legacy Node fallback symlink entry silently does not launch; parent independently confirmed. Repair owned by sa-0-1b17f9dc / deleg_9e9b867f in separate derivative.",
+  "broader_bun_failed_check": "phase5-recovery.test.ts fails before collection at z.object undefined on both old and proposed snapshots; runtime versus isolated-test-harness scope being diagnosed separately by sa-1-2e93ad80 / deleg_9e9b867f. Not a passing run.",
+  "recovery_integration": "Current live recovery is exclusively owned by sa-0-8845acea; approved old-mirror type deltas must later be rebased without replacing its protocol.",
+  "not_qualified": [
+    "live or package integration",
+    "native model performance/memory",
+    "older Node binary",
+    "native Mac recovery CI",
+    "final dependency/audit/Nix graph"
+  ],
+  "evidence_files": {
+    "independent-review.md": {
+      "sha256": "393de0ef536aeb162522070c2904cfdebc339147df8a1d46e184c1232b8ddfcf",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/REVIEW.md"
+    },
+    "independent-review-result.json": {
+      "sha256": "8b7a4c54ebd4f73791e2474ae248b9980ab4c452658045aa94412870e80b3c3d",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/review-result.json"
+    },
+    "independent-report-index.json": {
+      "sha256": "9f21d28f3685a9da49ea4b7d46983bb826d7992812169a6bcafa887a874c89ec",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/report-index.json"
+    },
+    "independent-preservation.json": {
+      "sha256": "cf10f8453973df9749f6c490a86f2d7f416d94f2d56629b6f59274281b371640",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/integrity-final.json"
+    },
+    "original-source-manifest.json": {
+      "sha256": "d40e5ec1145869933609286ab1881da23d887b1032b0c36b668c80ddd9592846",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source-manifest.json"
+    },
+    "original-delivery-manifest.json": {
+      "sha256": "2cefd3de50afe0aedc4ab37937f4eefc902f6fb8a70b2cccfb14a2d9c84b458e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/delivery-manifest.json"
+    },
+    "supplement-manifest.json": {
+      "sha256": "39a838f2070b09e0703002cef073212394032dba3203b26f34e2bc640b13eb57",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/evidence/supplement-manifest.json"
+    },
+    "type-source.patch.txt": {
+      "sha256": "e7b8d38aa36df031a3d28b4ba4044d5a6e16607b7f1ddfe3fa515f7fbe4fa620",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/source.patch"
+    },
+    "lifecycle-supplement.patch.txt": {
+      "sha256": "531b457942ab2c4d3e17780a69251a9b4b8d23b2287f436f76c05b3981eed4cc",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-rerank-followup-tpvzynt4/rerank-lifecycle-supplement.patch"
+    },
+    "independent-heldouts.mjs.txt": {
+      "sha256": "ac8a87b10b550731d9378a9bb92c9d96119b604f90463047204f3b20071f1d55",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/probes/independent-heldouts.test.mjs"
+    },
+    "parent-receipt.json": {
+      "sha256": "a1a51ee4bead80e89a634a7f284c2068678fd4ff74397d352989f9d9a015db8d",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/parent-receipt.json"
+    },
+    "node-focused-results.json": {
+      "sha256": "c6dad82b529e6426407e49315e7575ab8f23694e0b5ced9b9f8c8fcfcd119e3c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/node-focused-results.json"
+    },
+    "bun-focused-results.json": {
+      "sha256": "3bf1fc5b4dc16cd10bf7fb107e381d2eecc71030bd7b08c7bca6ae99f51aaa09",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-focused-results.json"
+    },
+    "node-original-results.json": {
+      "sha256": "0441ca9d7d0d4fd6269f3ba041a6a125b04f8d844aa696568fd7c8c504c4813c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/node-original-results.json"
+    },
+    "bun-original-results.json": {
+      "sha256": "6bb625d44709b8cc7ab64fc2d44319ced7320334d1ea51aedac8ce2b91cbc9ce",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-original-results.json"
+    },
+    "node-root-noemit.json": {
+      "sha256": "73e50971d4bff774311661b3ff222ad3f3054ef069b50b7f4a4b5c699958e1c8",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/node-root-noemit.json"
+    },
+    "bun-root-noemit.json": {
+      "sha256": "356b6042da224eee3ffb6aeff712c1b916bfc6208f4aa1387117cc21b04c5103",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-root-noemit.json"
+    },
+    "baseline-root-noemit.json": {
+      "sha256": "4687ea836de056184d8b1f02f0daebdd752a898b511ad9a76bb12cfe65b042e3",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/baseline-root-noemit.json"
+    },
+    "bun-baseline-phase5-alone.json": {
+      "sha256": "ccc6869790c0c06336f7f33f5482ceba3241a2b784fd69b3b6d01846194e0a13",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-baseline-phase5-alone.json"
+    },
+    "bun-phase5-alone.json": {
+      "sha256": "c744b9f1673204fde9d86f6dc8e7d60eee3545a4481aa0bc99f4ed0e513a65eb",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/evidence/bun-phase5-alone.json"
+    },
+    "bun-baseline-phase5-alone.stderr.log": {
+      "sha256": "26b1d9cf6cbe9a79d3ea18e9b46ef3bc428be56dfe1fdc3044fd9ff205655828",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/logs/bun-baseline-phase5-alone.stderr.log"
+    },
+    "bun-phase5-alone.stdout.log": {
+      "sha256": "b2f12c2d5ef2fbc46a9681a789c351d510f11582ea2cb2997e3311c427ad8805",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/logs/bun-phase5-alone.stdout.log"
+    },
+    "bun-phase5-alone.stderr.log": {
+      "sha256": "26b1d9cf6cbe9a79d3ea18e9b46ef3bc428be56dfe1fdc3044fd9ff205655828",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/logs/bun-phase5-alone.stderr.log"
+    },
+    "bun-baseline-phase5-alone.stdout.log": {
+      "sha256": "92f8303b7e2e742b6a81648eb586d3906c1a07843e8b327f784db07fd124033e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-ts-rerank-_f_znfbl/logs/bun-baseline-phase5-alone.stdout.log"
+    },
+    "parent-node.stdout.log": {
+      "sha256": "6566e6518c3147fd58b61fbcd2477df8c88f612b3ae947bda9700c6b90e6e1c6",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/node.stdout.log"
+    },
+    "parent-node.stderr.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/node.stderr.log"
+    },
+    "parent-bun.stdout.log": {
+      "sha256": "092cbd4de064e3ea5aa53315c1c2099d9d3fa9c58be6ab0c134d69083be1aef8",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/bun.stdout.log"
+    },
+    "parent-bun.stderr.log": {
+      "sha256": "2382fd4a769b5d63c2610d3398437b22d3af6de8b12b0db5f17c71ae75755f91",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/bun.stderr.log"
+    }
+  }
+}

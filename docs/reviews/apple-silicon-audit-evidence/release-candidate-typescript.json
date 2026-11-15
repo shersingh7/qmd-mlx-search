@@ -1,0 +1,15 @@
+{
+  "label": "release-candidate-typescript",
+  "command": [
+    "pnpm",
+    "run",
+    "test",
+    "--reporter=json",
+    "--outputFile=/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-typescript-results.json"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 62.471502584,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-typescript.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-candidate-typescript-744eqj3b"
+}

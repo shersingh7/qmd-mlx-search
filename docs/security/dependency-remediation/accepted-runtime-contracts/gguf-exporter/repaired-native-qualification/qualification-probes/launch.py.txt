@@ -1,0 +1,106 @@
+"""Bounded foreground phase launcher: new lock's Python/CMake, own children only."""
+from pathlib import Path
+import json
+import os
+import signal
+import subprocess
+import sys
+import threading
+import time
+
+ROOT = Path(__file__).resolve().parent
+ENVIRONMENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv')
+PYTHON = str(ENVIRONMENT / 'bin/python')
+phase = sys.argv[1]
+assert phase in {'fixture', 'standalone', 'native', 'verify2', 'pinned'}
+ISOLATION = ROOT / 'isolation' / phase
+for directory in ('home', 'tmp', 'cache/hf', 'cache/xdg', 'cache/torch', 'cache/numba', 'cache/matplotlib',
+                  'config', 'data', 'state', 'hermes/knowledge'):
+    (ISOLATION / directory).mkdir(parents=True, exist_ok=True)
+(ROOT / 'logs').mkdir(exist_ok=True)
+env = {'HOME': str(ISOLATION / 'home'), 'TMPDIR': str(ISOLATION / 'tmp'),
+       'PATH': str(ENVIRONMENT / 'bin') + ':/usr/bin:/bin',
+       'HERMES_HOME': str(ISOLATION / 'hermes'), 'HERMES_DIR': str(ISOLATION / 'hermes'),
+       'HERMES_KNOWLEDGE_DIR': str(ISOLATION / 'hermes/knowledge'),
+       'HF_HOME': str(ISOLATION / 'cache/hf'), 'HF_HUB_CACHE': str(ISOLATION / 'cache/hf/hub'),
+       'XDG_CACHE_HOME': str(ISOLATION / 'cache/xdg'), 'XDG_CONFIG_HOME': str(ISOLATION / 'config'),
+       'XDG_DATA_HOME': str(ISOLATION / 'data'), 'XDG_STATE_HOME': str(ISOLATION / 'state'),
+       'TORCH_HOME': str(ISOLATION / 'cache/torch'),
+       'NUMBA_CACHE_DIR': str(ISOLATION / 'cache/numba'), 'MPLCONFIGDIR': str(ISOLATION / 'cache/matplotlib'),
+       'PYTHONNOUSERSITE': '1', 'PYTHONDONTWRITEBYTECODE': '1',
+       'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_DATASETS_OFFLINE': '1',
+       'HF_HUB_DISABLE_TELEMETRY': '1', 'DO_NOT_TRACK': '1', 'WANDB_MODE': 'disabled',
+       'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1',
+       'VECLIB_MAXIMUM_THREADS': '1', 'ACCELERATE_USE_CPU': 'true', 'CUDA_VISIBLE_DEVICES': '',
+       'QMD_LLAMA_GPU': 'false', 'TOKENIZERS_PARALLELISM': 'false',
+       'PYTORCH_ENABLE_MPS_FALLBACK': '0', 'LC_ALL': 'en_US.UTF-8',
+       'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_TERMINAL_PROMPT': '0'}
+argv = [PYTHON, '-s', '-B', str(ROOT / f'qualify_{phase}.py')]
+started = time.monotonic()
+stdout = ROOT / 'logs' / f'{phase}.stdout'
+stderr = ROOT / 'logs' / f'{phase}.stderr'
+assert not stdout.exists() and not stderr.exists() and not (ROOT / f'{phase}-launch.json').exists()
+peak = 0
+peak_processes = []
+samples = 0
+breach = None
+limit = 2 * 1024**3
+phase_timeout = 480
+with stdout.open('x') as out, stderr.open('x') as err:
+    process = subprocess.Popen(argv, env=env, cwd=ROOT, stdout=out, stderr=err, start_new_session=True)
+    def stop_owned():
+        if process.poll() is None:
+            os.killpg(process.pid, signal.SIGTERM)
+    def monitor():
+        global peak, peak_processes, samples, breach
+        while process.poll() is None:
+            # Discover only ancestry, never unowned command names/arguments or RSS.
+            topology = subprocess.run(['/bin/ps', '-axo', 'pid=,ppid='], env=env, capture_output=True, text=True)
+            pairs = [tuple(map(int, line.split())) for line in topology.stdout.splitlines() if len(line.split()) == 2]
+            owned = {process.pid}
+            while True:
+                new = owned | {pid for pid, ppid in pairs if ppid in owned}
+                if new == owned:
+                    break
+                owned = new
+            result = subprocess.run(['/bin/ps', '-p', ','.join(map(str, sorted(owned))), '-o', 'pid=,ppid=,rss='],
+                                    env=env, capture_output=True, text=True)
+            selected = []
+            for line in result.stdout.splitlines():
+                fields = line.split()
+                if len(fields) == 3 and int(fields[0]) in owned:
+                    selected.append({'pid': int(fields[0]), 'ppid': int(fields[1]), 'rss_bytes': int(fields[2]) * 1024})
+            total = sum(item['rss_bytes'] for item in selected)
+            samples += 1
+            if total > peak:
+                peak, peak_processes = total, selected
+            if total > limit:
+                breach = 'sampled owned tree RSS exceeded 2 GiB'
+                stop_owned()
+                return
+            time.sleep(0.5)
+    thread = threading.Thread(target=monitor, daemon=True)
+    thread.start()
+    try:
+        status = process.wait(timeout=phase_timeout)
+    except subprocess.TimeoutExpired:
+        breach = 'owned phase timeout'
+        stop_owned()
+        try:
+            status = process.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            status = process.wait(timeout=15)
+    finally:
+        thread.join(timeout=3)
+receipt = {'phase': phase, 'argv': argv, 'cwd': str(ROOT), 'environment': env,
+           'returncode': status, 'elapsed_seconds': time.monotonic() - started,
+           'phase_timeout_seconds': phase_timeout, 'rss_limit_bytes': limit,
+           'sampled_peak_tree_rss_bytes': peak, 'peak_owned_processes': peak_processes,
+           'samples': samples, 'breach': breach, 'monitor_scope': 'ancestry only globally; RSS for owned PID tree only; no process args',
+           'stdout': str(stdout), 'stderr': str(stderr)}
+(ROOT / f'{phase}-launch.json').write_text(json.dumps(receipt, indent=2))
+print(json.dumps(receipt, indent=2))
+if status:
+    print(stderr.read_text()[-12000:])
+sys.exit(status or (1 if breach else 0))

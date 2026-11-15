@@ -1,0 +1,4 @@
+{
+  "probe_stderr_payload": "\n::error title=SYNTHETIC::not a command\n::set-output name=x::not a command\n",
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/control-escaped-workflow-log/workspace"
+}

@@ -1,0 +1,11 @@
+{
+  "project_sync_exit": 0,
+  "pip_check_exit": 0,
+  "installed_probe": {
+    "accelerate": "1.15.0+qmd.2",
+    "installed_path": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/lib/python3.12/site-packages/accelerate",
+    "capability_sha256": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
+    "torch": "2.15.0"
+  },
+  "scope": "actual frozen project install, not model execution"
+}

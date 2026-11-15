@@ -1,0 +1,208 @@
+{
+  "status": "CANDIDATE DELIVERED: parent114focusedtestsPASS; independentSPEC/QUALITYandnativeCIpending",
+  "candidate_source_sha256": {
+    "scripts/phase5_e2e_runner.ts": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+    "scripts/phase5_recovery_process.py": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+    "test/audit-recovery-tree.test.ts": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+    "test/audit-recovery.test.ts": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696",
+    "test/phase5-recovery.test.ts": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+    "test/audit-native-bun-recovery.test.ts": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198",
+    "test/fixtures/bun_recovery_ownership.ts": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb",
+    "test/audit-recovery-startup.test.ts": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6",
+    "test/audit-recovery-transition.test.ts": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c",
+    "test/audit-recovery-execution-admission.test.ts": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010",
+    "scripts/qmd_mlx/process_anchor.py": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+    "scripts/qmd_mlx/__init__.py": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1"
+  },
+  "changed_paths_against_entry": [
+    "scripts/phase5_e2e_runner.ts",
+    "scripts/phase5_recovery_process.py",
+    "test/audit-recovery-tree.test.ts",
+    "test/audit-recovery-startup.test.ts",
+    "test/audit-recovery-execution-admission.test.ts"
+  ],
+  "parent_tests": {
+    "files": 7,
+    "passed": 114,
+    "failed": 0,
+    "skipped": 0,
+    "new_observations": 44,
+    "new_fixture_kills": 0
+  },
+  "clock_scope": "Conservative PREPARED anchor transfers remaining duration, not rawcross-runtimeclock. Actual systemPython forkepochparent-replayed; independent source-bound reviewpending.",
+  "independent_review": {
+    "delegation": "deleg_29cc12a0",
+    "owner": "sa-0-9f8abe79"
+  },
+  "ci_observability_proposal": {
+    "delegation": "deleg_46e0a020",
+    "owner": "sa-0-28b2145b",
+    "scope": "Separate scratch-only test/workflow proposal; preservescanonicalfirstlaunch, no warmup or protocol changes"
+  },
+  "remaining": [
+    "Independent scope acceptance",
+    "Preserve protocol when rebasing type-only proposal",
+    "Native CI bootstrap cause/qualification remains open",
+    "Whole workspace canonicaltests/build/packaging,exact-headCI,merge"
+  ],
+  "artifacts": {
+    "IMPLEMENTATION-REPORT.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/IMPLEMENTATION-REPORT.md",
+      "sha256": "f582c29a3079d9ca17e4e3dd62f08f81f43eca91c86952c23c64b350d5527249"
+    },
+    "DESIGN.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/DESIGN.md",
+      "sha256": "d3b194d4cbeda37d91e5054651e5ad90658b4229070a5f5f1fd679a7e2d58082"
+    },
+    "REVOCATION-DESIGN.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/REVOCATION-DESIGN.md",
+      "sha256": "8dad6a8b05cc87a4e257f750f0d7079b84ec7778056bcfd049e4522ff648b958"
+    },
+    "candidate-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-receipt.json",
+      "sha256": "791bf8fbcaaacdae7235976891652d045279a4dcfa1d43020f6e7f34aad09f8c"
+    },
+    "candidate-source-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source-manifest.json",
+      "sha256": "563e06bb3dd272557a889770acf54f56aec26569067af2dba00a2e504957c1b9"
+    },
+    "candidate-invocation.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-invocation.json",
+      "sha256": "40e3ec5d3b3c2bb1189493a4dc19778f09ffd917e859f8293a64e7af071582d2"
+    },
+    "candidate-evidence-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-evidence-summary.json",
+      "sha256": "07974dde27d960f81c1ec4cd857d8c14c4a998b31d989242d6ae5a5cfd98698f"
+    },
+    "candidate-observations.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-observations.json",
+      "sha256": "9c2c33247962b0e69cdb31ce91facc9bc2118ca80514ccae49cd9b6f9fc99b8f"
+    },
+    "revocation-red-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/revocation-red-receipt.json",
+      "sha256": "4ab6c7db757dc8ceb6b2b59fbda6a4842893a990f5aac89262d39c08d6f0566a"
+    },
+    "entry-delta.patch.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/entry-delta.patch",
+      "sha256": "39c2ab6e0487b550f928246c0e15f3ade59a45dba007300c1a025e690144bf66"
+    },
+    "clock-proof.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/clock-proof.py",
+      "sha256": "f46149c4e23c411fe525679d83248a7eb127d1771ac7e96eba93b95baa8508e7"
+    },
+    "original-reproduce_stale_e.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/original-reproduce_stale_e.py",
+      "sha256": "645d5d249875cffda60e6d2b0e59829cfa3e5b29799ce0a6ddc8ff3cd644a0e3"
+    },
+    "worker-clock-proof.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/logs/clock-proof.json",
+      "sha256": "6405940d4a9d782de284d9a6d9cb30f5489a2ad12d7bf6d871bce0eef068f74d"
+    },
+    "parent-receipt.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/parent-receipt.json",
+      "sha256": "7d26be820896378d00ef8236cd157ae4547192ce701d9779722bc6c36bf95ffb"
+    },
+    "parent-observations-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/observations-summary.json",
+      "sha256": "88d82b2912d456801b6ccde48b2856df666164c080de463ed837c22624ca27af"
+    },
+    "parent-input.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/input.json",
+      "sha256": "89e9703d9731655d411d6d089c12ddb359428f9413964c9e272d8dd542f541ab"
+    },
+    "parent-invocation.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/invocation.json",
+      "sha256": "6aaf7097c77ebac811cd09e42cb75664ae1569390b7418411b9dab22fc76cb1f"
+    },
+    "parent-fork-clock.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/clock.json",
+      "sha256": "1306a390fa7736fe322f35fb95a1460c0db5107aaae5bb6f273a9a28fb2e92a8"
+    },
+    "parent-focused-results.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/focused.json",
+      "sha256": "87721245d586cfb9a6670c18a4755ae5a2eaad97e856a4667fcad51d740111c5"
+    },
+    "candidate-source/scripts/phase5_e2e_runner.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/scripts/phase5_e2e_runner.ts",
+      "sha256": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875"
+    },
+    "candidate-source/scripts/phase5_recovery_process.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/scripts/phase5_recovery_process.py",
+      "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf"
+    },
+    "candidate-source/test/audit-recovery-tree.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-recovery-tree.test.ts",
+      "sha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d"
+    },
+    "candidate-source/test/audit-recovery.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-recovery.test.ts",
+      "sha256": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696"
+    },
+    "candidate-source/test/phase5-recovery.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/phase5-recovery.test.ts",
+      "sha256": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3"
+    },
+    "candidate-source/test/audit-native-bun-recovery.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-native-bun-recovery.test.ts",
+      "sha256": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198"
+    },
+    "candidate-source/test/fixtures/bun_recovery_ownership.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/fixtures/bun_recovery_ownership.ts",
+      "sha256": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb"
+    },
+    "candidate-source/test/audit-recovery-startup.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-recovery-startup.test.ts",
+      "sha256": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6"
+    },
+    "candidate-source/test/audit-recovery-transition.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-recovery-transition.test.ts",
+      "sha256": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c"
+    },
+    "candidate-source/test/audit-recovery-execution-admission.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/test/audit-recovery-execution-admission.test.ts",
+      "sha256": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010"
+    },
+    "candidate-source/scripts/qmd_mlx/process_anchor.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/scripts/qmd_mlx/process_anchor.py",
+      "sha256": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b"
+    },
+    "candidate-source/scripts/qmd_mlx/__init__.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/candidate-source/scripts/qmd_mlx/__init__.py",
+      "sha256": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1"
+    },
+    "entry-source/scripts/phase5_e2e_runner.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/entry/scripts/phase5_e2e_runner.ts",
+      "sha256": "3e0f163373f55451e5a8ce2f2d1f20579076b3aab9e3c3daa3ac7dbb0bf37848"
+    },
+    "entry-source/scripts/phase5_recovery_process.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/entry/scripts/phase5_recovery_process.py",
+      "sha256": "c9886fe8a1b7c99d8ac7f8746b73c5b1055e68ee012d3bb53581e866212be8ab"
+    },
+    "entry-source/test/audit-recovery-tree.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/entry/test/audit-recovery-tree.test.ts",
+      "sha256": "bd02a8b4ea16c18b978e62f62a8dee9eb7a96e279234a776fae37fbce0a47990"
+    },
+    "entry-source/test/audit-recovery-startup.test.ts.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/entry/test/audit-recovery-startup.test.ts",
+      "sha256": "7bba621f2bf0bc2096add1e890b48e99a528cd00a0ffa789b3d4ef1ec4e01248"
+    },
+    "parent-focused.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh/evidence/focused.log",
+      "sourceSha256": "8b385d5e68f4b66ace2afe9f806a1eed2edaea0ce1beb0be1806de21af417a58",
+      "sha256": "9f793b4c146adaa8cbc9660722fe466a99bc4aa16146ec4a9790d933984f4d7f",
+      "encoding": "gzip"
+    },
+    "worker-focused.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/logs/candidate-focused.log",
+      "sourceSha256": "9984f8bce6d15d0db16bff2ba3b35751548cddf3296fd640caf1a25b13ec4fc5",
+      "sha256": "487dd9712d340b16591c5d6025bac0504acf42a19d99a690d3eaa74ccda2ea6a",
+      "encoding": "gzip"
+    },
+    "revocation-red.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo/logs/revocation-red.log",
+      "sourceSha256": "74d04d8a3ca115759429719ce2acfe0373d2717f44b8db72fd3e32f08010998a",
+      "sha256": "df534ca4b931f118d280f376006fbeb6bf37c72a71b3818534226c7a3515a529",
+      "encoding": "gzip"
+    }
+  }
+}

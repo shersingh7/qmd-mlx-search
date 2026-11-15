@@ -94,7 +94,10 @@ def test_sustained_rehearsal_pilot_lifecycle_and_strata():
     runner = SustainedRunner(config)
     report = runner.run()
 
-    assert report["status"] == "passed"
+    assert report["status"] == "rehearsal_completed"
+    assert report["qualification_evaluation"]["overall_status"] == "failed"
+    assert report["qualification_evaluation"]["gates"]["completed_real_run"]["passed"] is False
+    assert report["qualification_evaluation"]["gates"]["process_telemetry_coverage"]["passed"] is True
     assert report["mode"] == "sustained_pilot"
     assert report["synthetic"] is True
     assert "code_manifest_sha256" in report
@@ -141,7 +144,10 @@ def test_sustained_rehearsal_pilot_lifecycle_and_strata():
         assert r["finite"] is True
         assert r["l2_normalized"] is True
         assert r["wire_ms"] > 0
-        assert r["effective_tokens_per_sec"] > 0
+        assert r["effective_tokens_per_sec"] is None
+        assert r["total_tokens"] is None
+        assert r["token_count_source"] == "unavailable"
+        assert r["effective_words_per_sec"] > 0
 
     assert len(rejs) >= 1
     for r in rejs:
@@ -155,11 +161,15 @@ def test_sustained_rehearsal_pilot_lifecycle_and_strata():
         assert c["bulk_wire_ms"] > 0
         assert c["concurrent_interactive_wire_ms"] > 0
         assert c["slowdown_factor"] > 0
+        assert c["overlap_verified"] == (c["bulk_start_mono"] <= c["query_start_mono"] < c["bulk_end_mono"])
 
     # Metrics summary
     summary = report["metrics_summary"]
     assert summary["total_measured_requests"] == len(reqs) + len(rejs)
-    assert summary["total_successful_embedded_tokens"] > 0
+    assert summary["total_successful_embedded_tokens"] is None
+    assert summary["overall_effective_tokens_per_sec"] is None
+    assert summary["token_metrics_complete"] is False
+    assert summary["overall_effective_words_per_sec"] > 0
     assert "overall_successful_latency_ms" in summary
     assert "expected_rejections_latency_ms" in summary
     assert "by_stratum_latency_ms" in summary
@@ -193,7 +203,8 @@ def test_sustained_rehearsal_soak_lifecycle():
     runner = SustainedRunner(config)
     report = runner.run()
 
-    assert report["status"] == "passed"
+    assert report["status"] == "rehearsal_completed"
+    assert report["qualification_evaluation"]["overall_status"] == "failed"
     assert report["mode"] == "sustained_soak"
     assert len(report["measured_requests"]) + len(report["rejections"]) == 25
     assert report["child_cleanup"]["cleaned"] is True
@@ -224,7 +235,8 @@ def test_sustained_cli_writes_report_file(tmp_path):
     with open(out_file, "r", encoding="utf-8") as f:
         saved_report = json.load(f)
 
-    assert saved_report["status"] == "passed"
+    assert saved_report["status"] == "rehearsal_completed"
+    assert saved_report["qualification_evaluation"]["overall_status"] == "failed"
     assert saved_report["mode"] == "sustained_pilot"
     assert saved_report["metrics_summary"]["total_measured_requests"] == 23
 
@@ -237,7 +249,11 @@ def test_evaluate_qualification_gates_fails_on_interactive_latency_breach():
         "status": "in_progress",
         "cold_startup": {"ready": True, "cold_startup_elapsed_s": 2.1},
         "rejections": [{"stratum": "boundary_2049", "rejection_verified": True, "status_code": 400}],
-        "measured_requests": [{"finite": True, "l2_normalized": True}],
+        "measured_requests": [
+            {"finite": True, "l2_normalized": True,
+             "tag": f"concurrent_interactive_query_{iteration}", "wire_ms": 1236.5}
+            for iteration in range(3)
+        ],
         "metrics_summary": {
             "concurrent_tail_latency_ms": {
                 "concurrent_interactive_under_load": {
@@ -306,8 +322,10 @@ def test_partial_metrics_summary_computation():
     from scripts.qmd_mlx.sustained import compute_metrics_summary
 
     meas = [
-        {"stratum": "short", "batch_size": 1, "total_tokens": 20, "wire_ms": 15.0},
-        {"stratum": "medium", "batch_size": 1, "total_tokens": 100, "wire_ms": 45.0},
+        {"stratum": "short", "batch_size": 1, "token_counts": [20], "total_tokens": 20,
+         "token_count_source": "tokenizer", "wire_ms": 15.0},
+        {"stratum": "medium", "batch_size": 1, "token_counts": [100], "total_tokens": 100,
+         "token_count_source": "tokenizer", "wire_ms": 45.0},
     ]
     rejs = [
         {"stratum": "boundary_2049", "wire_ms": 5.0, "status_code": 400, "rejection_verified": True}

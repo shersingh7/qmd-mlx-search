@@ -1,0 +1,150 @@
+from pathlib import Path
+import os, json, hashlib, stat, shutil, subprocess, time
+R=Path(__file__).resolve().parent
+S=R.parent
+BASE=S/'qmd-independent-ts-rerank-_f_znfbl'
+A=S/'qmd-entrypoint-fix-r8j5vfbp'
+B=S/'qmd-bun-zod-diagnosis-g5buabqa'
+P=S/'qmd-parent-types-final-deltas-vzh8vq1e'
+O=S/'qmd-ts-nj8i129w'
+F=S/'qmd-rerank-followup-tpvzynt4'
+for n in ['inputs','evidence','logs','bin','home','tmp','cache/vite','cache/vitest','cache/bun','cache/bun-transpiler','config','data','hermes','knowledge','hf']:
+    (R/n).mkdir(parents=True,exist_ok=True)
+def digest(p):
+    h=hashlib.sha256()
+    with Path(p).open('rb') as f:
+        for chunk in iter(lambda:f.read(1048576),b''): h.update(chunk)
+    return h.hexdigest()
+def load(p): return json.loads(Path(p).read_text())
+def save(p,d):
+    p=Path(p);p.parent.mkdir(parents=True,exist_ok=True)
+    with p.open('x') as f:json.dump(d,f,indent=2);f.write('\n')
+def item(p):
+    p=Path(p);s=p.lstat()
+    if stat.S_ISLNK(s.st_mode):return {'kind':'link','target':os.readlink(p),'mtime_ns':s.st_mtime_ns}
+    assert stat.S_ISREG(s.st_mode),str(p)
+    return {'kind':'file','size':s.st_size,'mtime_ns':s.st_mtime_ns,'sha256':digest(p)}
+def verify_old(records):
+    failures=[]
+    for name,old in records.items():
+        try:
+            actual=item(name)
+            old=dict(old)
+            if 'mtimeNs' in old:old['mtime_ns']=old.pop('mtimeNs')
+            for k,v in old.items():
+                if actual.get(k)!=v:failures.append({'path':name,'key':k,'expected':v,'actual':actual.get(k)})
+        except Exception as exc: failures.append({'path':name,'error':repr(exc)})
+    return failures
+# Authenticate frozen inventories first, before any test-host execution.
+oldA=load(A/'evidence/protection-entry.json')['protected']
+oldB=load(B/'evidence/preservation-before.json')
+assert len(oldA)==2787 and len(oldB)==3516
+errorsA=verify_old(oldA);errorsB=verify_old(oldB)
+save(R/'evidence/inherited-preservation-entry.json',{'guard_count':len(oldA),'zod_count':len(oldB),'guard_mismatches':errorsA,'zod_mismatches':errorsB})
+assert not errorsA and not errorsB,(errorsA[:2],errorsB[:2])
+protected={}
+# Add all readonly evidence/source trees, excluding dependencies and transient caches.
+for root in [O,F,BASE,A,B,P]:
+    for d,dirs,files in os.walk(root,followlinks=False):
+        dirs[:]=[n for n in dirs if n not in ['node_modules','.git','__pycache__']]
+        for n in files:
+            p=Path(d)/n
+            if p.is_symlink() or p.is_file():protected[str(p)]=item(p)
+        for n in dirs:
+            p=Path(d)/n
+            if p.is_symlink():protected[str(p)]=item(p)
+# Explicitly include every inherited protected cache, preserving prior cache incident.
+for name in set(oldA)|set(oldB):protected[name]=item(name)
+save(R/'evidence/protected-before.json',protected)
+baseReview=load(BASE/'review-result.json');indexA=load(A/'result-index.json');postA=load(A/'postfinal-verification.json')
+verified=[]
+for root, records, label in [(BASE,load(BASE/'report-index.json')['files'],'base-index'),(A,indexA['files'],'guard-index'),(A,postA['files'],'guard-postfinal')]:
+    for name,sha in records.items():
+        assert digest(root/name)==sha,(label,name)
+    verified.append({'label':label,'count':len(records)})
+assert len(indexA['files'])==indexA['artifactCount']==148
+assert digest(A/'result-index.json')==postA['previousIndexSha256']
+for name,sha in baseReview['artifacts'].items():assert digest(name)==sha,name
+verified.append({'label':'base-original-artifacts','count':len(baseReview['artifacts'])})
+manifestA=load(A/'delivery-manifest.json');manifestB=load(B/'proposal-manifest.json');parent=load(P/'input.json')
+assert digest(A/'entrypoint-fallback.patch')==manifestA['patchSha256']=='5ea31fbc708eeea3e2d6372a8c07d0bfbf9cc280e75c580dc62728eb1e0d9915'
+assert digest(B/'proposal.patch')==manifestB['patchSha256']=='8a5d0f9fb47085111b58264b770be94b1dd8aaf9eb1101f750f286627da616da'
+baseSources=load(A/'evidence/combined-source-before.json')
+for name,sha in baseSources.items():assert digest(BASE/'mirror'/name)==sha,name
+snapshot=load(O/'source-manifest.json')
+for name,sha in snapshot.items():assert digest(O/'snapshot'/name)==sha,name
+for f in manifestA['changedFiles']:
+    before=BASE/'mirror'/f['path']
+    assert (digest(before) if before.exists() else None)==f['beforeSha256']
+    assert digest(A/'mirror'/f['path'])==f['sha256']
+for f in manifestB['files']:
+    before=BASE/'mirror'/f['path']
+    assert (digest(before) if before.exists() else None)==f['baseSha256']
+    assert digest(B/'proposal'/f['path'])==f['proposedSha256']
+    assert digest(B/'mirror'/f['path'])==f['proposedSha256']
+union=sorted(set(baseReview['integrationPaths'])|{f['path'] for f in manifestA['changedFiles']}|{f['path'] for f in manifestB['files']})
+assert len(union)==19 and union==parent['integration_paths']
+for name,sha in parent['source_sha256'].items():assert digest(P/'mirror'/name)==sha,name
+# Independently replay all original source/metadata/relocation/lifecycle patches.
+replay=R/'base-replay';replay.mkdir()
+for name in snapshot:
+    dest=replay/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(O/'snapshot'/name,dest)
+cleanEnv={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin','HOME':str(R/'home'),'TMPDIR':str(R/'tmp'),'GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_OPTIONAL_LOCKS':'0'}
+applications=[]
+for patch in [O/'source.patch',O/'metadata-intents.patch',O/'mirror-only-import-relocation.patch',F/'rerank-lifecycle-supplement.patch']:
+    for flags in [['--check'],[]]:
+        cmd=['/usr/bin/git','apply',*flags,str(patch)]
+        cp=subprocess.run(cmd,cwd=replay,env=cleanEnv,text=True,capture_output=True,timeout=30)
+        applications.append({'command':cmd,'cwd':str(replay),'exit_code':cp.returncode,'stdout':cp.stdout,'stderr':cp.stderr})
+        assert cp.returncode==0,applications[-1]
+for name in snapshot:
+    assert digest(replay/name)==digest(BASE/'mirror'/name),name
+for name in union:
+    if (BASE/'mirror'/name).exists():assert digest(replay/name)==digest(BASE/'mirror'/name),name
+# Retain generated baseline compiler roots as well as reconstructed source.
+# Their omission was an initial own inventory-harness error, not a product delta.
+shutil.copytree(BASE/'mirror/dist',replay/'dist')
+# Test mirrors are copies; never run readonly upstream harness writers.
+shutil.copytree(BASE/'mirror',R/'mirror',ignore=shutil.ignore_patterns('node_modules','.git','__pycache__'))
+shutil.copytree(BASE/'mirror',R/'baseline',ignore=shutil.ignore_patterns('node_modules','.git','__pycache__'))
+for patch in [A/'entrypoint-fallback.patch',B/'proposal.patch']:
+    for flags in [['--check'],[]]:
+        cmd=['/usr/bin/git','apply',*flags,str(patch)]
+        cp=subprocess.run(cmd,cwd=R/'mirror',env=cleanEnv,text=True,capture_output=True,timeout=30)
+        applications.append({'command':cmd,'cwd':str(R/'mirror'),'exit_code':cp.returncode,'stdout':cp.stdout,'stderr':cp.stderr})
+        assert cp.returncode==0,applications[-1]
+# Baseline receives only new tests so identical RED/GREEN contract bytes execute.
+for name in ['test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts']:
+    shutil.copy2(R/'mirror'/name,R/'baseline'/name)
+for name,sha in parent['source_sha256'].items():assert digest(R/'mirror'/name)==sha,name
+changed=sorted(n for n in baseSources if digest(R/'mirror'/n)!=baseSources[n])
+added=sorted(n for n in parent['source_sha256'] if n not in baseSources)
+assert changed==['src/bench-rerank.ts','vitest.config.ts'] and added==['test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts'],(changed,added)
+layout=[]
+for label in ['mirror','baseline']:
+    nm=R/label/'node_modules';nm.mkdir()
+    for p in sorted((BASE/'mirror/node_modules').iterdir()):
+        if p.name.startswith('.'):continue
+        if p.name.startswith('@'):
+            (nm/p.name).mkdir()
+            pairs=[(c,nm/p.name/c.name) for c in sorted(p.iterdir())]
+        else:pairs=[(p,nm/p.name)]
+        for source,target in pairs:
+            resolved=source.resolve(strict=True);target.symlink_to(resolved,target_is_directory=resolved.is_dir())
+            layout.append({'mirror':label,'package':str(target.relative_to(nm)),'target':str(resolved)})
+    for n in ['.vite','.vite-temp','.cache']:(nm/n).mkdir()
+    assert not nm.is_symlink()
+for n,target in [('node','/Users/shersingh/.hermes/node/bin/node'),('bun','/Users/shersingh/.bun/bin/bun')]:
+    (R/'bin'/n).symlink_to(target)
+    assert Path(target).is_file()
+files=sorted({f['file'] for key in ['node-focused','node-original'] for f in baseReview['results'][key]['files']}|{'test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts'})
+assert len(files)==13
+for n in files:assert (R/'mirror'/n).is_file()
+for n in ['evaluator.mjs','pure-namespace-evaluator.mjs','namespace-entry.js','namespace-leaf.js']:
+    dest=R/'probes'/n;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(B/'mirror/probes'/n,dest)
+# Probe package roots live outside the candidate compiler root; own aliases only.
+shutil.copytree(R/'mirror/node_modules',R/'node_modules',symlinks=True)
+save(R/'evidence/dependency-layout.json',layout)
+save(R/'evidence/patch-applications.json',applications)
+save(R/'source-binding.json',{'scope':'Frozen 19-file source proposal; no live recovery integration','base_source_patch':digest(O/'source.patch'),'lifecycle_patch':digest(F/'rerank-lifecycle-supplement.patch'),'guard_patch':digest(A/'entrypoint-fallback.patch'),'zod_patch':digest(B/'proposal.patch'),'base_source_inventory_count':len(baseSources),'original_snapshot_count':len(snapshot),'parent_source_count':len(parent['source_sha256']),'base_sources':baseSources,'source_sha256':parent['source_sha256'],'integration_paths':union,'integration_sha256':{n:digest(R/'mirror'/n) for n in union},'four_file_sha256':{n:digest(R/'mirror'/n) for n in changed+added},'focused_files':files,'authenticated_indexes':verified,'readonly_original_artifacts':baseReview['artifacts'],'protected_before_count':len(protected),'cache_layout_ready_before_first_test':True,'package_links_per_mirror':len(layout)//2})
+print(json.dumps({'root':str(R),'source_binding':str(R/'source-binding.json'),'protected_count':len(protected),'patches_replayed':len(applications)//2,'focused_files':files,'changed':changed,'added':added,'package_links_per_mirror':len(layout)//2},indent=2))

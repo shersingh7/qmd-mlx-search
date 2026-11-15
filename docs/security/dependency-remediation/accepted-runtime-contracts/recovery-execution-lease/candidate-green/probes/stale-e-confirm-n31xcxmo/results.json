@@ -1,0 +1,153 @@
+[
+  {
+    "name": "positive",
+    "grant": "E-open",
+    "held": false,
+    "executionDeadlineMs": 200,
+    "guardMs": 1800,
+    "guardFired": false,
+    "elapsedMs": 118.70420800000001,
+    "supervisorPid": 12071,
+    "supervisorAbsent": true,
+    "workersAbsent": true,
+    "sentinelAlive": true,
+    "work": "actual-user-work",
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12071,
+        "sessionId": 12071
+      },
+      {
+        "type": "ready",
+        "pid": 12072,
+        "sessionId": 12071,
+        "processGroupId": 12072
+      },
+      {
+        "type": "exit",
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": false,
+        "processGroups": [
+          12072
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified"
+        ]
+      }
+    ],
+    "stderr": ""
+  },
+  {
+    "name": "eof-no-E",
+    "grant": "eof",
+    "held": false,
+    "executionDeadlineMs": 200,
+    "guardMs": 1800,
+    "guardFired": false,
+    "elapsedMs": 118.239,
+    "supervisorPid": 12074,
+    "supervisorAbsent": true,
+    "workersAbsent": true,
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12074,
+        "sessionId": 12074
+      },
+      {
+        "type": "ready",
+        "pid": 12075,
+        "sessionId": 12074,
+        "processGroupId": 12075
+      },
+      {
+        "type": "exit",
+        "exitCode": null,
+        "signal": "SIGKILL"
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12075
+        ],
+        "timedOut": false,
+        "errors": [
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery supervisor interrupted by parent signal or closed proof channel",
+          "Recovery runner control channel closed before teardown"
+        ]
+      }
+    ],
+    "stderr": ""
+  },
+  {
+    "name": "stale-E-eof",
+    "grant": "E-eof",
+    "held": true,
+    "executionDeadlineMs": 200,
+    "guardMs": 1800,
+    "guardFired": false,
+    "elapsedMs": 368.54441699999995,
+    "supervisorPid": 12077,
+    "supervisorAbsent": true,
+    "workersAbsent": true,
+    "sentinelAlive": true,
+    "work": null,
+    "messages": [
+      {
+        "type": "prepared",
+        "supervisorPid": 12077,
+        "sessionId": 12077
+      },
+      {
+        "type": "ready",
+        "pid": 12078,
+        "sessionId": 12077,
+        "processGroupId": 12078
+      },
+      {
+        "type": "exit",
+        "exitCode": 125,
+        "signal": null
+      },
+      {
+        "type": "cleanup",
+        "childReaped": true,
+        "groupTerminated": true,
+        "sessionTerminated": true,
+        "containmentVerified": false,
+        "sigkillUsed": true,
+        "processGroups": [
+          12078
+        ],
+        "timedOut": true,
+        "errors": [
+          "Recovery worker timed out after 200ms (PID 12078)",
+          "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+          "Recovery runner control channel closed or cancelled before execution",
+          "Recovery supervisor interrupted by parent signal or closed proof channel",
+          "Recovery runner control channel closed before teardown"
+        ]
+      }
+    ],
+    "stderr": ""
+  }
+]

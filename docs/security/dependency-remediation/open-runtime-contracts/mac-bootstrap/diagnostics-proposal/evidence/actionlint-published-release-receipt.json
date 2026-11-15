@@ -1,0 +1,19 @@
+{
+  "scope": "Isolated official release linter, no global installation",
+  "release": "v1.7.12",
+  "assets": {
+    "actionlint_1.7.12_checksums.txt": {
+      "url": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt",
+      "sha256": "433028cf0ba3c42163ea1a668dedce30fcdbe84fe912b1a5e288c006eab8a4f5",
+      "size": 1130
+    },
+    "actionlint_1.7.12_darwin_arm64.tar.gz": {
+      "url": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_arm64.tar.gz",
+      "sha256": "aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f",
+      "size": 2164202
+    }
+  },
+  "binary_sha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388",
+  "version_stdout": "1.7.12\ninstalled by downloading from release page\nbuilt with go1.26.1 compiler for darwin/arm64\n",
+  "exit_code": 0
+}

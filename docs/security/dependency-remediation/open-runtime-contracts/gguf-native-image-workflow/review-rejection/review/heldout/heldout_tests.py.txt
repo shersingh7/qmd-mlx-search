@@ -1,0 +1,201 @@
+"""Independent SPEC challenges against byte-identical workflow controller.
+
+SYNTHETIC subprocess fixtures only; no launcher/probe imports or execution,
+real Docker, CI, images, compiler, SDK, GPU, model, cloud or network use.
+A failing contract is retained rather than relabeled as a passing test.
+"""
+from pathlib import Path
+import ast
+import hashlib
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import time
+
+ROOT = Path(__file__).parent.parent
+HELDOUT = ROOT / 'heldout'
+BASE = HELDOUT / 'cases'
+BASE.mkdir(exist_ok=True)
+PYTHON = sys.executable
+script = (ROOT / 'evidence/generated-step.bash').read_text()
+controller = script.split("<<'PY'\n", 1)[1].rsplit('\nPY\n', 1)[0]
+assert hashlib.sha256(controller.encode()).hexdigest() == 'b0cc257ab4ede6c2e6ea9e887e4a4e5747edea9ba43d5ed52a86f19590606df4'
+assert (controller + '\n').encode() == (ROOT / 'evidence/generated-controller.py').read_bytes()
+shutil.copyfile(ROOT / 'evidence/fixture_adapter.py', HELDOUT / 'fixture_adapter.py')
+launcher = (ROOT / 'mirror/finetune/tools/submit_locked_job.py').read_bytes()
+probe = (ROOT / 'mirror/finetune/tools/qualify_gguf_image.py').read_bytes()
+tree = ast.parse(launcher)
+binding = next(n for n in tree.body if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id == 'GGUF_IMAGE')
+IMAGE = binding.value.value
+ALTERNATE = IMAGE.split('@')[0] + '@sha256:' + 'd' * 64
+EXPECTED_DIGEST = 'ghcr.io/astral-sh/uv@' + IMAGE.split('@')[1]
+engine = {'Server': {'Version': 'SYNTHETIC', 'Os': 'linux', 'Arch': 'amd64'}}
+image = {'Id': 'sha256:' + 'c' * 64, 'Os': 'linux', 'Architecture': 'amd64', 'RepoDigests': [EXPECTED_DIGEST]}
+CASES = [
+    ('control-current-launcher', 0, {}),
+    ('control-valid-new-literal', 0, {'literal': ALTERNATE}),
+    ('control-dynamic-probe-hash', 0, {'probe_suffix': '\n# SYNTHETIC interface data hash control\n'}),
+    ('control-extra-readback-fields', 0, {'image_update': {'HarmlessExtra': {'synthetic': True}}, 'probe_update': {'HarmlessExtra': [1, 2]}}),
+    ('control-extra-digests', 0, {'image_update': {'RepoDigests': [EXPECTED_DIGEST, 'example.invalid/other@sha256:' + 'e' * 64]}}),
+    ('control-escaped-workflow-log', 0, {'probe_stderr_payload': '\n::error title=SYNTHETIC::not a command\n::set-output name=x::not a command\n'}),
+    ('ast-match-direct-capture', 1, {'source_binding': 'match-capture'}),
+    ('ast-match-mapping-capture', 1, {'source_binding': 'match-mapping'}),
+    ('engine-root-array', 1, {'engine_value': [engine]}),
+    ('engine-server-array', 1, {'engine_value': {'Server': ['linux', 'amd64']}}),
+    ('engine-duplicate-server', 1, {'engine_raw': '{"Server":{"Os":"linux","Arch":"arm64"},"Server":{"Os":"linux","Arch":"amd64"}}'}),
+    ('engine-missing-server', 1, {'engine_value': {'Client': engine['Server']}}),
+    ('image-root-array', 1, {'image_value': [image]}),
+    ('image-duplicate-repodigests', 1, {'image_raw': json.dumps(image)[:-1] + ',"RepoDigests":' + json.dumps([EXPECTED_DIGEST]) + '}'}),
+    ('image-repodigests-object', 1, {'image_update': {'RepoDigests': {EXPECTED_DIGEST: True}}}),
+    ('image-repodigests-nonstring-member', 1, {'image_update': {'RepoDigests': [EXPECTED_DIGEST, None]}}),
+    ('image-id-object', 1, {'image_update': {'Id': {'sha256': 'c' * 64}}}),
+    ('probe-root-array', 1, {'probe_value': []}),
+    ('probe-duplicate-status', 1, {'probe_duplicate_status': True}),
+    ('probe-versions-array', 1, {'probe_update': {'versions': ['git', 'cc', 'c++', 'make', 'uv']}}),
+    ('probe-empty-version', 1, {'probe_update': {'versions': {tool: ('' if tool == 'make' else 'SYNTHETIC') for tool in ('git', 'cc', 'c++', 'make', 'uv')}}}),
+    ('probe-false-like-integer', 1, {'probe_update': {'native_only': 0}}),
+    ('probe-python-trailing-newline', 1, {'probe_update': {'python': '3.12.13\n'}}),
+    ('cid-directory', 1, {'cid_mode': 'directory', 'keep_container': True}),
+    ('cid-fifo', 1, {'cid_mode': 'fifo', 'keep_container': True}),
+    ('cid-oversize', 1, {'cid_mode': 'oversize', 'keep_container': True}),
+    ('cleanup-identity-duplicate-label', 1, {'keep_container': True, 'identity_duplicate_raw': True}),
+    ('cleanup-identity-array', 1, {'keep_container': True, 'identity_root_array': True}),
+    ('cleanup-inspect-error-present', 1, {'keep_container': True, 'identity_exit': 9}),
+    ('cleanup-list-empty-line', 1, {'ls_raw': '\n'}),
+    ('cleanup-list-json-array-not-id', 1, {'ls_raw': '[]'}),
+    ('control-duplicate-list-id-is-harmless', 0, {'duplicate_list_id': True}),
+    ('receipt-write-failure', 1, {'receipt_write_failure': True}),
+    ('timeout-group-descendant', 124, {'probe_timeout': True, 'descendant_on_timeout': True}),
+]
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+def run_case(name, expected, original_cfg):
+    case = BASE / name
+    case.mkdir()
+    cfg = dict(original_cfg)
+    tools = case / 'workspace/finetune/tools'
+    tools.mkdir(parents=True)
+    workspace = tools.parent.parent
+    actual_launcher = launcher.decode()
+    if 'literal' in cfg:
+        lines = actual_launcher.splitlines(keepends=True)
+        lines[binding.lineno - 1:binding.end_lineno] = ['GGUF_IMAGE = ' + repr(cfg['literal']) + '\n']
+        actual_launcher = ''.join(lines)
+    if 'source_binding' in cfg:
+        if cfg['source_binding'] == 'match-capture':
+            extra = '\nmatch ' + repr(ALTERNATE) + ':\n    case GGUF_IMAGE:\n        pass\n'
+        else:
+            extra = '\nmatch {"image": ' + repr(ALTERNATE) + '}:\n    case {"image": GGUF_IMAGE}:\n        pass\n'
+        lines = actual_launcher.splitlines(keepends=True)
+        lines[binding.end_lineno:binding.end_lineno] = [extra]
+        actual_launcher = ''.join(lines)
+        # Execute ONLY a tiny independent syntax fixture: one literal + one match.
+        # No import/execution of any launcher or qualifier bytes occurs.
+        snippet = 'GGUF_IMAGE = ' + repr(IMAGE) + '\n' + extra
+        (case / 'syntactic-rebinding-reproducer.py').write_text(snippet)
+        state = {'__builtins__': {}}
+        exec(compile(snippet, '<synthetic-binding-only>', 'exec'), state)
+        assert state['GGUF_IMAGE'] == ALTERNATE != IMAGE
+        (case / 'syntactic-rebinding-result.json').write_text(json.dumps({
+            'synthetic_only': True, 'literal': IMAGE, 'post_match_value': state['GGUF_IMAGE'],
+            'launcher_executed': False, 'qualifier_executed': False,
+        }, indent=2) + '\n')
+    (tools / 'submit_locked_job.py').write_text(actual_launcher)
+    actual_probe = probe + cfg.get('probe_suffix', '').encode()
+    (tools / 'qualify_gguf_image.py').write_bytes(actual_probe)
+    runner_temp = case / 'runner-temp'
+    runner_temp.mkdir()
+    cfg['workspace'] = str(workspace)
+    config = case / 'config.json'
+    config.write_text(json.dumps(cfg, indent=2) + '\n')
+    needle = 'python3 -I -B -S - "$owned"'
+    replacement = f'{shlex.quote(PYTHON)} -I -B -S {shlex.quote(str(HELDOUT / "fixture_adapter.py"))} {shlex.quote(str(config))} "$owned"'
+    assert script.count(needle) == 1
+    adapted = script.replace(needle, replacement)
+    assert adapted.split("<<'PY'\n", 1)[1] == script.split("<<'PY'\n", 1)[1]
+    path = case / 'step.bash'
+    path.write_text(adapted)
+    env = dict(os.environ)
+    # Deliberately synthetic polluted inputs: the real generated Bash must strip them.
+    env.update(RUNNER_TEMP=str(runner_temp), RUNNER_OS='Linux', RUNNER_ARCH='X64',
+               RUNNER_NAME='SYNTHETIC independent fixture runner', QMD_WORKSPACE=str(workspace),
+               QMD_EVENT='pull_request', QMD_CONTEXT_SHA='3' * 40, QMD_EVENT_HEAD_SHA='2' * 40,
+               GITHUB_TOKEN='SYNTHETIC-DO-NOT-FORWARD', DOCKER_HOST='tcp://synthetic.invalid:2376',
+               DOCKER_AUTH_CONFIG='SYNTHETIC-DO-NOT-FORWARD', DOCKER_CONTEXT='SYNTHETIC-DO-NOT-FORWARD')
+    result = subprocess.run(['/bin/bash', str(path)], env=env, cwd=case, capture_output=True, text=True, timeout=15)
+    returned = time.monotonic()
+    (case / 'stdout.log').write_text(result.stdout)
+    (case / 'stderr.log').write_text(result.stderr)
+    records = [json.loads(line) for line in result.stdout.splitlines()]
+    receipts = [item['qualification_receipt'] for item in records if 'qualification_receipt' in item]
+    assert len(receipts) == 1
+    receipt = receipts[0]
+    (case / 'observed-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    checks = {'expected_process_exit': result.returncode == expected,
+              'receipt_matches_process_exit': receipt['final_exit'] == result.returncode,
+              'receipt_status_matches_process_exit': (receipt['status'] == 'qualified-native-amd64-prerequisites') == (result.returncode == 0),
+              'only_json_log_lines': all(line.startswith('{') for line in result.stdout.splitlines())}
+    calls = [json.loads(line) for line in (case / 'calls.jsonl').read_text().splitlines()]
+    for call in calls:
+        assert call['argv'][0] in ('git', 'docker')
+        assert not ({'GITHUB_TOKEN', 'DOCKER_HOST', 'DOCKER_AUTH_CONFIG', 'DOCKER_CONTEXT', 'PYTHONPATH', 'NODE_OPTIONS'} & set(call['environment']))
+        assert Path(call['environment']['HOME']).is_relative_to(runner_temp)
+    if 'sources' in receipt:
+        assert receipt['sources'] == {'launcher_sha256': sha(actual_launcher.encode()), 'probe_sha256': sha(actual_probe)}
+    state_path = case / 'state.json'
+    fixture_state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    assert 'b' * 64 not in fixture_state.get('removed', [])
+    if cfg.get('identity_duplicate_raw') or cfg.get('identity_root_array') or cfg.get('identity_exit') or cfg.get('cid_mode'):
+        assert not fixture_state.get('removed', [])
+    details = {}
+    if 'source_binding' in cfg:
+        checks['syntactic_rebinding_refused_before_pull'] = not any(c['argv'][0] == 'docker' and c['argv'][5] in ('pull', 'run') for c in calls)
+        details['actual_synthetic_runtime_binding'] = ALTERNATE
+        details['controller_selected_literal'] = receipt.get('image_input')
+    if cfg.get('receipt_write_failure'):
+        checks['storage_failure_nonqualified_receipt'] = receipt['status'] == 'not-qualified' and receipt['final_exit'] != 0
+    if cfg.get('descendant_on_timeout'):
+        ready = json.loads((case / 'descendant-ready.json').read_text())
+        assert ready['same_group_as_owned_popen']
+        complete = case / 'descendant-late-side-effect.json'
+        survived_return = not complete.exists()
+        deadline = time.monotonic() + 3
+        while not complete.exists() and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert complete.exists(), 'bounded fixture failed to terminate naturally'
+        finished = json.loads(complete.read_text())
+        late = finished['completed_monotonic'] > returned
+        details.update(ready=ready, returned_monotonic=returned, completed=finished,
+                       alive_at_return_and_effect_after_return=survived_return and late,
+                       fixture_naturally_finished=True, external_pid_signals_used=False)
+        checks['owned_process_group_drained_on_timeout'] = not (survived_return and late)
+    passed = all(checks.values())
+    return {'case': name, 'passed': passed, 'expected_exit': expected, 'actual_exit': result.returncode,
+            'receipt_exit': receipt['final_exit'], 'receipt_status': receipt['status'],
+            'checks': checks, 'details': details, 'synthetic_only': True,
+            'native_image_execution_performed': False, 'raw_stdout': str(case / 'stdout.log'),
+            'raw_stderr': str(case / 'stderr.log')}
+
+results = []
+for name, expected, cfg in CASES:
+    try:
+        row = run_case(name, expected, cfg)
+    except Exception as exc:
+        row = {'case': name, 'passed': False, 'fixture_error': type(exc).__name__ + ': ' + str(exc), 'synthetic_only': True}
+    results.append(row)
+    with (HELDOUT / 'results.jsonl').open('a') as stream:
+        stream.write(json.dumps(row) + '\n')
+    print(json.dumps(row), flush=True)
+summary = {'stage': 'SPEC; QUALITY gated on SPEC pass', 'cases': len(results),
+           'passed': sum(row['passed'] for row in results), 'failed': sum(not row['passed'] for row in results),
+           'fixture_errors': sum('fixture_error' in row for row in results), 'skipped': 0,
+           'controller_sha256': sha(controller.encode()), 'results': results,
+           'native_image_execution_performed': False, 'real_docker_or_ci_execution': False}
+(HELDOUT / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+print(json.dumps({k: v for k, v in summary.items() if k != 'results'}, indent=2))
+raise SystemExit(0 if summary['failed'] == 0 else 1)

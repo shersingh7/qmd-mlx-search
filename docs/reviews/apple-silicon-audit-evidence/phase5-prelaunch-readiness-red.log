@@ -1,0 +1,224 @@
+{"command": [".venv/bin/python", "-m", "pytest", "test/python/test_qualification_http_status.py", "-q", "-k", "unsupported_node or missing_node or missing_local_tsx"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz"}
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_____ test_phase5_unsupported_node_fails_closed_without_bun_fallback[None] _____
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54e00>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55b20>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb37800>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb34320>
+version = None
+
+    @pytest.mark.parametrize("version", [None, "20.19.0", "21.7.3", "garbled", "22"])
+    def test_phase5_unsupported_node_fails_closed_without_bun_fallback(phase5_composition, monkeypatch, version):
+        def probe(command, **kwargs):
+            assert Path(command[0]).name == "node"
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            return subprocess.CompletedProcess(command, 0, json.dumps({"node": version, "bun": None,
+                "loader": str(Path(phase5.repo_root) / "node_modules/tsx/dist/loader.mjs")}), "")
+    
+        monkeypatch.setattr(phase5.subprocess, "run", probe)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eb91b00>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eb91b00> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54e00>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55b20>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb37800>).captured
+
+test/python/test_qualification_http_status.py:268: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+___ test_phase5_unsupported_node_fails_closed_without_bun_fallback[20.19.0] ____
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10eadf600>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadfce0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb0be60>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb37b00>
+version = '20.19.0'
+
+    @pytest.mark.parametrize("version", [None, "20.19.0", "21.7.3", "garbled", "22"])
+    def test_phase5_unsupported_node_fails_closed_without_bun_fallback(phase5_composition, monkeypatch, version):
+        def probe(command, **kwargs):
+            assert Path(command[0]).name == "node"
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            return subprocess.CompletedProcess(command, 0, json.dumps({"node": version, "bun": None,
+                "loader": str(Path(phase5.repo_root) / "node_modules/tsx/dist/loader.mjs")}), "")
+    
+        monkeypatch.setattr(phase5.subprocess, "run", probe)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eb3adc0>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eb3adc0> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eadf600>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadfce0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb0be60>).captured
+
+test/python/test_qualification_http_status.py:268: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+____ test_phase5_unsupported_node_fails_closed_without_bun_fallback[21.7.3] ____
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54c20>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf7e0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2485f0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b2aec00>
+version = '21.7.3'
+
+    @pytest.mark.parametrize("version", [None, "20.19.0", "21.7.3", "garbled", "22"])
+    def test_phase5_unsupported_node_fails_closed_without_bun_fallback(phase5_composition, monkeypatch, version):
+        def probe(command, **kwargs):
+            assert Path(command[0]).name == "node"
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            return subprocess.CompletedProcess(command, 0, json.dumps({"node": version, "bun": None,
+                "loader": str(Path(phase5.repo_root) / "node_modules/tsx/dist/loader.mjs")}), "")
+    
+        monkeypatch.setattr(phase5.subprocess, "run", probe)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eaca780>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eaca780> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54c20>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf7e0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2485f0>).captured
+
+test/python/test_qualification_http_status.py:268: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+___ test_phase5_unsupported_node_fails_closed_without_bun_fallback[garbled] ____
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10b320680>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf880>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b330c50>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b24af60>
+version = 'garbled'
+
+    @pytest.mark.parametrize("version", [None, "20.19.0", "21.7.3", "garbled", "22"])
+    def test_phase5_unsupported_node_fails_closed_without_bun_fallback(phase5_composition, monkeypatch, version):
+        def probe(command, **kwargs):
+            assert Path(command[0]).name == "node"
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            return subprocess.CompletedProcess(command, 0, json.dumps({"node": version, "bun": None,
+                "loader": str(Path(phase5.repo_root) / "node_modules/tsx/dist/loader.mjs")}), "")
+    
+        monkeypatch.setattr(phase5.subprocess, "run", probe)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eb45340>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eb45340> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10b320680>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf880>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b330c50>).captured
+
+test/python/test_qualification_http_status.py:268: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+______ test_phase5_unsupported_node_fails_closed_without_bun_fallback[22] ______
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10b3200e0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10b3213a0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb61370>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b333650>
+version = '22'
+
+    @pytest.mark.parametrize("version", [None, "20.19.0", "21.7.3", "garbled", "22"])
+    def test_phase5_unsupported_node_fails_closed_without_bun_fallback(phase5_composition, monkeypatch, version):
+        def probe(command, **kwargs):
+            assert Path(command[0]).name == "node"
+            assert "NODE_OPTIONS" not in kwargs["env"]
+            return subprocess.CompletedProcess(command, 0, json.dumps({"node": version, "bun": None,
+                "loader": str(Path(phase5.repo_root) / "node_modules/tsx/dist/loader.mjs")}), "")
+    
+        monkeypatch.setattr(phase5.subprocess, "run", probe)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10b3366c0>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10b3366c0> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10b3200e0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10b3213a0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb61370>).captured
+
+test/python/test_qualification_http_status.py:268: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+___________ test_phase5_missing_node_fails_closed_without_trying_bun ___________
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10eb55f80>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55760>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b248410>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b330740>
+
+    def test_phase5_missing_node_fails_closed_without_trying_bun(phase5_composition, monkeypatch):
+        calls = []
+    
+        def which(name, **kwargs):
+            calls.append(name)
+            return None
+    
+        monkeypatch.setattr(phase5.shutil, "which", which)
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert calls == ["node"]
+        assert any("Node.js >=22" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eb93340>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eb93340> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb55f80>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55760>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b248410>).captured
+
+test/python/test_qualification_http_status.py:286: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+__________ test_phase5_missing_local_tsx_fails_without_install_or_bun __________
+
+phase5_composition = namespace(run=<function phase5_composition.<locals>.run at 0x10eadfce0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55ee0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2ac7d0>)
+tmp_path = PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-audit/phase5-prelaunch-readiness-red-aee80vtz/tmp/pytest-of-shersingh/pytest-0/test_phase5_missing_local_tsx_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b330b00>
+
+    def test_phase5_missing_local_tsx_fails_without_install_or_bun(phase5_composition, tmp_path, monkeypatch):
+        empty_repo = tmp_path / "no-development-dependencies"
+        empty_repo.mkdir()
+        monkeypatch.setattr(phase5, "repo_root", str(empty_repo))
+        monkeypatch.setattr(phase5.subprocess, "run", lambda *a, **k: pytest.fail("must not install or run a fallback"))
+        report = phase5_composition.run()
+        assert report["status"] == "failed"
+        assert any("repository-local tsx development dependency is missing" in message for message in report["errors"])
+        assert "cmd" not in phase5_composition.captured
+>       assert phase5_composition.captured.get("stage_entries", 0) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <built-in method get of dict object at 0x10eaedd80>('stage_entries', 0)
+E        +    where <built-in method get of dict object at 0x10eaedd80> = {'health_calls': 1, 'stage_entries': 1}.get
+E        +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eadfce0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55ee0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2ac7d0>).captured
+
+test/python/test_qualification_http_status.py:300: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Phase 5 Supervisor] Preflight: Installed RAM=32768.0MB, Headroom=16000.0MB, Swap=0.0MB, Free=65.0%
+=========================== short test summary info ============================
+FAILED test/python/test_qualification_http_status.py::test_phase5_unsupported_node_fails_closed_without_bun_fallback[None] - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eb91b00>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eb91b00> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54e00>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55b20>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb37800>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_unsupported_node_fails_closed_without_bun_fallback[20.19.0] - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eb3adc0>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eb3adc0> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eadf600>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadfce0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb0be60>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_unsupported_node_fails_closed_without_bun_fallback[21.7.3] - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eaca780>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eaca780> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb54c20>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf7e0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2485f0>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_unsupported_node_fails_closed_without_bun_fallback[garbled] - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eb45340>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eb45340> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10b320680>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eadf880>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b330c50>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_unsupported_node_fails_closed_without_bun_fallback[22] - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10b3366c0>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10b3366c0> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10b3200e0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10b3213a0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10eb61370>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_missing_node_fails_closed_without_trying_bun - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eb93340>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eb93340> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eb55f80>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55760>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b248410>).captured
+FAILED test/python/test_qualification_http_status.py::test_phase5_missing_local_tsx_fails_without_install_or_bun - AssertionError: assert 1 == 0
+ +  where 1 = <built-in method get of dict object at 0x10eaedd80>('stage_entries', 0)
+ +    where <built-in method get of dict object at 0x10eaedd80> = {'health_calls': 1, 'stage_entries': 1}.get
+ +      where {'health_calls': 1, 'stage_entries': 1} = namespace(run=<function phase5_composition.<locals>.run at 0x10eadfce0>, responses={'/descriptor': (200, {'model': 'sy...t_json at 0x10eb55ee0>)), supervisor=<scripts.qmd_mlx.phase5_e2e_qualification.Phase5Supervisor object at 0x10b2ac7d0>).captured
+7 failed, 90 deselected in 0.37s

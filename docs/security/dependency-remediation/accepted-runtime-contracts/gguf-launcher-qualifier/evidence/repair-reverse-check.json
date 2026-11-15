@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "apply",
+    "--reverse",
+    "--check",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repair.patch"
+  ],
+  "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h/repo",
+  "name": "repair-reverse-check",
+  "returncode": 0,
+  "seconds": 0.009087042009923607,
+  "stderr": "",
+  "stdout": ""
+}

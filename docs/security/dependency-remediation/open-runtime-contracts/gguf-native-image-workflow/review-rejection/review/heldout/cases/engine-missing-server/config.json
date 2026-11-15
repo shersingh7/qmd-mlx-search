@@ -1,0 +1,10 @@
+{
+  "engine_value": {
+    "Client": {
+      "Version": "SYNTHETIC",
+      "Os": "linux",
+      "Arch": "amd64"
+    }
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/heldout/cases/engine-missing-server/workspace"
+}

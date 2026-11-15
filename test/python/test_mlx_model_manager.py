@@ -6,6 +6,7 @@ single-flight admission, evict-before-load LRU policy, failure recovery, and mem
 import threading
 import time
 import pytest
+from scripts.qmd_mlx import model_manager as manager_module
 from scripts.qmd_mlx.executor import GPUExecutor
 from scripts.qmd_mlx.model_manager import (
     ModelResidencyManager,
@@ -13,6 +14,12 @@ from scripts.qmd_mlx.model_manager import (
     calculate_residency_budget_mb,
 )
 from scripts.qmd_mlx.protocol import ModelUnavailableError, OutOfMemoryError
+
+
+@pytest.fixture(autouse=True)
+def no_metal_calls(monkeypatch):
+    """Lifecycle tests use synthetic adapters and must not invoke Metal APIs."""
+    monkeypatch.setattr(manager_module, "_MLX_AVAILABLE", False)
 
 
 class MockAdapter:

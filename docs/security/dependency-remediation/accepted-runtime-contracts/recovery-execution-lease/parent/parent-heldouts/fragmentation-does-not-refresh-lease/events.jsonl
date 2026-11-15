@@ -1,0 +1,19 @@
+{"kind": "source", "pid": 38092, "owner": 38092, "at": 0.085047583, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 38092, "owner": 38092, "at": 0.085437375, "preparedAt": 0.085430875, "deadline": 0.28543087500000003}
+{"kind": "control-read", "pid": 38092, "owner": 38092, "at": 0.085872458, "dataHex": "53", "preExec": false}
+{"kind": "control-read", "pid": 38092, "owner": 38092, "at": 0.139969583, "dataHex": "32", "preExec": false}
+{"kind": "control-read", "pid": 38092, "owner": 38092, "at": 0.19398325, "dataHex": "3030", "preExec": false}
+{"kind": "control-read", "pid": 38092, "owner": 38092, "at": 0.24803, "dataHex": "0a", "preExec": false}
+{"kind": "fork-parent", "pid": 38092, "owner": 38092, "at": 0.251502833, "child": 38093, "inheritedDeadline": 0.28543087500000003}
+{"kind": "fork-child", "pid": 38093, "owner": 38092, "at": 0.251637291}
+{"kind": "setpgid", "pid": 38092, "owner": 38092, "at": 0.253454125, "target": 38093, "group": 38093, "currentGroup": 38092, "currentSession": 38092}
+{"kind": "setpgid", "pid": 38093, "owner": 38092, "at": 0.253711875, "target": 0, "group": 0, "currentGroup": 38093, "currentSession": 38092}
+{"kind": "control-read", "pid": 38092, "owner": 38092, "at": 0.254350666, "dataHex": "45", "preExec": false}
+{"kind": "e-forwarded", "pid": 38092, "owner": 38092, "at": 0.254592375}
+{"kind": "child-gate-enter", "pid": 38093, "owner": 38092, "at": 0.254657, "deadline": 0.28543087500000003, "fd": 3, "inheritable": false, "blocking": false}
+{"kind": "child-gate-result", "pid": 38093, "owner": 38092, "at": 0.52250175, "allowed": false, "remainingMs": -237.02108299999998, "deadline": 0.28543087500000003}
+{"kind": "refusal-enter", "pid": 38093, "owner": 38092, "at": 0.524066333, "target": 38092, "currentGroup": 38093, "currentSession": 38092}
+{"kind": "setpgid", "pid": 38093, "owner": 38092, "at": 0.524776291, "target": 0, "group": 38092, "currentGroup": 38092, "currentSession": 38092}
+{"kind": "group-signal", "pid": 38093, "owner": 38092, "at": 0.525391166, "group": 38092, "signal": 15, "pinned": true, "currentSession": 38092, "termBlocked": true}
+{"kind": "group-signal", "pid": 38093, "owner": 38092, "at": 0.5261575, "group": 38092, "signal": 19, "pinned": true, "currentSession": 38092, "termBlocked": true}
+{"kind": "waitpid", "pid": 38092, "owner": 38092, "at": 0.536255916, "reaped": 38093, "status": 32000}

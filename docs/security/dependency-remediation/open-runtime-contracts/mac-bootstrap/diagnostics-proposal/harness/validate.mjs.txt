@@ -1,0 +1,137 @@
+// Artifact/preservation verifier; no execution of project or documentation code.
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import ts from "../mirror/node_modules/typescript/lib/typescript.js";
+import YAML from "../mirror/node_modules/yaml/dist/index.js";
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const mirror = path.join(root, "mirror");
+const input = JSON.parse(fs.readFileSync(path.join(root, "input.json"), "utf8"));
+const sha = bytes => createHash("sha256").update(bytes).digest("hex");
+const read = file => fs.readFileSync(file, "utf8");
+const save = (file, data) => fs.writeFileSync(path.join(root, file), JSON.stringify(data,null,2)+"\n", {flag:"wx"});
+const proposalPaths = [".github/workflows/ci.yml", "test/audit-recovery-tree.test.ts", "test/helpers/recovery-bootstrap-diagnostics.mjs", "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"];
+const originalSha256 = input.source_sha256;
+const proposedSha256 = {};
+for (const [name, expected] of Object.entries(originalSha256)) {
+  assert.equal(sha(fs.readFileSync(path.join(root,"original",name))),expected,`own frozen input preserved: ${name}`);
+  assert.equal(sha(fs.readFileSync(path.join(input.parent,"mirror",name))),expected,`parent frozen input preserved: ${name}`);
+  proposedSha256[name] = sha(fs.readFileSync(path.join(mirror,name)));
+  if (!proposalPaths.includes(name)) assert.equal(proposedSha256[name],expected,`no unrelated edit: ${name}`);
+}
+for(const name of proposalPaths) proposedSha256[name] = sha(fs.readFileSync(path.join(mirror,name)));
+const beforeTest = read(path.join(root,"original/test/audit-recovery-tree.test.ts"));
+const afterTest = read(path.join(mirror,"test/audit-recovery-tree.test.ts"));
+let restoredTest = afterTest;
+for (const [from,to] of [
+  ['import { beginRecoveryBootstrapDiagnostics } from "./helpers/recovery-bootstrap-diagnostics.mjs";\n', ""],
+  ['  // No extra launch/warmup: observe this existing invocation only when opted in.\n  const bootstrapDiagnostics = beginRecoveryBootstrapDiagnostics();\n', ""],
+  ['    bootstrapDiagnostics.attachAfterLaunch();\n', ""],
+  ['    try { result ??= await helper; }\n    finally { bootstrapDiagnostics.finish(result); }', '    result ??= await helper;'],
+]) { assert.equal(restoredTest.split(from).length,2,`unique instrumentation delta: ${from}`); restoredTest=restoredTest.replace(from,to); }
+assert.equal(restoredTest,beforeTest,"removing only observer hooks recovers every original test byte/assertion/deadline");
+function calls(source, names) {
+  const file = ts.createSourceFile("input.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const result=[];
+  function visit(node) {
+    if (ts.isCallExpression(node) && names.includes(node.expression.getText(file))) result.push(node.getText(file));
+    ts.forEachChild(node,visit);
+  }
+  visit(file); return result;
+}
+assert.deepEqual(calls(beforeTest,["it","spawn","executeRecoveryWorker"]),calls(afterTest,["it","spawn","executeRecoveryWorker"]));
+const beforeWorkflow=YAML.parse(read(path.join(root,"original/.github/workflows/ci.yml")));
+const afterWorkflow=YAML.parse(read(path.join(mirror,".github/workflows/ci.yml")));
+assert.deepEqual(afterWorkflow.on,beforeWorkflow.on);
+assert.deepEqual(afterWorkflow.jobs.javascript.strategy,beforeWorkflow.jobs.javascript.strategy);
+assert.equal(afterWorkflow.jobs.javascript["runs-on"],beforeWorkflow.jobs.javascript["runs-on"]);
+assert.deepEqual(afterWorkflow.jobs["python-portable"],beforeWorkflow.jobs["python-portable"]);
+assert.deepEqual(afterWorkflow.jobs["python-macos"],beforeWorkflow.jobs["python-macos"]);
+const identity = step => step.name ?? step.uses;
+const oldSteps=beforeWorkflow.jobs.javascript.steps;
+const newSteps=afterWorkflow.jobs.javascript.steps;
+const oldNames=oldSteps.map(identity);
+assert.deepEqual(newSteps.map(identity).filter(name=>oldNames.includes(name)),oldNames,"canonical step order");
+const normalize = command => command.replace(/\s+/g," ").trim();
+for(const old of oldSteps) {
+  const proposed=newSteps.find(step=>identity(step)===identity(old));
+  if(!old.run) continue;
+  const withoutDiagnosticEnv = proposed.run.replace('env QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED" QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap" ', "")
+    .replace('QMD_RECOVERY_BOOTSTRAP_DIAGNOSTICS="$QMD_BOOTSTRAP_ENABLED" QMD_RECOVERY_BOOTSTRAP_DIR="$RUNNER_TEMP/qmd-recovery-bootstrap" ', "");
+  assert.equal(normalize(withoutDiagnosticEnv),normalize(old.run),`canonical command unchanged apart from opt-in env: ${old.name}`);
+}
+const controlsIndex=newSteps.findIndex(step=>step.name==="After-canonical Node diagnostic controls");
+assert.ok(controlsIndex>newSteps.findIndex(step=>step.name==="Real isolated tarball install and CLI/SQLite smoke"));
+const upload=newSteps.find(step=>step.uses==="actions/upload-artifact@v4");
+assert.match(upload.if,/always\(\)/);
+assert.equal(upload.with["if-no-files-found"],"error");
+assert.ok(!read(path.join(mirror,"vitest.config.ts")).includes(".selftest.mjs"));
+const helper=read(path.join(mirror,proposalPaths[2]));
+for(const method of ["read","resume","pause","destroy","kill","write","spawn","emit","getReader"])
+  assert.ok(!new RegExp(`\\.${method}\\(`).test(helper),`observer cannot ${method}`);
+assert.ok(!/\.on\(["'](?:data|readable|error)["']/.test(helper));
+assert.ok(!/setTimeout\(|setInterval\(|globalThis\.|\.prototype\./.test(helper));
+
+// Explicit bounded TS source surface: exclude historical doc .mjs scripts with
+// absolute live-source imports. This is not canonical root typecheck acceptance.
+function boundedTypes(which) {
+  const base=path.join(root,which);
+  const config=ts.readConfigFile(path.join(base,"tsconfig.json"),ts.sys.readFile);
+  const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,base);
+  const entries=parsed.fileNames.filter(name=>name.endsWith(".ts"));
+  const host=ts.createCompilerHost(parsed.options);
+  const getSource=host.getSourceFile.bind(host);
+  const readPaths=[];
+  host.getSourceFile=(name,...args)=> {
+    const absolute=path.resolve(name);
+    assert.ok(absolute.startsWith(base+path.sep)||absolute.includes(path.sep+"node_modules"+path.sep),`outside bounded public source closure: ${name}`);
+    readPaths.push(absolute); return getSource(name,...args);
+  };
+  const program=ts.createProgram(entries,parsed.options,host);
+  const diagnostics=ts.getPreEmitDiagnostics(program).map(d=>({path:d.file?path.relative(base,d.file.fileName):null,
+    code:d.code, start:d.start??null, message:ts.flattenDiagnosticMessageText(d.messageText,"\n")}));
+  return { entryCount:entries.length, sourceFilesRead:readPaths, diagnostics };
+}
+const beforeTypes=boundedTypes("original");
+const afterTypes=boundedTypes("mirror");
+assert.deepEqual(afterTypes.diagnostics,beforeTypes.diagnostics,"no added errors on bounded same TS source surface");
+save("evidence/bounded-types.json",{scope:"same TS source entries, imported helper JS; excludes documentation JS with absolute source imports; NOT canonical root qualification", before:beforeTypes,after:afterTypes});
+
+// Retain original red CI bytes without trying to repair or normalize the receipt.
+const archive="/Users/shersingh/github/qmd-mlx-search/docs/security/dependency-remediation/open-runtime-contracts/mac-bootstrap";
+const retained={}; fs.mkdirSync(path.join(root,"evidence/original-ci"),{recursive:true});
+for(const name of ["diagnosis.md","open-gate-summary.json","collection-summary.json","ci-extracted-receipts.json","probe-source-manifest.json","132155679910.log","132155679594.log","parent-clock-domains.json"]) {
+  const bytes=fs.readFileSync(path.join(archive,name));
+  fs.writeFileSync(path.join(root,"evidence/original-ci",name),bytes,{flag:"wx"}); retained[name]=sha(bytes);
+}
+const receipts=JSON.parse(read(path.join(archive,"ci-extracted-receipts.json")));
+const negative=receipts["132155679910"].receipts.find(item=>item.line===727);
+assert.equal(negative.record.result.launch.state,"unconfirmed");
+assert.equal(negative.record.result.cleanup.forcedPipeClose,true);
+assert.equal(negative.record.elapsedMs,1007);
+save("evidence/original-ci-retention.json",{sha256:retained,negativeNodeFastReceipt:negative});
+
+const patchParts=[];
+const patchCommands=[];
+for(const name of proposalPaths) {
+  const existing=name in originalSha256;
+  const args=["-u","-L",existing?"a/"+name:"/dev/null","-L","b/"+name,existing?path.join(root,"original",name):"/dev/null",path.join(mirror,name)];
+  const result=spawnSync("/usr/bin/diff",args,{env:process.env,encoding:"utf8",maxBuffer:1024*1024});
+  assert.equal(result.status,1,`actual diff for ${name}`);
+  patchCommands.push({executable:"/usr/bin/diff",args,exitCode:result.status,stderr:result.stderr});
+  patchParts.push(`diff --git a/${name} b/${name}\n`+(existing?"":"new file mode 100644\n")+result.stdout);
+}
+const patch=patchParts.join(""); fs.writeFileSync(path.join(root,"diagnostics-proposal.patch"),patch,{flag:"wx"});
+// Apply only these four paths in a new owned tree; never a git worktree.
+const applyRoot=path.join(root,"patch-application-check"); fs.mkdirSync(applyRoot);
+for(const name of proposalPaths.filter(name=>name in originalSha256)) {const target=path.join(applyRoot,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(root,"original",name),target);}
+const apply=spawnSync("/usr/bin/git",["-c","core.hooksPath=/dev/null","apply","--no-index",path.join(root,"diagnostics-proposal.patch")],{cwd:applyRoot,env:{...process.env,GIT_CONFIG_GLOBAL:"/dev/null",GIT_CONFIG_NOSYSTEM:"1",GIT_OPTIONAL_LOCKS:"0"},encoding:"utf8",maxBuffer:1024*1024});
+assert.equal(apply.status,0,apply.stderr);
+for(const name of proposalPaths) assert.equal(sha(fs.readFileSync(path.join(applyRoot,name))),proposedSha256[name],`applied patch exact bytes: ${name}`);
+save("evidence/patch-command.json",{commands:patchCommands,apply:{executable:"/usr/bin/git",args:["-c","core.hooksPath=/dev/null","apply","--no-index",path.join(root,"diagnostics-proposal.patch")],cwd:applyRoot,exitCode:apply.status,stdout:apply.stdout,stderr:apply.stderr},allFourAppliedHashesVerified:true});
+const changes=proposalPaths.map(name=>({path:name,originalSha256:originalSha256[name]??null,proposedSha256:proposedSha256[name]}));
+save("source-hash-manifest.json",{scope:"proposal only; no CI qualification",originalSource:input.parent,verifiedFrozenFiles:Object.keys(originalSha256).length,sourceSha256:proposedSha256,changes,patchSha256:sha(patch),originalTestRecoveredByteForByte:true,unchangedCanonicalItCalls:calls(beforeTest,["it"]).length,unchangedCanonicalLaunchCalls:calls(beforeTest,["spawn","executeRecoveryWorker"]).length,unchangedStrategyAndTriggers:true,boundedTypes:{before:beforeTypes.diagnostics.length,after:afterTypes.diagnostics.length,newDiagnostics:0},readUseDependencyAliases:input.dependencyAliases.length});
+console.log(JSON.stringify({changes,patchSha256:sha(patch),all244InputHashesPreserved:true,canonicalTestBytesRecoverable:true,boundedTypes:[beforeTypes.diagnostics.length,afterTypes.diagnostics.length],patchApplies:true}));

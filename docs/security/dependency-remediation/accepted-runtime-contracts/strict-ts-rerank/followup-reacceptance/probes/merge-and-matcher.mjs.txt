@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolveConfig } from 'vitest/node';
+const R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const observations=[];
+for(const layout of ['baseline','mirror']){
+ const {vitestConfig:c}=await resolveConfig({root:path.join(R,layout),config:path.join(R,layout+'-isolated.config.mjs'),watch:false,run:true},{ssr:{noExternal:['review-sentinel']}});
+ const expected=layout==='mirror'&&process.versions.bun?['zod','review-sentinel']:['review-sentinel'];
+ assert.deepEqual(c.server.deps.inline,expected);
+ assert.equal(c.maxWorkers,2);assert.equal(c.testTimeout,30000);assert.deepEqual(c.include,['test/**/*.test.ts']);
+ observations.push({layout,ssrNoExternal:['review-sentinel'],effectiveInline:c.server.deps.inline});
+}
+const cli=fs.readFileSync(path.join(R,'node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js'),'utf8');
+const start=cli.indexOf('function matchPattern(id, moduleDirectories, patterns) {');
+const end=cli.indexOf('\n}\n',start)+2;assert.ok(start>0&&end>start);
+const exactFunction=cli.slice(start,end);
+const match=Function('join',`return (${exactFunction});`)(path.join);
+const scope=Object.fromEntries(['zod/index.js','zod/v4/core/index.js','zod-to-json-schema/dist/esm/index.js','picomatch/index.js','@modelcontextprotocol/sdk/dist/esm/server/mcp.js'].map(n=>[n,match('/node_modules/'+n,['/node_modules/'],['zod'])]));
+assert.equal(scope['zod/index.js'],true);assert.equal(scope['zod/v4/core/index.js'],true);assert.equal(scope['zod-to-json-schema/dist/esm/index.js'],true);assert.equal(scope['picomatch/index.js'],false);assert.equal(scope['@modelcontextprotocol/sdk/dist/esm/server/mcp.js'],false);
+console.log(JSON.stringify({execPath:process.execPath,versions:process.versions,observations,exactInstalledMatchPattern:exactFunction,zodPrefixScope:scope},null,2));

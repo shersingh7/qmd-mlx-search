@@ -1,0 +1,81 @@
+{"command": ["bash", "test/smoke-install.sh", "--runtime", "node"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t"}
+npm notice run @tobilu/qmd@2.1.0 prepare
+npm notice run node scripts/prepare.mjs
+npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+
+added 267 packages in 6s
+npm warn rebuild 6 packages had install scripts blocked because they are not covered by allowScripts. Run `npm install-scripts ls` to review.
+rebuilt dependencies successfully
+No collections found. Run 'qmd collection add .' to create one.
+QMD Status
+
+Index: /Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C/cache/qmd/index.sqlite
+Size:  116.0 KB
+
+Documents
+  Total:    0 files indexed
+  Vectors:  0 embedded
+
+AST Chunking
+  Status:   active
+  Languages: typescript, tsx, javascript, python, go, rust
+
+No collections. Run 'qmd collection add .' to index markdown files.
+
+Models
+  Embedding:   https://huggingface.co/ggml-org/embeddinggemma-300M-GGUF
+  Reranking:   https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF
+  Generation:  https://huggingface.co/tobil/qmd-query-expansion-1.7B-gguf
+sqlite-vec v0.1.9
+{
+  "ok": true,
+  "runtime": "node v22.22.3",
+  "pid": 31075,
+  "checks": [
+    "installed native MCP stdio initialize, tools/list and status"
+  ],
+  "tools": [
+    "query",
+    "get",
+    "multi_get",
+    "status"
+  ],
+  "childExited": true
+}
+{
+  "ok": true,
+  "runtime": "node v22.22.3",
+  "checks": [
+    "installed SDK/SQLite indexing and lexical retrieval",
+    "installed REST retrieval and foreign-origin rejection",
+    "installed MCP initialize and document retrieval",
+    "native fetch consumes SSE without complete-body buffering",
+    "partial upload bounded; 408 or fail-closed connection termination"
+  ],
+  "httpSupported": true,
+  "partialUploadMs": 85.179125
+}
+{
+  "ok": true,
+  "runtime": "node",
+  "tarball": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C/tobilu-qmd-2.1.0.tgz",
+  "installed": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C/installed/node_modules/@tobilu/qmd",
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C",
+  "packagedFiles": 126,
+  "httpReceipt": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C/native-node-http.json",
+  "stdioReceipt": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-node-x8l3zl7t/tmp/qmd-package-smoke-0OTP5C/native-node-stdio.json",
+  "httpSupported": true,
+  "checks": [
+    "source prepare and prepack (unless --package supplied)",
+    "recursive package inventory",
+    "isolated local dependency install",
+    "real launcher help/collection/status",
+    "SQLite and sqlite-vec load",
+    "installed native MCP stdio initialize, tools/list and status",
+    "installed SDK/SQLite indexing and lexical retrieval",
+    "installed REST retrieval and foreign-origin rejection",
+    "installed MCP initialize and document retrieval",
+    "native fetch consumes SSE without complete-body buffering",
+    "partial upload bounded; 408 or fail-closed connection termination"
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "delivery": {
+    "REPORT.md": true,
+    "manifest.json": true,
+    "proposal.patch": true,
+    "qualification-workflow.patch": true,
+    "qualification-workflow.yml.proposed": true,
+    "scope-ownership.json": true
+  },
+  "frozen_fixture": {
+    "docs/security/dependency-remediation/patched-dependencies.json": true,
+    "finetune/LOCKED-JOBS.md": true,
+    "finetune/convert_gguf.py": true,
+    "finetune/convert_gguf.py.lock": true,
+    "finetune/convert_onnx.py": true,
+    "finetune/convert_onnx.py.lock": true,
+    "finetune/dataset/analyze_data.py": true,
+    "finetune/dataset/analyze_data.py.lock": true,
+    "finetune/dataset/prepare_data.py": true,
+    "finetune/dataset/prepare_data.py.lock": true,
+    "finetune/dataset/prepare_data_lfm2.py": true,
+    "finetune/dataset/prepare_data_lfm2.py.lock": true,
+    "finetune/dataset/schema.py": true,
+    "finetune/dataset/score_data.py": true,
+    "finetune/dataset/score_data.py.lock": true,
+    "finetune/dataset/validate_schema.py": true,
+    "finetune/dataset/validate_schema.py.lock": true,
+    "finetune/eval.py": true,
+    "finetune/eval.py.lock": true,
+    "finetune/eval_retrieval.py": true,
+    "finetune/eval_retrieval.py.lock": true,
+    "finetune/evals/queries.txt": true,
+    "finetune/experiments/grpo/grpo.py": true,
+    "finetune/experiments/grpo/grpo.py.lock": true,
+    "finetune/experiments/lfm2/sft_lfm2.py": true,
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": true,
+    "finetune/gguf_toolchain.py": true,
+    "finetune/jobs/eval.py": true,
+    "finetune/jobs/eval.py.lock": true,
+    "finetune/jobs/eval_common.py": true,
+    "finetune/jobs/sft.py": true,
+    "finetune/jobs/sft.py.lock": true,
+    "finetune/pyproject.toml": true,
+    "finetune/reward.py": true,
+    "finetune/tests/test_locked_job_submission.py": true,
+    "finetune/tools/qualify_gguf_image.py": true,
+    "finetune/tools/submit_locked_job.py": true,
+    "finetune/train.py": true,
+    "finetune/train.py.lock": true,
+    "finetune/train_unsloth.py": true,
+    "finetune/train_unsloth.py.lock": true,
+    "finetune/uv.lock": true
+  },
+  "heldouts": {
+    "cases": 85,
+    "failed": 0,
+    "failures": [],
+    "helper_imported_or_executed": false,
+    "passed": 85,
+    "real_cloud_or_image_executed": false
+  },
+  "live_three_originals": {
+    "finetune/LOCKED-JOBS.md": true,
+    "finetune/tests/test_locked_job_submission.py": true,
+    "finetune/tools/submit_locked_job.py": true
+  },
+  "mutation_controls": [
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "omit-convert_gguf"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "omit-train"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "omit-train_unsloth"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 3,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "changed-helper-export"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 3,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "all-slim"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 5,
+        "skipped": 0,
+        "tests": 15
+      },
+      "failure_site_isolated": true,
+      "name": "empty-override-fallback"
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failures": 3,
+        "skipped": 0,
+        "tests": 3
+      },
+      "failure_site_isolated": true,
+      "name": "ignore-image-readback"
+    }
+  ],
+  "own_fixture": {
+    "docs/security/dependency-remediation/patched-dependencies.json": true,
+    "finetune/LOCKED-JOBS.md": true,
+    "finetune/convert_gguf.py": true,
+    "finetune/convert_gguf.py.lock": true,
+    "finetune/convert_onnx.py": true,
+    "finetune/convert_onnx.py.lock": true,
+    "finetune/dataset/analyze_data.py": true,
+    "finetune/dataset/analyze_data.py.lock": true,
+    "finetune/dataset/prepare_data.py": true,
+    "finetune/dataset/prepare_data.py.lock": true,
+    "finetune/dataset/prepare_data_lfm2.py": true,
+    "finetune/dataset/prepare_data_lfm2.py.lock": true,
+    "finetune/dataset/schema.py": true,
+    "finetune/dataset/score_data.py": true,
+    "finetune/dataset/score_data.py.lock": true,
+    "finetune/dataset/validate_schema.py": true,
+    "finetune/dataset/validate_schema.py.lock": true,
+    "finetune/eval.py": true,
+    "finetune/eval.py.lock": true,
+    "finetune/eval_retrieval.py": true,
+    "finetune/eval_retrieval.py.lock": true,
+    "finetune/evals/queries.txt": true,
+    "finetune/experiments/grpo/grpo.py": true,
+    "finetune/experiments/grpo/grpo.py.lock": true,
+    "finetune/experiments/lfm2/sft_lfm2.py": true,
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": true,
+    "finetune/gguf_toolchain.py": true,
+    "finetune/jobs/eval.py": true,
+    "finetune/jobs/eval.py.lock": true,
+    "finetune/jobs/eval_common.py": true,
+    "finetune/jobs/sft.py": true,
+    "finetune/jobs/sft.py.lock": true,
+    "finetune/pyproject.toml": true,
+    "finetune/reward.py": true,
+    "finetune/tests/test_locked_job_submission.py": true,
+    "finetune/tools/qualify_gguf_image.py": true,
+    "finetune/tools/submit_locked_job.py": true,
+    "finetune/train.py": true,
+    "finetune/train.py.lock": true,
+    "finetune/train_unsloth.py": true,
+    "finetune/train_unsloth.py.lock": true,
+    "finetune/uv.lock": true
+  },
+  "positive_probe_contract": {
+    "errors": 0,
+    "failures": 2,
+    "skipped": 0,
+    "tests": 4
+  },
+  "schema_version": 1,
+  "suite": {
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "tests": 149
+  }
+}

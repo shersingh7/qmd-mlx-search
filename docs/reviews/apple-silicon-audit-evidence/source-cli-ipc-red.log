@@ -1,0 +1,77 @@
+{"command": ["node", "node_modules/vitest/vitest.mjs", "run", "test/audit-cli-ipc.test.ts", "--maxWorkers=1"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi"}
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/Users/shersingh/github/qmd-mlx-search[39m
+
+ [31m❯[39m test/audit-cli-ipc.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 482[2mms[22m[39m
+[31m   [31m×[31m parallel source CLIs work with long managed TMPDIR and unrelated cwd[39m[33m 481[2mms[22m[39m
+[31m     → node:net:1918
+      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);
+                    ^
+
+Error: listen EEXIST: file already exists /Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp/source-cli-P4DIEn/long-managed-temp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/tsx-501/97402.pipe
+    at Server.setupListenHandle [as _listen2] (node:net:1918:21)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2119:5)
+    at file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:53:31537
+    at new Promise (<anonymous>)
+    at createIpcServer (file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:53:31515)
+    at async file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:55:459 {
+  code: 'EEXIST',
+  errno: -17,
+  syscall: 'listen',
+  address: '/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp/source-cli-P4DIEn/long-managed-temp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/tsx-501/97402.pipe',
+  port: -1
+}
+
+Node.js v22.22.3
+: expected 1 to be +0 // Object.is equality[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/audit-cli-ipc.test.ts[2m > [22mparallel source CLIs work with long managed TMPDIR and unrelated cwd
+[31m[1mAssertionError[22m: node:net:1918
+      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);
+                    ^
+
+Error: listen EEXIST: file already exists /Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp/source-cli-P4DIEn/long-managed-temp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/tsx-501/97402.pipe
+    at Server.setupListenHandle [as _listen2] (node:net:1918:21)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2119:5)
+    at file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:53:31537
+    at new Promise (<anonymous>)
+    at createIpcServer (file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:53:31515)
+    at async file:///Users/shersingh/github/qmd-mlx-search/node_modules/tsx/dist/cli.mjs:55:459 {
+  code: 'EEXIST',
+  errno: -17,
+  syscall: 'listen',
+  address: '/Users/shersingh/.hermes/cache/scratch/qmd-audit/source-cli-ipc-red-hblu5qbi/tmp/source-cli-P4DIEn/long-managed-temp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/tsx-501/97402.pipe',
+  port: -1
+}
+
+Node.js v22.22.3
+: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[90m [2m❯[22m node_modules/tsx/dist/cli.mjs:[2m53:31537[22m[39m
+[90m [2m❯[22m createIpcServer node_modules/tsx/dist/cli.mjs:[2m53:31515[22m[39m
+[36m [2m❯[22m test/audit-cli-ipc.test.ts:[2m37:78[22m[39m
+    [90m 35| [39m    }
+    [90m 36| [39m    [35mfor[39m ([35mconst[39m result [35mof[39m [35mawait[39m [33mPromise[39m[33m.[39m[34mall[39m(completions)) {
+    [90m 37| [39m      expect(result.code, result.stderr || `terminated by ${result.sig…
+    [90m   | [39m                                                                             [31m^[39m
+    [90m 38| [39m      [34mexpect[39m(result[33m.[39mstdout)[33m.[39m[34mtoMatch[39m([36m/qmd|Usage/i[39m)[33m;[39m
+    [90m 39| [39m      expect(result.stderr).not.toMatch(/EADDRINUSE|EEXIST|ENAMETOOLON…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 21:18:23
+[2m   Duration [22m 629ms[2m (transform 20ms, setup 0ms, collect 20ms, tests 482ms, environment 0ms, prepare 31ms)[22m
+

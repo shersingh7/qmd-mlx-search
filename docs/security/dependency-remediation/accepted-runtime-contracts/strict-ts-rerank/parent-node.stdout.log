@@ -1,0 +1,36 @@
+TAP version 13
+# HELDOUT_OUTPUT=/Users/shersingh/.hermes/cache/scratch/qmd-parent-ts-reviewed-f7iz0poc/evidence/node-heldout-kI3vXh
+#   [1 ctx, flash=auto] running...
+# Subtest: independent: arbitrary parallel refusal values, delayed siblings and every rejecting disposal remain visible
+ok 1 - independent: arbitrary parallel refusal values, delayed siblings and every rejecting disposal remain visible
+  ---
+  duration_ms: 2.103667
+  type: 'test'
+  ...
+# Subtest: independent: parent releases wait for asynchronous child release refusal then retain all nested faults
+ok 2 - independent: parent releases wait for asynchronous child release refusal then retain all nested faults
+  ---
+  duration_ms: 1.602292
+  type: 'test'
+  ...
+# Subtest: independent: real complete CLI keeps every cleanup fault and nonzero status
+ok 3 - independent: real complete CLI keeps every cleanup fault and nonzero status
+  ---
+  duration_ms: 33.302333
+  type: 'test'
+  ...
+# Subtest: independent: legacy fallback direct-entry control and symlink characterization (forced missing native main only)
+ok 4 - independent: legacy fallback direct-entry control and symlink characterization (forced missing native main only)
+  ---
+  duration_ms: 57.564292
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 299.937958

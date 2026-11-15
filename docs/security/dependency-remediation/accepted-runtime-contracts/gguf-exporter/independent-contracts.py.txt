@@ -1,0 +1,321 @@
+"""Independent whole-proposal contracts: maintained writer, no inference/builds."""
+from __future__ import annotations
+import functools, gc, hashlib, importlib, json, os
+from pathlib import Path
+import shutil, subprocess, sys, traceback
+from types import SimpleNamespace as NS
+import numpy as np
+import pytest
+import gguf_toolchain as tools
+
+ROOT=Path(__file__).resolve().parent
+MODE=sys.argv[1]
+OUT=ROOT/MODE
+O=Path('/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e')
+STOCK=Path('/Users/shersingh/.hermes/cache/scratch/qmd-stock-qwen35-4lpo1shr')
+
+
+def record(name,data):
+    path=OUT/(name+'.jsonl')
+    with path.open('a') as f:f.write(json.dumps(data,sort_keys=True)+'\n')
+
+
+def digest(path):
+    h=hashlib.sha256()
+    with Path(path).open('rb') as f:
+        for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
+    return h.hexdigest()
+
+
+@functools.lru_cache()
+def writer_bytes(kind='f16',label='fresh',big=False,alignment=32):
+    from gguf import GGMLQuantizationType as T, GGML_QUANT_SIZES, GGUFEndian, GGUFWriter, LlamaFileType as L
+    path=OUT/'writer'/f'{kind}-{label}-{big}-{alignment}.gguf'
+    path.parent.mkdir(exist_ok=True)
+    w=GGUFWriter(path,'qwen3',endianess=GGUFEndian.BIG if big else GGUFEndian.LITTLE)
+    typ,ft={'f16':(T.F16,L.MOSTLY_F16),'q4_k_m':(T.Q4_K,L.MOSTLY_Q4_K_M),
+            'q6_k':(T.Q6_K,L.MOSTLY_Q6_K),'q8_0':(T.Q8_0,L.MOSTLY_Q8_0)}[kind]
+    try:
+        w.add_name('independent synthetic zero blocks '+label)
+        w.add_custom_alignment(alignment);w.add_file_type(ft)
+        # Two tensors, including an earlier small typed F32 value and a packed
+        # quantized final tensor. Never construct a custom purported GGUF header.
+        w.add_tensor('independent.scalar',np.zeros((8,),dtype=np.float32))
+        if kind=='f16':w.add_tensor('independent.matrix',np.zeros((32,256),dtype=np.float16))
+        else:
+            _,sz=GGML_QUANT_SIZES[typ]
+            # The last tensor is a multiple of all tested alignments, so its
+            # final byte is actual tensor data, not optional tail padding.
+            w.add_tensor('independent.matrix',np.zeros((128,sz),dtype=np.uint8),raw_dtype=typ)
+        w.write_header_to_file();w.write_kv_data_to_file();w.write_tensors_to_file()
+    finally:w.close()
+    return path.read_bytes()
+
+
+def read_scalars(path):
+    from gguf import GGUFReader
+    r=GGUFReader.__new__(GGUFReader)
+    try:
+        r.__init__(path,mode='r')
+        return {'tensor_count':len(r.tensors),'tensor_types':[t.tensor_type.name for t in r.tensors],
+                'data_offset':int(r.data_offset),'end':max((int(t.data_offset)+int(t.n_bytes) for t in r.tensors),default=0),
+                'nbytes':int(r.data.nbytes),'file_type':int(r.get_field('general.file_type').parts[-1][0]),
+                'architecture':r.get_field('general.architecture').contents(),
+                'vocab':len(r.get_field('tokenizer.ggml.tokens').data) if r.get_field('tokenizer.ggml.tokens') else None}
+    finally:
+        a=getattr(r,'data',None)
+        if a is not None:a._mmap.close()
+
+
+@pytest.mark.parametrize('kind',['f16','q4_k_m','q6_k','q8_0'])
+@pytest.mark.parametrize('big',[False,True])
+@pytest.mark.parametrize('alignment',[32,64,256])
+def test_nearby_positive_multitensor_endian_alignment(tmp_path,kind,big,alignment):
+    p=tmp_path/'positive.gguf';content=writer_bytes(kind,big=big,alignment=alignment);p.write_bytes(content)
+    scalars=read_scalars(p)
+    assert scalars['tensor_count']==2 and scalars['end']==len(content)
+    tools.validate_gguf(p)
+    assert p.read_bytes()==content
+
+
+@pytest.mark.parametrize('cut',[5,7,8,15,16,23,'metadata','tensor-info','last-tensor'])
+def test_constructor_and_tensor_truncations_do_not_leak_or_retain_parser_frames(tmp_path,monkeypatch,cut):
+    from gguf import GGUFReader
+    content=writer_bytes('q8_0');p=tmp_path/'resource.gguf';p.write_bytes(content)
+    r=GGUFReader(p,mode='r')
+    try:
+        n={'metadata':int(r.get_field('general.name').offset)+10,
+           'tensor-info':int(r.tensors[1].field.offset)+10,'last-tensor':len(content)-1}.get(cut,cut)
+    finally:r.data._mmap.close()
+    p.write_bytes(content[:n])
+    reader_module=importlib.import_module('gguf.gguf_reader');np_real=reader_module.np;seen=[]
+    class Watch:
+        def __getattr__(self,n):return getattr(np_real,n)
+        def memmap(self,*a,**k):
+            array=np_real.memmap(*a,**k);seen.append(array._mmap);return array
+    monkeypatch.setattr(reader_module,'np',Watch())
+    retained=[];before=len(os.listdir('/dev/fd'));was=gc.isenabled();gc.disable()
+    try:
+        for i in range(17):
+            try:tools.validate_gguf(p)
+            except RuntimeError as e:
+                retained.append(e)
+                assert e.__context__ is None and e.__cause__ is None
+                for frame,_line in traceback.walk_tb(e.__traceback__):
+                    if Path(frame.f_code.co_filename).name=='gguf_toolchain.py':
+                        assert not any(isinstance(v,(np.ndarray,GGUFReader)) for v in frame.f_locals.values())
+                # Rendering complete outward diagnostics with locals must not
+                # dereference any abandoned, closed NumPy parse views.
+                text=''.join(traceback.TracebackException.from_exception(e,capture_locals=False).format())
+                helper_frames=[(f,l) for f,l in traceback.walk_tb(e.__traceback__)
+                               if Path(f.f_code.co_filename).name=='gguf_toolchain.py']
+                rendered_locals=traceback.StackSummary.extract(helper_frames,capture_locals=True).format()
+                assert rendered_locals
+                assert 'invalid GGUF artifact' in text
+            else:pytest.fail('Genuine truncated writer output accepted')
+            assert len(seen)==i+1 and all(m.closed for m in seen)
+            assert len(os.listdir('/dev/fd'))==before
+        assert len(retained)==17
+    finally:
+        if was:gc.enable()
+    record('resources',{'cut':cut,'repeats':17,'mapping_count':len(seen),'all_closed':all(m.closed for m in seen),
+                        'fd_before':before,'fd_after':len(os.listdir('/dev/fd')),'retained':len(retained),'gc_disabled':True})
+
+
+@pytest.mark.parametrize('arch',['Qwen3_5ForCausalLM','Qwen3_5ForConditionalGeneration'])
+@pytest.mark.parametrize('prefix',['mtp.','model.mtp.','language_model.mtp.','model.language_model.mtp.',
+    'language_model.model.mtp.','language_model.language_model.model.mtp.','model.language_model.language_model.mtp.',
+    'language_model.model.language_model.mtp.'])
+@pytest.mark.parametrize('last_shard',[False,True])
+def test_independent_saved_namespace_decision_matches_actual_pinned_filter(tmp_path,arch,prefix,last_shard):
+    from safetensors.numpy import save_file
+    from safetensors import safe_open
+
+    key=prefix+'layers.0.self_attn.q_proj.weight'
+    (tmp_path/'config.json').write_text(json.dumps({'architectures':[arch]}))
+    order=[3,1,2,0] if last_shard else [0,2,1,3]
+    target=order[-1] if last_shard else order[0]
+    for num in order:
+        save_file({key if num==target else f'model.layers.{num}.independent.weight':np.zeros((2,2),dtype=np.float32)},
+                  tmp_path/f'shard-{num:02}.safetensors')
+    before={p.name:digest(p) for p in tmp_path.iterdir()}
+    if MODE.endswith('pinned'):
+        # The real converter requires matching pinned gguf-py constants; the
+        # installed 0.19 reader is qualified separately, not used as converter API.
+        sys.path.insert(0,str(O/'upstream'))
+        from conversion.qwen import Qwen3_5TextModel as Q
+        Q._original_block_count=5;Q.opt_num_mtp_layers=0;Q.mtp_only=False;Q.no_mtp=False
+        actual=Q.filter_tensors((key,lambda:None))
+        assert actual is not None and actual[0]=='model.layers.5.self_attn.q_proj.weight'
+    assert tools.conversion_flags(tmp_path)==[]
+    assert before=={p.name:digest(p) for p in tmp_path.iterdir()}
+    with safe_open(tmp_path/f'shard-{target:02}.safetensors',framework='pt',device='cpu') as s:assert s.keys()==[key]
+
+
+@pytest.mark.parametrize('arch',['Qwen3ForCausalLM','Qwen3_5ForCausalLM','Qwen3_5ForConditionalGeneration'])
+@pytest.mark.parametrize('keys',[None,(),('model.mtp_extra.weight','not_mtp.weight','other.language_model.mtp.x.weight')])
+def test_no_mtp_flag_nearby_empty_nonmtp_and_plain_qwen_controls(tmp_path,arch,keys):
+    from safetensors.numpy import save_file
+    (tmp_path/'config.json').write_text(json.dumps({'architectures':[arch]}))
+    if keys is not None:save_file({k:np.zeros((2,2),dtype=np.float32) for k in keys},tmp_path/'model.safetensors')
+    assert tools.conversion_flags(tmp_path)==([] if arch=='Qwen3ForCausalLM' or keys is None else ['--no-mtp'])
+
+
+RETAINED=json.loads((O/'real-qualification.json').read_text())['artifacts']+json.loads((O/'actual-native-complete-SPM.json').read_text())['artifacts']
+assert digest(STOCK/'qualification-manifest.json')=='d909c6414b617b37aa28000fbb80650702c55a6948c5bdabb1e1d5284ec0c813'
+RETAINED+=json.loads((STOCK/'qualification-manifest.json').read_text())['artifacts']
+assert len(RETAINED)==14
+@pytest.mark.parametrize('rec',RETAINED,ids=[Path(r['path']).name for r in RETAINED])
+def test_retained_real_old_converter_outputs_are_positive_controls(rec):
+    p=Path(rec['path']);assert p.stat().st_size==rec['bytes'] and digest(p)==rec['sha256']
+    tools.validate_gguf(p);s=read_scalars(p)
+    assert s['tensor_count']==rec['tensors'] and s['end']<=p.stat().st_size
+    if 'types' in rec:
+        from collections import Counter
+        assert dict(Counter(s['tensor_types']))==rec['types'] and s['architecture']=='qwen35' and s['vocab']==248077
+    record('retained',{'source':str(p),'sha256':rec['sha256'],'structural_positive':True,'scalars':s,'old_converter_output_only':True})
+
+
+def fake_boundary(monkeypatch,tmp_path,fail_stage=None,fail_mode=None):
+    # Independent transport, intentionally not the product's regression fakes.
+    events=[]
+    def preflight(**kwargs):
+        events.append(('preflight',kwargs))
+        return {n:'/INDEPENDENT/'+n for n in ('git','cmake','cc','c++','make')}
+    monkeypatch.setattr(tools,'check_prerequisites',preflight)
+    def run(argv,**kwargs):
+        a=list(map(str,argv));p=None;kind=None;stdout=''
+        if a[0]=='/INDEPENDENT/git':
+            stage=next(x for x in ('init','fetch','checkout','rev-parse') if x in a)
+            assert kwargs['env']['GIT_TERMINAL_PROMPT']=='0' and kwargs['env']['GIT_CONFIG_NOSYSTEM']=='1'
+            if stage=='fetch':assert a[-2:]==[tools.SOURCE_URL,tools.SOURCE_REVISION]
+            if stage=='rev-parse':stdout=tools.SOURCE_REVISION+'\n'
+        elif a[0]=='/INDEPENDENT/cmake':
+            if '--build' in a:
+                stage='build';binary=Path(a[2])/'bin/llama-quantize';binary.parent.mkdir(parents=True);binary.write_text('NEVER EXECUTED')
+                assert a[-2:]==['-j','2']
+            else:
+                stage='configure';assert '-DGGML_CUDA=OFF' in a and '-DGGML_METAL=OFF' in a and '-DGGML_OPENMP=OFF' in a
+        elif a[0].endswith('llama-quantize'):
+            stage=a[-1];kind=stage.lower();p=Path(a[2])
+        elif any(x.endswith('convert_hf_to_gguf.py') for x in a):
+            assert a[:2]==[sys.executable,'-s']
+            stage='probe' if '--help' in a else 'converter'
+            assert not set(kwargs['env'])&{'PYTHONPATH','PYTHONHOME','NO_LOCAL_GGUF'}
+            if stage=='converter':kind='f16';p=Path(a[a.index('--outfile')+1])
+        elif len(a)>1 and a[1].endswith('eval.py'):
+            events.append(('eval',));return NS(returncode=0)
+        else:raise AssertionError(a)
+        events.append(('process',stage))
+        if p is not None:
+            b=writer_bytes(kind,label='fresh')
+            p.write_bytes(b[:-1] if stage==fail_stage and fail_mode=='truncated' else b)
+        return NS(returncode=17 if stage==fail_stage and fail_mode=='nonzero-valid' else 0,stdout=stdout,stderr='independent status diagnostic')
+    monkeypatch.setattr(subprocess,'run',run)
+    def save(path,**kwargs):
+        Path(path).mkdir(parents=True,exist_ok=True);events.append(('save',str(path)))
+    model=NS(save_pretrained=save)
+    model.merge_and_unload=lambda:(events.append(('merge',)) or model)
+    model.push_to_hub=lambda repo:events.append(('adapter-upload',repo))
+    tok=NS(pad_token=None,eos_token='END',save_pretrained=save,push_to_hub=lambda repo:events.append(('tokenizer-upload',repo)))
+    import datasets, transformers, trl, huggingface_hub
+    monkeypatch.setattr(transformers.AutoModelForCausalLM,'from_pretrained',lambda *a,**k:(events.append(('model-load',)) or model))
+    monkeypatch.setattr(transformers.AutoTokenizer,'from_pretrained',lambda *a,**k:(events.append(('tokenizer-load',)) or tok))
+    import peft
+    monkeypatch.setattr(peft.PeftModel,'from_pretrained',lambda *a,**k:model)
+    class Data:
+        def shuffle(self,**k):return self
+        def train_test_split(self,**k):return {'train':self,'test':self}
+    class Trainer:
+        def __init__(self,**k):self.model=model
+        def train(self):events.append(('training-fake',))
+        def save_model(self,path):save(path)
+    monkeypatch.setattr(datasets,'load_dataset',lambda *a,**k:Data())
+    monkeypatch.setattr(trl,'SFTTrainer',Trainer)
+    class Api:
+        def create_repo(self,**k):events.append(('create-repo',))
+        def upload_file(self,**k):events.append(('gguf-upload' if k['path_in_repo'].endswith('.gguf') else 'readme-upload',k['path_in_repo']))
+    monkeypatch.setattr(huggingface_hub,'HfApi',Api)
+    import convert_gguf as cli
+    monkeypatch.setattr(cli,'HfApi',Api)
+    monkeypatch.setattr(cli,'login',lambda **k:pytest.fail('No auth permitted'))
+    monkeypatch.setattr(cli.tempfile,'gettempdir',lambda:str(tmp_path))
+    return events,model,tok
+
+
+def invoke(caller,monkeypatch,tmp_path,model,tok,extra=()):
+    import train, train_unsloth, convert_gguf
+    if caller=='shared':return train.export_gguf(model,tok,str(tmp_path/'adapter'),'adapter')
+    if caller=='native-main':
+        monkeypatch.setattr(sys,'argv',['train_unsloth.py','--model','0.8B','--device','cpu','--output',str(tmp_path/'adapter'),
+                                       '--data',str(tmp_path/'never-read.jsonl'),'--push-hub','fixture/no-write',*extra])
+        return train_unsloth.main()
+    monkeypatch.setattr(sys,'argv',['convert_gguf.py','--size','1.7B','--output','fixture/adapter-gguf',*extra])
+    return convert_gguf.main()
+
+
+@pytest.mark.parametrize('caller',['shared','native-main','standalone'])
+@pytest.mark.parametrize('stage',['converter','Q4_K_M','Q6_K','Q8_0'])
+@pytest.mark.parametrize('failure',['truncated','nonzero-valid'])
+def test_independent_public_entrypoints_refuse_without_prior_output_loss(tmp_path,monkeypatch,capsys,caller,stage,failure):
+    events,model,tok=fake_boundary(monkeypatch,tmp_path,stage,failure)
+    dest=tmp_path/('qmd-gguf-output-previous' if caller=='standalone' else 'adapter/gguf');dest.mkdir(parents=True)
+    previous={q:writer_bytes(q,label='old') for q in ('q4_k_m','q6_k','q8_0')}
+    for q,b in previous.items():(dest/f'adapter-{q}.gguf').write_bytes(b)
+    with pytest.raises(RuntimeError,match='GGUF export failed'):
+        invoke(caller,monkeypatch,tmp_path,model,tok)
+    assert all((dest/f'adapter-{q}.gguf').read_bytes()==b for q,b in previous.items())
+    assert not any(e[0] in ('gguf-upload','eval','create-repo') for e in events)
+    assert [e for e in events if e[0]=='process'][-1]==('process',stage)
+    assert not list(tmp_path.glob('qmd-gguf-convert-*')) and not list((tmp_path/'adapter').glob('.gguf-*'))
+    if caller=='standalone':assert list(tmp_path.glob('qmd-gguf-output-*'))==[dest]
+    output=capsys.readouterr().out
+    assert 'Done!' not in output and 'GGUF files saved to:' not in output
+    if caller=='native-main':assert ('adapter-upload','fixture/no-write') in events and ('tokenizer-upload','fixture/no-write') in events
+    record('entrypoints',{'caller':caller,'stage':stage,'failure':failure,'previous_set_preserved':True,'events':events})
+
+
+@pytest.mark.parametrize('caller',['shared','native-main','standalone'])
+def test_independent_public_entrypoint_positive_complete_set(tmp_path,monkeypatch,capsys,caller):
+    events,model,tok=fake_boundary(monkeypatch,tmp_path)
+    invoke(caller,monkeypatch,tmp_path,model,tok)
+    if caller=='standalone':
+        destinations=list(tmp_path.glob('qmd-gguf-output-*'));assert len(destinations)==1;dest=destinations[0]
+        expected=('f16','q4_k_m','q6_k','q8_0')
+    else:dest=tmp_path/'adapter/gguf';expected=('q4_k_m','q6_k','q8_0')
+    assert sorted(p.name for p in dest.iterdir())==sorted(f'adapter-{q}.gguf' for q in expected)
+    assert all((dest/f'adapter-{q}.gguf').read_bytes()==writer_bytes(q,label='fresh') for q in expected)
+    assert 'GGUF files saved to:' in capsys.readouterr().out
+    processes=[e[1] for e in events if e[0]=='process'];assert processes==['init','fetch','checkout','rev-parse','probe','configure','build','converter','Q4_K_M','Q6_K','Q8_0']
+    record('entrypoints',{'caller':caller,'positive':True,'expected_files':list(expected),'events':events})
+
+
+def test_independent_skip_quantize_and_no_upload_standalone(tmp_path,monkeypatch,capsys):
+    events,model,tok=fake_boundary(monkeypatch,tmp_path)
+    invoke('standalone',monkeypatch,tmp_path,model,tok,extra=('--skip-quantize','--no-upload'))
+    dest,=tmp_path.glob('qmd-gguf-output-*')
+    assert [p.name for p in dest.iterdir()]==['adapter-f16.gguf']
+    assert not any(e[0] in ('gguf-upload','create-repo') for e in events)
+    assert [e[1] for e in events if e[0]=='process']==['init','fetch','checkout','rev-parse','probe','converter']
+    assert 'Done! Repository:' not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize('caller',['native','yaml'])
+def test_dryrun_bypasses_gguf_preflight_and_all_models(tmp_path,monkeypatch,capsys,caller):
+    import train,train_unsloth
+    monkeypatch.setattr(tools,'check_prerequisites',lambda **k:pytest.fail('Dry run reached GGUF prerequisites'))
+    if caller=='native':
+        monkeypatch.setattr(sys,'argv',['train_unsloth.py','--model','0.8B','--dry-run']);train_unsloth.main()
+    else:
+        p=tmp_path/'cfg.yaml';p.write_text('model: {base: public/no-load, output: outputs/no-write}\n')
+        train.cmd_sft(NS(config=str(p),dry_run=True))
+
+
+def test_no_gguf_native_bypasses_preflight_not_adapter_tokenizer_publication(tmp_path,monkeypatch,capsys):
+    events,model,tok=fake_boundary(monkeypatch,tmp_path)
+    monkeypatch.setattr(tools,'check_prerequisites',lambda **k:pytest.fail('No-GGUF reached GGUF preflight'))
+    invoke('native-main',monkeypatch,tmp_path,model,tok,extra=('--no-gguf',))
+    assert not any(e[0] in ('process','merge','gguf-upload') for e in events)
+    assert ('adapter-upload','fixture/no-write') in events and ('tokenizer-upload','fixture/no-write') in events
+    assert any(e[0]=='eval' for e in events)
+    assert 'Done!' in capsys.readouterr().out

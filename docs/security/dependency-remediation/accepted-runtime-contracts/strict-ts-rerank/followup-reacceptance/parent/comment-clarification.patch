@@ -1,0 +1,11 @@
+--- a/vitest.config.ts
++++ b/vitest.config.ts
+@@ -8,7 +8,7 @@
+     testTimeout: 30000,
+     include: ["test/**/*.test.ts"],
+     // Bun's ESM namespace membership trips Vitest's CJS default interop.
+-    // Transform only Zod on that test host; leave native product imports alone.
++    // Transform Zod-prefixed packages only on Bun; native product imports stay untouched.
+     server: {
+       deps: { inline: process.versions.bun ? ["zod"] : [] },
+     },

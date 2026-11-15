@@ -5,8 +5,8 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { mkdtemp, unlink, writeFile, readdir, rmdir, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { sourceCliCommand } from "./helpers/source-cli.js";
 import { spawn } from "node:child_process";
 import http from "node:http";
 import YAML from "yaml";
@@ -17,11 +17,6 @@ import {
 } from "../src/store.js";
 import { setDefaultLlamaCpp } from "../src/llm.js";
 import type { CollectionConfig } from "../src/collections.js";
-
-const thisDir = dirname(fileURLToPath(import.meta.url));
-const projectRoot = join(thisDir, "..");
-const qmdScript = join(projectRoot, "src", "cli", "qmd.ts");
-const tsxBin = join(projectRoot, "node_modules", ".bin", "tsx");
 
 let testDir: string;
 let testConfigDir: string;
@@ -115,6 +110,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
 
     let callCount = 0;
     const fakeLlm = {
+      ...createFakeTokenizer(),
       embedModelName: "mock-model",
       embedBatch: async (texts: string[]) => {
         callCount++;
@@ -155,6 +151,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
 
     let gpuInferenceCalls = 0;
     const fakeLlm = {
+      ...createFakeTokenizer(),
       embedModelName: "mock-model",
       getDescriptor: async () => ({
         version: 1,
@@ -199,6 +196,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
     setDefaultLlamaCpp(createFakeTokenizer() as any);
 
     const fakeLlm = {
+      ...createFakeTokenizer(),
       embedModelName: "mock-model",
       getDescriptor: async () => ({
         version: 1,
@@ -305,7 +303,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
 
       // Run qmd update to index document
       await new Promise<void>((resolve, reject) => {
-        const proc = spawn(tsxBin, [qmdScript, "update"], {
+        const proc = spawn(...sourceCliCommand(["update"]), {
           env: {
             ...process.env,
             INDEX_PATH: cliDbPath,
@@ -322,7 +320,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
 
       // Now run qmd embed with MLX backend pointing to mock server that fails
       const embedRun = await new Promise<{ stdout: string; stderr: string; code: number }>((resolve) => {
-        const proc = spawn(tsxBin, [qmdScript, "embed"], {
+        const proc = spawn(...sourceCliCommand(["embed"]), {
           env: {
             ...process.env,
             INDEX_PATH: cliDbPath,
@@ -345,7 +343,7 @@ describe("Task 2: Truthful Bulk Outcomes and Atomic Counters", () => {
 
       expect(embedRun.code).not.toBe(0);
       expect(embedRun.stdout).not.toContain("✓ Done!");
-      expect(embedRun.stdout).toContain("failed");
+      expect(embedRun.stdout, embedRun.stderr).toContain("failed");
     } finally {
       mockServer!.close();
     }

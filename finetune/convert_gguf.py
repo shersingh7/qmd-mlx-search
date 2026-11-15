@@ -1,17 +1,47 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "transformers>=4.36.0",
-#     "peft>=0.7.0",
-#     "torch>=2.0.0",
-#     "accelerate>=0.24.0",
-#     "huggingface_hub>=0.20.0",
-#     "sentencepiece>=0.1.99",
+#     "transformers>=5.22.2,<5.23",
+#     "peft>=0.21.3,<0.22",
+#     "torch>=2.13.0,<3",
+#     "accelerate==1.15.0+qmd.2",
+#     "huggingface_hub>=2.4.0,<3",
+#     "sentencepiece>=0.2.1",
 #     "protobuf>=3.20.0",
 #     "numpy",
 #     "gguf",
 # ]
+# [tool]
+# [tool.uv]
+# constraint-dependencies = [
+#     "accelerate==1.15.0+qmd.2",
+#     "aiohttp>=3.14.4",
+#     "anyio>=4.14.2",
+#     "authlib>=1.9.1",
+#     "brotli>=1.2.1",
+#     "certifi>=2026.10.18",
+#     "cryptography>=50.0.0",
+#     "datasets>=5.0.1",
+#     "filelock>=4.2.1",
+#     "fsspec>=2026.6.0",
+#     "gradio>=6.16.0",
+#     "idna>=3.15",
+#     "multidict>=6.9.1",
+#     "pillow>=13.0.0",
+#     "pyarrow>=23.0.1",
+#     "pygments>=2.20.0",
+#     "python-multipart>=0.0.31",
+#     "requests>=2.33.0",
+#     "setuptools>=84.1.0",
+#     "starlette>=1.3.1",
+#     "torch>=2.13.0",
+#     "transformers>=5.17.0",
+#     "urllib3>=2.8.0",
+# ]
+# [tool.uv.sources]
+# [tool.uv.sources.accelerate]
+# url = "https://raw.githubusercontent.com/shersingh7/qmd-mlx-search/f452290f116934a4f126fe8e513c565e97a8c94f/finetune/vendor/accelerate/accelerate-1.15.0%2Bqmd.2-py3-none-any.whl"
 # ///
 """
 Convert QMD query expansion model to GGUF format.
@@ -30,8 +60,10 @@ Usage:
 
 import argparse
 import os
-import subprocess
-import sys
+from pathlib import Path
+import tempfile
+
+from gguf_toolchain import convert_model, prepare_toolchain
 
 import torch
 from huggingface_hub import HfApi, login
@@ -55,22 +87,6 @@ PRESETS = {
         "ollama_name": "qmd-expand-4b",
     },
 }
-
-
-def run_cmd(cmd, description):
-    """Run a shell command with error handling."""
-    print(f"  {description}...")
-    try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"  FAILED: {' '.join(cmd)}")
-        if e.stderr:
-            print(f"  {e.stderr[:500]}")
-        return False
-    except FileNotFoundError:
-        print(f"  Command not found: {cmd[0]}")
-        return False
 
 
 def main():
@@ -103,79 +119,39 @@ def main():
     print(f"QMD GGUF Conversion: {model_name}")
     print("=" * 60)
 
-    # Install build tools (for Colab/cloud environments)
-    print("\nInstalling build dependencies...")
-    subprocess.run(["apt-get", "update", "-qq"], capture_output=True)
-    subprocess.run(["apt-get", "install", "-y", "-qq", "build-essential", "cmake", "git"], capture_output=True)
-
-    # Login
-    hf_token = os.environ.get("HF_TOKEN")
-    if hf_token:
-        print("Logging in to HuggingFace...")
-        login(token=hf_token)
-
-    # Step 1: Load and merge
-    print(f"\nStep 1: Loading base model {base_model}...")
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model, torch_dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
-    )
-
-    print(f"Step 2: Merging SFT adapter {sft_model}...")
-    model = PeftModel.from_pretrained(model, sft_model)
-    model = model.merge_and_unload()
-
-    print(f"Step 3: Merging GRPO adapter {grpo_model}...")
-    model = PeftModel.from_pretrained(model, grpo_model)
-    model = model.merge_and_unload()
-
-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
-
-    # Step 2: Save merged model
-    merged_dir = "/tmp/merged_model"
-    print(f"\nStep 4: Saving merged model to {merged_dir}...")
-    model.save_pretrained(merged_dir, safe_serialization=True)
-    tokenizer.save_pretrained(merged_dir)
-
-    # Step 3: Setup llama.cpp
-    print("\nStep 5: Setting up llama.cpp...")
-    if not os.path.exists("/tmp/llama.cpp"):
-        run_cmd(["git", "clone", "--depth", "1", "https://github.com/ggerganov/llama.cpp.git", "/tmp/llama.cpp"],
-                "Cloning llama.cpp")
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "/tmp/llama.cpp/requirements.txt"],
-                   capture_output=True)
-
-    # Step 4: Convert to FP16 GGUF
-    gguf_dir = "/tmp/gguf_output"
-    os.makedirs(gguf_dir, exist_ok=True)
-    gguf_file = f"{gguf_dir}/{model_name}-f16.gguf"
-
-    print(f"\nStep 6: Converting to FP16 GGUF...")
-    if not run_cmd([sys.executable, "/tmp/llama.cpp/convert_hf_to_gguf.py",
-                    merged_dir, "--outfile", gguf_file, "--outtype", "f16"],
-                   "Converting"):
-        sys.exit(1)
-
-    size_mb = os.path.getsize(gguf_file) / (1024 * 1024)
-    print(f"  FP16: {size_mb:.1f} MB")
-
-    # Step 5: Quantize
-    quantized_files = []
-    if not args.skip_quantize:
-        print("\nStep 7: Building quantize tool...")
-        os.makedirs("/tmp/llama.cpp/build", exist_ok=True)
-        run_cmd(["cmake", "-B", "/tmp/llama.cpp/build", "-S", "/tmp/llama.cpp", "-DGGML_CUDA=OFF"],
-                "CMake configure")
-        run_cmd(["cmake", "--build", "/tmp/llama.cpp/build", "--target", "llama-quantize", "-j", "4"],
-                "Building llama-quantize")
-        quantize_bin = "/tmp/llama.cpp/build/bin/llama-quantize"
-
-        print("\nStep 8: Quantizing...")
-        for quant_type, desc in [("Q4_K_M", "4-bit"), ("Q5_K_M", "5-bit"), ("Q8_0", "8-bit")]:
-            qfile = f"{gguf_dir}/{model_name}-{quant_type.lower()}.gguf"
-            if run_cmd([quantize_bin, gguf_file, qfile, quant_type], f"{quant_type} ({desc})"):
-                qsize = os.path.getsize(qfile) / (1024 * 1024)
-                print(f"  {quant_type}: {qsize:.1f} MB")
-                quantized_files.append((qfile, quant_type))
+    # Source checkout, dependency import check and (unless skipped) native build
+    # all succeed before model loading/merging. No apt/pip environment mutation.
+    with tempfile.TemporaryDirectory(prefix="qmd-gguf-convert-") as tmp:
+        work = Path(tmp)
+        tools = prepare_toolchain(work / "tools", quantize=not args.skip_quantize)
+        hf_token = os.environ.get("HF_TOKEN")
+        if hf_token:
+            print("Logging in to HuggingFace...")
+            login(token=hf_token)
+        print(f"Loading base model {base_model}...")
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model, dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
+        )
+        print(f"Merging SFT adapter {sft_model}...")
+        model = PeftModel.from_pretrained(model, sft_model).merge_and_unload()
+        print(f"Merging GRPO adapter {grpo_model}...")
+        model = PeftModel.from_pretrained(model, grpo_model).merge_and_unload()
+        tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+        merged_dir = work / "merged"
+        model.save_pretrained(merged_dir, safe_serialization=True)
+        tokenizer.save_pretrained(merged_dir)
+        files = convert_model(tools, merged_dir, model_name,
+                              quantize=not args.skip_quantize, keep_f16=True)
+        # Preserve the CLI's local output, but publish only a fully successful
+        # fresh set, never an output from a failed process or an earlier run.
+        # A unique private destination also avoids symlink/stale-file reuse in
+        # a shared system temporary directory. Its path is reported below.
+        gguf_dir = Path(tempfile.mkdtemp(prefix="qmd-gguf-output-"))
+        for path in files:
+            path.replace(gguf_dir / path.name)
+    gguf_file = str(gguf_dir / f"{model_name}-f16.gguf")
+    quantized_files = [(str(gguf_dir / f"{model_name}-{quant.lower()}.gguf"), quant)
+                       for quant in ("Q4_K_M", "Q6_K", "Q8_0")] if not args.skip_quantize else []
 
     # Step 6: Upload
     if not args.no_upload:
@@ -214,7 +190,9 @@ GGUF conversion of the QMD Query Expansion model.
         api.upload_file(path_or_fileobj=readme.encode(),
                         path_in_repo="README.md", repo_id=output_repo)
 
-    print(f"\nDone! Repository: https://huggingface.co/{output_repo}")
+    print(f"\nGGUF files saved to: {gguf_dir}")
+    if not args.no_upload:
+        print(f"Done! Repository: https://huggingface.co/{output_repo}")
 
 
 if __name__ == "__main__":

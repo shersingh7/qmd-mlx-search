@@ -1,0 +1,105 @@
+"""Execute only the source-bound prerequisite-version review surface."""
+from __future__ import annotations
+from collections import Counter
+import json
+from pathlib import Path
+import runpy
+import shlex
+import shutil
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parent
+S = runpy.run_path(str(ROOT / 'review_support.py'))
+AUTH = json.loads((ROOT / 'evidence/source-authentication.json').read_text())
+EXPECTED_SHA = AUTH['source_sha256']['finetune/tools/qualify_gguf_image.py']
+
+def save(name, data):
+    (ROOT / 'evidence' / name).write_text(json.dumps(data, indent=2, sort_keys=True) + '\n')
+
+def summary(receipt):
+    return {'returncode': receipt['returncode'], 'seconds': receipt['seconds'], **{k:v for k,v in receipt['junit'].items() if k not in ('case_names', 'failure_cases')}}
+
+old_repo = ROOT / 'old-repo'
+# These two suites already executed in the preserved initial runner. Resume
+# aggregation without rerunning, replacing, or counting those cases twice.
+red = json.loads((ROOT / 'evidence/independent-empty-red.json').read_text())
+assert red['returncode'] == 1, red
+assert red['junit']['tests'] == red['junit']['failures'] == 27
+assert red['junit']['errors'] == red['junit']['skipped'] == 0
+for failure in red['junit']['failure_cases']:
+    assert 'IndexError: list index out of range' in failure['text'], failure
+    assert 'assert 1 == 2' in failure['text'], failure
+    assert ':65:' in failure['text'], failure
+print('RED:', json.dumps(summary(red)), flush=True)
+repo = ROOT / 'repo'
+green = json.loads((ROOT / 'evidence/independent-empty-and-retained-green.json').read_text())
+assert green['returncode'] == 0, green
+assert green['junit']['tests'] == 90, green['junit']
+assert green['junit']['failures'] == green['junit']['errors'] == green['junit']['skipped'] == 0
+# Locally generated pytest XML; these files are not external XML input.
+cases = list(ET.parse(ROOT / 'evidence/independent-empty-and-retained-green.xml').iter('testcase'))
+parent_green_cases = list(ET.parse(ROOT / 'inputs/evidence/complete-green.xml').iter('testcase'))
+expected_modules = ('test_qualify_empty_version', 'test_probe_contract_green', 'test_repair_heldouts')
+expected = {module: Counter(case.get('name') for case in parent_green_cases if case.get('classname').split('.')[-1] == module) for module in expected_modules}
+assert {module: sum(names.values()) for module, names in expected.items()} == {'test_qualify_empty_version':27, 'test_probe_contract_green':4, 'test_repair_heldouts':59}
+assert Counter(case.get('name') for case in cases) == sum(expected.values(), Counter())
+groups = {module:sum(names.values()) for module,names in expected.items()}
+parent_red = list(ET.parse(ROOT / 'inputs/evidence/empty-output-red.xml').iter('testcase'))
+new_cases = [case.get('name') for case in cases if case.get('classname').endswith('test_qualify_empty_version')]
+assert Counter(new_cases) == Counter(case.get('name') for case in parent_red)
+print('GREEN:', json.dumps({**summary(green), 'groups':dict(groups)}), flush=True)
+
+base_env = S['environment']('real-tool-discovery')
+actual = {name: shutil.which(name, path=base_env['PATH']) for name in ('git','cc','c++','make')}
+actual['uv'] = '/Users/shersingh/.local/bin/uv'
+assert all(actual.values()), actual
+for path in actual.values():
+    assert Path(path).is_file(), path
+real_tools = ROOT / 'real-tools'
+real_tools.mkdir()
+for name, path in actual.items():
+    (real_tools / name).symlink_to(path)
+env = S['environment']('real-installed-uv-full', path=str(real_tools) + ':' + base_env['PATH'])
+command = [S['PYTHON'], '-I', '-B', '-S', repo / 'finetune/tools/qualify_gguf_image.py']
+full = S['run_case']('independent-real-installed-uv-full', command, env=env, timeout=120)
+assert full['returncode'] == 0 and not full['stderr'], full
+full_receipt = json.loads(full['stdout'])
+assert full_receipt['probe_sha256'] == EXPECTED_SHA
+assert full_receipt['native_only'] is False
+assert full_receipt['outputs'] == ['qmd-c-ok','qmd-cxx-ok']
+assert full_receipt['python'] == '3.12.13'
+assert full_receipt['locked_python_converter_training_gpu_cloud_qualified'] is False
+assert set(full_receipt['versions']) == {'git','cc','c++','make','uv'}
+assert not list(Path(env['TMPDIR']).iterdir())
+print('REAL_FULL:', json.dumps(full_receipt,sort_keys=True), flush=True)
+
+# Real host tools with only stdout decoration for --version. Build stdout is
+# deliberately silent; successful compile/run evidence still comes from host C/C++.
+wrapped_tools = ROOT / 'multiline-quiet-tools'
+wrapped_tools.mkdir()
+log = ROOT / 'evidence/multiline-quiet-tool-calls.log'
+for name, path in actual.items():
+    tool = wrapped_tools / name
+    script = '#!/bin/sh\n'
+    script += "printf '%s\\n' " + shlex.quote(name) + '" $*" >> ' + shlex.quote(str(log)) + '\n'
+    script += 'if [ "$#" -eq 1 ] && [ "$1" = "--version" ]; then\n'
+    script += "  printf ' \\t\\n'\n"
+    script += '  ' + shlex.quote(path) + ' "$@" || exit $?\n'
+    script += "  printf '\\nsecond authored version-only line\\n \\t\\n'\n"
+    script += '  exit 0\nfi\n'
+    script += 'exec ' + shlex.quote(path) + ' "$@"' + (' >/dev/null' if name == 'make' else '') + '\n'
+    tool.write_text(script)
+    tool.chmod(0o700)
+quiet_env = S['environment']('real-multiline-quiet-full', path=str(wrapped_tools) + ':' + base_env['PATH'])
+quiet = S['run_case']('independent-real-multiline-quiet-full', command, env=quiet_env, timeout=120)
+assert quiet['returncode'] == 0 and not quiet['stderr'], quiet
+quiet_receipt = json.loads(quiet['stdout'])
+assert quiet_receipt == full_receipt, {'quiet':quiet_receipt,'full':full_receipt}
+assert not list(Path(quiet_env['TMPDIR']).iterdir())
+observed = log.read_text().splitlines()
+assert observed[:5] == [name + ' --version' for name in ('git','cc','c++','make','uv')], observed
+assert any(line.startswith('make -j2 ') for line in observed), observed
+assert any(line.startswith('cc -std=c11 ') for line in observed), observed
+assert any(line.startswith('c++ -std=c++17 ') for line in observed), observed
+save('execution-summary.json', {'spec_stage':'PASS', 'red':summary(red), 'green':{**summary(green),'groups':dict(groups)}, 'real_full_exit':full['returncode'],'real_full_receipt':full_receipt,'real_multiline_quiet_build_exit':quiet['returncode'],'real_multiline_quiet_receipt_equal':True,'new_27_case_name_multiset_retained':True,'original_162_suite_freshly_rerun':False,'retained_85_heldouts_and_7_mutations_freshly_rerun':False})
+print('REAL_MULTILINE_QUIET: exit0; same receipt; real C/C++ outputs; cleanup verified',flush=True)

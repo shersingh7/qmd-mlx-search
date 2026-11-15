@@ -1,0 +1,105 @@
+{
+  "pathUnion": 46,
+  "changes": [
+    {
+      "path": "finetune/LOCKED-JOBS.md",
+      "preimageSha256": "6b798d82f3f2a0624e182c248e3d85355ae031c49c9f751b8751ebdabc452d9b",
+      "postimageSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/LOCKED-JOBS.md"
+    },
+    {
+      "path": "finetune/convert_gguf.py",
+      "preimageSha256": "709064002f9409defecb6869d4a27954044ca76d9100de973e9253a00b1d3236",
+      "postimageSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/convert_gguf.py"
+    },
+    {
+      "path": "finetune/gguf_toolchain.py",
+      "preimageSha256": null,
+      "postimageSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/gguf_toolchain.py"
+    },
+    {
+      "path": "finetune/tests/test_finetune_correctness.py",
+      "preimageSha256": "ddb66e2dd4e67394eba2eae61a613984bf0b3212b1d2c04ed922132ad7e2e032",
+      "postimageSha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/tests/test_finetune_correctness.py"
+    },
+    {
+      "path": "finetune/tests/test_gguf_structure.py",
+      "preimageSha256": null,
+      "postimageSha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/tests/test_gguf_structure.py"
+    },
+    {
+      "path": "finetune/tests/test_gguf_toolchain.py",
+      "preimageSha256": null,
+      "postimageSha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/tests/test_gguf_toolchain.py"
+    },
+    {
+      "path": "finetune/tests/test_locked_job_submission.py",
+      "preimageSha256": "4f37a131b666d723d22428551f354333e5aae4ab30e5fdfd49cb0b60dd6936ab",
+      "postimageSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tests/test_locked_job_submission.py"
+    },
+    {
+      "path": "finetune/tools/submit_locked_job.py",
+      "preimageSha256": "9f7333dec035129ec084fed14a5656552a29ea803e99b90740ec567815e51ae9",
+      "postimageSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tools/submit_locked_job.py"
+    },
+    {
+      "path": "finetune/train.py",
+      "preimageSha256": "f554cba836bd89253323677d60414742f48f254d931ad8ef902c8a707ac519e5",
+      "postimageSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train.py"
+    },
+    {
+      "path": "finetune/train_unsloth.py",
+      "preimageSha256": "2afc5740035eb22342d1a85b356e4132ac7d8d26255bacc61b10dd72e8c44efe",
+      "postimageSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "acceptedSource": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa/mirror/finetune/train_unsloth.py"
+    }
+  ],
+  "unchangedPaths": [
+    "docs/security/dependency-remediation/patched-dependencies.json",
+    "finetune/convert_gguf.py.lock",
+    "finetune/convert_onnx.py",
+    "finetune/convert_onnx.py.lock",
+    "finetune/dataset/analyze_data.py",
+    "finetune/dataset/analyze_data.py.lock",
+    "finetune/dataset/prepare_data.py",
+    "finetune/dataset/prepare_data.py.lock",
+    "finetune/dataset/prepare_data_lfm2.py",
+    "finetune/dataset/prepare_data_lfm2.py.lock",
+    "finetune/dataset/schema.py",
+    "finetune/dataset/score_data.py",
+    "finetune/dataset/score_data.py.lock",
+    "finetune/dataset/validate_schema.py",
+    "finetune/dataset/validate_schema.py.lock",
+    "finetune/eval.py",
+    "finetune/eval.py.lock",
+    "finetune/eval_retrieval.py",
+    "finetune/eval_retrieval.py.lock",
+    "finetune/evals/queries.txt",
+    "finetune/experiments/grpo/grpo.py",
+    "finetune/experiments/grpo/grpo.py.lock",
+    "finetune/experiments/lfm2/sft_lfm2.py",
+    "finetune/experiments/lfm2/sft_lfm2.py.lock",
+    "finetune/jobs/eval.py",
+    "finetune/jobs/eval.py.lock",
+    "finetune/jobs/eval_common.py",
+    "finetune/jobs/sft.py",
+    "finetune/jobs/sft.py.lock",
+    "finetune/pyproject.toml",
+    "finetune/reward.py",
+    "finetune/tests/test_qualify_empty_version.py",
+    "finetune/tools/qualify_gguf_image.py",
+    "finetune/train.py.lock",
+    "finetune/train_unsloth.py.lock",
+    "finetune/uv.lock"
+  ],
+  "patchSha256": "b2ec90e1053250e3cb3cd759f5cc8e10fc42ba51a8198e6300948126cfb738c8",
+  "scope": "Only actual reviewed deltas;43closure metadata alreadymatcheslive, no regeneration or blanketmirror replacement"
+}

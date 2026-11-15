@@ -1,0 +1,421 @@
+{
+  "finetune/convert_gguf.py": {
+    "executed": false,
+    "imports": [
+      {
+        "line": 63,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 66,
+        "module": "gguf_toolchain",
+        "names": [
+          "convert_model",
+          "prepare_toolchain"
+        ]
+      },
+      {
+        "line": 69,
+        "module": "huggingface_hub",
+        "names": [
+          "HfApi",
+          "login"
+        ]
+      },
+      {
+        "line": 70,
+        "module": "peft",
+        "names": [
+          "PeftModel"
+        ]
+      },
+      {
+        "line": 71,
+        "module": "transformers",
+        "names": [
+          "AutoModelForCausalLM",
+          "AutoTokenizer"
+        ]
+      }
+    ],
+    "relevant_calls": [
+      {
+        "line": 126,
+        "name": "prepare_toolchain"
+      },
+      {
+        "line": 143,
+        "name": "convert_model"
+      }
+    ],
+    "sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab"
+  },
+  "finetune/eval.py": {
+    "executed": false,
+    "imports": [
+      {
+        "line": 54,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 58,
+        "module": "reward",
+        "names": [
+          "score_expansion_detailed"
+        ]
+      },
+      {
+        "line": 67,
+        "module": "huggingface_hub",
+        "names": [
+          "hf_hub_download"
+        ]
+      },
+      {
+        "line": 68,
+        "module": "huggingface_hub.errors",
+        "names": [
+          "RemoteEntryNotFoundError"
+        ]
+      },
+      {
+        "line": 108,
+        "module": "peft",
+        "names": [
+          "PeftModel"
+        ]
+      },
+      {
+        "line": 167,
+        "module": "transformers",
+        "names": [
+          "AutoConfig",
+          "AutoModelForCausalLM",
+          "AutoTokenizer"
+        ]
+      }
+    ],
+    "relevant_calls": [],
+    "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c"
+  },
+  "finetune/gguf_toolchain.py": {
+    "executed": false,
+    "imports": [
+      {
+        "line": 7,
+        "module": "__future__",
+        "names": [
+          "annotations"
+        ]
+      },
+      {
+        "line": 9,
+        "module": "dataclasses",
+        "names": [
+          "dataclass"
+        ]
+      },
+      {
+        "line": 12,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 124,
+        "module": "gguf",
+        "names": [
+          "GGUFReader"
+        ]
+      },
+      {
+        "line": 164,
+        "module": "safetensors",
+        "names": [
+          "safe_open"
+        ]
+      }
+    ],
+    "relevant_calls": [
+      {
+        "line": 71,
+        "name": "check_prerequisites"
+      }
+    ],
+    "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028"
+  },
+  "finetune/train.py": {
+    "executed": false,
+    "imports": [
+      {
+        "line": 66,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 69,
+        "module": "transformers",
+        "names": [
+          "TrainerCallback"
+        ]
+      },
+      {
+        "line": 75,
+        "module": "gguf_toolchain",
+        "names": [
+          "convert_model",
+          "prepare_toolchain"
+        ]
+      },
+      {
+        "line": 145,
+        "module": "trl",
+        "names": [
+          "SFTConfig"
+        ]
+      },
+      {
+        "line": 188,
+        "module": "gguf_toolchain",
+        "names": [
+          "check_prerequisites"
+        ]
+      },
+      {
+        "line": 192,
+        "module": "datasets",
+        "names": [
+          "load_dataset"
+        ]
+      },
+      {
+        "line": 194,
+        "module": "peft",
+        "names": [
+          "LoraConfig"
+        ]
+      },
+      {
+        "line": 195,
+        "module": "transformers",
+        "names": [
+          "AutoTokenizer",
+          "AutoModelForCausalLM"
+        ]
+      },
+      {
+        "line": 196,
+        "module": "transformers.utils",
+        "names": [
+          "logging"
+        ]
+      },
+      {
+        "line": 199,
+        "module": "trl",
+        "names": [
+          "SFTTrainer"
+        ]
+      },
+      {
+        "line": 350,
+        "module": "peft",
+        "names": [
+          "PeftModel"
+        ]
+      },
+      {
+        "line": 384,
+        "module": "datasets",
+        "names": [
+          "load_dataset"
+        ]
+      },
+      {
+        "line": 385,
+        "module": "peft",
+        "names": [
+          "LoraConfig",
+          "PeftModel",
+          "get_peft_model"
+        ]
+      },
+      {
+        "line": 386,
+        "module": "transformers",
+        "names": [
+          "AutoModelForCausalLM",
+          "AutoTokenizer"
+        ]
+      },
+      {
+        "line": 387,
+        "module": "transformers.utils",
+        "names": [
+          "logging"
+        ]
+      },
+      {
+        "line": 390,
+        "module": "trl",
+        "names": [
+          "GRPOTrainer",
+          "GRPOConfig"
+        ]
+      },
+      {
+        "line": 394,
+        "module": "reward",
+        "names": [
+          "QMDRewardFunction"
+        ]
+      },
+      {
+        "line": 208,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 263,
+        "module": "datetime",
+        "names": [
+          "datetime"
+        ]
+      },
+      {
+        "line": 424,
+        "module": "datetime",
+        "names": [
+          "datetime"
+        ]
+      }
+    ],
+    "relevant_calls": [
+      {
+        "line": 189,
+        "name": "check_prerequisites"
+      },
+      {
+        "line": 358,
+        "name": "export_gguf"
+      },
+      {
+        "line": 361,
+        "name": "run_eval"
+      },
+      {
+        "line": 594,
+        "name": "export_gguf"
+      },
+      {
+        "line": 597,
+        "name": "run_eval"
+      },
+      {
+        "line": 83,
+        "name": "prepare_toolchain"
+      },
+      {
+        "line": 88,
+        "name": "convert_model"
+      }
+    ],
+    "sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e"
+  },
+  "finetune/train_unsloth.py": {
+    "executed": false,
+    "imports": [
+      {
+        "line": 62,
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ]
+      },
+      {
+        "line": 76,
+        "module": "train",
+        "names": [
+          "export_gguf"
+        ]
+      },
+      {
+        "line": 148,
+        "module": "datasets",
+        "names": [
+          "load_dataset"
+        ]
+      },
+      {
+        "line": 149,
+        "module": "peft",
+        "names": [
+          "LoraConfig"
+        ]
+      },
+      {
+        "line": 150,
+        "module": "transformers",
+        "names": [
+          "AutoModelForCausalLM",
+          "AutoTokenizer"
+        ]
+      },
+      {
+        "line": 151,
+        "module": "transformers.utils",
+        "names": [
+          "is_bitsandbytes_available"
+        ]
+      },
+      {
+        "line": 152,
+        "module": "trl",
+        "names": [
+          "SFTConfig",
+          "SFTTrainer"
+        ]
+      },
+      {
+        "line": 103,
+        "module": "huggingface_hub",
+        "names": [
+          "HfApi"
+        ]
+      },
+      {
+        "line": 160,
+        "module": "gguf_toolchain",
+        "names": [
+          "check_prerequisites"
+        ]
+      }
+    ],
+    "relevant_calls": [
+      {
+        "line": 85,
+        "name": "export_gguf"
+      },
+      {
+        "line": 161,
+        "name": "check_prerequisites"
+      },
+      {
+        "line": 212,
+        "name": "export_gguf_artifacts"
+      }
+    ],
+    "sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5"
+  }
+}

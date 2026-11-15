@@ -1,0 +1,27 @@
+{
+  "fullHost": {
+    "locked_python_converter_training_gpu_cloud_qualified": false,
+    "native_only": false,
+    "outputs": [
+      "qmd-c-ok",
+      "qmd-cxx-ok"
+    ],
+    "platform": "Darwin/arm64",
+    "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "python": "3.12.13",
+    "scope": "native CPU C/C++ prerequisites only",
+    "status": "pass",
+    "versions": {
+      "c++": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "cc": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "git": "git version 2.53.0",
+      "make": "GNU Make 3.81",
+      "uv": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)"
+    }
+  },
+  "multilineQuietReceiptIdentical": true,
+  "realNativeInvocations": 2,
+  "cleanupVerified": true,
+  "linuxImageExecution": false,
+  "noModelConverterTrainingGpuCloudQualification": true
+}

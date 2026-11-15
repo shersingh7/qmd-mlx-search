@@ -1,0 +1,10 @@
+{
+  "paths": {
+    "finetune/tools/qualify_gguf_image.py": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+    "finetune/tests/test_qualify_empty_version.py": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8"
+  },
+  "reviewResultSha256": "9288f5a27dc1a8bbbf9bad1d53182ae0944fb80afdee8183de8abf1f8e741c2f",
+  "preimages": "Both live targets were absent, not72ef preimages; installed complete independently reviewed final files only",
+  "otherLauncherHelperOrDependencyFilesModified": false,
+  "nativeImageQualified": false
+}

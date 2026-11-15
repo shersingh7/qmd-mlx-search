@@ -1,0 +1,101 @@
+--- a/finetune/tests/test_locked_job_submission.py
++++ b/finetune/tests/test_locked_job_submission.py
+@@ -779,3 +779,64 @@
+     assert result.returncode == 2 and not result.stdout
+     assert "requires uv 0.11.18" in result.stderr
+     assert set(tmp_path.iterdir()) == {tools}
++
++
++@pytest.mark.parametrize("banner", [
++    "uv 0.11.18",
++    "uv 0.11.18 (x86_64-unknown-linux-musl)",
++    "uv 0.11.18 (e32666915 2026-06-01 x86_64-unknown-linux-musl)",
++])
++def test_native_image_probe_accepts_exact_release_with_build_metadata(tmp_path, banner):
++    """Synthetic uv display, REAL host compilation; not image qualification."""
++    import shlex
++
++    probe = LAUNCHER.parent / "qualify_gguf_image.py"
++    tools = tmp_path / "synthetic-version-only"
++    tools.mkdir()
++    uv = tools / "uv"
++    uv.write_text("#!/bin/sh\nprintf '%s\\n' " + shlex.quote(banner) + "\n")
++    uv.chmod(0o700)
++    env = {"PATH": str(tools) + os.pathsep + os.environ.get("PATH", os.defpath),
++           "HOME": str(tmp_path), "TMPDIR": str(tmp_path), "PYTHONDONTWRITEBYTECODE": "1",
++           "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1",
++           "QMD_LLAMA_GPU": "false", "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
++    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)], env=env, cwd=tmp_path,
++                            capture_output=True, text=True, timeout=120)
++    assert result.returncode == 0, result.stderr
++    receipt = json.loads(result.stdout)
++    assert receipt["versions"]["uv"] == banner
++    assert receipt["native_only"] is False
++    assert receipt["outputs"] == ["qmd-c-ok", "qmd-cxx-ok"]
++    assert receipt["locked_python_converter_training_gpu_cloud_qualified"] is False
++    assert set(tmp_path.iterdir()) == {tools}
++
++
++@pytest.mark.parametrize("banner", [
++    "uv 0.11.17 (x86_64-unknown-linux-musl)",
++    "uv 0.11.180 (x86_64-unknown-linux-musl)",
++    "uv 0.11.18+1 (e32666915 2026-06-01 x86_64-unknown-linux-musl)",
++    "uv 0.11.18rc1 (x86_64-unknown-linux-musl)",
++    "uv 0.11.18.dev1 (x86_64-unknown-linux-musl)",
++    "uv 0.11.18 trailing",
++    "other 0.11.18",
++    "uv 0.11.18 ()",
++    "uv 0.11.18 (unterminated",
++    "uv 0.11.18 (x86_64-unknown-linux-musl) trailing",
++])
++def test_native_image_probe_does_not_normalize_or_prefix_match_release(tmp_path, banner):
++    import shlex
++
++    probe = LAUNCHER.parent / "qualify_gguf_image.py"
++    tools = tmp_path / "synthetic-tools"
++    tools.mkdir()
++    for name in ("git", "cc", "c++", "make", "uv"):
++        executable = tools / name
++        executable.write_text("#!/bin/sh\nprintf '%s\\n' " + shlex.quote(banner) + "\n")
++        executable.chmod(0o700)
++    env = {"PATH": str(tools), "HOME": str(tmp_path), "TMPDIR": str(tmp_path),
++           "PYTHONDONTWRITEBYTECODE": "1", "HF_HUB_OFFLINE": "1", "QMD_LLAMA_GPU": "false"}
++    result = subprocess.run([sys.executable, "-I", "-B", "-S", str(probe)], env=env, cwd=tmp_path,
++                            capture_output=True, text=True, timeout=15)
++    assert result.returncode == 2 and not result.stdout
++    assert "requires uv 0.11.18" in result.stderr
++    assert set(tmp_path.iterdir()) == {tools}
+--- a/finetune/tools/qualify_gguf_image.py
++++ b/finetune/tools/qualify_gguf_image.py
+@@ -12,6 +12,7 @@
+ import os
+ from pathlib import Path
+ import platform
++import re
+ import shutil
+ import subprocess
+ import sys
+@@ -23,6 +24,14 @@
+     if result.returncode != 0:
+         raise RuntimeError(f"native prerequisite command failed: {Path(command[0]).name}")
+     return result.stdout.strip()
++
++
++def _uv_release(banner):
++    # Upstream appends parenthesized target/build metadata. Preserve the exact
++    # release token, including +commits or prerelease suffixes: those are not
++    # the pinned release and must not be normalized into an accepted version.
++    match = re.fullmatch(r"uv ([^\s()]+)(?: \([^()\r\n]+\))?", banner)
++    return match.group(1) if match else None
+ 
+ 
+ def qualify(*, native_only=False):
+@@ -47,7 +56,7 @@
+         if not native_only:
+             if sys.version_info[:2] != (3, 12):
+                 raise RuntimeError("image probe requires Python 3.12")
+-            if versions["uv"] != "uv 0.11.18":
++            if _uv_release(versions["uv"]) != "0.11.18":
+                 raise RuntimeError("image probe requires uv 0.11.18")
+         (work / "hello.c").write_text('#include <stdio.h>\nint main(void) { puts("qmd-c-ok"); return 0; }\n')
+         (work / "hello.cc").write_text('#include <iostream>\nint main() { std::cout << "qmd-cxx-ok\\n"; return 0; }\n')

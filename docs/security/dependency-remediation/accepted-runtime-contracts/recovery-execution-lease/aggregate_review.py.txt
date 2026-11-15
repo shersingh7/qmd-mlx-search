@@ -1,0 +1,143 @@
+"""Aggregate full retained evidence, and reauthenticate every protected source."""
+from collections import Counter
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+WORKER = Path('/Users/shersingh/.hermes/cache/scratch/qmd-execution-lease-2lk2tigo')
+PARENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-recovery-lease-s4ugpcjh')
+REPO = Path('/Users/shersingh/github/qmd-mlx-search')
+ENV = json.loads((ROOT / 'environment.json').read_text())
+
+def dump(path, data):
+    path.write_text(json.dumps(data, indent=2) + '\n')
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+records = []
+for line in (ROOT / 'focused-tests.log').read_text().splitlines():
+    if line.startswith('{"evidence":'):
+        records.append(json.loads(line))
+dump(ROOT / 'focused-observations.json', records)
+counts = Counter(item['evidence'] for item in records)
+raw = [item for item in records if item['evidence'] == 'recovery-execution-admission-before-finally']
+frames = [item for item in records if item['evidence'] == 'recovery-budget-frame-before-finally']
+hosts = [item for item in records if item['evidence'] == 'recovery-parent-death-before-finally']
+new_finally = [item for item in records if item['evidence'] in ['recovery-execution-admission-finally', 'recovery-budget-frame-finally', 'recovery-parent-death-finally']]
+assert len(raw) == 15 and len(frames) == 7 and len(hosts) == 22 and len(new_finally) == 44
+assert all(not item.get('finallyKilled') for item in new_finally)
+assert all(item['supervisorAbsent'] and item['workerAbsent'] and item['sentinelAlive'] and not item['guardFired'] for item in raw)
+assert all(item['supervisorAbsent'] and not item['forked'] and item['sentinelAlive'] and not item['guardFired'] for item in frames)
+assert all(item['supervisorsAbsent'] and item['workersAbsent'] and item['sentinelAlive'] and not item['guardFired'] for item in hosts)
+helper_times = [item['helper']['elapsedMs'] for item in hosts if item['mode'] == 'alive']
+runtime_summary = {}
+for runtime in ['node', 'bun']:
+    samples = [item for item in hosts if item['runtime'] == runtime]
+    modes = Counter(item['mode'] for item in samples)
+    runtimes = {json.dumps({'executable': item['nativeRuntime']['executable'], 'node': item['nativeRuntime']['versions']['node'], 'bun': item['nativeRuntime']['versions'].get('bun')}, sort_keys=True) for item in samples}
+    assert modes == {'valid': 1, 'alive': 3, 'graceful': 3, 'hard': 4}
+    runtime_summary[runtime] = {'cases': len(samples), 'modes': dict(modes), 'actualRuntime': [json.loads(x) for x in sorted(runtimes)]}
+kills = [item for item in records if item.get('finallyKilled')]
+assert len(kills) == 4, kills
+assert sorted(item['mode'] for item in kills) == ['escaped-pipe', 'escaped-pipe', 'new-session', 'new-session']
+retained_transitions = [item for item in records if item['evidence'] == 'recovery-transition-no-late-work-before-finally']
+assert len(retained_transitions) == 20 and all(item['supervisorAbsent'] and item['workersAbsent'] and item['sentinelAlive'] and item['work'] is None for item in retained_transitions)
+
+initial = json.loads((ROOT / 'heldout-results-initial.json').read_text())
+corrected = json.loads((ROOT / 'heldout-results-heldouts-proof-corrected.json').read_text())
+assert len(initial) == 15 and len(corrected) == 1
+assert sum(not item.get('passed', False) for item in initial) == 1
+assert corrected[0]['name'] == 'ready-proof-real-EBADF' and corrected[0]['passed']
+heldouts = [item for item in initial if item['name'] != corrected[0]['name']] + corrected
+assert len(heldouts) == 15 and all(item['passed'] and not item['fixtureKills'] for item in heldouts)
+dump(ROOT / 'heldout-final-results.json', heldouts)
+
+binding = json.loads((ROOT / 'source-binding.json').read_text())
+expected = json.loads((WORKER / 'candidate-source-manifest.json').read_text())['filesSha256']
+checks = {relative: {name: sha(base / relative) for name, base in {
+    'live': REPO, 'worker': WORKER / 'candidate-source', 'parent': PARENT / 'mirror',
+    'ownMirror': ROOT / 'mirror', 'ownPatchReplay': ROOT / 'entry-replayed',
+}.items()} for relative in expected}
+assert all(all(value == expected[relative] for value in values.values()) for relative, values in checks.items())
+public = binding['publicSnapshot']
+assert all(sha(ROOT / 'mirror' / relative) == digest and sha(PARENT / 'mirror' / relative) == digest for relative, digest in public.items())
+original = Path('/Users/shersingh/.hermes/cache/scratch/qmd-transition-independent-ruk8fjg0/reproduce_stale_e.py')
+assert original.read_bytes() == (ROOT / 'original-reproduce_stale_e.py').read_bytes()
+assert original.read_bytes() == (WORKER / 'original-reproduce_stale_e.py').read_bytes()
+head = subprocess.run(['/usr/bin/git', 'rev-parse', 'HEAD'], cwd=REPO, env=ENV, capture_output=True, text=True, check=True).stdout.strip()
+assert head == binding['head']
+python = ROOT / 'mirror/scripts/phase5_recovery_process.py'
+compile(python.read_bytes(), str(python), 'exec')
+check = subprocess.run(['/usr/bin/git', 'diff', '--check'], cwd=REPO, env=ENV, capture_output=True, text=True)
+(ROOT / 'git-diff-check.log').write_text(check.stdout + check.stderr)
+assert check.returncode == 0
+integrity = {'head': head, 'files': checks, 'candidateFilesVerified': len(checks), 'publicSnapshotVerified': len(public),
+    'originalReproducerUnchanged': True, 'pythonSourceCompiled': True, 'gitDiffCheckExit': check.returncode}
+dump(ROOT / 'final-source-binding.json', integrity)
+summary = {
+    'topLevelVitest': json.loads((ROOT / 'focused-counts.json').read_text()),
+    'focusedRecordCounts': dict(counts),
+    'newCases': {'raw': len(raw), 'frames': len(frames), 'hosts': len(hosts), 'total': len(raw)+len(frames)+len(hosts),
+        'finally': len(new_finally), 'allNegativeNoWork': all(item['work'] is None for item in hosts if item['mode'] != 'valid'),
+        'allSentinelsAlive': True, 'allGuardsUnfired': True, 'allProcessesAbsentBeforeFinally': True, 'fixtureKills': 0,
+        'perRuntime': runtime_summary, 'liveHelperTimesMs': {'min': min(helper_times), 'max': max(helper_times), 'count': len(helper_times)},
+        'EOFUnexpired': [item['validation'] for item in raw if item['stage'] == 'supervisor-forwarded' and item['forwardDelayMs'] == 0],
+        'expiredForwardedOpenParent': [item['validation'] for item in raw if item['stage'] == 'supervisor-forwarded' and item['grant'] == 'open']},
+    'retained': {'transitionObservations': len(retained_transitions), 'actualBunNestedTests': {'startup': 18, 'transition': 10, 'tree': 8},
+        'nativeOwnershipCalls': counts['native-recovery-before-finally'], 'nativeOwnershipScenarios': counts['native-recovery-passed'],
+        'deliberateEscapedFixtureFinallyKills': kills},
+    'heldoutUniqueCases': len(heldouts), 'heldoutPasses': sum(item['passed'] for item in heldouts),
+    'heldoutFalseFixtureErrors': [{'name': initial[-2]['name'], 'reason': 'Reviewer wrapper closed proof fd twice on retried READY; corrected only wrapper to close once and reran fresh fixture',
+        'initialArtifact': str(ROOT / 'heldouts/ready-proof-real-EBADF/harness-or-contract-error.txt'), 'correctedArtifact': str(ROOT / 'heldouts-proof-corrected/ready-proof-real-EBADF/before-finally.json')}],
+    'forkClockControls': len(json.loads((ROOT / 'fork-clock-results.json').read_text())),
+    'directRealGateControls': len(json.loads((ROOT / 'gate-controls.json').read_text())['cases']),
+    'realCrossSessionJoinRefusal': json.loads((ROOT / 'join-refusal/before-finally.json').read_text()),
+    'monitorPauseDiagnostic': [{'runtime': item['runtime'], 'helperMs': item['atHelperReturn']['helper']['elapsedMs'],
+        'supervisorAliveAtReturn': bool(item['atHelperReturn']['supervisorsAlive']),
+        'completeProofAtReturn': item['atHelperReturn']['helper']['result']['cleanup']['childReaped'],
+        'forcedPipeClose': item['atHelperReturn']['helper']['result']['cleanup']['forcedPipeClose'],
+        'noWork': item['workAfterHold'] is None, 'naturallyAbsentAfterHold': item['allAbsentAfterHold'],
+        'gateResults': item['gateResults'], 'fixtureKills': item['fixtureKills']}
+        for item in json.loads((ROOT / 'monitor-pause-diagnostic-results.json').read_text())],
+    'sourceIntegrity': {'head': head, 'candidateFiles': len(checks), 'publicFiles': len(public), 'unchanged': True},
+}
+queued_red = json.loads((ROOT / 'queued-cancel-red/receipt.json').read_text())
+summary['queuedCancellationRedReplay'] = {
+    'exitCode': queued_red['exitCode'], 'selectedFailures': queued_red['selectedFailures'],
+    'unselectedPending': queued_red['unselectedPending'], 'actualWork': queued_red['observation']['work'],
+    'validation': queued_red['observation']['validation'], 'sourceSha256': queued_red['sourceSha256'],
+    'fixtureKills': queued_red['finally']['finallyKilled'],
+}
+dump(ROOT / 'review-evidence-summary.json', summary)
+assert len(('S%d' % 2_147_482_647).encode('ascii') + bytes([10])) == 12
+spec = ROOT / 'SPEC-REVIEW.md'
+quality = ROOT / 'QUALITY-REVIEW.md'
+assert spec.stat().st_mtime_ns < quality.stat().st_mtime_ns
+receipt = {
+    'specVerdict': 'SPEC_PASS_SCOPED', 'qualityVerdict': 'QUALITY_PASS_WITH_QUALIFICATION',
+    'specBeforeQualityVerified': True, 'root': str(ROOT), 'head': head,
+    'candidateSha256': expected, 'fiveFileEntryDeltaReplayed': True,
+    'sourceIntegrityArtifact': str(ROOT / 'final-source-binding.json'),
+    'publicSourceFilesUnchanged': len(public), 'candidateFilesUnchanged': len(checks),
+    'tests': summary['topLevelVitest'], 'newCaseCounts': summary['newCases'],
+    'heldoutUniquePasses': summary['heldoutPasses'], 'realGateControls': summary['directRealGateControls'],
+    'forkClockControls': summary['forkClockControls'], 'realCrossSessionJoinRefusal': True,
+    'originalRedAndAdaptedCandidate': json.loads((ROOT / 'original-replay-summary.json').read_text()),
+    'queuedCancellationRedReplay': summary['queuedCancellationRedReplay'],
+    'findings': [{'id': 'C1', 'kind': 'qualification', 'blocksScopedAdmissionRepair': False,
+        'sourceLocations': ['scripts/phase5_recovery_process.py:281-287', 'scripts/phase5_recovery_process.py:441-442',
+            'scripts/phase5_recovery_process.py:568-575', 'scripts/phase5_e2e_runner.ts:336-357'],
+        'summary': 'An extra 1300ms post-startup pause of the sole cleanup owner produces truthful incomplete cleanup proof at bounded caller return, without unauthorized work; actual owners naturally reap/exit later.',
+        'evidence': str(ROOT / 'monitor-pause-diagnostic-results.json')}],
+    'falseFixtureError': summary['heldoutFalseFixtureErrors'],
+    'reports': {'spec': str(spec), 'quality': str(quality), 'evidence': str(ROOT / 'review-evidence-summary.json')},
+    'reportSha256': {'spec': sha(spec), 'quality': sha(quality)},
+    'remainingParentGates': ['type-only proposal rebase preserving new protocol', 'canonical build/full workspace suite',
+        'integration/publication', 'actual candidate-head native Mac CI including separate bootstrap/open-stream qualification'],
+    'liveOrExternalWrites': False, 'workspaceChanges': 'Only this own managed-scratch tree was created/updated; all protected sources and external evidence remained read-only',
+}
+dump(ROOT / 'final-review-receipt.json', receipt)
+print(json.dumps({key: summary[key] for key in ['topLevelVitest', 'newCases', 'heldoutUniqueCases', 'heldoutPasses', 'forkClockControls', 'directRealGateControls', 'monitorPauseDiagnostic', 'sourceIntegrity']}, indent=2))

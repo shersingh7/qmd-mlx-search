@@ -1,0 +1,190 @@
+{
+  "status": "SCOPED_SOURCE_REVIEW_AND_LOCAL_INTEGRATION_PASS; package/current-head CI/release remain separate",
+  "reviewOrder": [
+    "SPEC:PASS",
+    "QUALITY:PASS"
+  ],
+  "reviewFindings": [],
+  "preimages": {
+    "src/mlx.ts": "dbd4dc66ab506d1611b4b48ee502a97b6e5d7ecc14092836980ecea1e844f6a7",
+    "test/audit-transport-review.test.ts": "50706fec09208aebd8391a29543a6953f282e8c07ebe8b8e4333a2772c14e127"
+  },
+  "acceptedPostimages": {
+    "src/mlx.ts": "2cd9aa0d12b0405b4b7147d2a2d7c12ccd7f9b0448b351c1b92115957a845751",
+    "test/audit-transport-review.test.ts": "b1489d0735ce1dccc351eca930110d6dc0235ea82d595a9252c8394489b0947d"
+  },
+  "reviewIndexSha256": "f8854cbc992cd648a791bcecc81637069805c6968cc53800a618f066a0e967cd",
+  "candidateIndexSha256": "946172a89b3ee0d688d856e866f9e135f88e198761fd4cc27985ff4e75f34659",
+  "localQualification": {
+    "scope": "Real repository, exact reviewed two-file integration on base5c5405c59b3a538745a9af5f0d7a5712f31e98dc",
+    "build": {
+      "command": "pnpm run build",
+      "exit": 0,
+      "toolVerification": {
+        "status": "passed",
+        "kind": "build",
+        "scope": "full"
+      }
+    },
+    "test": {
+      "command": "pnpm run test --reporter=json --outputFile=/Users/shersingh/.hermes/cache/scratch/qmd-live-transport-qualification-h1o8ekcl/evidence/canonical-test-attempt-2.vitest.json",
+      "exit": 0,
+      "counts": {
+        "passed": 1554,
+        "skipped": 66
+      },
+      "files": 54,
+      "toolVerification": {
+        "status": "passed",
+        "kind": "test",
+        "scope": "full"
+      }
+    },
+    "sourceFilesUnchanged": 300,
+    "builtArtifactsMatchReviewedSnapshot": {
+      "dist/index.js": "245e91cf9c824d0460d3c99dcfc956717721ff0c8ed765e4755165e99ab124ab",
+      "dist/index.d.ts": "4c6bfd7487da85e0449591c864308c4887bd1bd8dcf95bae7bd02d73a4f1c6f9",
+      "dist/cli/qmd.js": "e5b2b56c6db028c3fe0d2d92372cc0382d18832d18c5378e144ef9410983c733",
+      "dist/mcp/server.js": "7bf4c9b455d98696f5b2f8bf42bcd570f769c46f42831f73a5b20205cc55a2c5",
+      "dist/mlx.js": "65256773b2f52b7ec5afc6ea501e907761c2847b2bcab85ffb3a4ef5e445d900"
+    },
+    "guards": {
+      "build": {
+        "records": 610,
+        "hosts": 2,
+        "refusals": 0,
+        "refusalGroups": [],
+        "executables": [
+          "/Users/shersingh/.hermes/node/bin/node"
+        ],
+        "nodeVersions": [
+          "22.22.3"
+        ]
+      },
+      "test": {
+        "records": 175653,
+        "hosts": 291,
+        "refusals": 3,
+        "refusalGroups": [
+          {
+            "operation": "readFileSync",
+            "path": "/Users/shersingh/package.json",
+            "count": 3
+          }
+        ],
+        "executables": [
+          "/Users/shersingh/.hermes/node/bin/node"
+        ],
+        "nodeVersions": [
+          "22.22.3"
+        ]
+      }
+    },
+    "originalFailedCanonicalAttemptRetained": true,
+    "harnessRepair": "Pinned source/dependency root independently of subprocess CWD; no product assertion changed",
+    "privateAncestorRequests": "Listed refusals were blocked before contents were read; no permission widened",
+    "otherRecoveryFailureStillOpen": true,
+    "remoteCIPassClaimed": false,
+    "parentReducerIssues": [
+      "One reduction incorrectly expected build artifacts at the top level of the supplied nested build receipt; corrected against actualBuild.artifacts without rerunning build/tests"
+    ]
+  },
+  "freshParentFocusedQualification": {
+    "authenticatedSourceInputFiles": 298,
+    "reviewerProbeFiles": 1,
+    "additionalPreexistingGeneratedDistFiles": 48,
+    "runs": {
+      "intake-node": {
+        "exit": 0,
+        "counts": {
+          "passed": 117
+        },
+        "files": 3,
+        "guardRows": 877,
+        "guardRefusals": 0,
+        "actualHosts": 4,
+        "readGeneratedDistFiles": []
+      },
+      "intake-bun": {
+        "exit": 0,
+        "counts": {
+          "passed": 75,
+          "skipped": 20
+        },
+        "files": 2,
+        "guardRows": 57,
+        "guardRefusals": 0,
+        "actualHosts": 3,
+        "readGeneratedDistFiles": []
+      }
+    },
+    "guards": {
+      "intake-guard-node": {
+        "readRefusals": 1,
+        "writeRefusals": 1,
+        "networkRefusals": 2
+      },
+      "intake-guard-bun": {
+        "readRefusals": 1,
+        "writeRefusals": 1,
+        "networkRefusals": 2
+      }
+    },
+    "limitations": [
+      "Scoped source tests, not full suite or current-head CI",
+      "In-process guards, not an OS sandbox or complete native loader mediation",
+      "Owned derived-cache read hashes are recorded, but removed transient cache bytes cannot be reauthenticated after cleanup"
+    ],
+    "observedPublicDependencyFilesHashBound": 650,
+    "allCopiedSourceAndGeneratedBytesUnchanged": true,
+    "ownedSentinelUnchanged": true,
+    "ownedAuxiliaryReadRecords": 42,
+    "removedOwnedTemporaryReadRecords": 38,
+    "sourceReviewStages": "SPEC PASS then QUALITY PASS, exact two-file proposal",
+    "testExecutionsRerunForReduction": false
+  },
+  "credentialPatternScan": {
+    "uniqueFilesScanned": 7149,
+    "matchingFiles": 0,
+    "completeSecretDetectionClaimed": false
+  },
+  "remainingGates": [
+    "New packaged-artifact/installed-surface qualification",
+    "Exact published-head CI and source/checkout readback",
+    "Separate native-Bun gated-child ownership repair and transition-fixture qualification",
+    "Broader recovery/Nix/native-image/default-branch alert and merge gates"
+  ],
+  "limits": [
+    "No real-model/GPU performance or private-corpus qualification in this follow-up",
+    "75 selected native-Bun tests are not full native Vitest acceptance",
+    "Three optional private-ancestor package probes were blocked during the real-repository full suite; this is not a zero-refusal layout qualification",
+    "Original failed tests, invalid witnesses, reducer errors and harness bootstrap failures remain retained as such",
+    "Archives exclude dependency trees, private profile/session data and disposable caches; absolute scratch paths are historical provenance"
+  ],
+  "objectStore": {
+    "format": "qmd-evidence-sha256-objects-v1",
+    "archive": "evidence-objects.tar.xz",
+    "archiveSha256": "711e5f0952b171500a1f4dd8350aa968c7dd9b47f2ff7ae774154d026d00c52d",
+    "index": "evidence-index.json.gz",
+    "indexSha256": "92e8cd74682005d3d1d302b94a60e74f7eb656482a9dd870a6287689da9a3607",
+    "logicalMembers": 7152,
+    "uniqueObjects": 1235,
+    "logicalBytes": 318170768,
+    "uniqueContentBytes": 78241690,
+    "archiveBytes": 1766572,
+    "indexBytes": 398109,
+    "groupMembers": {
+      "proposal": 2642,
+      "independent-review": 3464,
+      "parent-integration": 1046
+    },
+    "everyOriginalMemberHashVerified": true,
+    "everyStoredObjectReopenedAndVerified": true,
+    "originalUnpublishedArchiveBytes": 73822764,
+    "initialLayoutRetainedInParentScratch": true
+  },
+  "directReviewReports": {
+    "SPEC-REVIEW.md": "483cd4e4cf0ddcccade82bab71591baa3228071a240ca5f6169422fd0fa5dc42",
+    "QUALITY-REVIEW.md": "b29037c4b4d1576438b96cc3d10477ab45e6f6fe6cb9c01e63d386c41db86f5f"
+  }
+}

@@ -1,0 +1,1021 @@
+{
+  "total_count": 6,
+  "jobs": [
+    {
+      "id": 132155679147,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRehqw",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679147",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679147",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:16Z",
+      "completed_at": "2026-11-13T20:42:00Z",
+      "name": "Python offline safety (Linux, no Metal)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:17Z",
+          "completed_at": "2026-11-13T20:40:18Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:18Z",
+          "completed_at": "2026-11-13T20:40:20Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:20Z",
+          "completed_at": "2026-11-13T20:40:25Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:25Z",
+          "completed_at": "2026-11-13T20:40:25Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:25Z",
+          "completed_at": "2026-11-13T20:40:27Z"
+        },
+        {
+          "name": "Install local Node qualification dependencies without hooks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:27Z",
+          "completed_at": "2026-11-13T20:40:30Z"
+        },
+        {
+          "name": "Install portable constrained dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:30Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Run python -m pip check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Offline CPU safety and packaging regressions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-13T20:41:56Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-13T20:41:56Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-13T20:41:56Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-11-13T20:41:56Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-13T20:41:56Z",
+          "completed_at": "2026-11-13T20:41:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679147",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000227,
+      "runner_name": "GitHub Actions 1000000227",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 132155679594,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRejag",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679594",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679594",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:30Z",
+      "completed_at": "2026-11-13T20:44:00Z",
+      "name": "bun (macos-15)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:31Z",
+          "completed_at": "2026-11-13T20:40:33Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:33Z",
+          "completed_at": "2026-11-13T20:40:35Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:35Z",
+          "completed_at": "2026-11-13T20:40:42Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:42Z",
+          "completed_at": "2026-11-13T20:40:45Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:45Z",
+          "completed_at": "2026-11-13T20:40:45Z"
+        },
+        {
+          "name": "Install SQLite (Ubuntu)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:45Z",
+          "completed_at": "2026-11-13T20:40:45Z"
+        },
+        {
+          "name": "Install SQLite (macOS)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:45Z",
+          "completed_at": "2026-11-13T20:40:49Z"
+        },
+        {
+          "name": "Frozen dependencies (no implicit lifecycle scripts)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:49Z",
+          "completed_at": "2026-11-13T20:40:51Z"
+        },
+        {
+          "name": "Build Node SQLite addon for the Vitest runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:40:51Z",
+          "completed_at": "2026-11-13T20:40:52Z"
+        },
+        {
+          "name": "Full source build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T20:40:52Z",
+          "completed_at": "2026-11-13T20:40:57Z"
+        },
+        {
+          "name": "Real launcher argv/runtime tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T20:40:57Z",
+          "completed_at": "2026-11-13T20:40:58Z"
+        },
+        {
+          "name": "Node tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-11-13T20:40:58Z",
+          "completed_at": "2026-11-13T20:40:58Z"
+        },
+        {
+          "name": "Vitest suite through Bun's package-script launcher",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 13,
+          "started_at": "2026-11-13T20:40:58Z",
+          "completed_at": "2026-11-13T20:43:54Z"
+        },
+        {
+          "name": "Real isolated tarball install and CLI/SQLite smoke",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-11-13T20:43:54Z",
+          "completed_at": "2026-11-13T20:43:54Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-11-13T20:43:54Z",
+          "completed_at": "2026-11-13T20:43:54Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 26,
+          "started_at": "2026-11-13T20:43:54Z",
+          "completed_at": "2026-11-13T20:43:54Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-11-13T20:43:54Z",
+          "completed_at": "2026-11-13T20:43:54Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-13T20:43:54Z",
+          "completed_at": "2026-11-13T20:43:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-13T20:43:56Z",
+          "completed_at": "2026-11-13T20:43:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679594",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000228,
+      "runner_name": "GitHub Actions 1000000228",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 132155679638,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRejlg",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679638",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679638",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:16Z",
+      "completed_at": "2026-11-13T20:44:06Z",
+      "name": "Python offline adapters (macOS arm64, no model weights)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:16Z",
+          "completed_at": "2026-11-13T20:40:18Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:18Z",
+          "completed_at": "2026-11-13T20:40:21Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:21Z",
+          "completed_at": "2026-11-13T20:40:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:27Z",
+          "completed_at": "2026-11-13T20:40:28Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:28Z",
+          "completed_at": "2026-11-13T20:40:28Z"
+        },
+        {
+          "name": "Install local Node qualification dependencies without hooks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:28Z",
+          "completed_at": "2026-11-13T20:40:32Z"
+        },
+        {
+          "name": "Require Apple Silicon rather than silently skipping MLX",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:32Z",
+          "completed_at": "2026-11-13T20:40:32Z"
+        },
+        {
+          "name": "Install tested constrained MLX and safety dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:32Z",
+          "completed_at": "2026-11-13T20:41:19Z"
+        },
+        {
+          "name": "Run python -m pip check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:41:19Z",
+          "completed_at": "2026-11-13T20:41:20Z"
+        },
+        {
+          "name": "Full model-free Python suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T20:41:20Z",
+          "completed_at": "2026-11-13T20:44:02Z"
+        },
+        {
+          "name": "Shell and launchd plist syntax",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T20:44:02Z",
+          "completed_at": "2026-11-13T20:44:02Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-13T20:44:02Z",
+          "completed_at": "2026-11-13T20:44:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-13T20:44:02Z",
+          "completed_at": "2026-11-13T20:44:03Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-13T20:44:03Z",
+          "completed_at": "2026-11-13T20:44:03Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-11-13T20:44:03Z",
+          "completed_at": "2026-11-13T20:44:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-11-13T20:44:03Z",
+          "completed_at": "2026-11-13T20:44:05Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679638",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000229,
+      "runner_name": "GitHub Actions 1000000229",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 132155679717,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRej5Q",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679717",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679717",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:16Z",
+      "completed_at": "2026-11-13T20:43:27Z",
+      "name": "bun (ubuntu-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:16Z",
+          "completed_at": "2026-11-13T20:40:17Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:17Z",
+          "completed_at": "2026-11-13T20:40:19Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:19Z",
+          "completed_at": "2026-11-13T20:40:23Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:23Z",
+          "completed_at": "2026-11-13T20:40:24Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:24Z",
+          "completed_at": "2026-11-13T20:40:24Z"
+        },
+        {
+          "name": "Install SQLite (Ubuntu)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:24Z",
+          "completed_at": "2026-11-13T20:40:29Z"
+        },
+        {
+          "name": "Install SQLite (macOS)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:29Z",
+          "completed_at": "2026-11-13T20:40:29Z"
+        },
+        {
+          "name": "Frozen dependencies (no implicit lifecycle scripts)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:29Z",
+          "completed_at": "2026-11-13T20:40:32Z"
+        },
+        {
+          "name": "Build Node SQLite addon for the Vitest runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:40:32Z",
+          "completed_at": "2026-11-13T20:40:33Z"
+        },
+        {
+          "name": "Full source build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T20:40:33Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Real launcher argv/runtime tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Node tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Vitest suite through Bun's package-script launcher",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:43:07Z"
+        },
+        {
+          "name": "Real isolated tarball install and CLI/SQLite smoke",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-13T20:43:07Z",
+          "completed_at": "2026-11-13T20:43:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-13T20:43:25Z",
+          "completed_at": "2026-11-13T20:43:25Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-13T20:43:25Z",
+          "completed_at": "2026-11-13T20:43:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-13T20:43:25Z",
+          "completed_at": "2026-11-13T20:43:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-13T20:43:25Z",
+          "completed_at": "2026-11-13T20:43:26Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-13T20:43:26Z",
+          "completed_at": "2026-11-13T20:43:26Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679717",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000230,
+      "runner_name": "GitHub Actions 1000000230",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 132155679910,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRekpg",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679910",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679910",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:16Z",
+      "completed_at": "2026-11-13T20:43:05Z",
+      "name": "node (macos-15)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:17Z",
+          "completed_at": "2026-11-13T20:40:18Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:19Z",
+          "completed_at": "2026-11-13T20:40:22Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:22Z",
+          "completed_at": "2026-11-13T20:40:29Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:29Z",
+          "completed_at": "2026-11-13T20:40:30Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:30Z",
+          "completed_at": "2026-11-13T20:40:30Z"
+        },
+        {
+          "name": "Install SQLite (Ubuntu)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:30Z",
+          "completed_at": "2026-11-13T20:40:30Z"
+        },
+        {
+          "name": "Install SQLite (macOS)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:30Z",
+          "completed_at": "2026-11-13T20:40:33Z"
+        },
+        {
+          "name": "Frozen dependencies (no implicit lifecycle scripts)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:33Z",
+          "completed_at": "2026-11-13T20:40:35Z"
+        },
+        {
+          "name": "Build Node SQLite addon for the Vitest runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:40:35Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Full source build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:40:41Z"
+        },
+        {
+          "name": "Real launcher argv/runtime tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T20:40:41Z",
+          "completed_at": "2026-11-13T20:40:42Z"
+        },
+        {
+          "name": "Node tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 12,
+          "started_at": "2026-11-13T20:40:42Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Vitest suite through Bun's package-script launcher",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Real isolated tarball install and CLI/SQLite smoke",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 26,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-13T20:43:02Z",
+          "completed_at": "2026-11-13T20:43:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-13T20:43:03Z",
+          "completed_at": "2026-11-13T20:43:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679910",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000233,
+      "runner_name": "GitHub Actions 1000000233",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 132155679941,
+      "run_id": 43503677544,
+      "workflow_name": "CI",
+      "head_branch": "hermes/apple-silicon-audit",
+      "run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/runs/43503677544",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOR9hP_M8AAAAexRekxQ",
+      "head_sha": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/actions/jobs/132155679941",
+      "html_url": "https://github.com/shersingh7/qmd-mlx-search/actions/runs/43503677544/job/132155679941",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-13T20:40:14Z",
+      "started_at": "2026-11-13T20:40:16Z",
+      "completed_at": "2026-11-13T20:42:54Z",
+      "name": "node (ubuntu-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T20:40:16Z",
+          "completed_at": "2026-11-13T20:40:17Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T20:40:17Z",
+          "completed_at": "2026-11-13T20:40:19Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T20:40:19Z",
+          "completed_at": "2026-11-13T20:40:24Z"
+        },
+        {
+          "name": "Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T20:40:24Z",
+          "completed_at": "2026-11-13T20:40:25Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T20:40:25Z",
+          "completed_at": "2026-11-13T20:40:26Z"
+        },
+        {
+          "name": "Install SQLite (Ubuntu)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-13T20:40:26Z",
+          "completed_at": "2026-11-13T20:40:29Z"
+        },
+        {
+          "name": "Install SQLite (macOS)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-13T20:40:29Z",
+          "completed_at": "2026-11-13T20:40:29Z"
+        },
+        {
+          "name": "Frozen dependencies (no implicit lifecycle scripts)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T20:40:29Z",
+          "completed_at": "2026-11-13T20:40:32Z"
+        },
+        {
+          "name": "Build Node SQLite addon for the Vitest runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T20:40:32Z",
+          "completed_at": "2026-11-13T20:40:33Z"
+        },
+        {
+          "name": "Full source build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T20:40:33Z",
+          "completed_at": "2026-11-13T20:40:36Z"
+        },
+        {
+          "name": "Real launcher argv/runtime tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T20:40:36Z",
+          "completed_at": "2026-11-13T20:40:37Z"
+        },
+        {
+          "name": "Node tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-13T20:40:37Z",
+          "completed_at": "2026-11-13T20:42:27Z"
+        },
+        {
+          "name": "Vitest suite through Bun's package-script launcher",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-11-13T20:42:27Z",
+          "completed_at": "2026-11-13T20:42:27Z"
+        },
+        {
+          "name": "Real isolated tarball install and CLI/SQLite smoke",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-13T20:42:27Z",
+          "completed_at": "2026-11-13T20:42:50Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-13T20:42:50Z",
+          "completed_at": "2026-11-13T20:42:51Z"
+        },
+        {
+          "name": "Post Run oven-sh/setup-bun@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-13T20:42:51Z",
+          "completed_at": "2026-11-13T20:42:51Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-13T20:42:51Z",
+          "completed_at": "2026-11-13T20:42:51Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-13T20:42:51Z",
+          "completed_at": "2026-11-13T20:42:51Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-13T20:42:51Z",
+          "completed_at": "2026-11-13T20:42:51Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/shersingh7/qmd-mlx-search/check-runs/132155679941",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000231,
+      "runner_name": "GitHub Actions 1000000231",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+from pathlib import Path
+import hashlib
+import json
+import shutil
+
+ROOT = Path(__file__).parent
+SOURCE = Path('/Users/shersingh/.hermes/cache/scratch/qmd-launcher-image-mLaqSSB1')
+EXPECT = {
+    'delivery/qualification-workflow.yml.proposed': '2c145115e53c2948249ee36d2593c7e9419bdaacbd7fe8555f2da01f323cb23e',
+    'mirror/finetune/tools/submit_locked_job.py': 'f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b',
+    'mirror/finetune/tools/qualify_gguf_image.py': '6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf',
+}
+paths = [SOURCE / p for p in EXPECT]
+paths += [SOURCE / 'delivery/manifest.json',
+          Path('/Users/shersingh/github/qmd-mlx-search/docs/plans/gguf-image-qualification.md'),
+          Path('/Users/shersingh/github/qmd-mlx-search/.github/workflows/ci.yml'),
+          Path('/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint'),
+          Path('/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/receipt.json')]
+records = []
+for path in paths:
+    raw = path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    if str(path).startswith(str(SOURCE) + '/'):
+        expected = EXPECT.get(str(path.relative_to(SOURCE)))
+        assert expected is None or digest == expected, str(path)
+    if path.name == 'actionlint':
+        assert digest == '8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388'
+    records.append({'path': str(path), 'sha256': digest, 'bytes': len(raw)})
+for name in ('submit_locked_job.py', 'qualify_gguf_image.py'):
+    target = ROOT / 'mirror/finetune/tools' / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(SOURCE / 'mirror/finetune/tools' / name, target)
+(ROOT / 'evidence/intake.json').write_text(json.dumps({'inputs': records, 'probe': 'Obsolete interface-only bytes; never executed; parent binds repaired qualifier before publication.'}, indent=2) + '\n')
+print(json.dumps({'authenticated_inputs': len(records), 'launcher_probe_copied_as_data_only': True, 'root': str(ROOT)}))

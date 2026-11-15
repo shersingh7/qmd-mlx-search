@@ -1,0 +1,55 @@
+from pathlib import Path
+import json, os, subprocess, time, sys
+R=Path(__file__).resolve().parent
+NODE='/Users/shersingh/.hermes/node/bin/node'
+BUN='/Users/shersingh/.bun/bin/bun'
+def env(label):
+    root=R/'state'/label
+    paths={k:str(root/v) for k,v in {'HOME':'home','TMPDIR':'tmp','HERMES_HOME':'hermes','HERMES_DIR':'hermes','HERMES_ROOT':'hermes','HERMES_KNOWLEDGE_DIR':'knowledge','KNOWLEDGE_DIR':'knowledge','HF_HOME':'hf','HF_HUB_CACHE':'hf/hub','XDG_CACHE_HOME':'cache','XDG_CONFIG_HOME':'config','XDG_DATA_HOME':'data','BUN_INSTALL_CACHE_DIR':'cache/bun','BUN_RUNTIME_TRANSPILER_CACHE_PATH':'cache/bun-transpiler','VITE_CACHE_DIR':'cache/vite','VITEST_CACHE_DIR':'cache/vitest','npm_config_cache':'cache/npm','PNPM_HOME':'cache/pnpm'}.items()}
+    for p in paths.values():Path(p).mkdir(parents=True,exist_ok=True)
+    return {**paths,'PATH':f'{R}/bin:/usr/bin:/bin:/usr/sbin:/sbin','CI':'1','REQUIRE_BUN':'1','QMD_LLAMA_GPU':'false','HF_HUB_OFFLINE':'1','TRANSFORMERS_OFFLINE':'1','HF_DATASETS_OFFLINE':'1','PYTHONDONTWRITEBYTECODE':'1','NO_COLOR':'1','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_OPTIONAL_LOCKS':'0','QMD_REVIEW_HOST_RECEIPT':str(R/'evidence'/f'{label}-hosts.jsonl'),'QMD_BENCH_ENTRYPOINT_RECEIPT':str(R/'evidence'/f'{label}-entrypoint.jsonl'),'QMD_BENCH_TEST_RECEIPT':str(R/'evidence'/f'{label}-lifecycle-host.json')}
+def run(label,cmd,cwd=None,timeout=180,expected=0):
+    target=R/'evidence'/f'{label}.json'
+    assert not target.exists(),label
+    environment=env(label);start=time.monotonic()
+    try:
+        result=subprocess.run([str(c) for c in cmd],cwd=cwd or R/'mirror',env=environment,capture_output=True,text=True,timeout=timeout)
+        data={'label':label,'command':[str(c) for c in cmd],'cwd':str(cwd or R/'mirror'),'env':environment,'elapsed_seconds':time.monotonic()-start,'exit_code':result.returncode,'expected_exit_code':expected}
+    except subprocess.TimeoutExpired as e:
+        result=None;data={'label':label,'command':[str(c) for c in cmd],'cwd':str(cwd or R/'mirror'),'env':environment,'elapsed_seconds':time.monotonic()-start,'error':repr(e),'expected_exit_code':expected}
+        for name,value in [('stdout',e.stdout),('stderr',e.stderr)]:
+            (R/'logs'/f'{label}.{name}.log').write_text(value.decode() if isinstance(value,bytes) else value or '')
+    if result:
+        for name in ['stdout','stderr']:(R/'logs'/f'{label}.{name}.log').write_text(getattr(result,name))
+    with target.open('x') as f:json.dump(data,f,indent=2);f.write('\n')
+    print(json.dumps(data|{'env':'[retained in receipt]'}),flush=True)
+    if result:
+        print(result.stdout[-2200:]);print(result.stderr[-2200:])
+    assert result is not None and result.returncode==expected,(label,data)
+    return result
+
+def vitest(label,host,files,layout='mirror',expected=0,config=None):
+    prefix=[NODE] if host=='node' else [BUN,'--bun']
+    return run(label,prefix+[str(R/layout/'node_modules/vitest/vitest.mjs'),'run','--config',str(config or R/f'{layout}-isolated.config.mjs'),'--no-cache','--reporter=dot','--reporter=json',f'--outputFile.json={R}/evidence/{label}-results.json',*files],cwd=R/layout,timeout=180,expected=expected)
+if __name__=='__main__':
+    stage=sys.argv[1]
+    hosts=sys.argv[2:] or ['node','bun']
+    for host in hosts:
+        prefix=[NODE] if host=='node' else [BUN,'--bun']
+        if stage=='identity':run(f'{host}-runtime-identity',prefix+['-e','console.log(JSON.stringify({execPath:process.execPath,versions:process.versions}))'])
+        elif stage=='source':run(f'{host}-source-proof',prefix+[str(R/'probes/source-proof.mjs')])
+        elif stage=='config':run(f'{host}-effective-config',prefix+[str(R/'probes/effective-config.mjs')])
+        elif stage=='evaluator':
+            run(f'{host}-real-evaluator',prefix+[str(R/'probes/evaluator.mjs')],expected=1 if host=='bun' else 0)
+            run(f'{host}-generic-evaluator',prefix+[str(R/'probes/pure-namespace-evaluator.mjs')],expected=1 if host=='bun' else 0)
+        elif stage=='red':
+            vitest(f'{host}-baseline-guard',host,['test/bench-rerank-entrypoint.test.ts'],layout='baseline',expected=1 if host=='node' else 0)
+            vitest(f'{host}-baseline-zod-phase5',host,['test/zod-import.test.ts','test/phase5-recovery.test.ts'],layout='baseline',expected=1 if host=='bun' else 0)
+        elif stage=='focused':
+            files=json.loads((R/'source-binding.json').read_text())['focused_files'];assert len(files)==13
+            vitest(f'{host}-composed-focused',host,files)
+        elif stage=='type':
+            run(f'{host}-ts-version',prefix+[str(R/'mirror/node_modules/typescript/bin/tsc'),'--version'])
+            run(f'{host}-root-noemit',prefix+[str(R/'mirror/node_modules/typescript/bin/tsc'),'-p','tsconfig.json','--noEmit','--pretty','false'])
+        elif stage=='sdk-quality':vitest(f'{host}-sdk-inlined-zod',host,['test/sdk-inlined-zod.test.ts'],config=R/'sdk-isolated.config.mjs')
+        else:raise ValueError(stage)

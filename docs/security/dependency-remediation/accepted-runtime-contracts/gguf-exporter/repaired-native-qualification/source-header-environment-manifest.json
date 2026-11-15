@@ -1,0 +1,256 @@
+{
+  "composed_files_sha256": {
+    "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+    "finetune/convert_gguf.py": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+    "finetune/convert_gguf.py.lock": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+    "finetune/convert_onnx.py": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+    "finetune/convert_onnx.py.lock": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+    "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+    "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+    "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+    "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+    "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+    "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+    "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+    "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+    "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+    "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+    "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+    "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+    "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+    "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+    "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+    "finetune/pyproject.toml": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+    "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+    "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+    "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+    "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+    "finetune/train.py": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+    "finetune/train.py.lock": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+    "finetune/train_unsloth.py": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+    "finetune/train_unsloth.py.lock": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+    "finetune/uv.lock": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+    "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596"
+  },
+  "environment": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv",
+  "environment_before_digest": "dcf43d083786a5fcdd5276bbf01818a085bcc58832752b195f1f35ba657a4df8",
+  "environment_parent_baseline_sha256": "302117f66bf0390428ce14d22c883b892935f93c22932cc2f5a9f5cf8d386d51",
+  "metadata_inputs": {
+    "docs/security/dependency-remediation/patched-dependencies.json": {
+      "sha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/docs/security/dependency-remediation/patched-dependencies.json"
+    },
+    "finetune/convert_gguf.py": {
+      "sha256": "5019938dce443f7e684bdaf12aaa267f522e4334d8377e30b91371a77a21db15",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/convert_gguf.py"
+    },
+    "finetune/convert_gguf.py.lock": {
+      "sha256": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/convert_gguf.py.lock"
+    },
+    "finetune/convert_onnx.py": {
+      "sha256": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/convert_onnx.py"
+    },
+    "finetune/convert_onnx.py.lock": {
+      "sha256": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/convert_onnx.py.lock"
+    },
+    "finetune/dataset/analyze_data.py": {
+      "sha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/analyze_data.py"
+    },
+    "finetune/dataset/analyze_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/analyze_data.py.lock"
+    },
+    "finetune/dataset/prepare_data.py": {
+      "sha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/prepare_data.py"
+    },
+    "finetune/dataset/prepare_data.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/prepare_data.py.lock"
+    },
+    "finetune/dataset/prepare_data_lfm2.py": {
+      "sha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/prepare_data_lfm2.py"
+    },
+    "finetune/dataset/prepare_data_lfm2.py.lock": {
+      "sha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/prepare_data_lfm2.py.lock"
+    },
+    "finetune/dataset/score_data.py": {
+      "sha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/score_data.py"
+    },
+    "finetune/dataset/score_data.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/score_data.py.lock"
+    },
+    "finetune/dataset/validate_schema.py": {
+      "sha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/validate_schema.py"
+    },
+    "finetune/dataset/validate_schema.py.lock": {
+      "sha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/dataset/validate_schema.py.lock"
+    },
+    "finetune/eval.py": {
+      "sha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/eval.py"
+    },
+    "finetune/eval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/eval.py.lock"
+    },
+    "finetune/eval_retrieval.py": {
+      "sha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/eval_retrieval.py"
+    },
+    "finetune/eval_retrieval.py.lock": {
+      "sha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/eval_retrieval.py.lock"
+    },
+    "finetune/experiments/grpo/grpo.py": {
+      "sha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/experiments/grpo/grpo.py"
+    },
+    "finetune/experiments/grpo/grpo.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/experiments/grpo/grpo.py.lock"
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py": {
+      "sha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/experiments/lfm2/sft_lfm2.py"
+    },
+    "finetune/experiments/lfm2/sft_lfm2.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/experiments/lfm2/sft_lfm2.py.lock"
+    },
+    "finetune/jobs/eval.py": {
+      "sha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/jobs/eval.py"
+    },
+    "finetune/jobs/eval.py.lock": {
+      "sha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/jobs/eval.py.lock"
+    },
+    "finetune/jobs/sft.py": {
+      "sha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/jobs/sft.py"
+    },
+    "finetune/jobs/sft.py.lock": {
+      "sha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/jobs/sft.py.lock"
+    },
+    "finetune/pyproject.toml": {
+      "sha256": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/pyproject.toml"
+    },
+    "finetune/tools/sync_script_dependencies.py": {
+      "sha256": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/tools/sync_script_dependencies.py"
+    },
+    "finetune/train.py": {
+      "sha256": "0e7ffa2f374bd98f7933a3f81d161c9cc4023c78ae7d7094a9f9b5dcb50d4daf",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/train.py"
+    },
+    "finetune/train.py.lock": {
+      "sha256": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/train.py.lock"
+    },
+    "finetune/train_unsloth.py": {
+      "sha256": "789da059639a73a04c1bd9523a4f22203583148595a6bed1dd4224be53768897",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/train_unsloth.py"
+    },
+    "finetune/train_unsloth.py.lock": {
+      "sha256": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/train_unsloth.py.lock"
+    },
+    "finetune/uv.lock": {
+      "sha256": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/uv.lock"
+    },
+    "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": {
+      "sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl"
+    },
+    "scripts/uv_lock_graph.py": {
+      "sha256": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596",
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/scripts/uv_lock_graph.py"
+    }
+  },
+  "metadata_preview": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_",
+  "reviewed_overlay": [
+    {
+      "composed_body_sha256": "0d0e4334406468b30e8bd3612d2ef306415840a1138514213ad4e2f54c197ed1",
+      "composed_whole_sha256": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+      "every_nonheader_byte_unchanged": true,
+      "metadata_preview_whole_sha256": "0e7ffa2f374bd98f7933a3f81d161c9cc4023c78ae7d7094a9f9b5dcb50d4daf",
+      "new_header_sha256": "c6f4270da962f6361db077e2733cb87d39844494f51142c4ca338cfee0fa2b0c",
+      "old_header_sha256": "53f085645190d17c923adc3c9adf9b553f9b1792c7dcf511f7f0f250b7bf2965",
+      "path": "finetune/train.py",
+      "reviewed_body_sha256": "0d0e4334406468b30e8bd3612d2ef306415840a1138514213ad4e2f54c197ed1",
+      "reviewed_whole_sha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e"
+    },
+    {
+      "composed_body_sha256": "c5204333e5d2b2d0653ecd5cf0b0304f47d965f1c02ac0529b41f378291623ae",
+      "composed_whole_sha256": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+      "every_nonheader_byte_unchanged": true,
+      "metadata_preview_whole_sha256": "789da059639a73a04c1bd9523a4f22203583148595a6bed1dd4224be53768897",
+      "new_header_sha256": "8754665a5d5b6948e25d9dd5b12b2018410eea3e2cc839329b5737845ae057f7",
+      "old_header_sha256": "8be5c7607f88cfc2a2e1fdfcfc13adab44af4ac738c6aa8dd6f47d9cf6827a08",
+      "path": "finetune/train_unsloth.py",
+      "reviewed_body_sha256": "c5204333e5d2b2d0653ecd5cf0b0304f47d965f1c02ac0529b41f378291623ae",
+      "reviewed_whole_sha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5"
+    },
+    {
+      "composed_body_sha256": "052550d675a558fc09e25e0cbb8ee052b5187ad05b2be83fbc471aea1e519b5b",
+      "composed_whole_sha256": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+      "every_nonheader_byte_unchanged": true,
+      "metadata_preview_whole_sha256": "5019938dce443f7e684bdaf12aaa267f522e4334d8377e30b91371a77a21db15",
+      "new_header_sha256": "f888d91121a29c85053b0d13a4042a042b609f9d1241cb0260a91a3262dbe080",
+      "old_header_sha256": "da3e5f96accf2c56a2644af6ac0c6e99083ef0ec0ca2e778725c9c23450093d1",
+      "path": "finetune/convert_gguf.py",
+      "reviewed_body_sha256": "052550d675a558fc09e25e0cbb8ee052b5187ad05b2be83fbc471aea1e519b5b",
+      "reviewed_whole_sha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab"
+    },
+    {
+      "composed_whole_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "exact_reviewed_whole_bytes": true,
+      "path": "finetune/gguf_toolchain.py",
+      "reviewed_whole_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028"
+    },
+    {
+      "composed_whole_sha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "exact_reviewed_whole_bytes": true,
+      "path": "finetune/tests/test_finetune_correctness.py",
+      "reviewed_whole_sha256": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3"
+    },
+    {
+      "composed_whole_sha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "exact_reviewed_whole_bytes": true,
+      "path": "finetune/tests/test_gguf_toolchain.py",
+      "reviewed_whole_sha256": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941"
+    },
+    {
+      "composed_whole_sha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "exact_reviewed_whole_bytes": true,
+      "path": "finetune/tests/test_gguf_structure.py",
+      "reviewed_whole_sha256": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617"
+    }
+  ],
+  "reviewed_source": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-namespace-structure-repair-qj55qsru",
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+  "status": "Own composed qualification source only; no live integration/graph acceptance"
+}

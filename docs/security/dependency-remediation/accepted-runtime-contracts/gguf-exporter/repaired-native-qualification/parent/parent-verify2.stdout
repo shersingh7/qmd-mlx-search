@@ -1,0 +1,104 @@
+{
+  "success": true,
+  "environment_unchanged": true,
+  "source_unchanged": true,
+  "summary": [
+    {
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-f16.gguf",
+      "bytes": 140593376,
+      "sha256": "4aaf136b76ca60b91c3107db953b435a58e65c6a6ebe55ffc1c417866b0505ff",
+      "tensors": 25,
+      "types": {
+        "F16": 14,
+        "F32": 11
+      }
+    },
+    {
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q4_k_m.gguf",
+      "bytes": 63829280,
+      "sha256": "dba3d739e11e483e783e7baf2f1e643df6658deacff6b4fa2ac84666e54bf562",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 3,
+        "Q4_K": 11
+      }
+    },
+    {
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q6_k.gguf",
+      "bytes": 64125504,
+      "sha256": "659a7ea01f8843c3c1abee6be703d6876a5f34e9f0e17871f94e084faeab3447",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "entrypoint": "standalone",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/standalone/tmp/qmd-gguf-output-29ticgff/RANDOM-Qwen3.5-standalone-q8_0.gguf",
+      "bytes": 79824192,
+      "sha256": "e260da836b8e5df34bd662186f0807788e57a518972b848c2ddf4cc6f33c38d3",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    },
+    {
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "bytes": 63829280,
+      "sha256": "32a4f31df10fe1ccbf1bb5df5742ebdd5255f836ab1c2a80dce7b9ab1a5c40f7",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 3,
+        "Q4_K": 11
+      }
+    },
+    {
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "bytes": 64125504,
+      "sha256": "8f485b8f4fce4b82361a1787c96c3dfb0977b991a928d415257c4460b09705ce",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q6_K": 14
+      }
+    },
+    {
+      "entrypoint": "native",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "bytes": 79824192,
+      "sha256": "adb5d3e358ba75c6132bd5738351e9c1738eef9cfb5cbcfaf580998c79be7464",
+      "tensors": 25,
+      "types": {
+        "F32": 11,
+        "Q8_0": 14
+      }
+    }
+  ],
+  "standalone_f16_adapter_numerical_readback": {
+    "tensor": "blk.1.attn_v.weight",
+    "exact_sequential_merge_matches": true,
+    "differs_from_base": true,
+    "merge_records": [
+      {
+        "adapter": "sft",
+        "device": "cpu",
+        "delta_nonzero": 32768
+      },
+      {
+        "adapter": "grpo",
+        "device": "cpu",
+        "delta_nonzero": 32768
+      }
+    ]
+  },
+  "error": null
+}

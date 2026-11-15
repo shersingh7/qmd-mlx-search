@@ -26,6 +26,8 @@ import numpy as np
 import pytest
 import requests
 
+from test_audit_embedding_adapters import dependencies  # noqa: F401 - CPU-only loader fixture
+
 from scripts.qmd_mlx.adapters.embedding import (
     QwenEmbeddingAdapter,
 )
@@ -548,42 +550,26 @@ def test_preflight_watchdog_defaults_passed_to_watchdog():
     assert report["status"] == "passed"
 
 
-def test_qwen_adapter_set_dtype_applied_mock():
-    """
-    Verifies that QwenEmbeddingAdapter.load honors configured compute dtype
-    and applies model.set_dtype(compute_dtype) while rejecting unsupported dtypes.
-    """
-    from unittest.mock import patch, MagicMock
+def test_qwen_adapter_set_dtype_applied_mock(dependencies):
+    """CPU-only load contract: resolved assets and measured dtype, no downloads."""
+    dependencies.update_config(model_type="qwen2", architectures=["Qwen2ForCausalLM"])
+    for dtype in ("float32", "float16", "bfloat16"):
+        adapter = QwenEmbeddingAdapter(str(dependencies.snapshot), dtype_str=dtype)
+        try:
+            adapter.load()
+            assert adapter.is_loaded()
+            model = dependencies.models[-1]
+            assert model.dtype_calls == [getattr(dependencies.mx, dtype)]
+            assert adapter.get_descriptor()["dtype"] == dtype
+            assert adapter.get_descriptor()["quantization"] == "none"
+            assert dependencies.calls.qwen[-1][1]["tokenizer_config"]["local_files_only"] is True
+        finally:
+            adapter.unload()
+        assert not adapter.is_loaded()
 
-    mock_model = MagicMock()
-    mock_model.set_dtype = MagicMock()
-    mock_model.args = MagicMock(hidden_size=2560)
-    mock_tok = MagicMock()
-
-    # 1. float32 dtype
-    adapter_f32 = QwenEmbeddingAdapter("qwen-test", dtype_str="float32")
-    with patch("mlx_lm.load", return_value=(mock_model, mock_tok, {"quantization": {"quant_type": "4bit"}})):
-        adapter_f32.load()
-        assert adapter_f32.is_loaded()
-        mock_model.set_dtype.assert_called_once()
-        call_arg = mock_model.set_dtype.call_args[0][0]
-        # In MLX, mx.float32 is the compute dtype
-        import mlx.core as mx
-        assert call_arg == mx.float32
-
-    # 2. bfloat16 dtype
-    mock_model.reset_mock()
-    adapter_bf16 = QwenEmbeddingAdapter("qwen-test", dtype_str="bfloat16")
-    with patch("mlx_lm.load", return_value=(mock_model, mock_tok, {})):
-        adapter_bf16.load()
-        mock_model.set_dtype.assert_called_once()
-        assert mock_model.set_dtype.call_args[0][0] == mx.bfloat16
-
-    # 3. Unsupported dtype
-    adapter_bad = QwenEmbeddingAdapter("qwen-test", dtype_str="int8_unsupported")
-    with patch("mlx_lm.load", return_value=(mock_model, mock_tok, {})):
-        with pytest.raises(ModelUnavailableError, match="Unsupported compute dtype"):
-            adapter_bad.load()
+    adapter_bad = QwenEmbeddingAdapter(str(dependencies.snapshot), dtype_str="int8_unsupported")
+    with pytest.raises(ModelUnavailableError, match="Unsupported compute dtype"):
+        adapter_bad.load()
 
 
 def test_diagnostic_mode_failing_comparison_continues_but_status_remains_failed():

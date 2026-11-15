@@ -1,0 +1,111 @@
+"""Parent verification of the exact observer review; not a CI acceptance gate."""
+from pathlib import Path
+import hashlib
+import json
+import re
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+REVIEW = Path('/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2')
+LIVE = Path('/Users/shersingh/github/qmd-mlx-search')
+NODE = '/Users/shersingh/.hermes/node/bin/node'
+BINDING = json.loads((ROOT / 'parent-source-binding.json').read_text())
+VERDICT = json.loads((REVIEW / 'final-review-receipt.json').read_text())
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def source_identity():
+    assert digest(REVIEW / 'final-review-receipt.json') == BINDING['reviewReceiptSha256']
+    for name, expected in BINDING['sha256'].items():
+        assert digest(ROOT / name) == expected, name
+
+
+def run(mode, label):
+    source_identity()
+    env = {'PATH': '/usr/bin:/bin', 'CI': '1', 'REQUIRE_BUN': '1', 'QMD_LLAMA_GPU': 'false',
+           'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_DATASETS_OFFLINE': '1'}
+    for key, folder in {'HOME': 'home', 'TMPDIR': 'tmp', 'HERMES_HOME': 'hermes',
+                        'HERMES_DIR': 'hermes', 'HERMES_KNOWLEDGE_DIR': 'knowledge',
+                        'XDG_CACHE_HOME': 'cache', 'XDG_CONFIG_HOME': 'config', 'HF_HOME': 'hf'}.items():
+        env[key] = str(ROOT / folder)
+    result = subprocess.run([NODE, str(ROOT / 'harness/run.mjs'), mode, label],
+                            cwd=ROOT, env=env, capture_output=True, timeout=100)
+    assert result.returncode == 0, (mode, result.stdout.decode(), result.stderr.decode())
+    receipt = read(ROOT / 'evidence' / f'{label}-command.json')
+    assert receipt['exitCode'] == 0 and receipt['signal'] is None
+    assert receipt['errorCode'] is None and receipt['outerCleanup'] == 'none'
+    assert len(receipt['sourceSha256']) == 246
+    source_identity()
+    return (ROOT / 'evidence' / f'{label}.stdout.log').read_text()
+
+
+def test_01_fresh_heldouts_and_actual_negative_transport():
+    heldouts = run('heldouts', 'parent-heldouts')
+    counts = {key: int(re.search(rf'^# {key} (\d+)$', heldouts, re.M).group(1))
+              for key in ('tests', 'pass', 'fail', 'skipped')}
+    assert counts == {'tests': 6, 'pass': 6, 'fail': 0, 'skipped': 0}
+    output = run('actual-fallback', 'parent-fallback')
+    messages = [json.loads(line) for line in output.splitlines() if line.startswith('{')]
+    result = next(row for row in messages if row['evidence'].endswith('-control'))
+    cleanup = next(row for row in messages if row['evidence'].endswith('-finally'))
+    assert result['coldOrCIProof'] is False
+    assert result['cleanup']['pipesClosed'] is False
+    assert result['cleanup']['forcedPipeClose'] is True
+    assert result['cleanup']['containmentVerified'] is False
+    assert cleanup['cooperativeWriterReleased'] and cleanup['noNumericalPidSignals'] and cleanup['fixtureRemoved']
+    artifacts = list((ROOT / 'evidence/parent-fallback-artifacts').glob('fast-timeout-node-*.json'))
+    assert len(artifacts) == 1
+    trace = read(artifacts[0])
+    assert trace['status'] == 'observed-node-supervisor'
+    assert trace['ownerPid'] == result['launch']['supervisorPid']
+    assert trace['receipt']['preForcedClosure']['transportFailure'] == result['transportFailure']
+    assert trace['receipt']['preForcedClosure']['tMs'] is None
+    assert trace['causality'] == 'not-established-by-runtime-events'
+    assert trace['restoration'] == {'channelUnsubscribed': True, 'listenersRemoved': True}
+    counter = trace['finalState']['closeCounter']
+    assert 0 <= counter['got'] <= counter['needed'] == 4
+    assert len(trace['events']) <= trace['eventLimit'] == 32
+    receipt = {'heldouts': counts, 'sourceFilesVerified': 246,
+               'fallback': {'elapsedMs': result['elapsedMs'], 'ownerPid': trace['ownerPid'],
+                            'closeCounter': counter, 'preDestroyTimestamp': None,
+                            'exactPreDestroyProjection': True, 'truthfulFailedTransport': True,
+                            'cooperativeWriterReleased': True, 'artifact': str(artifacts[0])},
+               'actualCiExecuted': False, 'completeCleanupCertification': False,
+               'qualification': 'Retained C1; runtime observation does not establish historical CI cause'}
+    with (ROOT / 'parent-verified-controls.json').open('x') as handle:
+        json.dump(receipt, handle, indent=2)
+        handle.write('\n')
+    print(json.dumps(receipt))
+
+
+def test_02_integrated_four_paths_match_reviewed_bytes_and_preserve_lease():
+    source_identity()
+    for change in VERDICT['changes']:
+        assert digest(LIVE / change['path']) == change['proposedSha256']
+    for name in ('scripts/phase5_e2e_runner.ts', 'scripts/phase5_recovery_process.py'):
+        assert digest(LIVE / name) == BINDING['sha256']['mirror/' + name]
+    integration = read(ROOT / 'integration-receipt.json')
+    assert integration['pathsIntegrated'] == [change['path'] for change in VERDICT['changes']]
+    assert integration['sourcePreimagesMatched'] and integration['leaseProductionUnchanged']
+    assert integration['ciAccepted'] is False
+
+
+def test_03_scoped_acceptance_cannot_close_native_ci():
+    ledger = read(Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/integration-gates-wave4.json'))
+    gate = next(row for row in ledger['gates'] if row['id'] == 'recovery-startup')
+    summary = read(LIVE / gate['native_ci_observability_acceptance_archive'])
+    assert gate['native_ci_observability_ci_accepted'] is False
+    assert summary['specVerdict'] == 'SPEC_PASS_SCOPED'
+    assert summary['qualityVerdict'] == 'QUALITY_PASS_WITH_QUALIFICATIONS'
+    assert summary['actualCiExecuted'] is False and summary['historicalCiCause'] == 'UNPROVEN'
+    assert summary['parentControls']['heldouts']['pass'] == 6
+    assert summary['parentControls']['fallback']['exactPreDestroyProjection'] is True
+    assert summary['integration']['leaseProductionUnchanged'] is True
+    assert summary['reviewReceiptSha256'] == BINDING['reviewReceiptSha256']

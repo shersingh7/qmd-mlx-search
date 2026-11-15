@@ -1,0 +1,43 @@
+{
+  "checks": [
+    {
+      "label": "validation-final",
+      "command": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/validate_workflow.py",
+        "final"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/validation-final.stdout.log",
+      "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/validation-final.stderr.log"
+    },
+    {
+      "label": "control-flow-final",
+      "command": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/control_flow_tests.py",
+        "final-v2"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/control-flow-final.stdout.log",
+      "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-workflow-review.k6XUMg0e/evidence/control-flow-final.stderr.log"
+    }
+  ],
+  "synthetic_cases": 74,
+  "synthetic_passed": 74,
+  "synthetic_failed": 0,
+  "synthetic_skipped": 0,
+  "workflow_sha256": "a384be7b604411d9a41b15568dd9d37324632416d3fe7c2346b06f3f7d60b306",
+  "physical_host": {
+    "os": "Darwin",
+    "architecture": "arm64"
+  },
+  "image_execution": false,
+  "validation_passed": true
+}

@@ -1,0 +1,7 @@
+{
+  "kind": "safe reviewer allowlist omission",
+  "initialCommand": "independent-bounded-types-command.json",
+  "error": "original comparison legitimately resolves type packages through the own mirror node_modules cwd; initial lexical guard allowed only current original tree and real dependency target, not the already-approved other own alias",
+  "protectedReadsPrevented": true,
+  "fix": "Explicit per-package alias prefixes for both OWN original/mirror containers, plus unchanged realpath dependency/source guard; do not allow other sources or all node_modules globally."
+}

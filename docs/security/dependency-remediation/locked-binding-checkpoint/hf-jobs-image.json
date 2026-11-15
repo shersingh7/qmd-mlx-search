@@ -1,0 +1,70 @@
+{
+  "verified_at": "2026-11-13T19:10:28.292090+00:00",
+  "public_registry_manifest_url": "https://ghcr.io/v2/astral-sh/uv/manifests/0.11.18-python3.12-trixie-slim",
+  "image": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie-slim@sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+  "response_content_sha256": "sha256:9f9a7c30d604c8297ac14321b91b42f8516ff207f42b76b1bf29974fad523f6e",
+  "uv_version_matches_existing_local_runtime_controls": true,
+  "image_pulled": false,
+  "image_executed": false,
+  "cloud_job_submitted": false,
+  "manifest": {
+    "schemaVersion": 2,
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "manifests": [
+      {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:ff53dab3f5b287aaa2e6c32bee0d7874e9ff47f2872fc6df991a8fa3cbbff801",
+        "size": 1248,
+        "platform": {
+          "architecture": "arm64",
+          "os": "linux"
+        }
+      },
+      {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:d772b01ea844e553621af5277402fa9609d7476ee272e917175564d671ae0fdc",
+        "size": 840,
+        "annotations": {
+          "vnd.docker.reference.digest": "sha256:ff53dab3f5b287aaa2e6c32bee0d7874e9ff47f2872fc6df991a8fa3cbbff801",
+          "vnd.docker.reference.type": "attestation-manifest"
+        },
+        "platform": {
+          "architecture": "unknown",
+          "os": "unknown"
+        }
+      },
+      {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:978d5be63c6e68a29712238ea637f81d5836ff8ffae48a8ff3776e3cb6cd8e7b",
+        "size": 1248,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      },
+      {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:6f89b41ab945667c7b83925c1150f6857b557636afc120df3428a8e54cdb3c33",
+        "size": 840,
+        "annotations": {
+          "vnd.docker.reference.digest": "sha256:978d5be63c6e68a29712238ea637f81d5836ff8ffae48a8ff3776e3cb6cd8e7b",
+          "vnd.docker.reference.type": "attestation-manifest"
+        },
+        "platform": {
+          "architecture": "unknown",
+          "os": "unknown"
+        }
+      }
+    ],
+    "annotations": {
+      "org.opencontainers.image.created": "2026-06-01T19:18:59.826Z",
+      "org.opencontainers.image.description": "An extremely fast Python package and project manager, written in Rust.",
+      "org.opencontainers.image.licenses": "Apache-2.0",
+      "org.opencontainers.image.revision": "e32666915e7fd99bbd0f167f5c381f4fb4198486",
+      "org.opencontainers.image.source": "https://github.com/astral-sh/uv",
+      "org.opencontainers.image.title": "uv",
+      "org.opencontainers.image.url": "https://github.com/astral-sh/uv",
+      "org.opencontainers.image.version": "0.11.18-python3.12-trixie-slim"
+    }
+  }
+}

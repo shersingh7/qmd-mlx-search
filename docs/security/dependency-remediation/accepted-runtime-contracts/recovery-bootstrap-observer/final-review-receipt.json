@@ -1,0 +1,120 @@
+{
+  "specVerdict": "SPEC_PASS_SCOPED",
+  "qualityVerdict": "QUALITY_PASS_WITH_QUALIFICATIONS",
+  "specBeforeQualityVerified": true,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2",
+  "patchSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+  "sourceManifestSha256": "d4f94e439de1704994cd2eb94e6b697d55c0625a833f7881832071529f0fed87",
+  "changes": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "originalSha256": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+      "proposedSha256": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f"
+    },
+    {
+      "path": "test/audit-recovery-tree.test.ts",
+      "originalSha256": "bffbd2c578cf357e3b34da75cca79a917c9537c6c211cd6e7ae08c274c3cfa1d",
+      "proposedSha256": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.mjs",
+      "originalSha256": null,
+      "proposedSha256": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de"
+    },
+    {
+      "path": "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs",
+      "originalSha256": null,
+      "proposedSha256": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e"
+    }
+  ],
+  "reports": {
+    "SPEC-REVIEW.md": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/SPEC-REVIEW.md",
+      "sha256": "bc78c3a2e0911c20789b2d4d066e17f6bb438c343ffb52c2495f506cfa1c30ea"
+    },
+    "QUALITY-REVIEW.md": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/QUALITY-REVIEW.md",
+      "sha256": "6f91f14c6f2875b4f6122a3cc1949cc8e6ccade310c7c40399b4cd0f403aaa91"
+    },
+    "RUNBOOK.md": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/RUNBOOK.md",
+      "sha256": "a4b86252c5be830599d11127611e28fae14df586f981761ca2aa2f39a553bf49"
+    },
+    "source-hash-manifest.json": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/source-hash-manifest.json",
+      "sha256": "0096519d95cb6ab60cdb9a077d0d3eb59441be1bcff111c2af176dde9ce6f2e7"
+    },
+    "verification-summary.json": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/verification-summary.json",
+      "sha256": "85d49e527d1417541f6cc9d256baf5e6b423998e7faa6b8b862a0db985885523"
+    }
+  },
+  "counts": {
+    "originalSourceFilesAuthenticated": 244,
+    "proposedSourceFilesAuthenticated": 246,
+    "providedScopedArtifactsAuthenticated": 104,
+    "nodeOn": {
+      "pass": 1,
+      "filtered": 7,
+      "elapsedMs": 248
+    },
+    "nodeOff": {
+      "pass": 1,
+      "filtered": 7,
+      "elapsedMs": 222
+    },
+    "nodeSelftests": {
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
+    "independentHeldouts": {
+      "pass": 6,
+      "fail": 0,
+      "skip": 0
+    },
+    "nativeBun": {
+      "pass": 1,
+      "filtered": 7,
+      "elapsedMs": 216
+    },
+    "separateActualFallback": {
+      "expectedFailedTransport": true,
+      "elapsedMs": 946.0969160000001,
+      "ownerPid": 39835,
+      "nodeClosesGot": 2,
+      "nodeClosesNeeded": 4,
+      "preDestroyTimestamp": null
+    },
+    "boundedTypes": {
+      "before": 65,
+      "after": 65,
+      "new": 0
+    },
+    "actionlintExit": 0,
+    "strictHelperTypesExit": 0,
+    "syntaxExit": [
+      0,
+      0
+    ],
+    "shellScriptsPass": 11
+  },
+  "blockingFindings": [],
+  "qualifications": [
+    "Existing lease C1 retained",
+    "Actual candidate-head/merge-checkout/source/artifact CI readback remains parent-owned and OPEN",
+    "Runtime events do not prove kernel holders/causality; native Bun tracing unsupported; selected interpreter/timing unavailable",
+    "Bounded 65 diagnostics comparison is not canonical root 61/type acceptance"
+  ],
+  "sourceOrLiveModifications": false,
+  "workloadTimeoutCleanupUsed": false,
+  "parentGates": [
+    "Narrow integration against exact live preimages; do not restore entire frozen mirror",
+    "Canonical build/full workspace suite/type/package gates (parent owns distinct 61 baseline/type proposal)",
+    "Actual candidate-head macOS CI, both Node and Bun main jobs: exact run/head/event/merge-checkout/source-file bytes readback",
+    "Require observed Node fast artifact in BOTH jobs and match owner/runtime/log/assertion/source identities; metadata/TAP-only cannot qualify; preserve earlier failures",
+    "Original bootstrap/stream/holder cause remains UNPROVEN; native Bun/kernel holder tracing unsupported"
+  ],
+  "artifactHashManifest": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/artifact-hash-manifest.json",
+  "artifactManifestScope": "All regular files present under root top-level report/input/manifest files plus harness/ and evidence/ at finalization, excluding this self-referential manifest. Source trees/dependencies/caches/environments/patch-replay separately bound by source-hash-manifest; no external target traversal."
+}

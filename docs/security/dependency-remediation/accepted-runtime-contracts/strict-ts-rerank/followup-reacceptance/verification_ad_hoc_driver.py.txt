@@ -1,0 +1,38 @@
+from pathlib import Path
+import json, tempfile, subprocess, hashlib, os
+R=Path(__file__).resolve().parent
+SOURCE='''from pathlib import Path
+import json, runpy
+R=Path(__file__).resolve().parent
+D=runpy.run_path(str(R/'run_review.py'))
+for name in ['setup_review.py','run_review.py','finalize_review.py']:
+    compile((R/name).read_text(),str(R/name),'exec')
+print('OWN_PYTHON_SYNTAX_PASS',flush=True)
+syntax=[*R.glob('*.mjs'),* (R/'probes').glob('*.mjs'),*(R/'sdk-probe/node_modules/review-native-zod').glob('*.mjs'),*(R/'sdk-probe/node_modules/review-converter-native').glob('*.mjs')]
+for i,p in enumerate(syntax): D['run'](f'adhoc-js-syntax-{i}',[D['NODE'],'--check',str(p)])
+for host,cmd in [('node',[D['NODE']]),('bun',[D['BUN'],'--bun'])]:
+    for probe in ['source-proof','effective-config','merge-and-matcher']:
+        D['run']('adhoc-'+host+'-'+probe,cmd+[str(R/'probes'/f'{probe}.mjs')])
+    D['vitest']('adhoc-'+host+'-three-product-files',host,['test/bench-rerank-entrypoint.test.ts','test/zod-import.test.ts','test/phase5-recovery.test.ts'])
+    D['vitest']('adhoc-'+host+'-sdk-boundaries',host,['test/sdk-inlined-zod.test.ts','test/zod-prefix-scope.test.ts'],config=R/'sdk-isolated.config.mjs')
+    D['run']('adhoc-'+host+'-strict-root',cmd+[str(R/'mirror/node_modules/typescript/bin/tsc'),'-p','tsconfig.json','--noEmit','--pretty','false'])
+D['vitest']('adhoc-node-baseline-config-positive', 'node',['test/zod-import.test.ts','test/phase5-recovery.test.ts'],layout='baseline')
+D['vitest']('adhoc-bun-baseline-config-positive', 'bun',['test/bench-rerank-entrypoint.test.ts'],layout='baseline')
+print('AD_HOC_CHANGED_BEHAVIOR_CHECKS_PASS',flush=True)
+'''
+fd,name=tempfile.mkstemp(prefix='hermes-verify-',suffix='.py',dir=R)
+p=Path(name)
+with os.fdopen(fd,'w') as f:f.write(SOURCE)
+# Keep a source snapshot before removing the temporary executable.
+(R/'evidence/ad-hoc-verifier-source.py').write_text(SOURCE)
+d=__import__('runpy').run_path(str(R/'run_review.py'))
+try:
+    cp=subprocess.run(['/usr/bin/python3','-I','-B',str(p)],cwd='/Users/shersingh',env=d['env']('adhoc-driver'),capture_output=True,text=True,timeout=180)
+    (R/'logs/ad-hoc-verification.stdout.log').write_text(cp.stdout)
+    (R/'logs/ad-hoc-verification.stderr.log').write_text(cp.stderr)
+    receipt={'classification':'ad-hoc focused verification, not canonical/full-suite acceptance','temporary_script':str(p),'script_sha256':hashlib.sha256(SOURCE.encode()).hexdigest(),'source_snapshot':'evidence/ad-hoc-verifier-source.py','exit_code':cp.returncode,'managed_scratch_used_instead_of_system_tmp':'Required by parent readonly/owned-scratch scope','stdout':'logs/ad-hoc-verification.stdout.log','stderr':'logs/ad-hoc-verification.stderr.log'}
+    (R/'evidence/ad-hoc-verification.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    print(json.dumps(receipt,indent=2)); print(cp.stdout[-5000:]);print(cp.stderr[-5000:])
+    assert cp.returncode==0
+finally:
+    p.unlink(missing_ok=True)

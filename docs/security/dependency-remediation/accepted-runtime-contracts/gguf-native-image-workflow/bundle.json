@@ -1,0 +1,12 @@
+{
+  "archive": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/review-bundle.zip",
+  "sha256": "fa2976fb3dc4bba25a04b5c7664acc86cbecc8fb5a23539d81abca46deb4e16a",
+  "bytes": 10855606,
+  "entries": 5812,
+  "only_regular_artifacts_archived": true,
+  "review_manifest": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/review-manifest.json",
+  "review_manifest_sha256": "40d3b0cec481a2697a6a8bcd67b9de0154d5a59e3e2512c773c2253b843a1820",
+  "report": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/REPORT.md",
+  "report_sha256": "354401f826f67084c13ba38473380c7f171fddfb4ed5a42fb7f081531bdb0841",
+  "result": "/Users/shersingh/.hermes/cache/scratch/qmd-w1-independent-n8m2r7/review-result.json"
+}

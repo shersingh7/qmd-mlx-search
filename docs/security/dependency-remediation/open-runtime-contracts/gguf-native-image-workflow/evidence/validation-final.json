@@ -1,0 +1,45 @@
+{
+  "phase": "final",
+  "image_execution": false,
+  "checks": [
+    {
+      "check": "structural assertions + inline Python compile",
+      "exit_code": 0
+    },
+    {
+      "check": "bash syntax",
+      "command": [
+        "/bin/bash",
+        "-n",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/generated-step.bash"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "check": "actionlint version",
+      "command": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "1.7.12\ninstalled by downloading from release page\nbuilt with go1.26.1 compiler for darwin/arm64\n",
+      "stderr": ""
+    },
+    {
+      "check": "actionlint",
+      "command": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+        "-no-color",
+        "-shellcheck=",
+        "-pyflakes=",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/mirror/.github/workflows/gguf-native-image-qualification.yml"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "passed": true
+}

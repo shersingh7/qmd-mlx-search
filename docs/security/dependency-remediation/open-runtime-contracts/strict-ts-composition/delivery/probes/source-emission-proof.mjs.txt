@@ -1,0 +1,38 @@
+import { createRequire } from 'node:module';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { createHash } from 'node:crypto';
+const R=process.env.QMD_COMPOSE_ROOT;
+const require=createRequire(join(R,'mirror/package.json'));
+const ts=require('typescript');
+const hash=v=>createHash('sha256').update(v).digest('hex');
+const roots={};
+for(const tree of ['baseline','mirror']){
+ const base=join(R,tree);
+ const config=ts.readConfigFile(join(base,'tsconfig.json'),ts.sys.readFile);
+ if(config.error)throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText,'\n'));
+ const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,base);
+ if(parsed.errors.length)throw new Error(JSON.stringify(parsed.errors));
+ roots[tree]={files:parsed.fileNames.map(x=>relative(base,x)).sort(),options:parsed.options};
+}
+const removed=roots.baseline.files.filter(x=>!roots.mirror.files.includes(x));
+const added=roots.mirror.files.filter(x=>!roots.baseline.files.includes(x));
+if(removed.length)throw new Error('Compiler roots removed: '+removed.join(','));
+const proof=[];
+for(const rel of ['scripts/phase5_e2e_runner.ts','test/phase5-recovery.test.ts']){
+ const outputs={};const sourceHashes={};
+ for(const tree of ['baseline','mirror']){
+  const source=readFileSync(join(R,tree,rel),'utf8');
+  sourceHashes[tree]=hash(source);
+  const out=ts.transpileModule(source,{fileName:rel,compilerOptions:{...roots[tree].options,noEmit:false,declaration:false,sourceMap:false},reportDiagnostics:true});
+  if(out.diagnostics?.length)throw new Error('Transpile diagnostics: '+JSON.stringify(out.diagnostics));
+  outputs[tree]=out.outputText;
+  const path=join(R,'evidence/emitted',tree,rel.replace(/\.ts$/,'.mjs'));
+  mkdirSync(join(path,'..'),{recursive:true});writeFileSync(path,out.outputText);
+ }
+ if(outputs.baseline!==outputs.mirror)throw new Error('Lease emitted runtime drift: '+rel);
+ proof.push({path:rel,sourceHashes,byteIdenticalSources:sourceHashes.baseline===sourceHashes.mirror,emittedSha256:hash(outputs.mirror),emittedRuntimeIdentical:true});
+}
+const report={typescript:ts.version,execPath:process.execPath,versions:process.versions,compilerRoots:roots,rootDiff:{removed,added},leaseEmitted:proof,note:'Lease-overlap files were held unchanged: reviewed proposal requires non-type runtime guards, so no unsafe runtime/type rewrite is silently substituted.'};
+writeFileSync(join(R,'evidence/source-emission-proof.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({typescript:ts.version,roots:{baseline:roots.baseline.files.length,mirror:roots.mirror.files.length},removed,added,leaseEmitted:proof},null,2));

@@ -37,7 +37,7 @@ from .adapters.embedding import (
     estimate_model_memory_mb,
     infer_model_params_b,
 )
-from .supervisor import SmokeHttpClient
+from .supervisor import SmokeHttpClient, _read_log_tail, _startup_failure_message
 from .watchdog import (
     BreachType,
     MLXWatchdog,
@@ -670,7 +670,7 @@ class SmokeRunner:
             while time.monotonic() < startup_deadline:
                 if breach_event.is_set():
                     b_res = breach_result[0]
-                    raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", log_file_path))
 
                 if child.poll() is not None:
                     # Allow supervisor a short window to register breach if watchdog delivered a kill signal
@@ -680,14 +680,13 @@ class SmokeRunner:
                         time.sleep(0.05)
                     if breach_event.is_set():
                         b_res = breach_result[0]
-                        raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                        raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", log_file_path))
                     if watchdog.last_check_result and not watchdog.last_check_result.healthy:
-                        raise RuntimeError(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}")
+                        raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}", log_file_path))
 
                     log_tail = ""
                     try:
-                        with open(log_file_path, "r", encoding="utf-8", errors="replace") as f:
-                            log_tail = f.read()[-2000:]
+                        log_tail = _read_log_tail(log_file_path, 2000)
                     except Exception:
                         pass
                     raise RuntimeError(
@@ -712,10 +711,10 @@ class SmokeRunner:
             if not ready:
                 if breach_event.is_set():
                     b_res = breach_result[0]
-                    raise RuntimeError(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {b_res.breach_reason if b_res else 'unknown breach'}", log_file_path))
                 if watchdog.last_check_result and not watchdog.last_check_result.healthy:
-                    raise RuntimeError(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}")
-                raise TimeoutError(f"Server child failed to report ready on {ctrl_url}/health within startup period")
+                    raise RuntimeError(_startup_failure_message(f"Watchdog breach during server startup: {watchdog.last_check_result.breach_reason}", log_file_path))
+                raise TimeoutError(_startup_failure_message(f"Server child failed to report ready on {ctrl_url}/health within startup period", log_file_path))
 
             # Step 5: Fetch & Strictly Validate Descriptor Schema
             status_desc, descriptor = client.get_json(f"{ctrl_url}/descriptor", deadline=deadline, timeout_s=2.0)
@@ -1078,8 +1077,7 @@ class SmokeRunner:
             # 1. Capture bounded log tail before closing or unlinking
             if log_file_path and os.path.exists(log_file_path):
                 try:
-                    with open(log_file_path, "r", encoding="utf-8", errors="replace") as f:
-                        report["captured_logs"] = f.read()[-8192:]
+                    report["captured_logs"] = _read_log_tail(log_file_path, 8192)
                 except Exception as log_err:
                     report["captured_logs"] = f"Failed to capture server logs: {log_err}"
 

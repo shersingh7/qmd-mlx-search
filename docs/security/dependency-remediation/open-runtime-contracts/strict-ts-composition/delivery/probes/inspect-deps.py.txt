@@ -1,0 +1,15 @@
+from pathlib import Path
+import json
+R=Path('/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p')
+a=json.loads((R/'evidence/mirror-package-aliases.json').read_text())
+print('INSTALLED TYPE ALIASES',json.dumps({k:v for k,v in a.items() if k.startswith('@types/') or 'bun' in k or 'picomatch' in k},indent=2))
+d=json.loads((R/'evidence/dependencies-before.json').read_text())
+print('BUN/PICOMATCH INSTALLED CANDIDATES',json.dumps([p for p in d if p.endswith('package.json') and any(v in p for v in ['@types/bun','@types/picomatch','bun-types','typescript/package.json'])],indent=2))
+for t in ['baseline','mirror']:
+ p=R/t
+ print(t,'dist_exists',(p/'dist').exists())
+for rel in ['docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs','docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs','docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs']:
+ print('DOC IMPORTS',rel)
+ for line in (R/'mirror'/rel).read_text().splitlines():
+  if 'import' in line or '/Users/' in line: print(line)
+print('RUNTIMES',json.dumps({n:str((R/'tools/bin'/n).resolve()) for n in ['node','bun']}))

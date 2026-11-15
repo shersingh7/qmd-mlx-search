@@ -1,0 +1,237 @@
+"""Finalize QUALITY only after source-bound SPEC evidence passes."""
+from __future__ import annotations
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+PARENT = Path('/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-version-bhorx1tv')
+PRIOR = Path('/Users/shersingh/.hermes/cache/scratch/qmd-uv-reacceptance-48650f6h')
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def files(root):
+    result = {}
+    for path in root.rglob('*'):
+        assert not path.is_symlink(), str(path)
+        if path.is_file():
+            result[str(path.relative_to(root))] = sha(path)
+    return result
+
+def put(path, data):
+    path.write_text(json.dumps(data, indent=2, sort_keys=True) + '\n')
+
+auth = json.loads((ROOT / 'evidence/source-authentication.json').read_text())
+execution = json.loads((ROOT / 'evidence/execution-summary.json').read_text())
+assert execution['spec_stage'] == 'PASS'
+assert execution['green']['tests'] == 90
+assert execution['green']['returncode'] == 0
+assert execution['red']['failures'] == 27 and execution['red']['returncode'] == 1
+candidate = auth['source_sha256']
+assert files(ROOT / 'repo') == candidate
+base = json.loads((ROOT / 'inputs/base-source-binding.json').read_text())['sourceSha256']
+assert files(ROOT / 'baseline') == base
+old = (ROOT / 'baseline/finetune/tools/qualify_gguf_image.py').read_text()
+new = (ROOT / 'repo/finetune/tools/qualify_gguf_image.py').read_text()
+old_tree, new_tree = ast.parse(old), ast.parse(new)
+old_defs = {node.name:node for node in old_tree.body if isinstance(node, ast.FunctionDef)}
+new_defs = {node.name:node for node in new_tree.body if isinstance(node, ast.FunctionDef)}
+for name in ('run','_uv_release','main'):
+    assert ast.dump(old_defs[name]) == ast.dump(new_defs[name]), name
+# The native-only tuple, Python/uv gates, native build and receipt body remain
+# byte-identical; authenticate all bytes outside the one exact extraction block.
+old_fragment = '        versions = {name: run([path, "--version"], work, env, timeout=10).splitlines()[0]\n                    for name, path in tools.items()}\n'
+new_fragment = '        versions = {}\n        for name, path in tools.items():\n            output = run([path, "--version"], work, env, timeout=10)\n            if not output:\n                raise RuntimeError(f"empty version output from native prerequisite: {name}")\n            versions[name] = output.splitlines()[0]\n'
+assert new == old.replace(old_fragment, new_fragment)
+assert old_defs['run'].body[-1].value.func.attr == 'strip'
+assert 'except (OSError, RuntimeError, subprocess.TimeoutExpired)' in new
+assert 'except IndexError' not in new
+assert 'timeout=10' in new_fragment
+assert 'work, env, timeout=60)' in new
+assert 'for name in ("c-smoke", "cxx-smoke")' in new
+for name in ('test_probe_contract_green.py','test_repair_heldouts.py'):
+    assert (ROOT / name).read_bytes() == (PARENT / name).read_bytes()
+    parent_ast = ast.parse((PARENT / name).read_text())
+    original_ast = ast.parse((PRIOR / name).read_text())
+    parent_asserts = [ast.dump(node) for node in ast.walk(parent_ast) if isinstance(node, ast.Assert)]
+    original_asserts = [ast.dump(node) for node in ast.walk(original_ast) if isinstance(node, ast.Assert)]
+    before = base['finetune/tools/qualify_gguf_image.py']
+    after = candidate['finetune/tools/qualify_gguf_image.py']
+    assert [s.replace(before, after) for s in original_asserts] == parent_asserts
+
+before = json.loads((ROOT / 'evidence/protected-before.json').read_text())
+after = {
+    'parent-baseline':files(PARENT / 'baseline'),
+    'parent-candidate':files(PARENT / 'repo'),
+    'prior-source':files(PRIOR / 'repo'),
+    'parent-artifacts':{rel:sha(PARENT / rel) for rel in before['parent-artifacts']},
+    'prior-artifacts':{rel:sha(PRIOR / rel) for rel in before['prior-artifacts']},
+}
+assert before == after
+put(ROOT / 'evidence/protected-after.json', after)
+put(ROOT / 'evidence/preservation-verification.json', {'all_unchanged':True,'group_counts':{group:len(values) for group,values in after.items()},'candidate_replay_source_count':len(candidate),'baseline_source_count':len(base),'unchanged_existing_candidate_files':len(base)-1,'production_AST_unchanged_functions':['run','_uv_release','main'],'production_all_other_bytes_unchanged':True,'retained_contract_assertions_unchanged_except_source_hash':True,'original_162_test_file_unchanged':True,'helper_sha256':candidate['finetune/gguf_toolchain.py'],'helper_imported_or_executed':False})
+
+report = f'''# Empty prerequisite version refusal: independent two-file review
+
+## SPEC: PASS
+
+Source-bound acceptance of exactly `finetune/tools/qualify_gguf_image.py` plus
+new `finetune/tests/test_qualify_empty_version.py`. No live integration.
+
+- Patch SHA-256: `{auth['patch_sha256']}`.
+- Base accepted review result: `{auth['base_review_sha256']}`.
+- Qualifier preimage: `{base['finetune/tools/qualify_gguf_image.py']}`.
+- Qualifier candidate: `{candidate['finetune/tools/qualify_gguf_image.py']}`.
+- New regression file: `{candidate['finetune/tests/test_qualify_empty_version.py']}`.
+- Independently checked preimages, applied only the two-file patch in an owned
+  derivative (`git apply --check` and replay both exit 0), then matched all 43
+  candidate source hashes. Base has 42 files; candidate preserves 41 byte-for-byte,
+  changes one existing file, and adds one. All 42 baseline files remain preserved.
+
+### Fresh execution evidence
+
+| Surface | Cases | Result |
+|---|---:|---|
+| Authored regression file against exact old qualifier | 27 | 27 expected failures; pytest exit 1, no errors/skips |
+| Same regression file against candidate | 27 | passed |
+| Retained uv release positive/wrong-release contracts | 4 | passed |
+| Retained parser and public CLI contracts | 59 | passed |
+| Candidate combined scoped suite | 90 | exit 0; 0 failures/errors/skips |
+
+The combined suite ran once in {execution['green']['seconds']:.2f}s; its three groups
+are not added again to a separate total. Exact executed case-name multisets
+match the source-bound retained fixtures. The 27 old-source failures all reach
+the exit-code assertion at regression line 65 and show `IndexError: list index
+out of range`, exit 1. Thus call-order, no-build-sentinel, and temporary-directory
+cleanup assertions preceding that line did not fail. This is genuine RED, not
+an import/setup failure and not an acceptance requirement for the buggy state.
+
+The candidate's 27 real CLI negatives cover full mode's five queried tools and
+native-only mode's four, each with empty, newline-only, and whitespace-only
+successful stdout. They require exit 2, exact named refusal, empty stdout, no
+traceback, no build attempt, expected call prefix/order and no workspace leak.
+The fixtures are explicitly authored version-only/no-build controls, not claims
+of native success.
+
+Retained 4+59 cases independently reran the accepted upstream bare/suffixed uv
+banners, exact release tokens including +N/prerelease refusals, malformed banners,
+missing uv, native-only uv omission, simulated wrong-Python gates, default full
+mode, help and argument refusals. Their assertions are unchanged; only the prior
+candidate source-hash literal was adapted upstream. Reviewer's copied support
+added missing owned `KNOWLEDGE_DIR`, `TMP`, and `TEMP` values only.
+
+### Real host controls (not pytest cases)
+
+1. Actual installed `/Users/shersingh/.local/bin/uv`, no fake uv and no
+   `--native-only`: exit 0, actual Python 3.12.13, Darwin/arm64, actual Apple clang
+   C/C++ and make, outputs `qmd-c-ok` and `qmd-cxx-ok`. Receipt is bound to the
+   candidate qualifier and explicitly denies converter/training/GPU/cloud
+   qualification. Temporary directory emptied on return.
+2. Real-tool wrappers add whitespace/additional version lines while delegating
+   every real command; make build stdout is deliberately suppressed. Exit 0,
+   identical first-line version receipt and real C/C++ outputs; cleanup verified.
+   This checks unchanged nonempty banner semantics and proves the new blank guard
+   is version-only, not a global ban on quiet native commands.
+
+### Contract preservation
+
+Qualifier lines 54–59 are the entire production delta. `run()` already strips
+stdout (line 26); the new check routes blank results through existing RuntimeError
+handling (lines 88–90) rather than hiding IndexError globally. Version commands
+remain timeout 10s and same-order; build remains 60s; native executables remain
+10s. `run`, `_uv_release`, and `main` have identical ASTs to the accepted base;
+all production bytes outside that extraction block are identical. Python 3.12,
+uv 0.11.18 identity, native-only selection, output verification and receipt scope
+are unchanged. The new tests' literal prerequisite names include `c++` correctly.
+
+## QUALITY: PASS (assessed after SPEC PASS)
+
+No in-scope defects found. The fix is minimal, localized to extraction, keeps
+refusal inside TemporaryDirectory cleanup, preserves real stdout and release
+parsing semantics, and does not weaken positive/native evidence. Existing Q1/P3
+empty-version diagnostic is closed on this exact candidate; prior R1/P1 closure
+remains preserved. No source repair was performed by this reviewer.
+
+The original 162-case launcher test file, launcher, docs, locks, manifest and
+helper remain byte-identical to the accepted base. The helper's preserved hash is
+`{candidate['finetune/gguf_toolchain.py']}`; it was not imported/executed and is not
+newly qualified. All protected parent/prior source and selected evidence hashes
+match before/after snapshots.
+
+## Review-only issues and count clarification
+
+- Initial post-test aggregation expected nonempty JUnit classnames outside
+  `--rootdir`; pytest emitted empty classnames for the 63 external retained cases.
+  Product suite already passed 90/90. Corrected only reviewer aggregation to exact
+  case-name multiset comparison and resumed from original receipts, without
+  rerunning, overwriting or double-counting tests. Initial runner and issue receipt
+  are retained under `inputs/run_review-initial.py` and
+  `evidence/reviewer-aggregation-issue.json`.
+- Parent manifest's `originalInputsUnchanged: 42` must not be read as 42 unchanged
+  candidate source files: independently measured counts are 42 preserved baseline
+  files and 43 candidate files (41 unchanged existing + 1 changed + 1 new).
+  No manifest/lock was modified.
+
+## Scope and remaining gates
+
+This is only the two-file repair review, not release or image acceptance. Parent
+integration, native Linux amd64 isolated image execution, whole-workspace build
+and exact-head CI remain open. Original 162 launcher cases were preserved, not
+freshly rerun here; the parent's 252-case green artifact is retained but is not
+this review's fresh count. Older 85 heldouts and seven mutation controls were
+not freshly rerun. No workflow proposal review, network, resolver/install,
+Docker/container, cloud, GPU, model, converter, training or evaluation execution.
+
+## Artifact locations
+
+- Root: `{ROOT}`
+- Frozen candidate: `repo/`; baseline: `baseline/`; old-source RED derivative: `old-repo/`.
+- `evidence/source-authentication.json`, `execution-summary.json`,
+  `preservation-verification.json`, `protected-before.json`, `protected-after.json`.
+- `evidence/independent-empty-red.{{json,xml}}` and
+  `evidence/independent-empty-and-retained-green.{{json,xml}}`.
+- `evidence/independent-real-installed-uv-full.json` and
+  `evidence/independent-real-multiline-quiet-full.json`.
+- `review-result.json` and `artifact-manifest.json` bind the report/evidence;
+  review-owned files are frozen read-only after completion (not OS immutable).
+'''
+(ROOT / 'REPORT.md').write_text(report)
+result = {
+    'spec':'PASS', 'quality':'PASS', 'source_sha256':candidate,
+    'patch_sha256':auth['patch_sha256'],'base_review_result_sha256':auth['base_review_sha256'],
+    'empty_version_Q1_P3':'CLOSED_ON_EXACT_CANDIDATE', 'prior_uv_R1_P1':'PRESERVED_CLOSED',
+    'in_scope_findings':[], 'execution':execution,
+    'all_protected_inputs_unchanged':True, 'counts':{'baseline':42,'candidate':43,'unchanged_existing_candidate':41,'changed_existing':1,'added':1},
+    'fresh_original_162_suite':False,'fresh_old_85_heldouts_and_7_mutations':False,
+    'source_repairs_performed_by_reviewer':False,
+    'parent_integration':False,'native_linux_amd64_image_qualified':False,'whole_workspace_build':False,'exact_head_CI':False,
+    'workflow_reviewed':False,'converter_cloud_gpu_model_training_qualified':False,
+    'reviewer_only_issue':'JUnit classname aggregation corrected; original 90-case green artifacts retained without rerun',
+    'report':str(ROOT / 'REPORT.md'),'report_sha256':sha(ROOT / 'REPORT.md'),'evidence':str(ROOT / 'evidence'),
+    'own_root':str(ROOT),
+}
+put(ROOT / 'review-result.json', result)
+# Inventory all local artifacts without following real-tool or fixture symlinks.
+inventory = {}
+for path in sorted(ROOT.rglob('*')):
+    relative = str(path.relative_to(ROOT))
+    if path.is_symlink():
+        inventory[relative] = {'type':'symlink','target':os.readlink(path)}
+    elif path.is_file():
+        inventory[relative] = {'type':'file','sha256':sha(path),'bytes':path.stat().st_size}
+manifest = {'review_root':str(ROOT),'files':inventory,'report_sha256':sha(ROOT / 'REPORT.md'),'review_result_sha256':sha(ROOT / 'review-result.json'),'read_only_freeze':True,'OS_immutable_flag':False,'manifest_self_hash_excluded':True}
+put(ROOT / 'artifact-manifest.json', manifest)
+# Verify protected sources once more at the final publication boundary.
+assert files(ROOT / 'repo') == candidate
+assert all(sha(PARENT / relative) == digest for relative,digest in before['parent-artifacts'].items())
+assert all(sha(PRIOR / relative) == digest for relative,digest in before['prior-artifacts'].items())
+for path in ROOT.rglob('*'):
+    if not path.is_symlink() and path.is_file():
+        path.chmod(0o444)
+for path in sorted((p for p in ROOT.rglob('*') if p.is_dir() and not p.is_symlink()), key=lambda p:len(p.parts), reverse=True):
+    path.chmod(0o555)
+ROOT.chmod(0o555)
+print(json.dumps({'spec':result['spec'],'quality':result['quality'],'fresh_green':90,'red_expected_failures':27,'protected_group_counts':{group:len(values) for group,values in after.items()},'report':result['report'],'report_sha256':result['report_sha256'],'review_result':str(ROOT / 'review-result.json'),'review_result_sha256':sha(ROOT / 'review-result.json'),'artifact_manifest':str(ROOT / 'artifact-manifest.json'),'artifact_manifest_sha256':sha(ROOT / 'artifact-manifest.json'),'read_only_frozen':True},indent=2))

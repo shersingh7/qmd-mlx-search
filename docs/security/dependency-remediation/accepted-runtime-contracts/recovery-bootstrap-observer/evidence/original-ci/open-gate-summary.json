@@ -1,0 +1,97 @@
+{
+  "status": "OPEN: exact failure authenticated, CI cause unproven",
+  "independent_delegation": "deleg_b7797211",
+  "head": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+  "actual_checkout_merge": "99d061d2d373f8affd62210f74bf0b6d5ce0c898",
+  "source_verified_against_local_head": {
+    "scripts/phase5_e2e_runner.ts": "4f4e539cd7cc18a06bb151dd2e5d9d1009dd58325919da5d66b2e5e0dc691660",
+    "scripts/phase5_recovery_process.py": "1b5c2f687c431095c31596aa8641c32a782d01d57be6fd77c69008739c9b58e1",
+    "scripts/phase5_recovery_worker.ts": "6d0b868044aa0b9dfbb074558a6164de2874d9ca92151c22f055d31d54222511",
+    "scripts/phase5_recovery_process_loader.mjs": "f3084a9542828252d5cd8b107ae1061ccb4e500854fcadb9e29c8bb8224cedf1",
+    "scripts/qmd_mlx/process_anchor.py": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+    "scripts/qmd_mlx/__init__.py": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1",
+    "scripts/run-offline.py": "a462e64221cb245bceb9c5a971319c77b72314a1d5f92f0054119e10e84267f8",
+    "test/audit-recovery-tree.test.ts": "541c604676b0231e65f28c990e72523e3dd7699115f4bde9a02c7dfd4a3014cb",
+    "test/audit-recovery-startup.test.ts": "4b92f23749371b42ddc8507ba5c8c03e7d7327558c1102d0a064eaf1aa76517c",
+    "test/phase5-recovery.test.ts": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+    ".github/workflows/ci.yml": "4afa73ffff380ca3fffcdf22118f91a75ca0d9bef780084b523208aa7b046e8c",
+    "package.json": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa"
+  },
+  "corrected_jobs": {
+    "node": 132155679910,
+    "bun": 132155679594
+  },
+  "main_test_host_both_jobs": "Node22.22.3; nativeBunprobesseparate",
+  "ci_platform": "macos-15-arm64 /15.8.2 /24H232; CPUmodelunrecorded",
+  "verified_failed_contract": "Aggregatechild.closeabsentbeforefallback; includesstdout/stderr/FD3.1007mswasinside1500msbound; exactwhichstreamorcauseunproven.",
+  "parent_clock_reproduction": "SystemPython3.9andBunhrtimearestartup-scale; projectPython3.12andNodealsoexposedifferentclockvalues. Never assume common raw deadline epoch.",
+  "next_acceptance_obligations": [
+    "Review the completed recovery handoff for proven deadline-domain conversion or conservative anchored-duration protocol",
+    "Late clock warning was not steered to a vanished live worker; retain as parent/reviewer gate",
+    "Add bounded per-stream/native-owner snapshots before fallback without changing flow or certification",
+    "Capture the first un-warmed recovery invocation and separate kernel/executable evidence on actual CI image; localcontrols do notcloseit"
+  ],
+  "no_production_fix_or_acceptance": true,
+  "evidence_files": {
+    "investigation-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/investigation-summary.json",
+      "sha256": "bacaa06277f2314f257a38d0d5c835589e6406add7616cadec494e04a7873bc6"
+    },
+    "collection-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/collection-summary.json",
+      "sha256": "54d934419084ca4191f6c8ef68bd3aad3b7ff05e5629d59897e584fac934c92b"
+    },
+    "additional-source-identity.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/additional-source-identity.json",
+      "sha256": "91805c7f9c562047ee1ee91a2ef8a6bf56d718019579dc8fc1c3f6836d95c575"
+    },
+    "probe-source-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/probe-source-manifest.json",
+      "sha256": "eb0f85f772099480ba7806354e79a1f2677b1504879d22b5d829a5b9e2a8eaaa"
+    },
+    "ci-extracted-receipts.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/ci-extracted-receipts.json",
+      "sha256": "f25924b42560bf8022a63009fd66163ce8b6d347ed52b209dfcc4be4e62aa539"
+    },
+    "clock-domains.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/clock-domains.json",
+      "sha256": "bfa39b3e33af30e539c990f5bd3b85f09d4a36a4f59524bd2e2c17333b689ace"
+    },
+    "raw3-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/raw3-summary.json",
+      "sha256": "d365cfbbc4ed683427bd77c9e452b5ec5084b52755011e8f5c1d0fd32bf4e9d9"
+    },
+    "run.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/run.json",
+      "sha256": "3bf3236bd48bc1b82e3c5fa67bc67e4e94db4f8cf842767a070c03d45089acb5"
+    },
+    "jobs.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/jobs.json",
+      "sha256": "03d0ac54b01b8b3881d5cea078b2df54fa2c42085bb07f326b4623f4f4d9dc28"
+    },
+    "132155679910.log": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/132155679910.log",
+      "sha256": "b4b1e9e8b431ee6b229352d8e0ca2432f19f37dc770b43cd0b13da0353238b81"
+    },
+    "132155679594.log": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/132155679594.log",
+      "sha256": "d4f086aea21c44175d6418809b413786e86ef1ae0782f3d789ef4540f0fb7293"
+    },
+    "132155679910-annotations.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/132155679910-annotations.json",
+      "sha256": "7c27e5f7200adb9257b89b8e5374b934f84e373430d76540cf2a5c21203c5cf3"
+    },
+    "132155679594-annotations.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/evidence/132155679594-annotations.json",
+      "sha256": "5c05f3102961309c4882d68e368d9141be63a5eb5cb8dd28b09f1623ea667abf"
+    },
+    "diagnosis.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/diagnosis.md",
+      "sha256": "38179cbe24745397011ef77d5c2704b5cbedcbbd481189aaa777da0936572966"
+    },
+    "parent-clock-domains.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-clock-domains-o9udzq6_/receipt.json",
+      "sha256": "eae359c66299f5264c377988c2cbaca1a25995cbd813c3df2b71be5a64c96f27"
+    }
+  }
+}

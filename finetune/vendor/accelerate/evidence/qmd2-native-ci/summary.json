@@ -1,0 +1,22 @@
+{
+  "run_id": 43469021580,
+  "head": "f452290f116934a4f126fe8e513c565e97a8c94f",
+  "native_platforms": [
+    {
+      "platform": "ubuntu-24.04",
+      "total": 1258,
+      "passed": 1203,
+      "skipped": 55,
+      "failed": 0,
+      "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-native-ci-ai9r6ux_/ubuntu-24.04/accelerate-checkpoint.xml"
+    },
+    {
+      "platform": "macos-15",
+      "total": 1258,
+      "passed": 1210,
+      "skipped": 48,
+      "failed": 0,
+      "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-native-ci-ai9r6ux_/macos-15/accelerate-checkpoint.xml"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+11 | observations.defaultEqualsNativeDefault=evaluated.default===ns.default;
+12 | observations.noInteropIdentity=noInterop===ns;
+13 | console.log(JSON.stringify(observations,null,2));
+14 | assert.equal(typeof ns.z,'object');
+15 | assert.equal(noInterop.z,ns.z);
+16 | assert.equal(typeof evaluated.z,'object','Actual Vitest evaluator must retain the named ESM namespace export');
+            ^
+AssertionError: Actual Vitest evaluator must retain the named ESM namespace export
++ actual - expected
+
++ 'undefined'
+- 'object'
+
+ generatedMessage: false,
+     actual: "undefined",
+   expected: "object",
+   operator: "strictEqual",
+       code: "ERR_ASSERTION"
+
+      at /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/evaluator.mjs:16:8
+
+Bun v1.3.8 (macOS arm64)

@@ -1,0 +1,22 @@
+{
+  "execPath": "/Users/shersingh/.hermes/node/bin/node",
+  "node": "22.22.3",
+  "url": "file:///Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/namespace-entry.js",
+  "nativeKeys": [
+    "default",
+    "object",
+    "z"
+  ],
+  "defaultKeys": [
+    "object"
+  ],
+  "defaultHasEsModule": false,
+  "defaultOwnEsModule": false,
+  "nativeNamed": "object",
+  "interopNamed": "object",
+  "interopKeys": [
+    "default",
+    "object",
+    "z"
+  ]
+}

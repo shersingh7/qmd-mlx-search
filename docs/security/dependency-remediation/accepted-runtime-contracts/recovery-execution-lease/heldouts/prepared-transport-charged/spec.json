@@ -1,0 +1,9 @@
+{
+  "name": "prepared-transport-charged",
+  "timeout": 800,
+  "prepared_delay": 0.15,
+  "computed_budget": true,
+  "work_then_sleep": true,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/heldouts/prepared-transport-charged",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/mirror/scripts/phase5_recovery_process.py"
+}

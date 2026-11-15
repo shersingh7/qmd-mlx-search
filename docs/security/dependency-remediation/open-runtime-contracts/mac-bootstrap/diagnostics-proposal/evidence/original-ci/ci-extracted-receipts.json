@@ -1,0 +1,512 @@
+{
+  "132155679594": {
+    "line_count": 2000,
+    "receipts": [
+      {
+        "line": 730,
+        "timestamp": "2026-11-13T20:41:14.8720140Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-before-finally",
+          "timeoutMs": 200,
+          "elapsedMs": 245,
+          "supervisorAbsent": true,
+          "sentinelAlive": true,
+          "guardFired": false,
+          "result": {
+            "exitCode": null,
+            "signal": null,
+            "timedOut": true,
+            "stdout": "",
+            "stderr": "",
+            "launch": {
+              "state": "not-started",
+              "admissionGranted": false,
+              "supervisorReaped": true,
+              "supervisorPid": 1641
+            },
+            "cleanup": {
+              "childReaped": false,
+              "groupTerminated": true,
+              "pipesClosed": true,
+              "forcedPipeClose": false,
+              "sigkillUsed": true,
+              "sessionTerminated": true,
+              "containmentVerified": false,
+              "processGroups": []
+            },
+            "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+          }
+        }
+      },
+      {
+        "line": 733,
+        "timestamp": "2026-11-13T20:41:14.8771760Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-finally",
+          "guardFired": false,
+          "finallyKilled": [],
+          "scratchRemoved": true
+        }
+      },
+      {
+        "line": 788,
+        "timestamp": "2026-11-13T20:41:31.2233820Z",
+        "record": {
+          "evidence": "recovery-kernel-no-fork",
+          "pid": 1773,
+          "platform": "darwin",
+          "forkDenied": true,
+          "spawnDenied": true,
+          "cleanup": {
+            "type": "cleanup",
+            "childReaped": true,
+            "groupTerminated": true,
+            "sessionTerminated": true,
+            "containmentVerified": true,
+            "sigkillUsed": false,
+            "processGroups": [
+              1773
+            ],
+            "timedOut": false,
+            "errors": []
+          }
+        }
+      },
+      {
+        "line": 1258,
+        "timestamp": "2026-11-13T20:41:56.4880030Z",
+        "record": {
+          "evidence": "W13-integrated-synthetic",
+          "status": "passed",
+          "mcpHttpRuntimeSupported": true,
+          "workers": [
+            {
+              "pid": 2043,
+              "exitCode": null,
+              "signal": "SIGKILL",
+              "timedOut": false
+            },
+            {
+              "pid": 2049,
+              "exitCode": 0,
+              "signal": null,
+              "timedOut": false
+            }
+          ],
+          "restoredDocuments": 16,
+          "restoredVectors": 16
+        }
+      },
+      {
+        "line": 1846,
+        "timestamp": "2026-11-13T20:43:37.2327640Z",
+        "record": {
+          "evidence": "recovery-tree-native-runtime",
+          "bun": "1.3.8",
+          "executable": "/Users/runner/.bun/bin/bun"
+        }
+      },
+      {
+        "line": 1847,
+        "timestamp": "2026-11-13T20:43:37.2332080Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-before-finally",
+          "timeoutMs": 200,
+          "elapsedMs": 250,
+          "supervisorAbsent": true,
+          "sentinelAlive": true,
+          "guardFired": false,
+          "result": {
+            "exitCode": null,
+            "signal": null,
+            "timedOut": true,
+            "stdout": "",
+            "stderr": "",
+            "launch": {
+              "state": "not-started",
+              "admissionGranted": false,
+              "supervisorReaped": true,
+              "supervisorPid": 3207
+            },
+            "cleanup": {
+              "childReaped": false,
+              "groupTerminated": true,
+              "pipesClosed": true,
+              "forcedPipeClose": false,
+              "sigkillUsed": true,
+              "sessionTerminated": true,
+              "containmentVerified": false,
+              "processGroups": []
+            },
+            "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+          }
+        }
+      },
+      {
+        "line": 1848,
+        "timestamp": "2026-11-13T20:43:37.2335430Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-finally",
+          "guardFired": false,
+          "finallyKilled": [],
+          "scratchRemoved": true
+        }
+      },
+      {
+        "line": 1861,
+        "timestamp": "2026-11-13T20:43:37.2389850Z",
+        "record": {
+          "evidence": "recovery-kernel-no-fork",
+          "pid": 3560,
+          "platform": "darwin",
+          "forkDenied": true,
+          "spawnDenied": true,
+          "cleanup": {
+            "type": "cleanup",
+            "childReaped": true,
+            "groupTerminated": true,
+            "sessionTerminated": true,
+            "containmentVerified": true,
+            "sigkillUsed": false,
+            "processGroups": [
+              3560
+            ],
+            "timedOut": false,
+            "errors": []
+          }
+        }
+      }
+    ],
+    "runtime_setup_and_failure_snippets": [
+      {
+        "line": 17,
+        "text": "2026-11-13T20:40:31.5538160Z Image: macos-15-arm64"
+      },
+      {
+        "line": 18,
+        "text": "2026-11-13T20:40:31.5538590Z Version: 20261104.0514.1"
+      },
+      {
+        "line": 105,
+        "text": "2026-11-13T20:40:35.2993880Z HEAD is now at 99d061d Merge dcf98c159b671b4d08c3759215c4371502f49fc0 into 1d6cfef0353810eea55d3fec879d9c05ef5ebc4c"
+      },
+      {
+        "line": 119,
+        "text": "2026-11-13T20:40:36.2848790Z Acquiring 22.22.3 - arm64 from https://github.com/actions/node-versions/releases/download/22.22.3-25838401827/node-22.22.3-darwin-arm64.tar.gz"
+      },
+      {
+        "line": 124,
+        "text": "2026-11-13T20:40:42.5594570Z node: v22.22.3"
+      },
+      {
+        "line": 155,
+        "text": "2026-11-13T20:40:45.5944530Z Successfully set up CPython (3.12.10)"
+      },
+      {
+        "line": 266,
+        "text": "2026-11-13T20:40:59.1077790Z $ node node_modules/vitest/vitest.mjs run --reporter=verbose test/ \"--maxWorkers=2\" --testTimeout \"60000\""
+      },
+      {
+        "line": 730,
+        "text": "2026-11-13T20:41:14.8720140Z {\"evidence\":\"recovery-fast-timeout-before-finally\",\"timeoutMs\":200,\"elapsedMs\":245,\"supervisorAbsent\":true,\"sentinelAlive\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":1641},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1328,
+        "text": "2026-11-13T20:42:44.9514300Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":350,\"canonical\":false,\"elapsedMs\":391.438541,\"supervisorPid\":2766,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2766},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1338,
+        "text": "2026-11-13T20:42:45.7964940Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":false,\"elapsedMs\":311.27033299999994,\"supervisorPid\":2771,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2771},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1348,
+        "text": "2026-11-13T20:42:47.5287610Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":true,\"elapsedMs\":272.0382499999996,\"supervisorPid\":2777,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2777},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1805,
+        "text": "2026-11-13T20:43:20.1182230Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":350,\"canonical\":false,\"elapsedMs\":365.03837499999986,\"supervisorPid\":3061,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3061},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1808,
+        "text": "2026-11-13T20:43:20.1202730Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":false,\"elapsedMs\":283.81137499999977,\"supervisorPid\":3154,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3154},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1811,
+        "text": "2026-11-13T20:43:20.1256690Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":true,\"elapsedMs\":289.6925419999998,\"supervisorPid\":3167,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3167},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1847,
+        "text": "2026-11-13T20:43:37.2332080Z {\"evidence\":\"recovery-fast-timeout-before-finally\",\"timeoutMs\":200,\"elapsedMs\":250,\"supervisorAbsent\":true,\"sentinelAlive\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3207},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1870,
+        "text": "2026-11-13T20:43:43.1369350Z {\"evidence\":\"native-recovery-before-finally\",\"scenario\":\"sequential-gc\",\"index\":0,\"timeoutMs\":200,\"elapsedMs\":209.20958300000007,\"gcDuringActive\":false,\"activeFDs\":[],\"reusedFDs\":[],\"parentAbsent\":false,\"sentinelPid\":3572,\"sentinelAlive\":true,\"descriptorSentinelOpen\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3573},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1884,
+        "text": "2026-11-13T20:43:50.0509460Z {\"evidence\":\"native-recovery-before-finally\",\"scenario\":\"fd-reuse\",\"index\":0,\"timeoutMs\":200,\"elapsedMs\":296.50920900000006,\"gcDuringActive\":false,\"activeFDs\":[],\"reusedFDs\":[],\"parentAbsent\":false,\"sentinelPid\":3651,\"sentinelAlive\":true,\"descriptorSentinelOpen\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3653},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1957,
+        "text": "2026-11-13T20:43:54.4872280Z AssertionError: expected 'Recovery command injection is unconta\u2026' to match /spawn failed/"
+      },
+      {
+        "line": 1968,
+        "text": "2026-11-13T20:43:54.5255770Z \"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\""
+      }
+    ]
+  },
+  "132155679910": {
+    "line_count": 2012,
+    "receipts": [
+      {
+        "line": 727,
+        "timestamp": "2026-11-13T20:40:58.2167420Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-before-finally",
+          "timeoutMs": 200,
+          "elapsedMs": 1007,
+          "supervisorAbsent": true,
+          "sentinelAlive": true,
+          "guardFired": false,
+          "result": {
+            "exitCode": null,
+            "signal": null,
+            "timedOut": true,
+            "stdout": "",
+            "stderr": "",
+            "launch": {
+              "state": "unconfirmed",
+              "admissionGranted": false,
+              "supervisorReaped": true,
+              "supervisorPid": 1616
+            },
+            "cleanup": {
+              "childReaped": false,
+              "groupTerminated": false,
+              "pipesClosed": true,
+              "forcedPipeClose": true,
+              "sigkillUsed": true,
+              "sessionTerminated": false,
+              "containmentVerified": false,
+              "processGroups": []
+            },
+            "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+          }
+        }
+      },
+      {
+        "line": 730,
+        "timestamp": "2026-11-13T20:40:58.2527640Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-finally",
+          "guardFired": false,
+          "finallyKilled": [],
+          "scratchRemoved": true
+        }
+      },
+      {
+        "line": 786,
+        "timestamp": "2026-11-13T20:41:12.3556450Z",
+        "record": {
+          "evidence": "recovery-kernel-no-fork",
+          "pid": 1743,
+          "platform": "darwin",
+          "forkDenied": true,
+          "spawnDenied": true,
+          "cleanup": {
+            "type": "cleanup",
+            "childReaped": true,
+            "groupTerminated": true,
+            "sessionTerminated": true,
+            "containmentVerified": true,
+            "sigkillUsed": false,
+            "processGroups": [
+              1743
+            ],
+            "timedOut": false,
+            "errors": []
+          }
+        }
+      },
+      {
+        "line": 1255,
+        "timestamp": "2026-11-13T20:41:32.7059200Z",
+        "record": {
+          "evidence": "W13-integrated-synthetic",
+          "status": "passed",
+          "mcpHttpRuntimeSupported": true,
+          "workers": [
+            {
+              "pid": 1980,
+              "exitCode": null,
+              "signal": "SIGKILL",
+              "timedOut": false
+            },
+            {
+              "pid": 1985,
+              "exitCode": 0,
+              "signal": null,
+              "timedOut": false
+            }
+          ],
+          "restoredDocuments": 16,
+          "restoredVectors": 16
+        }
+      },
+      {
+        "line": 1848,
+        "timestamp": "2026-11-13T20:42:54.1846190Z",
+        "record": {
+          "evidence": "recovery-tree-native-runtime",
+          "bun": "1.3.8",
+          "executable": "/Users/runner/.bun/bin/bun"
+        }
+      },
+      {
+        "line": 1849,
+        "timestamp": "2026-11-13T20:42:54.1858800Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-before-finally",
+          "timeoutMs": 200,
+          "elapsedMs": 206,
+          "supervisorAbsent": true,
+          "sentinelAlive": true,
+          "guardFired": false,
+          "result": {
+            "exitCode": null,
+            "signal": null,
+            "timedOut": true,
+            "stdout": "",
+            "stderr": "",
+            "launch": {
+              "state": "not-started",
+              "admissionGranted": false,
+              "supervisorReaped": true,
+              "supervisorPid": 3052
+            },
+            "cleanup": {
+              "childReaped": false,
+              "groupTerminated": true,
+              "pipesClosed": true,
+              "forcedPipeClose": false,
+              "sigkillUsed": true,
+              "sessionTerminated": true,
+              "containmentVerified": false,
+              "processGroups": []
+            },
+            "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+          }
+        }
+      },
+      {
+        "line": 1850,
+        "timestamp": "2026-11-13T20:42:54.1999020Z",
+        "record": {
+          "evidence": "recovery-fast-timeout-finally",
+          "guardFired": false,
+          "finallyKilled": [],
+          "scratchRemoved": true
+        }
+      },
+      {
+        "line": 1863,
+        "timestamp": "2026-11-13T20:42:54.2112900Z",
+        "record": {
+          "evidence": "recovery-kernel-no-fork",
+          "pid": 3228,
+          "platform": "darwin",
+          "forkDenied": true,
+          "spawnDenied": true,
+          "cleanup": {
+            "type": "cleanup",
+            "childReaped": true,
+            "groupTerminated": true,
+            "sessionTerminated": true,
+            "containmentVerified": true,
+            "sigkillUsed": false,
+            "processGroups": [
+              3228
+            ],
+            "timedOut": false,
+            "errors": []
+          }
+        }
+      }
+    ],
+    "runtime_setup_and_failure_snippets": [
+      {
+        "line": 17,
+        "text": "2026-11-13T20:40:17.0273070Z Image: macos-15-arm64"
+      },
+      {
+        "line": 18,
+        "text": "2026-11-13T20:40:17.0274090Z Version: 20261104.0514.1"
+      },
+      {
+        "line": 105,
+        "text": "2026-11-13T20:40:22.3722960Z HEAD is now at 99d061d Merge dcf98c159b671b4d08c3759215c4371502f49fc0 into 1d6cfef0353810eea55d3fec879d9c05ef5ebc4c"
+      },
+      {
+        "line": 119,
+        "text": "2026-11-13T20:40:23.8801990Z Acquiring 22.22.3 - arm64 from https://github.com/actions/node-versions/releases/download/22.22.3-25838401827/node-22.22.3-darwin-arm64.tar.gz"
+      },
+      {
+        "line": 124,
+        "text": "2026-11-13T20:40:29.6468370Z node: v22.22.3"
+      },
+      {
+        "line": 154,
+        "text": "2026-11-13T20:40:30.8556230Z Successfully set up CPython (3.12.10)"
+      },
+      {
+        "line": 727,
+        "text": "2026-11-13T20:40:58.2167420Z {\"evidence\":\"recovery-fast-timeout-before-finally\",\"timeoutMs\":200,\"elapsedMs\":1007,\"supervisorAbsent\":true,\"sentinelAlive\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"unconfirmed\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":1616},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":false,\"pipesClosed\":true,\"forcedPipeClose\":true,\"sigkillUsed\":true,\"sessionTerminated\":false,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1326,
+        "text": "2026-11-13T20:42:09.3131710Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":350,\"canonical\":false,\"elapsedMs\":207.656208,\"supervisorPid\":2623,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2623},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1337,
+        "text": "2026-11-13T20:42:10.0422940Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":false,\"elapsedMs\":203.8080419999999,\"supervisorPid\":2629,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2629},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1348,
+        "text": "2026-11-13T20:42:11.7322750Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":true,\"elapsedMs\":204.80962499999987,\"supervisorPid\":2636,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2636},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1807,
+        "text": "2026-11-13T20:42:39.8274610Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":350,\"canonical\":false,\"elapsedMs\":206.137208,\"supervisorPid\":2900,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2900},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1810,
+        "text": "2026-11-13T20:42:39.8285130Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":false,\"elapsedMs\":203.19683299999997,\"supervisorPid\":2906,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2906},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1813,
+        "text": "2026-11-13T20:42:39.8294350Z {\"evidence\":\"recovery-cold-supervisor-before-finally\",\"bootstrapDelayMs\":1300,\"canonical\":true,\"elapsedMs\":209.65420799999993,\"supervisorPid\":2914,\"supervisorObservedAlive\":true,\"supervisorAbsent\":true,\"supervisorIdentity\":null,\"sentinelAlive\":true,\"forks\":null,\"work\":null,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":2914},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1849,
+        "text": "2026-11-13T20:42:54.1858800Z {\"evidence\":\"recovery-fast-timeout-before-finally\",\"timeoutMs\":200,\"elapsedMs\":206,\"supervisorAbsent\":true,\"sentinelAlive\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3052},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1917,
+        "text": "2026-11-13T20:43:00.0126730Z {\"evidence\":\"native-recovery-before-finally\",\"scenario\":\"sequential-gc\",\"index\":0,\"timeoutMs\":200,\"elapsedMs\":204.90612499999997,\"gcDuringActive\":false,\"activeFDs\":[],\"reusedFDs\":[],\"parentAbsent\":false,\"sentinelPid\":3233,\"sentinelAlive\":true,\"descriptorSentinelOpen\":true,\"guardFired\":false,\"result\":{\"exitCode\":null,\"signal\":null,\"timedOut\":true,\"stdout\":\"\",\"stderr\":\"\",\"launch\":{\"state\":\"not-started\",\"admissionGranted\":false,\"supervisorReaped\":true,\"supervisorPid\":3234},\"cleanup\":{\"childReaped\":false,\"groupTerminated\":true,\"pipesClosed\":true,\"forcedPipeClose\":false,\"sigkillUsed\":true,\"sessionTerminated\":true,\"containmentVerified\":false,\"processGroups\":[]},\"error\":\"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\"}}"
+      },
+      {
+        "line": 1955,
+        "text": "2026-11-13T20:43:02.2684090Z AssertionError: expected 'unconfirmed' to be 'started' // Object.is equality"
+      },
+      {
+        "line": 1971,
+        "text": "2026-11-13T20:43:02.2826800Z AssertionError: expected 'Recovery command injection is unconta\u2026' to match /spawn failed/"
+      },
+      {
+        "line": 1977,
+        "text": "2026-11-13T20:43:02.2829910Z \"Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery worker was not started: launch admission was withheld; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report\""
+      }
+    ]
+  }
+}

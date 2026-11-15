@@ -1,0 +1,273 @@
+{
+  "specVerdict": "SPEC_PASS_SCOPED",
+  "qualityVerdict": "QUALITY_PASS_WITH_QUALIFICATIONS",
+  "specBeforeQuality": true,
+  "spec": {
+    "status": "SPEC_EVIDENCE_READBACK_PASS",
+    "root": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2",
+    "patchSha256": "69810f46ab0a458e53dd9a13a951a82e11379611c2bcdfa366939f1498cb174f",
+    "sourceManifestSha256": "d4f94e439de1704994cd2eb94e6b697d55c0625a833f7881832071529f0fed87",
+    "on": {
+      "label": "first-fast-on",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 7,
+      "elapsedMs": 248,
+      "ownerPid": 39647,
+      "closeCounter": {
+        "needed": 4,
+        "got": 4,
+        "scope": "Node-private-read-only-not-kernel-state"
+      },
+      "artifact": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/first-fast-on-artifacts/fast-timeout-node-39641.json"
+    },
+    "off": {
+      "label": "compare-fast-off",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 7,
+      "elapsedMs": 222
+    },
+    "selftests": {
+      "label": "provided-selftests",
+      "executed": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0
+    },
+    "heldouts": {
+      "label": "independent-heldouts-final",
+      "executed": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "native": {
+      "runtime": "1.3.8",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 7,
+      "elapsedMs": 216,
+      "artifact": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/native-bun-control-artifacts/fast-timeout-bun-39809.json",
+      "status": "native-bun-owner-diagnostics-not-implemented"
+    },
+    "fallback": {
+      "elapsedMs": 946.0969160000001,
+      "ownerPid": 39835,
+      "closeCounter": {
+        "needed": 4,
+        "got": 2,
+        "scope": "Node-private-read-only-not-kernel-state"
+      },
+      "artifact": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/actual-fallback-control-artifacts/fast-timeout-node-39834.json",
+      "truthfulFailedTransport": true,
+      "preDestroySnapshotExact": true,
+      "timestamp": null,
+      "notCIOrColdProof": true
+    },
+    "envChecks": [
+      {
+        "label": "first-fast-on",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "compare-fast-off",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "provided-selftests",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "native-bun-control",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "actual-fallback-control",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "independent-static",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "independent-heldouts-final",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      },
+      {
+        "label": "independent-static-metadata",
+        "exitCode": 0,
+        "outerCleanup": "none",
+        "sourceCount": 246
+      }
+    ],
+    "metadata": {
+      "host": {
+        "platform": "darwin",
+        "arch": "arm64",
+        "kernel": "27.2.0",
+        "osVersion": "Darwin Kernel Version 27.2.0: Thu Oct 15 00:00:57 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T6020",
+        "swVers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131",
+        "cpuModel": "Apple M2 Pro"
+      },
+      "runtime": {
+        "metadataNode": "22.22.3",
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "uv": "1.51.0",
+        "packageLauncher": null,
+        "expectedMainSuiteHost": "Node (package.json test explicitly invokes node); actual observed host is in fast-timeout artifact"
+      },
+      "checkout": {
+        "sourceHead": null,
+        "eventSha": null,
+        "actualCheckout": null,
+        "checkoutSource": "read-only .git/HEAD/ref; no git/CLT launcher"
+      },
+      "selectedPython": {
+        "requested": "/usr/bin/python3",
+        "launcherIsRegularFile": true,
+        "firstSelectedInterpreterVersion": "not-observed",
+        "versionQuery": "not-run; no Python/xcrun/xcode-select diagnostic warmup"
+      }
+    },
+    "retainedCi": {
+      "run": "43503677544",
+      "nodeJob": "132155679910",
+      "bunJob": "132155679594",
+      "head": "dcf98c159b671b4d08c3759215c4371502f49fc0",
+      "actualCheckout": "99d061d2d373f8affd62210f74bf0b6d5ce0c898",
+      "elapsedMs": 1007,
+      "failedContract": "unconfirmed ownership, not elapsed bound",
+      "cause": "UNPROVEN"
+    },
+    "qualification": "No full suite/build/CI execution; fresh HOME is not cold OS; no global-first claim; native tracing unsupported; C1 retained"
+  },
+  "quality": {
+    "commands": [
+      {
+        "label": "independent-actionlint",
+        "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-actionlint-4voz5mzz/actionlint",
+        "argv": [
+          "-shellcheck=",
+          ".github/workflows/ci.yml"
+        ],
+        "exitCode": 0,
+        "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/independent-actionlint-command.json"
+      },
+      {
+        "label": "independent-helper-types",
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "argv": [
+          "node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--allowJs",
+          "--checkJs",
+          "--strict",
+          "--skipLibCheck",
+          "--module",
+          "NodeNext",
+          "--moduleResolution",
+          "NodeNext",
+          "--target",
+          "ESNext",
+          "test/helpers/recovery-bootstrap-diagnostics.mjs"
+        ],
+        "exitCode": 0,
+        "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/independent-helper-types-command.json"
+      },
+      {
+        "label": "independent-helper-syntax",
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "argv": [
+          "--check",
+          "test/helpers/recovery-bootstrap-diagnostics.mjs"
+        ],
+        "exitCode": 0,
+        "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/independent-helper-syntax-command.json"
+      },
+      {
+        "label": "independent-selftest-syntax",
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "argv": [
+          "--check",
+          "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"
+        ],
+        "exitCode": 0,
+        "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/independent-selftest-syntax-command.json"
+      },
+      {
+        "label": "independent-bounded-types-final",
+        "executable": "/Users/shersingh/.hermes/node/bin/node",
+        "argv": [
+          "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/harness/bounded-types.mjs"
+        ],
+        "exitCode": 0,
+        "receipt": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/independent-bounded-types-final-command.json"
+      }
+    ],
+    "boundedTypes": {
+      "before": 65,
+      "after": 65,
+      "newDiagnostics": 0,
+      "entryCount": 89,
+      "sourceFilesBefore": 668,
+      "sourceFilesAfter": 669,
+      "excludedJsEntryCount": 11,
+      "notCanonicalRootGate": true
+    }
+  },
+  "noBlockingFindings": true,
+  "reviewOnlyHistoricalFailures": [
+    {
+      "label": "independent-heldouts",
+      "exitCode": 1,
+      "reason": "Review oracle undefined versus actual constructor null; corrected own oracle only, 6/6 final fresh fixtures"
+    },
+    {
+      "label": "independent-spec-readback",
+      "exitCode": 1,
+      "reason": "Review JSON parser used pending vs actual per-assertion skipped; corrected only parser"
+    },
+    {
+      "label": "independent-bounded-types",
+      "exitCode": 1,
+      "reason": "Guard refused legitimate explicitly approved own mirror dependency alias; only per-package own alias routes added, realpath source closure unchanged"
+    }
+  ],
+  "C1Retained": {
+    "id": "C1",
+    "kind": "qualification",
+    "blocksScopedAdmissionRepair": false,
+    "sourceLocations": [
+      "scripts/phase5_recovery_process.py:281-287",
+      "scripts/phase5_recovery_process.py:441-442",
+      "scripts/phase5_recovery_process.py:568-575",
+      "scripts/phase5_e2e_runner.ts:336-357"
+    ],
+    "summary": "An extra 1300ms post-startup pause of the sole cleanup owner produces truthful incomplete cleanup proof at bounded caller return, without unauthorized work; actual owners naturally reap/exit later.",
+    "evidence": "/Users/shersingh/.hermes/cache/scratch/qmd-lease-independent-e8hp4uif/monitor-pause-diagnostic-results.json"
+  },
+  "parentGates": [
+    "Narrow integration against exact live preimages; do not restore entire frozen mirror",
+    "Canonical build/full workspace suite/type/package gates (parent owns distinct 61 baseline/type proposal)",
+    "Actual candidate-head macOS CI, both Node and Bun main jobs: exact run/head/event/merge-checkout/source-file bytes readback",
+    "Require observed Node fast artifact in BOTH jobs and match owner/runtime/log/assertion/source identities; metadata/TAP-only cannot qualify; preserve earlier failures",
+    "Original bootstrap/stream/holder cause remains UNPROVEN; native Bun/kernel holder tracing unsupported"
+  ],
+  "externalWrites": false,
+  "scope": "Own managed scratch only; no CI/gh/network/install/download/live edits/stage/commit/model/GPU/private knowledge/config/service/skill writes; no full canonical suite/build execution"
+}

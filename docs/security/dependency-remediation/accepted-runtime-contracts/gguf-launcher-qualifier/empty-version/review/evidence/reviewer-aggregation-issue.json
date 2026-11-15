@@ -1,0 +1,5 @@
+{
+  "issue": "Review aggregation assumed nonempty JUnit classname for tests outside --rootdir; pytest passed all90 and used empty classnames for external63.",
+  "effect": "Post-test reviewer assertion only; no product test failed; no test assertion or source repair.",
+  "resolution": "Verify exact executed name multisets against source-bound retained parent case groups, reuse already-recorded red/green artifacts without rerunning or overwriting."
+}

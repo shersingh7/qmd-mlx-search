@@ -1,0 +1,44 @@
+{
+  "classification": "ad-hoc focused verification, not canonical/full-suite acceptance",
+  "exit_code": 0,
+  "temporary_verifier_removed": true,
+  "syntax_python_files": 3,
+  "syntax_js_files": 12,
+  "results": {
+    "node": {
+      "three-product-files": {
+        "files": 3,
+        "counts": {
+          "passed": 63
+        }
+      },
+      "sdk-boundaries": {
+        "files": 2,
+        "counts": {
+          "passed": 4
+        }
+      },
+      "strict_root_exit_code": 0
+    },
+    "bun": {
+      "three-product-files": {
+        "files": 3,
+        "counts": {
+          "passed": 41
+        }
+      },
+      "sdk-boundaries": {
+        "files": 2,
+        "counts": {
+          "passed": 4
+        }
+      },
+      "strict_root_exit_code": 0
+    }
+  },
+  "original_index_unchanged_and_verified": "949e00889d5c073c9d61bdb69ee01dfde307dffc6bc8c39f2f8046dd82fba9dd",
+  "original_index_entries_verified": 146,
+  "protected_inputs_checked": 5532,
+  "protected_changes": [],
+  "candidate_source_files_unchanged": 245
+}

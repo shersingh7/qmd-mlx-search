@@ -1,0 +1,33 @@
+{
+  "artifact": {
+    "filename": "accelerate-1.15.0+qmd.2-py3-none-any.whl",
+    "sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "size": 1586279,
+    "version": "1.15.0+qmd.2"
+  },
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "installed_source_sha256": {
+    "accelerate/__init__.py": "2e65354fca30b8f439935938242a9cefee832dfe9f6805493c1f27a6102a90fe",
+    "accelerate/utils/modeling.py": "ab238e26594d723b8ef6c26260b9fd0380c1ce0656d495c40da5b250dabec0ee",
+    "accelerate/utils/checkpoint_security.py": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95"
+  },
+  "tests": {
+    "installed_suite": {
+      "total": 1197,
+      "passed": 1149,
+      "skipped": 48,
+      "failures": 0,
+      "sha256": "a6e3af994a81df3843c556446aa4f4f77151f2bd12e3345323bcb7245da82756"
+    },
+    "maintained_review_contracts": {
+      "total": 61,
+      "passed": 61,
+      "skipped": 0,
+      "failures": 0,
+      "sha256": "390d49ca4be710344d3ca92c00a770b9fc71d484ce9fe94e2ce522f95ab57d20"
+    }
+  },
+  "combined_passed": 1210,
+  "linux_status": "awaiting fresh native CI",
+  "review_status": "qmd.1 partial independent report retained; parent reproduced and fixed lifetime findings; qmd.2 not yet production-bound"
+}

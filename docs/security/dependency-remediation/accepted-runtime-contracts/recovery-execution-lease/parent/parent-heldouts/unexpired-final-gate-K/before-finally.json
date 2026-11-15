@@ -1,0 +1,110 @@
+{
+  "name": "unexpired-final-gate-K",
+  "guardFired": false,
+  "elapsedMs": 191.06587500000137,
+  "exitCode": 0,
+  "supervisorPid": 38108,
+  "supervisorAbsent": true,
+  "workers": [
+    38109
+  ],
+  "workersAbsent": true,
+  "reapedWorkers": [
+    38109
+  ],
+  "sentinelAlive": true,
+  "work": null,
+  "messages": [
+    {
+      "type": "prepared",
+      "supervisorPid": 38108,
+      "sessionId": 38108
+    },
+    {
+      "type": "ready",
+      "pid": 38109,
+      "sessionId": 38108,
+      "processGroupId": 38109
+    },
+    {
+      "type": "exit",
+      "exitCode": 125,
+      "signal": null
+    },
+    {
+      "type": "cleanup",
+      "childReaped": true,
+      "groupTerminated": true,
+      "sessionTerminated": true,
+      "containmentVerified": false,
+      "sigkillUsed": true,
+      "processGroups": [
+        38109
+      ],
+      "timedOut": false,
+      "errors": [
+        "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified",
+        "Recovery supervisor interrupted by parent signal or closed proof channel"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "kind": "child-gate-result",
+      "pid": 38109,
+      "owner": 38108,
+      "at": 0.1006815,
+      "allowed": false,
+      "remainingMs": 187.497708,
+      "deadline": 0.288173666
+    }
+  ],
+  "groupSignals": [
+    {
+      "kind": "group-signal",
+      "pid": 38109,
+      "owner": 38108,
+      "at": 0.100955666,
+      "group": 38108,
+      "signal": 15,
+      "pinned": true,
+      "currentSession": 38108,
+      "termBlocked": true
+    },
+    {
+      "kind": "group-signal",
+      "pid": 38109,
+      "owner": 38108,
+      "at": 0.101070416,
+      "group": 38108,
+      "signal": 19,
+      "pinned": true,
+      "currentSession": 38108,
+      "termBlocked": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "budget-calculated-after-prepared",
+      "remainingMs": 200,
+      "elapsedMs": 127.92600000000043
+    },
+    {
+      "action": "queued-byte",
+      "dataHex": "4b",
+      "elapsedMs": 139.80500000000086
+    }
+  ],
+  "sent": [
+    {
+      "hex": "533230300a",
+      "elapsedMs": 127.93758400000144
+    },
+    {
+      "hex": "45",
+      "elapsedMs": 129.5233340000017
+    }
+  ],
+  "stderr": "",
+  "eventCount": 18
+}

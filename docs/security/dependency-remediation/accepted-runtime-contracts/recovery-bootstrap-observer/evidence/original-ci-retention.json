@@ -1,0 +1,48 @@
+{
+  "sha256": {
+    "diagnosis.md": "38179cbe24745397011ef77d5c2704b5cbedcbbd481189aaa777da0936572966",
+    "open-gate-summary.json": "44eb5b191b7d261055030cdc5fb33928f1120959fd9c3bb30276f4cc8a3e5816",
+    "collection-summary.json": "54d934419084ca4191f6c8ef68bd3aad3b7ff05e5629d59897e584fac934c92b",
+    "ci-extracted-receipts.json": "f25924b42560bf8022a63009fd66163ce8b6d347ed52b209dfcc4be4e62aa539",
+    "probe-source-manifest.json": "eb0f85f772099480ba7806354e79a1f2677b1504879d22b5d829a5b9e2a8eaaa",
+    "132155679910.log": "b4b1e9e8b431ee6b229352d8e0ca2432f19f37dc770b43cd0b13da0353238b81",
+    "132155679594.log": "d4f086aea21c44175d6418809b413786e86ef1ae0782f3d789ef4540f0fb7293",
+    "parent-clock-domains.json": "eae359c66299f5264c377988c2cbaca1a25995cbd813c3df2b71be5a64c96f27"
+  },
+  "negativeNodeFastReceipt": {
+    "line": 727,
+    "timestamp": "2026-11-13T20:40:58.2167420Z",
+    "record": {
+      "evidence": "recovery-fast-timeout-before-finally",
+      "timeoutMs": 200,
+      "elapsedMs": 1007,
+      "supervisorAbsent": true,
+      "sentinelAlive": true,
+      "guardFired": false,
+      "result": {
+        "exitCode": null,
+        "signal": null,
+        "timedOut": true,
+        "stdout": "",
+        "stderr": "",
+        "launch": {
+          "state": "unconfirmed",
+          "admissionGranted": false,
+          "supervisorReaped": true,
+          "supervisorPid": 1616
+        },
+        "cleanup": {
+          "childReaped": false,
+          "groupTerminated": false,
+          "pipesClosed": true,
+          "forcedPipeClose": true,
+          "sigkillUsed": true,
+          "sessionTerminated": false,
+          "containmentVerified": false,
+          "processGroups": []
+        },
+        "error": "Recovery command injection is uncontained: arbitrary descendants can escape the owned session; cleanup cannot be certified; Recovery worker timed out after 200ms (PID undefined); Recovery supervisor did not provide bounded cleanup proof; Recovery worker pipes did not close within teardown budget; Recovery worker cleanup lacks complete owned-session proof; Recovery worker failed (exit=null, signal=null); Recovery worker produced no report"
+      }
+    }
+  }
+}

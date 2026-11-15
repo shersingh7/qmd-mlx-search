@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/sdk-probe
+
+····
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  21:27:06
+   Duration  427ms (transform 306ms, setup 41ms, import 471ms, tests 31ms, environment 0ms)
+
+JSON report written to /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/evidence/adhoc-bun-sdk-boundaries-results.json

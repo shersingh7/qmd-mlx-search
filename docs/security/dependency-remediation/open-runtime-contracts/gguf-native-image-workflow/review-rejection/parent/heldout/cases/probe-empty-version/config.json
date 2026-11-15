@@ -1,0 +1,12 @@
+{
+  "probe_update": {
+    "versions": {
+      "git": "SYNTHETIC",
+      "cc": "SYNTHETIC",
+      "c++": "SYNTHETIC",
+      "make": "",
+      "uv": "SYNTHETIC"
+    }
+  },
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/probe-empty-version/workspace"
+}

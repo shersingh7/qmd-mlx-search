@@ -1,0 +1,1217 @@
+{
+  "status": "PARTIAL_COMPOSITION_BLOCKED_NOT_ACCEPTED",
+  "applied_paths": [
+    "src/bench-rerank.ts",
+    "src/llm.ts",
+    "src/llm/mlx-identity.ts",
+    "src/mcp/server.ts",
+    "src/test-preload.ts",
+    "test/bench-rerank-entrypoint.test.ts",
+    "test/bench-rerank-lifecycle.test.ts",
+    "test/cli.test.ts",
+    "test/eval-bm25.test.ts",
+    "test/eval.test.ts",
+    "test/fixtures/public_eval_dataset.ts",
+    "test/llm.test.ts",
+    "test/multi-collection-filter.test.ts",
+    "test/rrf-trace.test.ts",
+    "test/store.helpers.unit.test.ts",
+    "test/zod-import.test.ts",
+    "vitest.config.ts"
+  ],
+  "applied_count": 17,
+  "held_paths": [
+    "scripts/phase5_e2e_runner.ts",
+    "test/phase5-recovery.test.ts"
+  ],
+  "before_source_count": 248,
+  "after_source_count": 251,
+  "unchanged_baseline_source_count": 234,
+  "unchanged_observer_lease_metadata": {
+    "observer": {
+      ".github/workflows/ci.yml": {
+        "before": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+        "after": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+        "identical": true
+      },
+      "test/audit-recovery-tree.test.ts": {
+        "before": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+        "after": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+        "identical": true
+      },
+      "test/helpers/recovery-bootstrap-diagnostics.mjs": {
+        "before": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+        "after": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+        "identical": true
+      },
+      "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs": {
+        "before": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e",
+        "after": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e",
+        "identical": true
+      }
+    },
+    "lease": {
+      "test/audit-recovery-startup.test.ts": {
+        "before": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6",
+        "after": "f0225ea29d353cbf3e185441f91db5b6014f73e7a75f030bf866a2b48e9dc5a6",
+        "identical": true
+      },
+      "test/audit-recovery-transition.test.ts": {
+        "before": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c",
+        "after": "d2f465deb81e8a83650964a07ad8693b079da508ef25512c87fe15a3b84ac44c",
+        "identical": true
+      },
+      "test/audit-recovery-tree.test.ts": {
+        "before": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+        "after": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+        "identical": true
+      },
+      "test/audit-native-bun-recovery.test.ts": {
+        "before": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198",
+        "after": "752afd60b20a7a5315f2676703f56a7ac7cf256ba7b43ee8e4f9d0a922368198",
+        "identical": true
+      },
+      "test/audit-recovery.test.ts": {
+        "before": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696",
+        "after": "63edc35a9decd755d440978f88bee0db0aa316007ba7a77053a30caa6f88f696",
+        "identical": true
+      },
+      "test/phase5-recovery.test.ts": {
+        "before": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+        "after": "9882a80d11235b31403fb897ea7bdb75597972256d323417b26e772cbddacff3",
+        "identical": true
+      },
+      "test/audit-recovery-execution-admission.test.ts": {
+        "before": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010",
+        "after": "6a516aebe57bcd1580adb8d83a99d5d5e4bb41a5685f5d334e06d2d721b79010",
+        "identical": true
+      },
+      "scripts/phase5_e2e_runner.ts": {
+        "before": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+        "after": "6204b26a3a8218cd1da6ce03ec856065656d904cc9b936d9110900f8d79ac875",
+        "identical": true
+      },
+      "scripts/phase5_recovery_process.py": {
+        "before": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+        "after": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf",
+        "identical": true
+      },
+      "test/fixtures/bun_recovery_ownership.ts": {
+        "before": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb",
+        "after": "125d2ec7269ef2035e71a9ad2a98f7ed11e66e6386dd57a5f0307de2e34243cb",
+        "identical": true
+      },
+      "scripts/qmd_mlx/process_anchor.py": {
+        "before": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+        "after": "7f4e038aab6c29b0f9dd7eb30d8262f2ef66f74d02b8cb0e56c0d04f00acd85b",
+        "identical": true
+      },
+      "scripts/qmd_mlx/__init__.py": {
+        "before": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1",
+        "after": "40155cb660d50ee206d9309113c37122456058c607b66234d90b982c1f2a76c1",
+        "identical": true
+      }
+    },
+    "dependency_metadata": {
+      "package.json": {
+        "before": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+        "after": "ae1aa01c0275dcabb174872a6a2b5ef24518c15f109796236a76d321805c3eaa",
+        "identical": true
+      },
+      "pnpm-lock.yaml": {
+        "before": "fe935e0afa6f90131e21b1ad295d4cc9acbdfd8c68cde6a46ba1acd07dc0c42a",
+        "after": "fe935e0afa6f90131e21b1ad295d4cc9acbdfd8c68cde6a46ba1acd07dc0c42a",
+        "identical": true
+      },
+      "bun.lock": {
+        "before": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719",
+        "after": "484035b1459455e18d7aac3e7b5fb8d8b671c77021ad43243b8ba0961277a719",
+        "identical": true
+      },
+      "tsconfig.json": {
+        "before": "5fc9601fc32acae3d75f59fcb64c04fccb7e9cc2040b3a5c147bd90341a9fc2c",
+        "after": "5fc9601fc32acae3d75f59fcb64c04fccb7e9cc2040b3a5c147bd90341a9fc2c",
+        "identical": true
+      },
+      "tsconfig.build.json": {
+        "before": "9728a37c2b951e2826f5750f2016f9187b3ebf6aecca8a3176bfb119dc3e8453",
+        "after": "9728a37c2b951e2826f5750f2016f9187b3ebf6aecca8a3176bfb119dc3e8453",
+        "identical": true
+      }
+    }
+  },
+  "readonly_frozen_baseline_sources_authenticated": 248,
+  "readonly_accepted_sources_authenticated": 19,
+  "dependencies": {
+    "entries": 18642,
+    "mismatches": {},
+    "shared_container_symlink": false,
+    "package_aliases_per_source_tree": 274
+  },
+  "patch": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/parent-integration.partial.patch",
+    "sha256": "8bdd69cdafc5bc1edc6d82347b1f2bb5cf8c2d09cf615466819ea70ed9c7b353",
+    "preimages": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/path-preimages.json",
+    "replay_verified_source_count": 251,
+    "check_exit_code": 0,
+    "apply_exit_code": 0
+  },
+  "compiler_read_guards": [
+    {
+      "log": "build-node-baseline-compiler-reads-59980.jsonl",
+      "reads": 2,
+      "denied": [],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/baseline"
+        }
+      ]
+    },
+    {
+      "log": "build-node-baseline-compiler-reads-59981.jsonl",
+      "reads": 573,
+      "denied": [],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/baseline"
+        }
+      ]
+    },
+    {
+      "log": "build-node-checkpoint-compiler-reads-59829.jsonl",
+      "reads": 2,
+      "denied": [],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror"
+        }
+      ]
+    },
+    {
+      "log": "build-node-checkpoint-compiler-reads-59830.jsonl",
+      "reads": 573,
+      "denied": [],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror"
+        }
+      ]
+    },
+    {
+      "log": "types-bun-final-compiler-reads-60538.jsonl",
+      "reads": 841,
+      "denied": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.bun/bin/bun",
+          "versions": {
+            "node": "24.3.0",
+            "bun": "1.3.8",
+            "boringssl": "29a2cd359458c9384694b75456026e4b57e3e567",
+            "openssl": "1.1.0",
+            "llhttp": "9.3.0",
+            "libarchive": "898dc8319355b7e985f68a9819f182aaed61b53a",
+            "mimalloc": "4c283af60cdae205df5a872530c77e2a6a307d43",
+            "picohttpparser": "066d2b1e9ab820703db0837a7255d92d30f0c9f5",
+            "uwebsockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+            "webkit": "0ddf6f47af0a9782a354f61e06d7f83d097d9f84",
+            "zig": "0.14.1",
+            "zlib": "886098f3f339617b4243b286f5ed364b9989e245",
+            "tinycc": "ab631362d839333660a265d3084d8ff060b96753",
+            "lolhtml": "8d4c273ded322193d017042d1f48df2766b0f88b",
+            "ares": "d1722e6e8acaf10eb73fa995798a9cd421d9f85e",
+            "libdeflate": "dc76454a39e7e83b68c3704b6e3784654f8d5ac5",
+            "usockets": "b64edcb490b486fb8af90cb2cb2dc51590453064",
+            "lshpack": "3d0f1fc1d6e66a642e7a98c55deb38aa986eb4b0",
+            "zstd": "794ea1b0afca0f020f4e57b6732332231fb23c70",
+            "v8": "13.6.233.10-node.18",
+            "uv": "1.48.0",
+            "napi": "10",
+            "icu": "74.2",
+            "unicode": "15.1",
+            "modules": "137"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror"
+        }
+      ]
+    },
+    {
+      "log": "types-node-baseline-compiler-reads-60550.jsonl",
+      "reads": 841,
+      "denied": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/baseline"
+        }
+      ]
+    },
+    {
+      "log": "types-node-checkpoint-compiler-reads-59424.jsonl",
+      "reads": 788,
+      "denied": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror"
+        }
+      ]
+    },
+    {
+      "log": "types-node-final-compiler-reads-60485.jsonl",
+      "reads": 844,
+      "denied": [
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "real": "/Users/shersingh/github/qmd-mlx-search/package.json",
+          "allowed": false
+        },
+        {
+          "operation": "readFileSync",
+          "lexical": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "real": "/Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts",
+          "allowed": false
+        }
+      ],
+      "hosts": [
+        {
+          "kind": "compiler-host",
+          "execPath": "/Users/shersingh/.hermes/node/bin/node",
+          "versions": {
+            "node": "22.22.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.6",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.2",
+            "llhttp": "9.3.1",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.5.6",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026a",
+            "undici": "6.24.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.56",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "source": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror"
+        }
+      ]
+    }
+  ],
+  "types": {
+    "types-node-checkpoint": {
+      "exit_code": 2,
+      "diagnostic_count": 39,
+      "per_path": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "scripts/timing-embed-4b-gguf.ts": 2,
+        "scripts/timing-gguf-baseline.ts": 2,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 1
+      },
+      "diagnostics": [
+        "migrate-schema.ts(10,26): error TS2307: Cannot find module 'bun:sqlite' or its corresponding type declarations.",
+        "scripts/phase5_e2e_runner.ts(565,42): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(565,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,22): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,38): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,54): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,69): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,47): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,36): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,59): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,33): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,10): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,34): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,84): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS2532: Object is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,64): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,81): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(576,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,51): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,86): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,122): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,136): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(583,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(672,21): error TS18048: 'p50' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(673,21): error TS18048: 'p95' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(738,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "scripts/phase5_e2e_runner.ts(1379,72): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "scripts/timing-embed-4b-gguf.ts(6,26): error TS2307: Cannot find module '../dist/llm.js' or its corresponding type declarations.",
+        "scripts/timing-embed-4b-gguf.ts(31,26): error TS7006: Parameter 'e' implicitly has an 'any' type.",
+        "scripts/timing-gguf-baseline.ts(4,26): error TS2307: Cannot find module '../dist/llm.js' or its corresponding type declarations.",
+        "scripts/timing-gguf-baseline.ts(17,98): error TS7006: Parameter 'e' implicitly has an 'any' type.",
+        "src/db.ts(16,40): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.",
+        "src/store.ts(17,23): error TS7016: Could not find a declaration file for module 'picomatch'. '/Users/shersingh/github/qmd-mlx-search/node_modules/picomatch/index.js' implicitly has an 'any' type.",
+        "src/test-preload.ts(7,26): error TS2307: Cannot find module 'bun:test' or its corresponding type declarations."
+      ],
+      "canonical_root_pass": false
+    },
+    "types-node-baseline": {
+      "exit_code": 2,
+      "diagnostic_count": 61,
+      "per_path": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "src/bench-rerank.ts": 3,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 2,
+        "test/cli.test.ts": 4,
+        "test/eval-bm25.test.ts": 1,
+        "test/eval.test.ts": 10,
+        "test/fixtures/public_eval_dataset.ts": 3,
+        "test/llm.test.ts": 1,
+        "test/multi-collection-filter.test.ts": 1,
+        "test/rrf-trace.test.ts": 1,
+        "test/store.helpers.unit.test.ts": 1
+      },
+      "diagnostics": [
+        "migrate-schema.ts(10,26): error TS2307: Cannot find module 'bun:sqlite' or its corresponding type declarations.",
+        "scripts/phase5_e2e_runner.ts(565,42): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(565,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,22): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,38): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,54): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,69): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,47): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,36): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,59): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,33): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,10): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,34): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,84): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS2532: Object is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,64): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,81): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(576,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,51): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,86): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,122): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,136): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(583,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(672,21): error TS18048: 'p50' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(673,21): error TS18048: 'p95' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(738,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "scripts/phase5_e2e_runner.ts(1379,72): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "src/bench-rerank.ts(112,9): error TS7034: Variable 'contexts' implicitly has type 'any[]' in some locations where its type cannot be determined.",
+        "src/bench-rerank.ts(117,9): error TS2353: Object literal may only specify known properties, and 'flashAttention' does not exist in type 'LlamaRankingContextOptions'.",
+        "src/bench-rerank.ts(152,35): error TS7005: Variable 'contexts' implicitly has an 'any[]' type.",
+        "src/db.ts(16,40): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.",
+        "src/store.ts(17,23): error TS7016: Could not find a declaration file for module 'picomatch'. '/Users/shersingh/github/qmd-mlx-search/node_modules/picomatch/index.js' implicitly has an 'any' type.",
+        "src/test-preload.ts(7,26): error TS2307: Cannot find module 'bun:test' or its corresponding type declarations.",
+        "src/test-preload.ts(8,40): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './llm.js'?",
+        "test/cli.test.ts(17,42): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.",
+        "test/cli.test.ts(1365,12): error TS18046: 'health' is of type 'unknown'.",
+        "test/cli.test.ts(1366,12): error TS18046: 'health' is of type 'unknown'.",
+        "test/cli.test.ts(1468,14): error TS18046: 'body' is of type 'unknown'.",
+        "test/eval-bm25.test.ts(20,8): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../src/store.js'?",
+        "test/eval.test.ts(38,8): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../src/store.js'?",
+        "test/eval.test.ts(39,83): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../src/llm.js'?",
+        "test/eval.test.ts(225,36): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(237,36): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(250,24): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(261,36): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(300,39): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(312,39): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(377,40): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/eval.test.ts(381,39): error TS7006: Parameter 'r' implicitly has an 'any' type.",
+        "test/fixtures/public_eval_dataset.ts(221,41): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "test/fixtures/public_eval_dataset.ts(228,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "test/fixtures/public_eval_dataset.ts(238,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "test/llm.test.ts(189,53): error TS7006: Parameter 'item' implicitly has an 'any' type.",
+        "test/multi-collection-filter.test.ts(81,12): error TS2532: Object is possibly 'undefined'.",
+        "test/rrf-trace.test.ts(2,72): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../src/store.js'?",
+        "test/store.helpers.unit.test.ts(21,8): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../src/store.js'?"
+      ],
+      "canonical_root_pass": false
+    },
+    "types-node-final": {
+      "exit_code": 2,
+      "diagnostic_count": 35,
+      "per_path": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 1
+      },
+      "diagnostics": [
+        "migrate-schema.ts(10,26): error TS2307: Cannot find module 'bun:sqlite' or its corresponding type declarations.",
+        "scripts/phase5_e2e_runner.ts(565,42): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(565,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,22): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,38): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,54): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,69): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,47): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,36): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,59): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,33): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,10): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,34): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,84): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS2532: Object is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,64): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,81): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(576,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,51): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,86): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,122): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,136): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(583,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(672,21): error TS18048: 'p50' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(673,21): error TS18048: 'p95' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(738,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "scripts/phase5_e2e_runner.ts(1379,72): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "src/db.ts(16,40): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.",
+        "src/store.ts(17,23): error TS7016: Could not find a declaration file for module 'picomatch'. '/Users/shersingh/github/qmd-mlx-search/node_modules/picomatch/index.js' implicitly has an 'any' type.",
+        "src/test-preload.ts(7,26): error TS2307: Cannot find module 'bun:test' or its corresponding type declarations."
+      ],
+      "canonical_root_pass": false
+    },
+    "types-bun-final": {
+      "exit_code": 2,
+      "diagnostic_count": 35,
+      "per_path": {
+        "migrate-schema.ts": 1,
+        "scripts/phase5_e2e_runner.ts": 31,
+        "src/db.ts": 1,
+        "src/store.ts": 1,
+        "src/test-preload.ts": 1
+      },
+      "diagnostics": [
+        "migrate-schema.ts(10,26): error TS2307: Cannot find module 'bun:sqlite' or its corresponding type declarations.",
+        "scripts/phase5_e2e_runner.ts(565,42): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(565,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,22): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,38): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,54): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(566,69): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,47): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(568,77): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,36): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(569,59): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(570,33): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,10): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(571,34): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,10): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,84): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(572,121): error TS2532: Object is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,64): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(573,81): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(576,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,51): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,86): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,122): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(579,136): error TS18048: 'qPost' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(583,18): error TS18048: 'qPre' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(672,21): error TS18048: 'p50' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(673,21): error TS18048: 'p95' is possibly 'undefined'.",
+        "scripts/phase5_e2e_runner.ts(738,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "scripts/phase5_e2e_runner.ts(1379,72): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+        "src/db.ts(16,40): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.",
+        "src/store.ts(17,23): error TS7016: Could not find a declaration file for module 'picomatch'. '/Users/shersingh/github/qmd-mlx-search/node_modules/picomatch/index.js' implicitly has an 'any' type.",
+        "src/test-preload.ts(7,26): error TS2307: Cannot find module 'bun:test' or its corresponding type declarations."
+      ],
+      "canonical_root_pass": false
+    }
+  },
+  "runtime_results": {
+    "node-focused": {
+      "exit_code": 1,
+      "success": false,
+      "file_count": 13,
+      "assertions": {
+        "passed": 235,
+        "skipped": 48,
+        "failed": 2
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-cleanup-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 21
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-deadline-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 27
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-entrypoint.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 44
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 34
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval-bm25.test.ts",
+          "status": "failed",
+          "counts": {
+            "skipped": 4
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval.test.ts",
+          "status": "failed",
+          "counts": {
+            "skipped": 13
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/llm.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 20,
+            "skipped": 31
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/multi-collection-filter.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 14
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/phase5-recovery.test.ts",
+          "status": "failed",
+          "counts": {
+            "passed": 15,
+            "failed": 2
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/rrf-trace.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 2
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/store.helpers.unit.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 35
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/zod-import.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 1
+          }
+        }
+      ]
+    },
+    "node-focused-final": {
+      "exit_code": 0,
+      "success": true,
+      "file_count": 13,
+      "assertions": {
+        "passed": 245,
+        "skipped": 40
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-cleanup-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 21
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-deadline-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 27
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-entrypoint.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 44
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 34
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval-bm25.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4,
+            "skipped": 9
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/llm.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 20,
+            "skipped": 31
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/multi-collection-filter.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 14
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/phase5-recovery.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 17
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/rrf-trace.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 2
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/store.helpers.unit.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 35
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/zod-import.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 1
+          }
+        }
+      ]
+    },
+    "bun-focused-final": {
+      "exit_code": 0,
+      "success": true,
+      "file_count": 13,
+      "assertions": {
+        "passed": 223,
+        "skipped": 40
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/multi-collection-filter.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 14
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/phase5-recovery.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 17
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 27
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/store.helpers.unit.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 35
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-entrypoint.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval-bm25.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/eval.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 4,
+            "skipped": 9
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-cleanup-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 21
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/bench-rerank-lifecycle.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 34
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/llm.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 20,
+            "skipped": 31
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-llm-deadline-review.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 22
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/rrf-trace.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 2
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/zod-import.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 1
+          }
+        }
+      ]
+    },
+    "node-sdk": {
+      "exit_code": 0,
+      "success": true,
+      "file_count": 2,
+      "assertions": {
+        "passed": 4
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/sdk-probe/test/sdk-inlined-zod.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 3
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/sdk-probe/test/zod-prefix-scope.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 1
+          }
+        }
+      ]
+    },
+    "bun-sdk": {
+      "exit_code": 0,
+      "success": true,
+      "file_count": 2,
+      "assertions": {
+        "passed": 4
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/sdk-probe/test/zod-prefix-scope.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 1
+          }
+        },
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/sdk-probe/test/sdk-inlined-zod.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 3
+          }
+        }
+      ]
+    },
+    "node-native-bun-wrappers": {
+      "exit_code": 0,
+      "success": true,
+      "file_count": 1,
+      "assertions": {
+        "passed": 7
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/mirror/test/audit-native-bun-recovery.test.ts",
+          "status": "passed",
+          "counts": {
+            "passed": 7
+          }
+        }
+      ]
+    },
+    "node-held-sparse": {
+      "exit_code": 1,
+      "success": false,
+      "file_count": 1,
+      "assertions": {
+        "skipped": 17,
+        "failed": 1
+      },
+      "files": [
+        {
+          "path": "/Users/shersingh/.hermes/cache/scratch/qmd-types-compose-nd8v4x2p/held/phase5-recovery.test.ts",
+          "status": "failed",
+          "counts": {
+            "skipped": 17,
+            "failed": 1
+          }
+        }
+      ]
+    }
+  },
+  "source_emission_proof": "evidence/source-emission-proof.json",
+  "roots_before": 150,
+  "roots_after": 153,
+  "root_diff": {
+    "removed": [],
+    "added": [
+      "test/bench-rerank-entrypoint.test.ts",
+      "test/bench-rerank-lifecycle.test.ts",
+      "test/zod-import.test.ts"
+    ]
+  },
+  "blockers": [
+    {
+      "id": "B1",
+      "path": [
+        "scripts/phase5_e2e_runner.ts",
+        "test/phase5-recovery.test.ts"
+      ],
+      "reason": "Accepted source.patch first five runner hunks add executable missing-slot/score/percentile guards, change iteration and argument evaluation; accepted test adds a behavioral sparse-report regression. These are not type-erased changes. Current scope permits only type-only rebase on these lease-overlap paths. Both source files are therefore held byte-identical; no assertions or suppressions substituted. Real relocated accepted sparse test fails against the unchanged baseline runner."
+    },
+    {
+      "id": "B2",
+      "reason": "Canonical tsconfig allowJs roots include three historical .mjs docs importing /Users/shersingh/github/qmd-mlx-search/src/mcp/server.ts. Lexical+real read guard denied live package.json and server.ts reads. Production root/config/docs were not edited or excluded; no complete isolated canonical-root pass is possible with those forbidden imports."
+    },
+    {
+      "id": "B3",
+      "reason": "Authoritative installed dependency root supplies 274 package aliases, not historical 277: @types/bun, bun-types and @types/picomatch absent. No installs or invented ambient declarations. Final strict-root errors also report bun:sqlite, bun:test, globalThis.Bun and picomatch declaration failures."
+    }
+  ],
+  "C1": "Retained qualification: an artificially paused sole cleanup owner may return truthful incomplete cleanup proof with no forbidden work and later natural reap; never claimed complete cleanup.",
+  "no_live_edits": true,
+  "self_approval": false,
+  "parent_gates": [
+    "Resolve scope of accepted runtime metric guards on two held paths",
+    "Authorize safe canonical-root historical import relocation and missing declaration provenance if appropriate",
+    "Independent review and parent full-suite/integration acceptance",
+    "No CI/native-model/release qualification claimed"
+  ],
+  "fresh_host_summary": "evidence/final-host-summary.json",
+  "native_bun_child_runtime_verified": true
+}

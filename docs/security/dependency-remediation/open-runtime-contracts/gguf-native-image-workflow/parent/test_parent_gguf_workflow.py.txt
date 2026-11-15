@@ -1,0 +1,77 @@
+"""Parent replay of workflow syntax and SYNTHETIC controls, never native images."""
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+
+ROOT = Path(__file__).resolve().parent
+PYTHON = '/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/security-venv/bin/python'
+BIND = json.loads((ROOT / 'parent-input-binding.json').read_text())
+ENV = json.loads((ROOT / 'environment.json').read_text())
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def source_identity():
+    for name, digest in BIND['copiedSha256'].items():
+        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest, name
+
+
+def run(label, script, phase):
+    source_identity()
+    command = [PYTHON, '-I', '-B', '-S', str(ROOT / 'evidence' / script), phase]
+    result = subprocess.run(command, cwd=ROOT, env=ENV, capture_output=True, timeout=90)
+    (ROOT / f'evidence/{label}.stdout').write_bytes(result.stdout)
+    (ROOT / f'evidence/{label}.stderr').write_bytes(result.stderr)
+    (ROOT / f'evidence/{label}-invocation.json').write_text(json.dumps({
+        'command': command, 'environment': ENV, 'cwd': str(ROOT), 'exitCode': result.returncode,
+        'scope': 'syntax/synthetic only; no real Docker or native image execution',
+    }, indent=2) + '\n')
+    assert result.returncode == 0, (label, result.stdout.decode(), result.stderr.decode())
+    source_identity()
+
+
+def test_01_actual_generated_syntax_and_actionlint():
+    run('parent-validation', 'validate_workflow.py', 'parent')
+    result = read(ROOT / 'evidence/validation-parent.json')
+    assert result['passed'] and not result['image_execution']
+    assert len(result['checks']) == 4
+    assert all(check['exit_code'] == 0 for check in result['checks'])
+    for check in result['checks']:
+        if check['check'] in ('bash syntax', 'actionlint'):
+            assert check['stdout'] == check['stderr'] == ''
+
+
+def test_02_original_74_synthetic_cases_without_controller_edits():
+    run('parent-control-flow', 'control_flow_tests.py', 'parent')
+    result = read(ROOT / 'evidence/synthetic-parent/summary.json')
+    rows = result['results']
+    assert len(rows) == len({row['case'] for row in rows}) == result['cases'] == 74
+    assert result['passed'] == 74 and result['failed'] == result['skipped'] == 0
+    assert sum(row['expected_exit'] != 0 for row in rows) == 66
+    assert all(row['passed'] and row['expected_exit'] == row['actual_exit'] for row in rows)
+    assert all(row['synthetic_only'] and not row['native_image_execution_performed'] for row in rows)
+    assert result['native_image_execution_performed'] is False
+    assert result['workflow_sha256'] == BIND['copiedSha256']['mirror/.github/workflows/gguf-native-image-qualification.yml']
+    worker = read(Path(BIND['source']) / 'evidence/synthetic-final-v2/summary.json')
+    assert result['generated_bash_sha256'] == worker['generated_bash_sha256']
+    assert result['controller_sha256'] == worker['controller_sha256']
+    print(json.dumps({'syntheticCases': len(rows), 'expectedNonzeroControls': 66, 'controllerUnchanged': True, 'realDockerOrImageExecuted': False}))
+
+
+def test_03_durable_handoff_does_not_promote_synthetic_evidence():
+    source_identity()
+    ledger = read(Path('/Users/shersingh/.hermes/cache/scratch/qmd-dependency-remediation/integration-gates-wave4.json'))
+    gate = next(item for item in ledger['gates'] if item['id'] == 'gguf-launcher-image-closure')
+    summary = read(Path('/Users/shersingh/github/qmd-mlx-search') / gate['premerge_workflow_proposal_archive'])
+    assert summary['independentReviewDelegation'] == 'deleg_15b024ec'
+    assert summary['acceptedForIntegration'] is False
+    assert summary['imageExecuted'] is False and summary['dockerExecuted'] is False
+    assert summary['parentVerification']['syntheticCases'] == 74
+    assert summary['parentVerification']['expectedNonzeroControls'] == 66
+    assert summary['parentVerification']['controllerUnchanged'] is True
+    assert summary['workflowSha256'] == BIND['copiedSha256']['mirror/.github/workflows/gguf-native-image-qualification.yml']
+    assert len(summary['parentInputReconciliation']['stillIdentical']) == 9
+    assert summary['parentInputReconciliation']['authorizedPlanChange']['exactPriorReconstructed'] is True

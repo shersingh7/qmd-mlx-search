@@ -1,0 +1,3 @@
+import {defineConfig,mergeConfig} from './snapshot/node_modules/vitest/dist/config.js';
+import original from './snapshot/vitest.config.ts';
+export default mergeConfig(original,defineConfig({root:new URL('./snapshot/',import.meta.url).pathname,cacheDir:new URL('./cache/',import.meta.url).pathname,test:{maxWorkers:2}}));

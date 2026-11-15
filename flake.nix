@@ -7,6 +7,11 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    let
+      # These are the native hosts exercised by .github/workflows/nix.yml.
+      # Adding another host requires its own verified dependency hash and smoke.
+      supportedSystems = [ "x86_64-linux" "aarch64-darwin" ];
+    in
     {
       homeModules.default = { config, lib, pkgs, ... }:
         with lib;
@@ -30,63 +35,85 @@
           };
         };
     } //
-    flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachSystem supportedSystems (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         packageJson = builtins.fromJSON (builtins.readFile ./package.json);
         version = packageJson.version;
-
-        # SQLite with loadable extension support for sqlite-vec
-        sqliteWithExtensions = pkgs.sqlite.overrideAttrs (old: {
-          configureFlags = (old.configureFlags or []) ++ [
-            "--enable-load-extension"
-          ];
+        # One exact Node derivation supplies the runtime AND native addon headers.
+        # The HTTP transport requires Node >=22; Bun is only the locked fetcher.
+        nodejs = pkgs.nodejs_22;
+        # nixpkgs' wrapper hardcodes its own Node and npm_config_nodedir. Override
+        # both: a CLI --nodedir alone still compiled the addon against Node 24.
+        nodeGyp = (pkgs.node-gyp.override { inherit nodejs; }).overrideAttrs (_old: {
+          makeWrapperArgs = [ "--set npm_config_nodedir ${pkgs.lib.getDev nodejs}" ];
         });
 
-        nodeModulesHashes = {
-          x86_64-linux = "sha256-D0ezO4vqq4iswcAMU2DCql9ZAQvh3me6N9aDB5roq4w=";
-          aarch64-darwin = "sha256-qU+9KdR/nTocelyANS09I/4yaQ+7s1LvJNqB27IOK/c=";
+        source = pkgs.lib.cleanSourceWith {
+          src = ./.;
+          filter = path: type:
+            let
+              name = builtins.baseNameOf path;
+              relative = pkgs.lib.removePrefix "${toString ./.}/" (toString path);
+              top = builtins.head (pkgs.lib.splitString "/" relative);
+            in
+            # Only build/package inputs enter the store; never local indexes,
+            # models, finetuning data or unrelated checkout artifacts.
+            (toString path == toString ./. || builtins.elem top [
+              "src" "scripts" "bin" "package.json" "tsconfig.json"
+              "tsconfig.build.json" "LICENSE" "CHANGELOG.md"
+            ]) && !(builtins.elem name [
+              ".git" "node_modules" "dist" ".venv" "__pycache__"
+              ".pytest_cache" ".direnv" "result"
+            ]) && !(pkgs.lib.hasSuffix ".pyc" name || pkgs.lib.hasSuffix ".pyo" name);
+        };
 
-          # Populate these on first build for additional hosts if/when needed.
-          aarch64-linux = pkgs.lib.fakeHash;
-          x86_64-darwin = pkgs.lib.fakeHash;
+        nodeModulesHashes = {
+          # Recompute both from native CI after package.json/bun.lock or the
+          # build+production dependency layout changes; never disable integrity.
+          # Both measured by native run 43587714131 at head 9697a6f.
+          x86_64-linux = "sha256-FShClrkZs1dqlIJD3ygyda018rRhYhMJWSPDsAyS+Vc=";
+          aarch64-darwin = "sha256-Hb23tGns07IbiyUyXXdTrVpAA9Qamqagd/iYMOW3qZ4=";
         };
 
         nodeModules = pkgs.stdenvNoCC.mkDerivation {
           pname = "qmd-node-modules";
           inherit version;
 
-          src = ./.;
+          # No checkout .npmrc/bunfig, prepare hook source, caches or modules can
+          # contaminate the fixed-output fetch. Integrity verification stays on.
+          src = pkgs.lib.fileset.toSource {
+            root = ./.;
+            fileset = pkgs.lib.fileset.unions [ ./package.json ./bun.lock ];
+          };
 
-          impureEnvVars = pkgs.lib.fetchers.proxyImpureEnvVars ++ [
-            "GIT_PROXY_COMMAND"
-            "SOCKS_SERVER"
-          ];
-
-          nativeBuildInputs = [
-            pkgs.bun
-          ];
-
+          impureEnvVars = pkgs.lib.fetchers.proxyImpureEnvVars;
+          nativeBuildInputs = [ pkgs.bun ];
           dontConfigure = true;
 
           buildPhase = ''
-            export HOME=$(mktemp -d)
+            runHook preBuild
+            export HOME="$TMPDIR/qmd-fetch-home"
+            mkdir -p "$HOME"
 
-            bun install \
-              --backend copyfile \
-              --frozen-lockfile \
-              --ignore-scripts \
-              --no-progress \
-              --production
+            # Build with the lock's compiler/types, but ship production deps only.
+            # Neither pass may run dependency or root lifecycle scripts.
+            bun install --backend copyfile --frozen-lockfile --ignore-scripts \
+              --no-progress --cache-dir "$TMPDIR/bun-cache"
+            mv node_modules node_modules-build
+            bun install --backend copyfile --frozen-lockfile --ignore-scripts \
+              --no-progress --cache-dir "$TMPDIR/bun-cache" --production
+            runHook postBuild
           '';
 
           installPhase = ''
+            runHook preInstall
             mkdir -p $out
-            cp -R node_modules $out/
+            cp -R node_modules node_modules-build $out/
+            runHook postInstall
           '';
 
           dontFixup = true;
-
           outputHash = nodeModulesHashes.${system};
           outputHashAlgo = "sha256";
           outputHashMode = "recursive";
@@ -95,76 +122,130 @@
         qmd = pkgs.stdenv.mkDerivation {
           pname = "qmd";
           inherit version;
-
-          src = ./.;
+          src = source;
+          dontConfigure = true;
 
           nativeBuildInputs = [
-            pkgs.bun
+            nodejs
             pkgs.makeWrapper
-            pkgs.nodejs
-            pkgs.node-gyp
-            pkgs.python3  # needed by node-gyp to compile better-sqlite3
+            nodeGyp
+            pkgs.python3
           ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-            pkgs.darwin.cctools  # provides libtool needed by node-gyp on macOS
+            pkgs.darwin.cctools
           ];
 
-          buildInputs = [ pkgs.sqlite ];
-
           buildPhase = ''
-            export HOME=$(mktemp -d)
+            runHook preBuild
+            export HOME="$TMPDIR/qmd-build-home"
+            export PYTHON=${pkgs.python3}/bin/python3
+            mkdir -p "$HOME"
 
+            cp -R ${nodeModules}/node_modules-build node_modules
+            chmod -R u+w node_modules
+            ${nodejs}/bin/node scripts/build.mjs
+
+            rm -rf node_modules
             cp -R ${nodeModules}/node_modules ./
             chmod -R u+w node_modules
-
-            (cd node_modules/better-sqlite3 && node-gyp rebuild --release)
+            # Offline source build of exactly the locked better-sqlite3. Do not
+            # download prebuilds/headers or use node-gyp's runtime ABI implicitly.
+            (cd node_modules/better-sqlite3 && \
+              node-gyp rebuild --release --nodedir=${pkgs.lib.getDev nodejs})
+            runHook postBuild
           '';
 
           installPhase = ''
-            mkdir -p $out/lib/qmd
-            mkdir -p $out/bin
+            runHook preInstall
+            mkdir -p $out/lib/qmd $out/bin
+            cp -R node_modules $out/lib/qmd/
+            cp -R dist scripts bin $out/lib/qmd/
+            cp package.json LICENSE CHANGELOG.md $out/lib/qmd/
 
-            cp -r node_modules $out/lib/qmd/
-            cp -r src $out/lib/qmd/
-            cp package.json $out/lib/qmd/
-
-            makeWrapper ${pkgs.bun}/bin/bun $out/bin/qmd \
-              --add-flags "$out/lib/qmd/src/cli/qmd.ts" \
-              --set DYLD_LIBRARY_PATH "${pkgs.sqlite.out}/lib" \
-              --set LD_LIBRARY_PATH "${pkgs.sqlite.out}/lib"
+            # Do not consult a consumer's Bun/Node selection for a Node-ABI addon.
+            # better-sqlite3's bundled SQLite loads sqlite-vec without loader-path hacks.
+            makeWrapper ${nodejs}/bin/node $out/bin/qmd \
+              --add-flags "$out/lib/qmd/dist/cli/qmd.js" \
+              --prefix PATH : ${pkgs.lib.makeBinPath [ nodejs ]}
+            runHook postInstall
           '';
 
+          doInstallCheck = true;
+          installCheckPhase = ''
+            runHook preInstallCheck
+            export HOME="$TMPDIR/qmd-install-home"
+            export XDG_CONFIG_HOME="$HOME/config"
+            export XDG_CACHE_HOME="$HOME/cache"
+            mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
+            test -s $out/lib/qmd/dist/index.js
+            test -s $out/lib/qmd/dist/index.d.ts
+            test -s $out/lib/qmd/scripts/qmd_mlx/server.py
+            $out/bin/qmd --help > "$TMPDIR/qmd-help.txt"
+            ${nodejs}/bin/node --input-type=module -e "
+              const {openDatabase,loadSqliteVec}=await import('file://$out/lib/qmd/dist/db.js');
+              const db=openDatabase(':memory:');
+              try {
+                loadSqliteVec(db);
+                if (!db.prepare('select vec_version() as version').get().version) throw Error('sqlite-vec unavailable');
+              } finally { db.close(); }
+            "
+            runHook postInstallCheck
+          '';
+
+          passthru = { inherit nodejs nodeModules; };
           meta = with pkgs.lib; {
-            description = "On-device search engine for markdown notes, meeting transcripts, and knowledge bases";
-            homepage = "https://github.com/tobi/qmd";
+            description = "On-device search engine for markdown notes and knowledge bases";
+            homepage = "https://github.com/shersingh7/qmd-mlx-search";
             license = licenses.mit;
-            platforms = platforms.unix;
+            mainProgram = "qmd";
+            platforms = supportedSystems;
           };
+        };
+
+        installedCheck = pkgs.writeShellApplication {
+          name = "qmd-check-installed";
+          runtimeInputs = [ nodejs pkgs.python3 ];
+          text = ''
+            if [ "$#" -lt 1 ]; then
+              echo "usage: qmd-check-installed /path/to/nix-output [--receipt /new/file.json]" >&2
+              exit 2
+            fi
+            package="$1"
+            shift
+            : "''${TMPDIR:?Set TMPDIR to a managed scratch directory}"
+            exec ${pkgs.python3}/bin/python3 ${./test/security/test_nix_packaging.py} \
+              --installed "$package" --node ${nodejs}/bin/node "$@"
+          '';
         };
       in
       {
         packages = {
           default = qmd;
-          qmd = qmd;
+          inherit qmd;
         };
 
-        apps.default = {
-          type = "app";
-          program = "${qmd}/bin/qmd";
+        apps = {
+          default = {
+            type = "app";
+            program = "${qmd}/bin/qmd";
+          };
+          # Run outside the build sandbox so loopback HTTP acceptance is not
+          # confused with sandbox socket policy. The app pins the same Node ABI.
+          check-installed = {
+            type = "app";
+            program = "${installedCheck}/bin/qmd-check-installed";
+          };
         };
 
+        # The Python/MLX helpers are shipped recursively as source/assets, not a
+        # bundled GPU/MLX environment. Provision their pinned requirements in a
+        # separate compatible environment; these checks never load any model.
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.bun
-            sqliteWithExtensions
-          ];
-
+          packages = [ nodejs pkgs.bun pkgs.python3 ];
           shellHook = ''
-            export BREW_PREFIX="''${BREW_PREFIX:-${sqliteWithExtensions.out}}"
-            echo "QMD development shell"
-            echo "Run: bun src/cli/qmd.ts <command>"
+            echo "QMD development shell (Node.js ${nodejs.version})"
+            echo "Run: npm run build; node dist/cli/qmd.js --help"
           '';
         };
       }
     );
-
 }

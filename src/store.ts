@@ -11,7 +11,8 @@
  *   const store = createStore();
  */
 
-import { openDatabase, loadSqliteVec } from "./db.js";
+import { openDatabase, loadSqliteVec, createSavepoint, withSavepoint, withExclusiveDatabaseOperation, withoutDatabaseOperation, assertDatabaseAccess } from "./db.js";
+import { MAX_EXPANSION_BYTES } from "./expansion/protocol.js";
 import type { Database } from "./db.js";
 import picomatch from "picomatch";
 import { createHash } from "crypto";
@@ -24,10 +25,12 @@ import {
   formatQueryForEmbedding,
   formatDocForEmbedding,
   withLLMSessionForLlm,
+  SessionReleasedError,
   type RerankDocument,
   type ILLMSession,
   type EmbeddingResult,
 } from "./llm.js";
+import { abortable, throwIfAborted } from "./llm/lifecycle.js";
 import type {
   NamedCollection,
   Collection,
@@ -37,7 +40,16 @@ import type {
 import {
   type EmbeddingDescriptor,
   computeEmbeddingSpaceId,
+  assertEmbeddingCompatibility,
+  validateEmbeddingDescriptor,
 } from "./embedding/contract.js";
+import {
+  getPendingEmbeddingStats,
+  pendingEmbeddingBatches,
+  getStoredChunkStrategy,
+  physicalVectorExistsSql,
+  type PendingEmbeddingDoc,
+} from "./indexing/pending.js";
 
 // =============================================================================
 // Configuration
@@ -777,6 +789,7 @@ function initializeDatabase(db: Database): void {
 
   db.exec(`CREATE INDEX IF NOT EXISTS idx_documents_collection ON documents(collection, active)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_documents_hash ON documents(hash)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_documents_hash_active_path ON documents(hash, active, path)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_documents_path ON documents(path, active)`);
 
   // Cache table for LLM API calls
@@ -988,19 +1001,25 @@ export function upsertStoreCollection(db: Database, name: string, collection: Om
 }
 
 export function deleteStoreCollection(db: Database, name: string): boolean {
-  const result = db.prepare(`DELETE FROM store_collections WHERE name = ?`).run(name);
-  return result.changes > 0;
+  return withSavepoint(db, () => {
+    const result = db.prepare(`DELETE FROM store_collections WHERE name = ?`).run(name);
+    // The FTS delete trigger removes only these document rows. Shared content,
+    // chunk expectations and vectors remain available to other collections.
+    const docs = db.prepare(`DELETE FROM documents WHERE collection = ?`).run(name);
+    return result.changes > 0 || docs.changes > 0;
+  });
 }
 
 export function renameStoreCollection(db: Database, oldName: string, newName: string): boolean {
-  // Check target doesn't exist
-  const existing = db.prepare(`SELECT name FROM store_collections WHERE name = ?`).get(newName) as { name: string } | null | undefined;
-  if (existing != null) {
-    throw new Error(`Collection '${newName}' already exists`);
-  }
-
-  const result = db.prepare(`UPDATE store_collections SET name = ? WHERE name = ?`).run(newName, oldName);
-  return result.changes > 0;
+  return withSavepoint(db, () => {
+    const existing = db.prepare(`SELECT name FROM store_collections WHERE name = ?`).get(newName);
+    const indexed = db.prepare(`SELECT 1 FROM documents WHERE collection = ? LIMIT 1`).get(newName);
+    if (existing || indexed) throw new Error(`Collection '${newName}' already exists`);
+    const result = db.prepare(`UPDATE store_collections SET name = ? WHERE name = ?`).run(newName, oldName);
+    // Context maps live in store_collections; document updates also rewrite FTS.
+    const docs = db.prepare(`UPDATE documents SET collection = ? WHERE collection = ?`).run(newName, oldName);
+    return result.changes > 0 || docs.changes > 0;
+  });
 }
 
 export function updateStoreContext(db: Database, collectionName: string, path: string, text: string): boolean {
@@ -1088,20 +1107,14 @@ function ensureVecTableInternal(db: Database, dimensions: number, descriptor?: E
   // Verify embedding space identity against stored metadata
   if (descriptor) {
     const spaceId = computeEmbeddingSpaceId(descriptor);
-    try {
-      const storedSpace = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_space_id'`).get() as { value: string } | undefined;
-      const storedModel = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_model'`).get() as { value: string } | undefined;
-
-      if (storedSpace && storedSpace.value !== spaceId) {
-        throw new Error(
-          `Embedding space mismatch: existing vector index uses space '${storedSpace.value}' (${storedModel?.value || 'unknown'}), ` +
-          `but current configuration is space '${spaceId}' (${descriptor.model}). ` +
-          `Run 'qmd embed -f' to re-embed with the new model.`
-        );
-      }
-    } catch (err: any) {
-      if (err?.message?.includes("Embedding space mismatch")) throw err;
-      // store_config table might not exist yet during initial setup
+    const storedSpace = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_space_id'`).get() as { value: string } | undefined;
+    const storedModel = db.prepare(`SELECT value FROM store_config WHERE key = 'embedding_model'`).get() as { value: string } | undefined;
+    if (storedSpace && storedSpace.value !== spaceId) {
+      throw new Error(
+        `Embedding space mismatch: existing vector index uses space '${storedSpace.value}' (${storedModel?.value || 'unknown'}), ` +
+        `but current configuration is space '${spaceId}' (${descriptor.model}). ` +
+        `Run 'qmd embed -f' to re-embed with the new model.`
+      );
     }
   }
 
@@ -1115,11 +1128,9 @@ function ensureVecTableInternal(db: Database, dimensions: number, descriptor?: E
     if (existingDims === dimensions && hasHashSeq && hasCosine) {
       if (descriptor) {
         const spaceId = computeEmbeddingSpaceId(descriptor);
-        try {
-          db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_space_id', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(spaceId);
-          db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_model', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(descriptor.model);
-          db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_descriptor', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(JSON.stringify(descriptor));
-        } catch {}
+        db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_space_id', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(spaceId);
+        db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_model', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(descriptor.model);
+        db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_descriptor', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(JSON.stringify(descriptor));
       }
       return;
     }
@@ -1129,17 +1140,15 @@ function ensureVecTableInternal(db: Database, dimensions: number, descriptor?: E
         `Run 'qmd embed -f' to re-embed with the new model.`
       );
     }
-    db.exec("DROP TABLE IF EXISTS vectors_vec");
+    throw new Error("Vector index schema mismatch. Refusing to erase the existing index; run 'qmd embed -f' for an explicit rebuild.");
   }
   db.exec(`CREATE VIRTUAL TABLE vectors_vec USING vec0(hash_seq TEXT PRIMARY KEY, embedding float[${dimensions}] distance_metric=cosine)`);
 
   if (descriptor) {
     const spaceId = computeEmbeddingSpaceId(descriptor);
-    try {
-      db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_space_id', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(spaceId);
-      db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_model', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(descriptor.model);
-      db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_descriptor', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(JSON.stringify(descriptor));
-    } catch {}
+    db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_space_id', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(spaceId);
+    db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_model', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(descriptor.model);
+    db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_descriptor', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(JSON.stringify(descriptor));
   }
 }
 
@@ -1189,11 +1198,11 @@ export type Store = {
 
   // Search
   searchFTS: (query: string, limit?: number, collectionName?: string) => SearchResult[];
-  searchVec: (query: string, model: string, limit?: number, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[]) => Promise<SearchResult[]>;
+  searchVec: (query: string, model: string, limit?: number, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[], signal?: AbortSignal) => Promise<SearchResult[]>;
 
   // Query expansion & reranking
-  expandQuery: (query: string, model?: string, intent?: string) => Promise<ExpandedQuery[]>;
-  rerank: (query: string, documents: { file: string; text: string }[], model?: string, intent?: string) => Promise<{ file: string; score: number }[]>;
+  expandQuery: (query: string, model?: string, intent?: string, signal?: AbortSignal, cache?: QueryInferenceCache) => Promise<ExpandedQuery[]>;
+  rerank: (query: string, documents: { file: string; text: string }[], model?: string, intent?: string, signal?: AbortSignal, cache?: QueryInferenceCache) => Promise<{ file: string; score: number }[]>;
 
   // Document retrieval
   findDocument: (filename: string, options?: { includeBody?: boolean }) => DocumentResult | DocumentNotFound;
@@ -1218,7 +1227,7 @@ export type Store = {
   getHashesForEmbedding: () => { hash: string; body: string; path: string }[];
   clearAllEmbeddings: () => void;
   insertEmbedding: (hash: string, seq: number, pos: number, embedding: Float32Array, model: string, embeddedAt: string) => void;
-  getEmbeddingDescriptor?: () => Promise<EmbeddingDescriptor | undefined> | EmbeddingDescriptor | undefined;
+  getEmbeddingDescriptor?: (options?: { signal?: AbortSignal }) => Promise<EmbeddingDescriptor | undefined> | EmbeddingDescriptor | undefined;
 };
 
 // =============================================================================
@@ -1253,8 +1262,20 @@ export async function reindexCollection(
     onProgress?: (info: ReindexProgress) => void;
   }
 ): Promise<ReindexResult> {
+  return withExclusiveDatabaseOperation(store.db, "collection indexing", () =>
+    reindexCollectionInternal(store, collectionPath, globPattern, collectionName, options));
+}
+
+async function reindexCollectionInternal(
+  store: Store,
+  collectionPath: string,
+  globPattern: string,
+  collectionName: string,
+  options?: { ignorePatterns?: string[]; onProgress?: (info: ReindexProgress) => void },
+): Promise<ReindexResult> {
   const db = store.db;
   const now = new Date().toISOString();
+  const reportProgress = (info: ReindexProgress) => withoutDatabaseOperation(db, () => options?.onProgress?.(info));
   const excludeDirs = ["node_modules", ".git", ".cache", "vendor", "dist", "build"];
 
   const allIgnore = [
@@ -1288,7 +1309,7 @@ export async function reindexCollection(
       content = readFileSync(filepath, "utf-8");
     } catch {
       processed++;
-      options?.onProgress?.({ file: relativeFile, current: processed, total });
+      reportProgress({ file: relativeFile, current: processed, total });
       continue;
     }
 
@@ -1327,7 +1348,7 @@ export async function reindexCollection(
     }
 
     processed++;
-    options?.onProgress?.({ file: relativeFile, current: processed, total });
+    reportProgress({ file: relativeFile, current: processed, total });
   }
 
   // Deactivate documents that no longer exist
@@ -1370,6 +1391,16 @@ export type EmbedResult = {
   durationMs: number;
 };
 
+/** Zero-work completion/cancellation never needs to publish index state. */
+export function emptyEmbedResult(status: "complete" | "cancelled", durationMs = 0): EmbedResult {
+  return {
+    status, docsProcessed: 0, docsSelected: 0, chunksAttempted: 0,
+    chunksCommitted: 0, chunksEmbedded: 0, chunksFailed: 0,
+    chunksSkipped: 0, chunksPending: 0, errors: 0, durationMs,
+    ...(status === "cancelled" ? { firstFailureReason: "Embedding aborted by signal" } : {}),
+  };
+}
+
 export type EmbedOptions = {
   force?: boolean;
   model?: string;
@@ -1379,12 +1410,6 @@ export type EmbedOptions = {
   chunkStrategy?: ChunkStrategy;
   onProgress?: (info: EmbedProgress) => void;
   signal?: AbortSignal;
-};
-
-type PendingEmbeddingDoc = {
-  hash: string;
-  path: string;
-  bytes: number;
 };
 
 type EmbeddingDoc = PendingEmbeddingDoc & {
@@ -1445,65 +1470,6 @@ function ensureCheckpointTable(db: Database): void {
   `);
 }
 
-function getPendingEmbeddingDocs(db: Database): PendingEmbeddingDoc[] {
-  ensureExpectationTable(db);
-  ensureCheckpointTable(db);
-  return db.prepare(`
-    SELECT d.hash, MIN(d.path) as path, length(CAST(c.doc AS BLOB)) as bytes
-    FROM documents d
-    JOIN content c ON d.hash = c.hash
-    LEFT JOIN (
-      SELECT hash, COUNT(*) as cnt FROM content_vectors GROUP BY hash
-    ) v ON d.hash = v.hash
-    LEFT JOIN content_chunk_expectations e ON d.hash = e.hash
-    WHERE d.active = 1 AND (
-      v.cnt IS NULL
-      OR v.cnt = 0
-      OR (e.total_chunks IS NOT NULL AND v.cnt < e.total_chunks)
-      OR (
-        EXISTS (
-          SELECT 1 FROM sqlite_master WHERE type='table' AND name='indexing_checkpoints'
-        ) AND EXISTS (
-          SELECT 1 FROM indexing_checkpoints WHERE status IN ('in_progress', 'paused')
-        )
-      )
-    )
-    GROUP BY d.hash
-    ORDER BY MIN(d.path)
-  `).all() as PendingEmbeddingDoc[];
-}
-
-function buildEmbeddingBatches(
-  docs: PendingEmbeddingDoc[],
-  maxDocsPerBatch: number,
-  maxBatchBytes: number,
-): PendingEmbeddingDoc[][] {
-  const batches: PendingEmbeddingDoc[][] = [];
-  let currentBatch: PendingEmbeddingDoc[] = [];
-  let currentBytes = 0;
-
-  for (const doc of docs) {
-    const docBytes = Math.max(0, doc.bytes);
-    const wouldExceedDocs = currentBatch.length >= maxDocsPerBatch;
-    const wouldExceedBytes = currentBatch.length > 0 && (currentBytes + docBytes) > maxBatchBytes;
-
-    if (wouldExceedDocs || wouldExceedBytes) {
-      batches.push(currentBatch);
-      currentBatch = [];
-      currentBytes = 0;
-    }
-
-    currentBatch.push(doc);
-    currentBytes += docBytes;
-  }
-
-  if (currentBatch.length > 0) {
-    batches.push(currentBatch);
-  }
-
-  return batches;
-}
-
 function getEmbeddingDocsForBatch(db: Database, batch: PendingEmbeddingDoc[]): EmbeddingDoc[] {
   if (batch.length === 0) return [];
 
@@ -1530,69 +1496,93 @@ export async function generateEmbeddings(
   store: Store,
   options?: EmbedOptions
 ): Promise<EmbedResult> {
+  return withExclusiveDatabaseOperation(store.db, "embedding generation", () => generateEmbeddingsInternal(store, options));
+}
+
+async function generateEmbeddingsInternal(store: Store, options?: EmbedOptions): Promise<EmbedResult> {
+  const startTime = Date.now();
+  if (options?.signal?.aborted) return emptyEmbedResult("cancelled");
   const db = store.db;
-  const model = options?.model ?? DEFAULT_EMBED_MODEL;
+  const llm = getLlm(store);
+  const model = options?.model ?? llm.embedModelName ?? DEFAULT_EMBED_MODEL;
   const now = new Date().toISOString();
   const { maxDocsPerBatch, maxBatchBytes } = resolveEmbedOptions(options);
   const encoder = new TextEncoder();
-
-  if (options?.force) {
-    clearAllEmbeddings(db);
+  const strategy = options?.chunkStrategy ?? "regex";
+  const storedStrategy = getStoredChunkStrategy(db);
+  if (!options?.force && db.prepare(`SELECT 1 FROM content_vectors WHERE model != ? LIMIT 1`).get(model)) {
+    throw new Error(`Embedding model mismatch: existing vectors use a different model. An explicit rebuild on isolated shadow index required (or options.force: true).`);
   }
-
-  const docsToEmbed = getPendingEmbeddingDocs(db);
-  const totalDocs = docsToEmbed.length;
-  const startTime = Date.now();
+  if (!options?.force && storedStrategy && storedStrategy !== strategy) {
+    throw new Error(`Chunk strategy mismatch: index uses '${storedStrategy}', requested '${strategy}'. An explicit rebuild on isolated shadow index required (or options.force: true).`);
+  }
+  const pending = getPendingEmbeddingStats(db, model, strategy, Boolean(options?.force));
+  const totalDocs = pending.count;
+  let replacement: ReturnType<typeof createSavepoint> | undefined;
+  const reportProgress = (info: EmbedProgress) => withoutDatabaseOperation(db, () => options?.onProgress?.(info));
 
   if (totalDocs === 0) {
-    return {
-      status: 'complete',
-      docsProcessed: 0,
-      docsSelected: 0,
-      chunksAttempted: 0,
-      chunksCommitted: 0,
-      chunksEmbedded: 0,
-      chunksFailed: 0,
-      chunksSkipped: 0,
-      chunksPending: 0,
-      errors: 0,
-      durationMs: 0,
-    };
+    if (options?.force) {
+      // Empty active corpora still need a consistent explicit reset. Backend
+      // refusal must leave even inactive vectors and their metadata intact.
+      let descriptor: EmbeddingDescriptor | undefined;
+      try {
+        descriptor = await withoutDatabaseOperation(db, () => store.getEmbeddingDescriptor?.({ signal: options?.signal }));
+      } catch (error) {
+        if (options?.signal?.aborted) return emptyEmbedResult("cancelled", Date.now() - startTime);
+        throw error;
+      }
+      if (options?.signal?.aborted) return emptyEmbedResult("cancelled", Date.now() - startTime);
+      withSavepoint(db, () => {
+        clearAllEmbeddings(db);
+        if (descriptor) store.ensureVecTable(descriptor.outputDimensions, descriptor);
+        db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_chunk_strategy', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(strategy);
+      });
+    }
+    return emptyEmbedResult("complete", Date.now() - startTime);
   }
 
-  const totalBytes = docsToEmbed.reduce((sum, doc) => sum + Math.max(0, doc.bytes), 0);
+  const totalBytes = pending.bytes;
 
   // Use store's LlamaCpp or global singleton, wrapped in a session
-  const llm = getLlm(store);
   const embedModelUri = llm.embedModelName;
+
+  // These are live, commit-verified counters, not callback-local results. A
+  // progress hook or the session's final validity check can throw after an
+  // incremental batch has already committed and must not erase that outcome.
+  let chunksAttempted = 0;
+  let chunksCommitted = 0;
+  let chunksFailed = 0;
+  let chunksSkipped = 0;
+  let firstFailureReason: string | undefined;
+  let totalChunks = 0;
+  let fullyProcessedDocs = 0;
+  const outcome = (status: EmbedOutcomeStatus) => ({
+    status,
+    docsProcessed: fullyProcessedDocs,
+    docsSelected: totalDocs,
+    chunksAttempted,
+    chunksCommitted,
+    chunksEmbedded: chunksCommitted,
+    chunksFailed,
+    chunksSkipped,
+    chunksPending: Math.max(0, totalChunks - chunksCommitted - chunksFailed - chunksSkipped),
+    errors: chunksFailed,
+    firstFailureReason,
+  });
 
   try {
     const sessionResult = await withLLMSessionForLlm(llm, async (session) => {
-      let chunksAttempted = 0;
-      let chunksCommitted = 0;
-      let chunksFailed = 0;
-      let chunksSkipped = 0;
-      let firstFailureReason: string | undefined = undefined;
       let bytesProcessed = 0;
-      let totalChunks = 0;
       let vectorTableInitialized = false;
       const BATCH_SIZE = 32;
-      const batches = buildEmbeddingBatches(docsToEmbed, maxDocsPerBatch, maxBatchBytes);
-
-      const docChunksTotal = new Map<string, number>();
-      const docChunksCommitted = new Map<string, number>();
-
-      const strategy = options?.chunkStrategy ?? "regex";
+      let docsVisited = 0;
+      let stopped = false;
 
       // Prepared statements reused across batches and iterations
-      const getExpectationStmt = db.prepare(`
-        SELECT total_chunks FROM content_chunk_expectations WHERE hash = ? AND strategy = ?
-      `);
+
       const setExpectationStmt = db.prepare(`
         INSERT OR REPLACE INTO content_chunk_expectations (hash, strategy, total_chunks, created_at) VALUES (?, ?, ?, ?)
-      `);
-      const getExistingSeqsStmt = db.prepare(`
-        SELECT seq FROM content_vectors WHERE hash = ? AND model = ?
       `);
       const insertContentVectorStmt = db.prepare(`
         INSERT OR REPLACE INTO content_vectors (hash, seq, pos, model, embedded_at) VALUES (?, ?, ?, ?, ?)
@@ -1617,10 +1607,19 @@ export async function generateEmbeddings(
       };
 
       let descriptor: EmbeddingDescriptor | undefined;
-      if (typeof session.getDescriptor === "function") {
-        try {
-          descriptor = (await session.getDescriptor()) ?? undefined;
-        } catch {}
+      if (typeof llm.getDescriptor === "function" && typeof session.getDescriptor === "function") {
+        descriptor = (await withoutDatabaseOperation(db, () => session.getDescriptor!())) ?? undefined;
+      }
+      if (session.signal.aborted || options?.signal?.aborted) {
+        return { ...emptyEmbedResult("cancelled"), docsSelected: totalDocs };
+      }
+
+      // Validate the backend before resetting anything. Keep every replacement
+      // write (including vec0 DDL and metadata) inside one rollback boundary.
+      // Ordinary incremental jobs still commit each chunk batch durably.
+      if (options?.force) {
+        replacement = createSavepoint(db);
+        clearAllEmbeddings(db);
       }
 
       if (descriptor) {
@@ -1636,48 +1635,74 @@ export async function generateEmbeddings(
         }
       }
 
-      for (const batchMeta of batches) {
+      db.prepare(`INSERT INTO store_config (key, value) VALUES ('embedding_chunk_strategy', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(strategy);
+
+      // Metadata alone is not a committed embedding. A legacy/failed insert
+      // with no physical vec0 row must be inferred again, not skipped forever.
+      const getExistingSeqsStmt = db.prepare(`
+        SELECT seq, pos FROM content_vectors v WHERE hash = ? AND model = ?
+          AND ${physicalVectorExistsSql(db)}
+      `);
+
+      for (const batchMeta of pendingEmbeddingBatches(db, model, strategy, maxDocsPerBatch, maxBatchBytes)) {
         if (!session.isValid || session.signal.aborted || options?.signal?.aborted) {
           if (!firstFailureReason) {
             firstFailureReason = (session.signal.aborted || options?.signal?.aborted) ? "Embedding aborted by signal" : "Session expired";
           }
+          stopped = true;
           break;
         }
 
         const batchDocs = getEmbeddingDocsForBatch(db, batchMeta);
         const batchChunks: ChunkItem[] = [];
         const batchBytes = batchMeta.reduce((sum, doc) => sum + Math.max(0, doc.bytes), 0);
+        const docChunksTotal = new Map<string, number>();
+        const docChunksCommitted = new Map<string, number>();
+        const countedDocs = new Set<string>();
+        const markFullyProcessedDocs = () => {
+          for (const [hash, total] of docChunksTotal) {
+            if (!countedDocs.has(hash) && (docChunksCommitted.get(hash) ?? 0) >= total) {
+              countedDocs.add(hash);
+              fullyProcessedDocs++;
+            }
+          }
+        };
+        docsVisited += batchDocs.length;
 
         for (const doc of batchDocs) {
-          if (!doc.body.trim()) continue;
-
-          const existingRows = getExistingSeqsStmt.all(doc.hash, model) as { seq: number }[];
-          const existingSeqs = new Set(existingRows.map(r => r.seq));
-
-          const expRow = getExpectationStmt.get(doc.hash, strategy) as { total_chunks: number } | undefined;
-          if (expRow && expRow.total_chunks > 0 && existingSeqs.size >= expRow.total_chunks) {
-            // Avoid full-corpus re-chunk on resume: chunk count expectation already fully satisfied
-            docChunksTotal.set(doc.hash, expRow.total_chunks);
-            docChunksCommitted.set(doc.hash, existingSeqs.size);
+          if (!doc.body.trim()) {
+            setExpectationStmt.run(doc.hash, strategy, 0, now);
+            fullyProcessedDocs++;
             continue;
           }
 
+          const existingRows = getExistingSeqsStmt.all(doc.hash, model) as { seq: number; pos: number }[];
+          const existingPositions = new Map(existingRows.map(r => [r.seq, r.pos]));
+
           const title = extractTitle(doc.body, doc.path);
-          const chunks = await chunkDocumentByTokens(
+          const chunks = await withoutDatabaseOperation(db, () => chunkDocumentByTokens(
             doc.body,
             undefined, undefined, undefined,
             doc.path,
             options?.chunkStrategy,
             session.signal,
-          );
+            llm,
+          ));
+
+          if (session.signal.aborted || options?.signal?.aborted) {
+            stopped = true;
+            break;
+          }
 
           setExpectationStmt.run(doc.hash, strategy, chunks.length, now);
 
           docChunksTotal.set(doc.hash, chunks.length);
-          docChunksCommitted.set(doc.hash, existingSeqs.size);
+          docChunksCommitted.set(doc.hash, 0);
 
           for (let seq = 0; seq < chunks.length; seq++) {
-            if (!existingSeqs.has(seq)) {
+            if (existingPositions.get(seq) === chunks[seq]!.pos) {
+              docChunksCommitted.set(doc.hash, docChunksCommitted.get(doc.hash)! + 1);
+            } else {
               batchChunks.push({
                 hash: doc.hash,
                 title,
@@ -1692,10 +1717,11 @@ export async function generateEmbeddings(
         }
 
         totalChunks += batchChunks.length;
+        markFullyProcessedDocs();
 
         if (batchChunks.length === 0) {
           bytesProcessed += batchBytes;
-          options?.onProgress?.({
+          reportProgress({
             chunksEmbedded: chunksCommitted,
             totalChunks,
             bytesProcessed,
@@ -1712,7 +1738,11 @@ export async function generateEmbeddings(
           } else {
             const firstChunk = batchChunks[0]!;
             const firstText = formatDocForEmbedding(firstChunk.text, firstChunk.title, embedModelUri);
-            const firstResult = await session.embed(firstText, { model });
+            const firstResult = await withoutDatabaseOperation(db, () => session.embed(firstText, { model }));
+            if (session.signal.aborted || options?.signal?.aborted) {
+              stopped = true;
+              break;
+            }
             if (!firstResult) {
               throw new Error("Failed to get embedding dimensions from first chunk");
             }
@@ -1754,7 +1784,7 @@ export async function generateEmbeddings(
           let inferenceError: Error | null = null;
 
           try {
-            embeddings = await session.embedBatch(texts, { model });
+            embeddings = await withoutDatabaseOperation(db, () => session.embedBatch(texts, { model }));
           } catch (err) {
             inferenceError = err instanceof Error ? err : new Error(String(err));
           }
@@ -1781,7 +1811,7 @@ export async function generateEmbeddings(
                 let singleRes: EmbeddingResult | null = null;
                 try {
                   const text = formatDocForEmbedding(chunk.text, chunk.title, embedModelUri);
-                  singleRes = await session.embed(text, { model });
+                  singleRes = await withoutDatabaseOperation(db, () => session.embed(text, { model }));
                 } catch (singleErr) {
                   if (!firstFailureReason) {
                     firstFailureReason = singleErr instanceof Error ? singleErr.message : String(singleErr);
@@ -1790,13 +1820,13 @@ export async function generateEmbeddings(
 
                 if (singleRes && singleRes.embedding && singleRes.embedding.length > 0) {
                   let singleCommitted = false;
-                  db.exec("BEGIN IMMEDIATE");
+                  const transaction = createSavepoint(db);
                   try {
                     insertEmbeddingPrepared(chunk.hash, chunk.seq, chunk.pos, new Float32Array(singleRes.embedding), model, now);
-                    db.exec("COMMIT");
+                    transaction.commit();
                     singleCommitted = true;
                   } catch (txErr) {
-                    try { db.exec("ROLLBACK"); } catch {}
+                    transaction.rollback();
                     if (!firstFailureReason) {
                       firstFailureReason = `Database error: ${txErr instanceof Error ? txErr.message : String(txErr)}`;
                     }
@@ -1824,7 +1854,7 @@ export async function generateEmbeddings(
             let txFailed = false;
             let txErrorMsg = "";
 
-            db.exec("BEGIN IMMEDIATE");
+            const transaction = createSavepoint(db);
             try {
               for (let i = 0; i < chunkBatch.length; i++) {
                 const chunk = chunkBatch[i]!;
@@ -1841,11 +1871,11 @@ export async function generateEmbeddings(
                 }
                 batchChunkBytesProcessed += chunk.bytes;
               }
-              db.exec("COMMIT");
+              transaction.commit();
             } catch (txErr) {
               txFailed = true;
               txErrorMsg = txErr instanceof Error ? txErr.message : String(txErr);
-              try { db.exec("ROLLBACK"); } catch {}
+              transaction.rollback();
             }
 
             if (txFailed) {
@@ -1863,10 +1893,13 @@ export async function generateEmbeddings(
             }
           }
 
+          // Publish document completion before invoking unprivileged hooks.
+          // Only successful savepoint releases advance docChunksCommitted.
+          markFullyProcessedDocs();
           const proportionalBytes = totalBatchChunkBytes === 0
             ? batchBytes
             : Math.min(batchBytes, Math.round((batchChunkBytesProcessed / totalBatchChunkBytes) * batchBytes));
-          options?.onProgress?.({
+          reportProgress({
             chunksEmbedded: chunksCommitted,
             totalChunks,
             bytesProcessed: bytesProcessed + proportionalBytes,
@@ -1876,7 +1909,7 @@ export async function generateEmbeddings(
         }
 
         bytesProcessed += batchBytes;
-        options?.onProgress?.({
+        reportProgress({
           chunksEmbedded: chunksCommitted,
           totalChunks,
           bytesProcessed,
@@ -1885,17 +1918,10 @@ export async function generateEmbeddings(
         });
       }
 
-      let fullyProcessedDocs = 0;
-      for (const [hash, total] of docChunksTotal.entries()) {
-        if (total > 0 && (docChunksCommitted.get(hash) ?? 0) >= total) {
-          fullyProcessedDocs++;
-        }
-      }
-
       let status: EmbedOutcomeStatus;
       if (session.signal?.aborted || options?.signal?.aborted) {
         status = 'cancelled';
-      } else if (chunksFailed === 0 && chunksSkipped === 0) {
+      } else if (!stopped && docsVisited === totalDocs && chunksFailed === 0 && chunksSkipped === 0) {
         status = 'complete';
       } else if (chunksCommitted > 0) {
         status = 'partial';
@@ -1903,39 +1929,47 @@ export async function generateEmbeddings(
         status = 'failed';
       }
 
-      return {
-        status,
-        docsProcessed: fullyProcessedDocs,
-        docsSelected: totalDocs,
-        chunksAttempted,
-        chunksCommitted,
-        chunksEmbedded: chunksCommitted,
-        chunksFailed,
-        chunksSkipped,
-        chunksPending: totalChunks > 0 ? Math.max(0, totalChunks - chunksCommitted - chunksFailed - chunksSkipped) : 0,
-        errors: chunksFailed,
-        firstFailureReason,
-      };
+      return outcome(status);
     }, { maxDuration: options?.maxDuration ?? 0, name: 'generateEmbeddings', signal: options?.signal });
 
-    return {
-      ...sessionResult,
-      durationMs: Date.now() - startTime,
-    };
+    // Session cleanup is an asynchronous boundary. Cancellation may arrive
+    // after the callback chose "complete" but before replacement publication.
+    // Recheck immediately before the synchronous commit/rollback decision.
+    if (options?.signal?.aborted) {
+      sessionResult.status = 'cancelled';
+      sessionResult.firstFailureReason ??= 'Embedding aborted by signal before publication';
+    }
+    if (replacement) {
+      if (sessionResult.status === 'complete') {
+        replacement.commit();
+      } else {
+        replacement.rollback();
+        return {
+          ...sessionResult,
+          status: sessionResult.status === 'cancelled' ? 'cancelled' : 'failed',
+          docsProcessed: 0,
+          chunksCommitted: 0,
+          chunksEmbedded: 0,
+          chunksPending: sessionResult.chunksAttempted + sessionResult.chunksSkipped + sessionResult.chunksPending,
+          firstFailureReason: sessionResult.firstFailureReason ?? 'Rebuild incomplete; prior index preserved',
+          durationMs: Date.now() - startTime,
+        };
+      }
+    }
+    return { ...sessionResult, durationMs: Date.now() - startTime };
   } catch (fatalErr) {
-    const isAborted = Boolean(options?.signal?.aborted);
+    replacement?.rollback();
+    const isAborted = Boolean(options?.signal?.aborted) || fatalErr instanceof SessionReleasedError;
+    firstFailureReason ??= options?.signal?.aborted ? "Embedding aborted by signal" : (fatalErr instanceof Error ? fatalErr.message : String(fatalErr));
+    const result = outcome(isAborted ? 'cancelled' : chunksCommitted > 0 && !replacement ? 'partial' : 'failed');
     return {
-      status: isAborted ? 'cancelled' : 'failed',
-      docsProcessed: 0,
-      docsSelected: totalDocs,
-      chunksAttempted: 0,
-      chunksCommitted: 0,
-      chunksEmbedded: 0,
-      chunksFailed: 0,
-      chunksSkipped: 0,
-      chunksPending: totalDocs,
-      errors: 1,
-      firstFailureReason: isAborted ? "Embedding aborted by signal" : (fatalErr instanceof Error ? fatalErr.message : String(fatalErr)),
+      ...result,
+      ...(replacement ? {
+        docsProcessed: 0,
+        chunksCommitted: 0,
+        chunksEmbedded: 0,
+        chunksPending: chunksAttempted + chunksSkipped + result.chunksPending,
+      } : {}),
       durationMs: Date.now() - startTime,
     };
   }
@@ -1957,7 +1991,7 @@ export function createStore(dbPath?: string): Store {
     db,
     dbPath: resolvedPath,
     close: () => db.close(),
-    ensureVecTable: (dimensions: number, descriptor?: EmbeddingDescriptor) => ensureVecTableInternal(db, dimensions, descriptor),
+    ensureVecTable: (dimensions: number, descriptor?: EmbeddingDescriptor) => withSavepoint(db, () => ensureVecTableInternal(db, dimensions, descriptor)),
 
     // Index health
     getHashesNeedingEmbedding: () => getHashesNeedingEmbedding(db),
@@ -1993,11 +2027,11 @@ export function createStore(dbPath?: string): Store {
 
     // Search
     searchFTS: (query: string, limit?: number, collectionName?: string) => searchFTS(db, query, limit, collectionName),
-    searchVec: (query: string, model: string, limit?: number, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[]) => searchVec(db, query, model, limit, collectionName, session, precomputedEmbedding),
+    searchVec: (query: string, model: string, limit?: number, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[], signal?: AbortSignal) => searchVec(db, query, model, limit, collectionName, session, precomputedEmbedding, store.llm, signal),
 
     // Query expansion & reranking
-    expandQuery: (query: string, model?: string, intent?: string) => expandQuery(query, model, db, intent, store.llm),
-    rerank: (query: string, documents: { file: string; text: string }[], model?: string, intent?: string) => rerank(query, documents, model, db, intent, store.llm),
+    expandQuery: (query: string, model?: string, intent?: string, signal?: AbortSignal, cache?: QueryInferenceCache) => expandQuery(query, model, db, intent, store.llm, signal, cache),
+    rerank: (query: string, documents: { file: string; text: string }[], model?: string, intent?: string, signal?: AbortSignal, cache?: QueryInferenceCache) => rerank(query, documents, model, db, intent, store.llm, signal, cache),
 
     // Document retrieval
     findDocument: (filename: string, options?: { includeBody?: boolean }) => findDocument(db, filename, options),
@@ -2022,14 +2056,17 @@ export function createStore(dbPath?: string): Store {
     getHashesForEmbedding: () => getHashesForEmbedding(db),
     clearAllEmbeddings: () => clearAllEmbeddings(db),
     insertEmbedding: (hash: string, seq: number, pos: number, embedding: Float32Array, model: string, embeddedAt: string) => insertEmbedding(db, hash, seq, pos, embedding, model, embeddedAt),
-    getEmbeddingDescriptor: async () => {
+    getEmbeddingDescriptor: async (options) => {
+      throwIfAborted(options?.signal);
       const llmInstance = getLlm(store);
       if (typeof (llmInstance as any).getDescriptor === "function") {
-        const desc = await (llmInstance as any).getDescriptor();
+        const desc = await (llmInstance as any).getDescriptor(options);
+        throwIfAborted(options?.signal);
         return desc ?? undefined;
       }
       if (typeof (llmInstance as any).getEmbeddingDescriptor === "function") {
-        const desc = await (llmInstance as any).getEmbeddingDescriptor();
+        const desc = await (llmInstance as any).getEmbeddingDescriptor(options);
+        throwIfAborted(options?.signal);
         return desc ?? undefined;
       }
       return undefined;
@@ -2240,17 +2277,13 @@ export function getHashesNeedingEmbedding(db: Database): number {
     SELECT COUNT(DISTINCT d.hash) as count
     FROM documents d
     LEFT JOIN (
-      SELECT hash, COUNT(*) as cnt FROM content_vectors GROUP BY hash
+      SELECT hash, COUNT(*) as cnt FROM content_vectors v WHERE ${physicalVectorExistsSql(db)} GROUP BY hash
     ) v ON d.hash = v.hash
     LEFT JOIN content_chunk_expectations e ON d.hash = e.hash
     WHERE d.active = 1 AND (
       v.cnt IS NULL
       OR v.cnt = 0
       OR (e.total_chunks IS NOT NULL AND v.cnt < e.total_chunks)
-      OR (
-        EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='indexing_checkpoints')
-        AND EXISTS (SELECT 1 FROM indexing_checkpoints WHERE status IN ('in_progress', 'paused'))
-      )
     )
   `).get() as { count: number };
   return result.count;
@@ -2297,6 +2330,85 @@ export function setCachedResult(db: Database, cacheKey: string, result: string):
   db.prepare(`INSERT OR REPLACE INTO llm_cache (hash, result, created_at) VALUES (?, ?, ?)`).run(cacheKey, result, now);
   if (Math.random() < 0.01) {
     db.exec(`DELETE FROM llm_cache WHERE hash NOT IN (SELECT hash FROM llm_cache ORDER BY created_at DESC LIMIT 1000)`);
+  }
+}
+
+/**
+ * Cache publication belongs to the whole query, not to an expansion/rerank
+ * sub-step. Pass the buffer explicitly to internal calls: unrelated operations
+ * (even those started by a hook on this DB) must never inherit its writes.
+ * No SQLite transaction is held during inference. Closed buffers also fence
+ * continuations of cancelled native work from publishing abandoned results.
+ */
+class QueryInferenceCache {
+  private pending = new Map<string, string>();
+  private bytes = 0;
+  private closed = false;
+
+  constructor(readonly db: Database) {}
+
+  assertOwner(db: Database): void {
+    if (db !== this.db || this.closed) throw new SessionReleasedError("Query cache scope is closed or belongs to another database");
+    assertDatabaseAccess(db);
+  }
+
+  get(db: Database, key: string): string | null {
+    this.assertOwner(db);
+    return this.pending.get(key) ?? getCachedResult(db, key);
+  }
+
+  set(db: Database, key: string, result: string): void {
+    this.assertOwner(db);
+    const previous = this.pending.get(key);
+    if (previous !== undefined) {
+      this.bytes -= Buffer.byteLength(key, "utf8") + Buffer.byteLength(previous, "utf8");
+      this.pending.delete(key);
+    }
+    const bytes = Buffer.byteLength(key, "utf8") + Buffer.byteLength(result, "utf8");
+    // Cache retention already caps at 1000 rows; bound staged output too, using
+    // the expansion response cap (with room for JSON escaping). Oversized
+    // custom-backend output remains usable but is not retained for caching.
+    if (this.pending.size >= 1000 || this.bytes + bytes > MAX_EXPANSION_BYTES * 2) return;
+    this.pending.set(key, result);
+    this.bytes += bytes;
+  }
+
+  publish(): void {
+    this.assertOwner(this.db);
+    this.closed = true;
+    if (this.pending.size === 0) return;
+    // The only write transaction is this synchronous publication. Cleanup in
+    // setCachedResult is part of it, so a failed publication restores old rows.
+    withSavepoint(this.db, () => {
+      for (const [key, result] of this.pending) setCachedResult(this.db, key, result);
+    });
+  }
+
+  discard(): void {
+    this.closed = true;
+    this.pending.clear();
+    this.bytes = 0;
+  }
+}
+
+async function withQueryInferenceCache<T>(
+  db: Database, signal: AbortSignal | undefined,
+  work: (cache: QueryInferenceCache) => Promise<T>, parent?: QueryInferenceCache,
+): Promise<T> {
+  throwIfAborted(signal);
+  if (parent) {
+    parent.assertOwner(db);
+    // Nested internal calls cannot publish; only the successful outer query can.
+    return work(parent);
+  }
+  const cache = new QueryInferenceCache(db);
+  try {
+    const result = await work(cache);
+    throwIfAborted(signal);
+    cache.publish();
+    return result;
+  } finally {
+    cache.discard();
   }
 }
 
@@ -2571,14 +2683,18 @@ export async function chunkDocumentAsync(
   windowChars: number = CHUNK_WINDOW_CHARS,
   filepath?: string,
   chunkStrategy: ChunkStrategy = "regex",
+  signal?: AbortSignal,
 ): Promise<{ text: string; pos: number }[]> {
+  throwIfAborted(signal);
   const regexPoints = scanBreakPoints(content);
   const codeFences = findCodeFences(content);
 
   let breakPoints = regexPoints;
   if (chunkStrategy === "auto" && filepath) {
     const { getASTBreakPoints } = await import("./ast.js");
+    throwIfAborted(signal);
     const astPoints = await getASTBreakPoints(content, filepath);
+    throwIfAborted(signal);
     if (astPoints.length > 0) {
       breakPoints = mergeBreakPoints(regexPoints, astPoints);
     }
@@ -2601,9 +2717,11 @@ export async function chunkDocumentByTokens(
   windowTokens: number = CHUNK_WINDOW_TOKENS,
   filepath?: string,
   chunkStrategy: ChunkStrategy = "regex",
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  llmOverride?: LlamaCpp,
 ): Promise<{ text: string; pos: number; tokens: number }[]> {
-  const llm = getDefaultLlamaCpp();
+  throwIfAborted(signal);
+  const llm = llmOverride ?? getDefaultLlamaCpp();
 
   // Use moderate chars/token estimate (prose ~4, code ~2, mixed ~3)
   // If chunks exceed limit, they'll be re-split with actual ratio
@@ -2614,7 +2732,8 @@ export async function chunkDocumentByTokens(
 
   // Chunk in character space with conservative estimate
   // Use AST-aware chunking for the first pass when filepath/strategy provided
-  let charChunks = await chunkDocumentAsync(content, maxChars, overlapChars, windowChars, filepath, chunkStrategy);
+  let charChunks = await chunkDocumentAsync(content, maxChars, overlapChars, windowChars, filepath, chunkStrategy, signal);
+  throwIfAborted(signal);
 
   // Tokenize and split any chunks that still exceed limit.
   //
@@ -2624,14 +2743,16 @@ export async function chunkDocumentByTokens(
   // Phase 1: token counts for every char chunk. Prefer one batched MLX
   // daemon call (real BPE counts, no GGUF load); fall back to per-chunk local
   // tokenization (exact under GGUF, word-split estimate under MLX w/o daemon).
-  const mlxFn = (llm as unknown as { mlxTokenize?: (t: string[]) => Promise<number[] | null> }).mlxTokenize;
+  const mlxFn = (llm as unknown as { mlxTokenize?: (t: string[], options?: { signal?: AbortSignal }) => Promise<number[] | null> }).mlxTokenize;
   let mlxCounts: number[] | null = null;
   if (typeof mlxFn === 'function' && !signal?.aborted) {
     try {
-      mlxCounts = await mlxFn.call(llm, charChunks.map((c) => c.text));
+      mlxCounts = await mlxFn.call(llm, charChunks.map((c) => c.text), { signal });
     } catch {
+      throwIfAborted(signal);
       mlxCounts = null;
     }
+    throwIfAborted(signal);
     if (mlxCounts && mlxCounts.length !== charChunks.length) mlxCounts = null;
   }
 
@@ -2644,9 +2765,10 @@ export async function chunkDocumentByTokens(
   for (let i = 0; i < charChunks.length; i++) {
     const chunk = charChunks[i]!;
     // Respect abort signal to avoid runaway tokenization
-    if (signal?.aborted) break;
+    throwIfAborted(signal);
 
-    const count = mlxCounts ? (mlxCounts[i] ?? 0) : (await llm.tokenize(chunk.text)).length;
+    const count = mlxCounts ? (mlxCounts[i] ?? 0) : (await llm.tokenize(chunk.text, { signal })).length;
+    throwIfAborted(signal);
 
     if (count <= maxTokens) {
       expanded.push({ text: chunk.text, pos: chunk.pos, tokens: count });
@@ -2668,23 +2790,26 @@ export async function chunkDocumentByTokens(
     let subCounts: number[] | null = null;
     if (mlxCounts && typeof mlxFn === 'function') {
       try {
-        subCounts = await mlxFn.call(llm, uncounted.map((e) => e.text));
+        subCounts = await mlxFn.call(llm, uncounted.map((e) => e.text), { signal });
       } catch {
+        throwIfAborted(signal);
         subCounts = null;
       }
+      throwIfAborted(signal);
       if (subCounts && subCounts.length !== uncounted.length) subCounts = null;
     }
     for (let k = 0; k < uncounted.length; k++) {
-      if (signal?.aborted) break;
+      throwIfAborted(signal);
       uncounted[k]!.tokens = subCounts
         ? (subCounts[k] ?? 0)
-        : (await llm.tokenize(uncounted[k]!.text)).length;
+        : (await llm.tokenize(uncounted[k]!.text, { signal })).length;
+      throwIfAborted(signal);
     }
   }
 
   const results: { text: string; pos: number; tokens: number }[] = [];
   for (const item of expanded) {
-    if (signal?.aborted) break;
+    throwIfAborted(signal);
     results.push({ text: item.text, pos: item.pos, tokens: item.tokens ?? 0 });
   }
 
@@ -3000,22 +3125,12 @@ export function listCollections(db: Database): { name: string; pwd: string; glob
  * Uses collections.ts to remove from YAML config and cleans up database.
  */
 export function removeCollection(db: Database, collectionName: string): { deletedDocs: number; cleanedHashes: number } {
-  // Delete documents from database
-  const docResult = db.prepare(`DELETE FROM documents WHERE collection = ?`).run(collectionName);
-
-  // Clean up orphaned content hashes
-  const cleanupResult = db.prepare(`
-    DELETE FROM content
-    WHERE hash NOT IN (SELECT DISTINCT hash FROM documents WHERE active = 1)
-  `).run();
-
-  // Remove from store_collections
-  deleteStoreCollection(db, collectionName);
-
-  return {
-    deletedDocs: docResult.changes,
-    cleanedHashes: cleanupResult.changes
-  };
+  return withSavepoint(db, () => {
+    const docResult = db.prepare(`DELETE FROM documents WHERE collection = ?`).run(collectionName);
+    const cleanupResult = db.prepare(`DELETE FROM content WHERE NOT EXISTS (SELECT 1 FROM documents d WHERE d.hash = content.hash)`).run();
+    deleteStoreCollection(db, collectionName);
+    return { deletedDocs: docResult.changes, cleanedHashes: cleanupResult.changes };
+  });
 }
 
 /**
@@ -3023,11 +3138,6 @@ export function removeCollection(db: Database, collectionName: string): { delete
  * Updates both YAML config and database documents table.
  */
 export function renameCollection(db: Database, oldName: string, newName: string): void {
-  // Update all documents with the new collection name in database
-  db.prepare(`UPDATE documents SET collection = ? WHERE collection = ?`)
-    .run(newName, oldName);
-
-  // Rename in store_collections
   renameStoreCollection(db, oldName, newName);
 }
 
@@ -3357,27 +3467,21 @@ export function validateLexQuery(query: string): string | null {
 
 export function searchFTS(db: Database, query: string, limit: number = 20, collectionName?: string): SearchResult[] {
   const ftsQuery = buildFTS5Query(query);
-  if (!ftsQuery) return [];
+  if (!ftsQuery || limit <= 0) return [];
 
-  // Use a CTE to force FTS5 to run first, then filter by collection.
-  // Without the CTE, SQLite's query planner combines FTS5 MATCH with the
-  // collection filter in a single WHERE clause, which can cause it to
-  // abandon the FTS5 index and fall back to a full scan — turning an 8ms
-  // query into a 17-second query on large collections.
+  // Keep MATCH on FTS and constrain eligible rowids before ranking/LIMIT.
+  // A globally truncated prefix can never establish a correct scoped top-k.
   const params: (string | number)[] = [ftsQuery];
-
-  // When filtering by collection, fetch extra candidates from the FTS index
-  // since some will be filtered out. Without a collection filter we can
-  // fetch exactly the requested limit.
-  const ftsLimit = collectionName ? limit * 10 : limit;
-
-  let sql = `
-    WITH fts_matches AS (
+  const scope = collectionName !== undefined ? `AND rowid IN (SELECT id FROM documents WHERE active = 1 AND collection = ?)` : "";
+  if (collectionName !== undefined) params.push(collectionName);
+  params.push(limit);
+  const sql = `
+    WITH fts_matches AS MATERIALIZED (
       SELECT rowid, bm25(documents_fts, 1.5, 4.0, 1.0) as bm25_score
       FROM documents_fts
-      WHERE documents_fts MATCH ?
+      WHERE documents_fts MATCH ? ${scope}
       ORDER BY bm25_score ASC
-      LIMIT ${ftsLimit}
+      LIMIT ?
     )
     SELECT
       'qmd://' || d.collection || '/' || d.path as filepath,
@@ -3390,16 +3494,8 @@ export function searchFTS(db: Database, query: string, limit: number = 20, colle
     JOIN documents d ON d.id = fm.rowid
     JOIN content ON content.hash = d.hash
     WHERE d.active = 1
+    ORDER BY fm.bm25_score ASC
   `;
-
-  if (collectionName) {
-    sql += ` AND d.collection = ?`;
-    params.push(String(collectionName));
-  }
-
-  // bm25 lower is better; sort ascending.
-  sql += ` ORDER BY fm.bm25_score ASC LIMIT ?`;
-  params.push(limit);
 
   const rows = db.prepare(sql).all(...params) as { filepath: string; display_path: string; title: string; body: string; hash: string; bm25_score: number }[];
   return rows.map(row => {
@@ -3430,119 +3526,279 @@ export function searchFTS(db: Database, query: string, limit: number = 20, colle
 // Vector Search
 // =============================================================================
 
-export async function searchVec(db: Database, query: string, model: string, limit: number = 20, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[]): Promise<SearchResult[]> {
-  const tableExists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='vectors_vec'`).get();
-  if (!tableExists) return [];
+type VectorQueryIndex = Readonly<{
+  dimensions: number;
+  signature: string;
+  descriptor?: EmbeddingDescriptor;
+  spaceId?: string;
+}>;
 
-  const embedding = precomputedEmbedding ?? await getEmbedding(query, model, true, session);
-  if (!embedding) return [];
+function vectorQueryIdentityError(reason: string): Error {
+  return new Error(`Embedding space mismatch: ${reason}. Select the matching model or run 'qmd embed -f' to rebuild the index.`);
+}
 
-  // IMPORTANT: We use a two-step query approach here because sqlite-vec virtual tables
-  // hang indefinitely when combined with JOINs in the same query. Do NOT try to
-  // "optimize" this by combining into a single query with JOINs - it will break.
-  // See: https://github.com/tobi/qmd/pull/23
-
-  // Progressive overfetch: When filtering by collection, global KNN can miss matches if other
-  // collections occupy the top-k positions. We expand fetchK progressively up to a safe budget.
-  let fetchK = collectionName ? Math.max(limit * 4, 32) : limit * 3;
-  const maxCandidateBudget = Math.min(limit * 32, 2048);
-  const seen = new Map<string, { row: any; bestDist: number }>();
-
-  while (true) {
-    const vecResults = db.prepare(`
-      SELECT hash_seq, distance
-      FROM vectors_vec
-      WHERE embedding MATCH ? AND k = ?
-    `).all(new Float32Array(embedding), fetchK) as { hash_seq: string; distance: number }[];
-
-    if (vecResults.length === 0) break;
-
-    const hashSeqs = vecResults.map(r => r.hash_seq);
-    const distanceMap = new Map(vecResults.map(r => [r.hash_seq, r.distance]));
-
-    const placeholders = hashSeqs.map(() => '?').join(',');
-    let docSql = `
-      SELECT
-        cv.hash || '_' || cv.seq as hash_seq,
-        cv.hash,
-        cv.pos,
-        'qmd://' || d.collection || '/' || d.path as filepath,
-        d.collection || '/' || d.path as display_path,
-        d.title,
-        content.doc as body
-      FROM content_vectors cv
-      JOIN documents d ON d.hash = cv.hash AND d.active = 1
-      JOIN content ON content.hash = d.hash
-      WHERE cv.hash || '_' || cv.seq IN (${placeholders})
-    `;
-    const params: string[] = [...hashSeqs];
-
-    if (collectionName) {
-      docSql += ` AND d.collection = ?`;
-      params.push(collectionName);
+/** Read-only: query validation must never adopt, repair or recreate an index. */
+function readVectorQueryIndex(db: Database): VectorQueryIndex | undefined {
+  const table = db.prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='vectors_vec'`).get() as { sql: string } | undefined;
+  if (!table) return undefined;
+  const dimensions = Number(table.sql.match(/float\[(\d+)\]/)?.[1]);
+  if (!Number.isSafeInteger(dimensions) || dimensions <= 0) throw vectorQueryIdentityError("unrecognized vector index schema");
+  const rows = db.prepare(`SELECT key, value FROM store_config WHERE key IN (
+    'embedding_space_id', 'embedding_model', 'embedding_descriptor',
+    'embedding_chunk_strategy', 'embedding_index_fingerprint'
+  ) ORDER BY key`).all() as { key: string; value: string }[];
+  const config = new Map(rows.map(row => [row.key, row.value]));
+  const spaceId = config.get("embedding_space_id");
+  const model = config.get("embedding_model");
+  const serialized = config.get("embedding_descriptor");
+  let descriptor: EmbeddingDescriptor | undefined;
+  if (spaceId !== undefined || model !== undefined || serialized !== undefined) {
+    if (!spaceId || !model || !serialized) throw vectorQueryIdentityError("incomplete stored embedding identity metadata");
+    try {
+      descriptor = validateEmbeddingDescriptor(JSON.parse(serialized));
+    } catch {
+      throw vectorQueryIdentityError("invalid stored embedding descriptor");
     }
-
-    const docRows = db.prepare(docSql).all(...params) as {
-      hash_seq: string; hash: string; pos: number; filepath: string;
-      display_path: string; title: string; body: string;
-    }[];
-
-    for (const row of docRows) {
-      const distance = distanceMap.get(row.hash_seq) ?? 1;
-      const existing = seen.get(row.filepath);
-      if (!existing || distance < existing.bestDist) {
-        seen.set(row.filepath, { row, bestDist: distance });
-      }
+    // Compare the persisted ID itself, not only a newly computed pair of IDs:
+    // pre-maxTokens fingerprints deliberately require an explicit rebuild.
+    if (spaceId !== computeEmbeddingSpaceId(descriptor)) throw vectorQueryIdentityError("stored embedding fingerprint is invalid or uses a legacy policy");
+    if (model !== descriptor.model || dimensions !== descriptor.outputDimensions) {
+      throw vectorQueryIdentityError("stored embedding descriptor disagrees with the index model or dimensions");
     }
-
-    // Stop if:
-    // 1. Not filtering by collection (single pass is sufficient)
-    // 2. We have found at least `limit` unique document results
-    // 3. We've reached the maximum candidate budget cap
-    // 4. The vector table has fewer results than our requested fetchK
-    if (!collectionName || seen.size >= limit || fetchK >= maxCandidateBudget || vecResults.length < fetchK) {
-      break;
-    }
-
-    fetchK = Math.min(fetchK * 4, maxCandidateBudget);
   }
+  // DDL can replace an index with identical metadata while inference awaits.
+  const schemaVersion = db.prepare("PRAGMA schema_version").get() as { schema_version: number };
+  return Object.freeze({ dimensions, descriptor, spaceId, signature: JSON.stringify([table.sql, schemaVersion.schema_version, rows]) });
+}
 
-  return Array.from(seen.values())
-    .sort((a, b) => a.bestDist - b.bestDist)
-    .slice(0, limit)
-    .map(({ row, bestDist }) => {
-      const collection = row.filepath.split('//')[1]?.split('/')[0] || "";
-      const score = Math.max(0, 1 - bestDist / 2);
-      return {
-        filepath: row.filepath,
-        displayPath: row.display_path,
-        title: row.title,
-        hash: row.hash,
-        docid: getDocid(row.hash),
-        collectionName: collection,
-        modifiedAt: "",  // Not available in vec query
-        bodyLength: row.body.length,
-        body: row.body,
-        context: getContextForFile(db, row.filepath),
-        score,
-        source: "vec" as const,
-        chunkPos: row.pos,
-      };
-    });
+function assertVectorQueryIndexUnchanged(db: Database, index: VectorQueryIndex): void {
+  // Every DB read also rechecks the connection's async ownership guard. Never
+  // use a query's old preflight to enter an in-progress force job's savepoint.
+  if (readVectorQueryIndex(db)?.signature !== index.signature) {
+    throw vectorQueryIdentityError("vector index identity changed while the query was awaiting inference; retry the query");
+  }
+}
+
+async function servingQueryDescriptor(
+  index: VectorQueryIndex, session: ILLMSession, llm: LlamaCpp, signal?: AbortSignal,
+): Promise<EmbeddingDescriptor | undefined> {
+  throwIfAborted(signal);
+  throwIfAborted(session.signal);
+  const raw = typeof session.getDescriptor === "function"
+    ? await session.getDescriptor({ signal })
+    : typeof llm.getDescriptor === "function" ? await llm.getDescriptor({ signal }) : undefined;
+  throwIfAborted(signal);
+  throwIfAborted(session.signal);
+  const descriptor = raw == null ? undefined : validateEmbeddingDescriptor(raw);
+  if (index.descriptor) {
+    if (!descriptor) throw vectorQueryIdentityError("serving embedding descriptor is unavailable for an identity-bearing index");
+    const servingSpaceId = computeEmbeddingSpaceId(descriptor);
+    if (servingSpaceId !== index.spaceId) {
+      throw vectorQueryIdentityError(`index uses '${index.descriptor.model}' (${index.spaceId}), but the serving runtime uses '${descriptor.model}' (${servingSpaceId})`);
+    }
+  } else if (descriptor?.backend === "mlx" || (llm as unknown as { embedBackend?: string }).embedBackend === "mlx") {
+    throw vectorQueryIdentityError("an MLX query requires a proven stored embedding descriptor and fingerprint");
+  }
+  // Only entirely identity-less legacy GGUF stores (including old duck-typed
+  // test backends) retain the historical descriptor-less behavior. Any stored
+  // identity evidence above requires an actual serving descriptor; never
+  // reinterpret an MLX descriptor as a legacy GGUF index.
+  return descriptor;
+}
+
+// Only query embeddings produced by the gate carry this private provenance.
+// Reuse across collection lookups does not need additional daemon requests.
+const verifiedQueryEmbeddings = new WeakMap<number[], Readonly<{
+  db: Database; index: VectorQueryIndex; session: ILLMSession;
+}>>();
+
+/** One identity negotiation per embedding call/batch, not per vec0 lookup. */
+async function embedVectorQueries(
+  db: Database, queries: string[], model: string, session: ILLMSession, llm: LlamaCpp,
+  batch: boolean, signal?: AbortSignal,
+): Promise<(number[] | null)[]> {
+  const index = readVectorQueryIndex(db);
+  if (!index) throw vectorQueryIdentityError("vector index disappeared before query embedding");
+  const descriptor = await servingQueryDescriptor(index, session, llm, signal);
+  assertVectorQueryIndexUnchanged(db, index);
+  const texts = queries.map(query => formatQueryForEmbedding(query, descriptor?.model ?? llm.embedModelName ?? model));
+  // LlamaCpp's MLX transport pins this same descriptor and validates it on the
+  // actual response (including binary responses), not just on /descriptor.
+  // Keep it explicit for identity-aware custom backends too.
+  const embedOptions = { model: descriptor?.model ?? model, isQuery: true, signal, expectedDescriptor: descriptor };
+  const results = batch
+    ? await session.embedBatch(texts, embedOptions)
+    : [await session.embed(texts[0]!, embedOptions)];
+  throwIfAborted(signal);
+  throwIfAborted(session.signal);
+  assertVectorQueryIndexUnchanged(db, index);
+  if (results.length !== queries.length) throw vectorQueryIdentityError("query embedding response cardinality changed");
+  // A fresh postflight detects descriptor changes in custom backends too.
+  // The production transport additionally closes the A→B→A response race.
+  const after = await servingQueryDescriptor(index, session, llm, signal);
+  assertVectorQueryIndexUnchanged(db, index);
+  if (Boolean(descriptor) !== Boolean(after)) throw vectorQueryIdentityError("serving embedding descriptor changed during inference");
+  if (descriptor && after) assertEmbeddingCompatibility(descriptor, after, "query response");
+  return results.map(result => {
+    if (!result) {
+      if (descriptor) throw vectorQueryIdentityError("no verified query embedding was returned");
+      return null; // Historical descriptor-less GGUF failure behavior.
+    }
+    if (descriptor) {
+      if (result.model !== descriptor.model) throw vectorQueryIdentityError("query response model differs from the pinned descriptor");
+      const actual = (result as EmbeddingResult & { descriptor?: unknown }).descriptor;
+      if (actual !== undefined) assertEmbeddingCompatibility(descriptor, validateEmbeddingDescriptor(actual), "query response");
+    }
+    const embedding = [...result.embedding];
+    assertQueryEmbeddingDimensions(embedding, index);
+    Object.freeze(embedding);
+    verifiedQueryEmbeddings.set(embedding, Object.freeze({ db, index, session }));
+    return embedding;
+  });
+}
+
+function assertQueryEmbeddingDimensions(embedding: number[], index: VectorQueryIndex): void {
+  if (embedding.length !== index.dimensions || embedding.some(value => !Number.isFinite(value))) {
+    throw vectorQueryIdentityError("query embedding dimensions or values disagree with the vector index");
+  }
+}
+
+export async function searchVec(db: Database, query: string, model: string, limit: number = 20, collectionName?: string, session?: ILLMSession, precomputedEmbedding?: number[], llmOverride?: LlamaCpp, signal?: AbortSignal): Promise<SearchResult[]> {
+  throwIfAborted(signal);
+  throwIfAborted(session?.signal);
+  if (limit <= 0) return [];
+  const index = readVectorQueryIndex(db);
+  if (!index) return [];
+
+  if (precomputedEmbedding === undefined && !session) {
+    const llm = llmOverride ?? getDefaultLlamaCpp();
+    return withLLMSessionForLlm(llm, active => searchVec(db, query, model, limit, collectionName, active, undefined, llm, active.signal),
+      { signal, maxDuration: 0, name: "vector search" });
+  }
+  const embedding = precomputedEmbedding ?? (await embedVectorQueries(db, [query], model, session!, llmOverride ?? getDefaultLlamaCpp(), false, signal))[0];
+  throwIfAborted(signal);
+  throwIfAborted(session?.signal);
+  // SAVEPOINT is DEFERRED, takes no reserved writer lock, and nests inside
+  // caller-owned transactions. Keep this callback entirely synchronous: the
+  // final identity checks, every KNN round, and all document/context reads must
+  // see one SQLite snapshot even if a WAL writer commits on another connection.
+  // Inference has already settled; never hold this scope across an await.
+  return withSavepoint(db, () => {
+    assertVectorQueryIndexUnchanged(db, index);
+    if (!embedding) return [];
+    const verified = verifiedQueryEmbeddings.get(embedding);
+    if (verified) {
+      if (verified.db !== db || verified.session !== session) throw vectorQueryIdentityError("precomputed query embedding belongs to a different index or session");
+      assertVectorQueryIndexUnchanged(db, verified.index);
+    }
+    // Explicit raw precomputed arrays remain a low-level, caller-owned-space API:
+    // there was no serving inference to authenticate. Stored metadata integrity
+    // and dimensions are still mandatory. Public SDK searches never use this
+    // escape hatch; internal batches carry the private verified provenance above.
+    assertQueryEmbeddingDimensions(embedding, index);
+
+    // IMPORTANT: We use a two-step query approach here because sqlite-vec virtual tables
+    // hang indefinitely when combined with JOINs in the same query. Do NOT try to
+    // "optimize" this by combining into a single query with JOINs - it will break.
+    // See: https://github.com/tobi/qmd/pull/23
+
+    // Progressive overfetch: When filtering by collection, global KNN can miss matches if other
+    // collections occupy the top-k positions. We expand fetchK progressively up to a safe budget.
+    let fetchK = collectionName ? Math.max(limit * 4, 32) : limit * 3;
+    const maxCandidateBudget = Math.max(fetchK, Math.min(limit * 32, 2048));
+    const seen = new Map<string, { row: any; bestDist: number }>();
+
+    while (true) {
+      const vecResults = db.prepare(`
+        SELECT hash_seq, distance
+        FROM vectors_vec
+        WHERE embedding MATCH ? AND k = ?
+      `).all(new Float32Array(embedding), fetchK) as { hash_seq: string; distance: number }[];
+
+      if (vecResults.length === 0) break;
+
+      const distanceMap = new Map(vecResults.map(r => [r.hash_seq, r.distance]));
+      // Decode only the final separator (content hashes may contain underscores
+      // in legacy/test stores). Equality on (hash, seq) uses the primary key;
+      // concatenating those indexed columns in WHERE scans content_vectors.
+      const requested = vecResults.map(r => {
+        const separator = r.hash_seq.lastIndexOf('_');
+        return { hash: r.hash_seq.slice(0, separator), seq: Number(r.hash_seq.slice(separator + 1)), key: r.hash_seq };
+      });
+      const placeholders = requested.map(() => '(?, ?, ?)').join(',');
+      let docSql = `
+        WITH requested(hash, seq, hash_seq) AS (VALUES ${placeholders})
+        SELECT
+          requested.hash_seq,
+          cv.hash,
+          cv.pos,
+          'qmd://' || d.collection || '/' || d.path as filepath,
+          d.collection || '/' || d.path as display_path,
+          d.title,
+          content.doc as body
+        FROM requested
+        JOIN content_vectors cv ON cv.hash = requested.hash AND cv.seq = requested.seq
+        JOIN documents d ON d.hash = cv.hash AND d.active = 1
+        JOIN content ON content.hash = d.hash
+        WHERE 1 = 1
+      `;
+      const params: (string | number)[] = requested.flatMap(r => [r.hash, r.seq, r.key]);
+
+      if (collectionName) {
+        docSql += ` AND d.collection = ?`;
+        params.push(collectionName);
+      }
+
+      const docRows = db.prepare(docSql).all(...params) as {
+        hash_seq: string; hash: string; pos: number; filepath: string;
+        display_path: string; title: string; body: string;
+      }[];
+
+      for (const row of docRows) {
+        const distance = distanceMap.get(row.hash_seq) ?? 1;
+        const existing = seen.get(row.filepath);
+        if (!existing || distance < existing.bestDist) {
+          seen.set(row.filepath, { row, bestDist: distance });
+        }
+      }
+
+      // Stop if:
+      // Duplicate chunks can starve unique documents even without a scope.
+      if (seen.size >= limit || fetchK >= maxCandidateBudget || vecResults.length < fetchK) {
+        break;
+      }
+
+      fetchK = Math.min(fetchK * 4, maxCandidateBudget);
+    }
+
+    return Array.from(seen.values())
+      .sort((a, b) => a.bestDist - b.bestDist)
+      .slice(0, limit)
+      .map(({ row, bestDist }) => {
+        const collection = row.filepath.split('//')[1]?.split('/')[0] || "";
+        const score = Math.max(0, 1 - bestDist / 2);
+        return {
+          filepath: row.filepath,
+          displayPath: row.display_path,
+          title: row.title,
+          hash: row.hash,
+          docid: getDocid(row.hash),
+          collectionName: collection,
+          modifiedAt: "",  // Not available in vec query
+          bodyLength: row.body.length,
+          body: row.body,
+          context: getContextForFile(db, row.filepath),
+          score,
+          source: "vec" as const,
+          chunkPos: row.pos,
+        };
+      });
+  });
 }
 
 // =============================================================================
 // Embeddings
 // =============================================================================
-
-async function getEmbedding(text: string, model: string, isQuery: boolean, session?: ILLMSession, llmOverride?: LlamaCpp): Promise<number[] | null> {
-  // Format text using the appropriate prompt template
-  const formattedText = isQuery ? formatQueryForEmbedding(text, model) : formatDocForEmbedding(text, undefined, model);
-  const result = session
-    ? await session.embed(formattedText, { model, isQuery })
-    : await (llmOverride ?? getDefaultLlamaCpp()).embed(formattedText, { model, isQuery });
-  return result?.embedding || null;
-}
 
 /**
  * Get all unique content hashes that need embeddings (from active documents).
@@ -3556,17 +3812,13 @@ export function getHashesForEmbedding(db: Database): { hash: string; body: strin
     FROM documents d
     JOIN content c ON d.hash = c.hash
     LEFT JOIN (
-      SELECT hash, COUNT(*) as cnt FROM content_vectors GROUP BY hash
+      SELECT hash, COUNT(*) as cnt FROM content_vectors v WHERE ${physicalVectorExistsSql(db)} GROUP BY hash
     ) v ON d.hash = v.hash
     LEFT JOIN content_chunk_expectations e ON d.hash = e.hash
     WHERE d.active = 1 AND (
       v.cnt IS NULL
       OR v.cnt = 0
       OR (e.total_chunks IS NOT NULL AND v.cnt < e.total_chunks)
-      OR (
-        EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='indexing_checkpoints')
-        AND EXISTS (SELECT 1 FROM indexing_checkpoints WHERE status IN ('in_progress', 'paused'))
-      )
     )
     GROUP BY d.hash
   `).all() as { hash: string; body: string; path: string }[];
@@ -3579,25 +3831,21 @@ export function getHashesForEmbedding(db: Database): { hash: string; body: strin
 export function clearAllEmbeddings(db: Database): void {
   ensureExpectationTable(db);
   ensureCheckpointTable(db);
-  db.exec("BEGIN IMMEDIATE");
-  try {
+  withSavepoint(db, () => {
     db.exec(`DELETE FROM content_vectors`);
     db.exec(`DROP TABLE IF EXISTS vectors_vec`);
     db.exec(`DELETE FROM content_chunk_expectations`);
     db.exec(`DELETE FROM indexing_checkpoints`);
-    db.exec("COMMIT");
-  } catch (err) {
-    try { db.exec("ROLLBACK"); } catch {}
-    throw err;
-  }
+    db.exec(`DELETE FROM store_config WHERE key IN ('embedding_space_id', 'embedding_model', 'embedding_descriptor', 'embedding_chunk_strategy', 'embedding_index_fingerprint')`);
+  });
 }
 
 /**
  * Insert a single embedding into both content_vectors and vectors_vec tables.
  * The hash_seq key is formatted as "hash_seq" for the vectors_vec table.
  *
- * content_vectors is inserted first so that getHashesForEmbedding (which checks
- * only content_vectors) won't re-select the hash on a crash between the two inserts.
+ * Metadata and the vector are committed atomically; failed inserts must remain
+ * pending rather than falsely marking a document complete.
  *
  * vectors_vec uses DELETE + INSERT instead of INSERT OR REPLACE because sqlite-vec's
  * vec0 virtual tables silently ignore the OR REPLACE conflict clause.
@@ -3612,52 +3860,67 @@ export function insertEmbedding(
   embeddedAt: string
 ): void {
   const hashSeq = `${hash}_${seq}`;
-
-  // Insert content_vectors first — crash-safe ordering (see getHashesForEmbedding)
-  const insertContentVectorStmt = db.prepare(`INSERT OR REPLACE INTO content_vectors (hash, seq, pos, model, embedded_at) VALUES (?, ?, ?, ?, ?)`);
-  insertContentVectorStmt.run(hash, seq, pos, model, embeddedAt);
-
-  // vec0 virtual tables don't support OR REPLACE — use DELETE + INSERT
-  const deleteVecStmt = db.prepare(`DELETE FROM vectors_vec WHERE hash_seq = ?`);
-  const insertVecStmt = db.prepare(`INSERT INTO vectors_vec (hash_seq, embedding) VALUES (?, ?)`);
-  deleteVecStmt.run(hashSeq);
-  insertVecStmt.run(hashSeq, embedding);
+  withSavepoint(db, () => {
+    db.prepare(`INSERT OR REPLACE INTO content_vectors (hash, seq, pos, model, embedded_at) VALUES (?, ?, ?, ?, ?)`).run(hash, seq, pos, model, embeddedAt);
+    // vec0 ignores OR REPLACE; the delete must roll back if insertion fails.
+    db.prepare(`DELETE FROM vectors_vec WHERE hash_seq = ?`).run(hashSeq);
+    db.prepare(`INSERT INTO vectors_vec (hash_seq, embedding) VALUES (?, ?)`).run(hashSeq, embedding);
+  });
 }
 
 // =============================================================================
 // Query expansion
 // =============================================================================
 
-/**
- * Resolve the effective model identity for llm_cache keys.
- *
- * When the instance will serve the op from the MLX daemon, the key uses the
- * daemon's reported model (`mlx:<model>`); otherwise it uses the requested
- * (GGUF) model string. This keeps MLX and GGUF results in separate cache
- * namespaces so toggling the opt-in flags (or swapping daemon models) can
- * never serve cross-backend scores. Tolerant of mock LLMs that lack
- * `mlxModelFor` (test doubles) — those fall back to the requested model.
- */
-async function predictedModelFor(llm: LlamaCpp, op: 'rerank' | 'expand', fallback: string): Promise<string> {
-  try {
-    const fn = (llm as unknown as { mlxModelFor?: (op: 'rerank' | 'expand') => Promise<string | null> }).mlxModelFor;
-    if (typeof fn === 'function') {
-      const m = await fn.call(llm, op);
-      if (m) return m;
-    }
-  } catch {
-    // Daemon probe failed — the call itself will take the GGUF fallback,
-    // so the GGUF key is the correct namespace.
+function inferenceCacheKey(op: 'expandQuery' | 'rerank', body: object): string {
+  // Older rows were keyed by a prediction, even when inference fell back to a
+  // different backend. They cannot be authenticated after the fact.
+  return getCacheKey(op, { cacheVersion: 2, ...body });
+}
+
+/** Cache reads require a fresh identity; an unavailable probe means bypass. */
+async function predictedModelFor(llm: LlamaCpp, op: 'rerank' | 'expand', fallback: string, session: ILLMSession): Promise<string | null> {
+  const signal = session.signal;
+  throwIfAborted(signal);
+  const backend = llm as LlamaCpp & { getCacheIdentity?: (op: 'rerank' | 'expand', options?: { signal?: AbortSignal }) => Promise<string | null> };
+  if (typeof backend.getCacheIdentity === 'function') {
+    try {
+      const identity = await session.getCacheIdentity!(op, { signal });
+      throwIfAborted(signal);
+      return identity;
+    } catch { throwIfAborted(signal); return null; }
   }
+  // Never label a production backend with a caller/default model alias. Older
+  // simple test doubles can keep using their requested-model namespace.
+  if (llm instanceof LlamaCpp) return null;
+  try {
+    const fn = (llm as unknown as { mlxModelFor?: (op: 'rerank' | 'expand', options?: { signal?: AbortSignal }) => Promise<string | null> }).mlxModelFor;
+    if (typeof fn === 'function') {
+      const identity = await abortable(fn.call(llm, op, { signal }), signal);
+      throwIfAborted(signal);
+      return identity ?? fallback;
+    }
+  } catch { throwIfAborted(signal); return null; }
   return fallback;
 }
 
-export async function expandQuery(query: string, model: string = DEFAULT_QUERY_MODEL, db: Database, intent?: string, llmOverride?: LlamaCpp): Promise<ExpandedQuery[]> {
+export async function expandQuery(query: string, model: string = DEFAULT_QUERY_MODEL, db: Database, intent?: string, llmOverride?: LlamaCpp, signal?: AbortSignal, cache?: QueryInferenceCache): Promise<ExpandedQuery[]> {
+  throwIfAborted(signal);
+  return withQueryInferenceCache(db, signal, active =>
+    withLLMSessionForLlm(llmOverride ?? getDefaultLlamaCpp(), session =>
+      expandQueryInternal(query, model, db, intent, llmOverride, session, active),
+    { signal, maxDuration: 0, name: "query expansion" }), cache);
+}
+
+async function expandQueryInternal(query: string, model: string, db: Database, intent: string | undefined, llmOverride: LlamaCpp | undefined, session: ILLMSession, cache: QueryInferenceCache): Promise<ExpandedQuery[]> {
+  const signal = session.signal;
+  throwIfAborted(signal);
   const llm = llmOverride ?? getDefaultLlamaCpp();
-  const effectiveModel = await predictedModelFor(llm, 'expand', model);
+  const effectiveModel = await predictedModelFor(llm, 'expand', model, session);
+  throwIfAborted(signal);
   // Check cache first — stored as JSON preserving types
-  const cacheKey = getCacheKey("expandQuery", { query, model: effectiveModel, ...(intent && { intent }) });
-  const cached = getCachedResult(db, cacheKey);
+  const cacheKey = inferenceCacheKey("expandQuery", { query, model: effectiveModel, ...(intent && { intent }) });
+  const cached = effectiveModel ? cache.get(db, cacheKey) : null;
   if (cached) {
     try {
       const parsed = JSON.parse(cached) as any[];
@@ -3672,8 +3935,14 @@ export async function expandQuery(query: string, model: string = DEFAULT_QUERY_M
     }
   }
 
-  // Note: LlamaCpp uses hardcoded model, model parameter is ignored
-  const results = await llm.expandQuery(query, { intent });
+  const backend = llm as LlamaCpp & {
+    expandQueryWithIdentity?: (query: string, opts: { intent?: string; signal?: AbortSignal }) => Promise<{ queries: { type: 'lex' | 'vec' | 'hyde'; text: string }[]; model: string }>;
+  };
+  const identified = typeof backend.expandQueryWithIdentity === 'function'
+    ? await session.expandQueryWithIdentity!(query, { intent, signal })
+    : { queries: await session.expandQuery(query, { intent, signal }), model: llm instanceof LlamaCpp ? null : effectiveModel };
+  throwIfAborted(signal);
+  const results = identified.queries;
 
   // Map Queryable[] → ExpandedQuery[] (same shape, decoupled from llm.ts internals).
   // Filter out entries that duplicate the original query text.
@@ -3681,8 +3950,9 @@ export async function expandQuery(query: string, model: string = DEFAULT_QUERY_M
     .filter(r => r.text !== query)
     .map(r => ({ type: r.type, query: r.text }));
 
-  if (expanded.length > 0) {
-    setCachedResult(db, cacheKey, JSON.stringify(expanded));
+  if (expanded.length > 0 && identified.model) {
+    const actualKey = inferenceCacheKey("expandQuery", { query, model: identified.model, ...(intent && { intent }) });
+    cache.set(db, actualKey, JSON.stringify(expanded));
   }
 
   return expanded;
@@ -3692,52 +3962,63 @@ export async function expandQuery(query: string, model: string = DEFAULT_QUERY_M
 // Reranking
 // =============================================================================
 
-export async function rerank(query: string, documents: { file: string; text: string }[], model: string = DEFAULT_RERANK_MODEL, db: Database, intent?: string, llmOverride?: LlamaCpp): Promise<{ file: string; score: number }[]> {
-  // Prepend intent to rerank query so the reranker scores with domain context
+export async function rerank(query: string, documents: { file: string; text: string }[], model: string = DEFAULT_RERANK_MODEL, db: Database, intent?: string, llmOverride?: LlamaCpp, signal?: AbortSignal, cache?: QueryInferenceCache): Promise<{ file: string; score: number }[]> {
+  throwIfAborted(signal);
+  return withQueryInferenceCache(db, signal, active =>
+    withLLMSessionForLlm(llmOverride ?? getDefaultLlamaCpp(), session =>
+      rerankInternal(query, documents, model, db, intent, llmOverride, session, active),
+    { signal, maxDuration: 0, name: "reranking" }), cache);
+}
+
+async function rerankInternal(query: string, documents: { file: string; text: string }[], model: string, db: Database, intent: string | undefined, llmOverride: LlamaCpp | undefined, session: ILLMSession, cache: QueryInferenceCache): Promise<{ file: string; score: number }[]> {
+  const signal = session.signal;
+  throwIfAborted(signal);
+  if (documents.length === 0) return [];
   const rerankQuery = intent ? `${intent}\n\n${query}` : query;
-
-  // Namespace the cache by serving backend: MLX scores and GGUF scores for
-  // the same chunk must never share a key (see predictedModelFor).
   const llm = llmOverride ?? getDefaultLlamaCpp();
-  const effectiveModel = await predictedModelFor(llm, 'rerank', model);
+  const predictedModel = await predictedModelFor(llm, 'rerank', model, session);
+  throwIfAborted(signal);
+  const scores = new Map<string, number>();
+  const uniqueDocs = new Map<string, RerankDocument>(documents.map(doc => [doc.text, doc]));
+  const uncached: RerankDocument[] = [];
+  for (const doc of uniqueDocs.values()) {
+    const key = inferenceCacheKey("rerank", { query: rerankQuery, model: predictedModel, chunk: doc.text });
+    const cached = predictedModel ? cache.get(db, key) : null;
+    const score = cached !== null ? Number(cached) : NaN;
+    if (Number.isFinite(score)) scores.set(doc.text, score);
+    else uncached.push(doc);
+  }
 
-  const cachedResults: Map<string, number> = new Map();
-  const uncachedDocsByChunk: Map<string, RerankDocument> = new Map();
+  if (uncached.length > 0) {
+    let scoredDocs = uncached;
+    let result = await session.rerank(rerankQuery, scoredDocs, { model, signal });
+    throwIfAborted(signal);
+    const identityOf = (response: typeof result): string | null => response.model || (llm instanceof LlamaCpp ? null : predictedModel);
+    let actualModel = identityOf(result);
+    // A daemon can fail or switch models after the read-side probe. Never
+    // blend cached MLX scores with new GGUF (or different-model) scores.
+    if (scores.size > 0 && actualModel !== predictedModel) {
+      scores.clear();
+      scoredDocs = [...uniqueDocs.values()];
+      result = await session.rerank(rerankQuery, scoredDocs, { model, signal });
+      throwIfAborted(signal);
+      actualModel = identityOf(result);
+    }
 
-  // Check cache for each document
-  // Cache key includes chunk text — different queries can select different chunks
-  // from the same file, and the reranker score depends on which chunk was sent.
-  // File path is excluded from the new cache key because the reranker score
-  // depends on the chunk content, not where it came from.
-  for (const doc of documents) {
-    const cacheKey = getCacheKey("rerank", { query: rerankQuery, model: effectiveModel, chunk: doc.text });
-    const legacyCacheKey = getCacheKey("rerank", { query, file: doc.file, model: effectiveModel, chunk: doc.text });
-    const cached = getCachedResult(db, cacheKey) ?? getCachedResult(db, legacyCacheKey);
-    if (cached !== null) {
-      cachedResults.set(doc.text, parseFloat(cached));
-    } else {
-      uncachedDocsByChunk.set(doc.text, { file: doc.file, text: doc.text });
+    const textByFile = new Map(scoredDocs.map(doc => [doc.file, doc.text]));
+    for (const row of result.results) {
+      const indexed = Number.isInteger(row.index) ? scoredDocs[row.index] : undefined;
+      const chunk = indexed?.text ?? textByFile.get(row.file);
+      if (chunk === undefined || !Number.isFinite(row.score)) continue;
+      if (actualModel) {
+        const key = inferenceCacheKey("rerank", { query: rerankQuery, model: actualModel, chunk });
+        cache.set(db, key, String(row.score));
+      }
+      scores.set(chunk, row.score);
     }
   }
 
-  // Rerank uncached documents using LlamaCpp
-  if (uncachedDocsByChunk.size > 0) {
-    const uncachedDocs = [...uncachedDocsByChunk.values()];
-    const rerankResult = await llm.rerank(rerankQuery, uncachedDocs, { model });
-
-    // Cache results by chunk text so identical chunks across files are scored once.
-    const textByFile = new Map(uncachedDocs.map(d => [d.file, d.text]));
-    for (const result of rerankResult.results) {
-      const chunk = textByFile.get(result.file) || "";
-      const cacheKey = getCacheKey("rerank", { query: rerankQuery, model: effectiveModel, chunk });
-      setCachedResult(db, cacheKey, result.score.toString());
-      cachedResults.set(chunk, result.score);
-    }
-  }
-
-  // Return all results sorted by score
-  return documents
-    .map(doc => ({ file: doc.file, score: cachedResults.get(doc.text) || 0 }))
+  return documents.map(doc => ({ file: doc.file, score: scores.get(doc.text) ?? 0 }))
     .sort((a, b) => b.score - a.score);
 }
 
@@ -4359,7 +4640,9 @@ export interface SearchHooks {
 }
 
 export interface HybridQueryOptions {
+  signal?: AbortSignal;
   collection?: string;
+  collections?: string[];   // OR scopes, combined/deduplicated with collection
   limit?: number;           // default 10
   minScore?: number;        // default 0
   candidateLimit?: number;  // default RERANK_CANDIDATE_LIMIT
@@ -4407,10 +4690,27 @@ export async function hybridQuery(
   query: string,
   options?: HybridQueryOptions
 ): Promise<HybridQueryResult[]> {
+  throwIfAborted(options?.signal);
+  return withQueryInferenceCache(store.db, options?.signal, cache =>
+    withLLMSessionForLlm(getLlm(store), session => hybridQueryInternal(store, query, options, session, cache),
+      { signal: options?.signal, maxDuration: 0, name: "hybrid search" }));
+}
+
+async function hybridQueryInternal(store: Store, query: string, options: HybridQueryOptions | undefined, session: ILLMSession, cache: QueryInferenceCache): Promise<HybridQueryResult[]> {
+  const signal = session.signal;
+  throwIfAborted(signal);
   const limit = options?.limit ?? 10;
   const minScore = options?.minScore ?? 0;
   const candidateLimit = options?.candidateLimit ?? RERANK_CANDIDATE_LIMIT;
-  const collection = options?.collection;
+  const collections = [...new Set([
+    ...(options?.collection !== undefined ? [options.collection] : []),
+    ...(options?.collections ?? []),
+  ])];
+  const collectionList = collections.length > 0 ? collections : [undefined];
+  const mergeScopedResults = (results: SearchResult[]) => [...new Map(
+    results.sort((a, b) => b.score - a.score).map(r => [r.filepath, r]),
+  ).values()].slice(0, 20);
+  const scopedFTS = (text: string) => mergeScopedResults(collectionList.flatMap(coll => store.searchFTS(text, 20, coll)));
   const explain = options?.explain ?? false;
   const intent = options?.intent;
   const skipRerank = options?.skipRerank ?? false;
@@ -4428,7 +4728,7 @@ export async function hybridQuery(
   // match may not be what the caller wants (e.g. "performance" with intent
   // "web page load times" should NOT shortcut to a sports-performance doc).
   // Pass collection directly into FTS query (filter at SQL level, not post-hoc)
-  const initialFts = store.searchFTS(query, 20, collection);
+  const initialFts = scopedFTS(query);
   const topScore = initialFts[0]?.score ?? 0;
   const secondScore = initialFts[1]?.score ?? 0;
   const hasStrongSignal = !intent && initialFts.length > 0
@@ -4439,12 +4739,15 @@ export async function hybridQuery(
 
   // Step 2: Expand query (or skip if strong signal)
   hooks?.onExpandStart?.();
+  throwIfAborted(signal);
   const expandStart = Date.now();
   const expanded = hasStrongSignal
     ? []
-    : await store.expandQuery(query, undefined, intent);
+    : await store.expandQuery(query, undefined, intent, signal, cache);
+  throwIfAborted(signal);
 
   hooks?.onExpand?.(query, expanded, Date.now() - expandStart);
+  throwIfAborted(signal);
 
   // Seed with initial FTS results (avoid re-running original query FTS)
   if (initialFts.length > 0) {
@@ -4465,7 +4768,7 @@ export async function hybridQuery(
   // 3a: Run FTS for all lex expansions right away (no LLM needed)
   for (const q of expanded) {
     if (q.type === 'lex') {
-      const ftsResults = store.searchFTS(q.query, 20, collection);
+      const ftsResults = scopedFTS(q.query);
       if (ftsResults.length > 0) {
         for (const r of ftsResults) docidMap.set(r.filepath, r.docid);
         rankedLists.push(ftsResults.map(r => ({
@@ -4490,21 +4793,28 @@ export async function hybridQuery(
 
     // Batch embed all vector queries in a single call
     const llm = getLlm(store);
-    const textsToEmbed = vecQueries.map(q => formatQueryForEmbedding(q.text, llm.embedModelName));
-    hooks?.onEmbedStart?.(textsToEmbed.length);
+    hooks?.onEmbedStart?.(vecQueries.length);
+    throwIfAborted(signal);
     const embedStart = Date.now();
-    const embeddings = await llm.embedBatch(textsToEmbed);
+    const embeddings = await embedVectorQueries(store.db, vecQueries.map(q => q.text), llm.embedModelName ?? DEFAULT_EMBED_MODEL, session, llm, true, signal);
+    throwIfAborted(signal);
     hooks?.onEmbedDone?.(Date.now() - embedStart);
+    throwIfAborted(signal);
 
     // Run sqlite-vec lookups with pre-computed embeddings
     for (let i = 0; i < vecQueries.length; i++) {
-      const embedding = embeddings[i]?.embedding;
+      const embedding = embeddings[i];
       if (!embedding) continue;
 
-      const vecResults = await store.searchVec(
-        vecQueries[i]!.text, DEFAULT_EMBED_MODEL, 20, collection,
-        undefined, embedding
-      );
+      const scopedResults: SearchResult[] = [];
+      for (const coll of collectionList) {
+        scopedResults.push(...await store.searchVec(
+          vecQueries[i]!.text, DEFAULT_EMBED_MODEL, 20, coll,
+          session, embedding, signal,
+        ));
+        throwIfAborted(signal);
+      }
+      const vecResults = mergeScopedResults(scopedResults);
       if (vecResults.length > 0) {
         for (const r of vecResults) docidMap.set(r.filepath, r.docid);
         rankedLists.push(vecResults.map(r => ({
@@ -4536,7 +4846,8 @@ export async function hybridQuery(
 
   const chunkStrategy = options?.chunkStrategy;
   for (const cand of candidates) {
-    const chunks = await chunkDocumentAsync(cand.body, undefined, undefined, undefined, cand.file, chunkStrategy);
+    const chunks = await chunkDocumentAsync(cand.body, undefined, undefined, undefined, cand.file, chunkStrategy, signal);
+    throwIfAborted(signal);
     if (chunks.length === 0) continue;
 
     // Pick chunk with most keyword overlap (fallback: first chunk)
@@ -4615,9 +4926,12 @@ export async function hybridQuery(
   }
 
   hooks?.onRerankStart?.(chunksToRerank.length);
+  throwIfAborted(signal);
   const rerankStart = Date.now();
-  const reranked = await store.rerank(query, chunksToRerank, undefined, intent);
+  const reranked = await store.rerank(query, chunksToRerank, undefined, intent, signal, cache);
+  throwIfAborted(signal);
   hooks?.onRerankDone?.(Date.now() - rerankStart);
+  throwIfAborted(signal);
 
   // Step 7: Blend RRF position score with reranker score
   // Position-aware weights: top retrieval results get more protection from reranker disagreement
@@ -4684,6 +4998,7 @@ export async function hybridQuery(
 }
 
 export interface VectorSearchOptions {
+  signal?: AbortSignal;
   collection?: string;
   limit?: number;           // default 10
   minScore?: number;        // default 0.3
@@ -4715,6 +5030,15 @@ export async function vectorSearchQuery(
   query: string,
   options?: VectorSearchOptions
 ): Promise<VectorSearchResult[]> {
+  throwIfAborted(options?.signal);
+  return withQueryInferenceCache(store.db, options?.signal, cache =>
+    withLLMSessionForLlm(getLlm(store), session => vectorSearchQueryInternal(store, query, options, session, cache),
+      { signal: options?.signal, maxDuration: 0, name: "expanded vector search" }));
+}
+
+async function vectorSearchQueryInternal(store: Store, query: string, options: VectorSearchOptions | undefined, session: ILLMSession, cache: QueryInferenceCache): Promise<VectorSearchResult[]> {
+  const signal = session.signal;
+  throwIfAborted(signal);
   const limit = options?.limit ?? 10;
   const minScore = options?.minScore ?? 0.3;
   const collection = options?.collection;
@@ -4727,15 +5051,18 @@ export async function vectorSearchQuery(
 
   // Expand query — filter to vec/hyde only (lex queries target FTS, not vector)
   const expandStart = Date.now();
-  const allExpanded = await store.expandQuery(query, undefined, intent);
+  const allExpanded = await store.expandQuery(query, undefined, intent, signal, cache);
+  throwIfAborted(signal);
   const vecExpanded = allExpanded.filter(q => q.type !== 'lex');
   options?.hooks?.onExpand?.(query, vecExpanded, Date.now() - expandStart);
+  throwIfAborted(signal);
 
   // Run original + vec/hyde expanded through vector, sequentially — concurrent embed() hangs
   const queryTexts = [query, ...vecExpanded.map(q => q.query)];
   const allResults = new Map<string, VectorSearchResult>();
   for (const q of queryTexts) {
-    const vecResults = await store.searchVec(q, DEFAULT_EMBED_MODEL, limit, collection);
+    const vecResults = await store.searchVec(q, DEFAULT_EMBED_MODEL, limit, collection, session, undefined, signal);
+    throwIfAborted(signal);
     for (const r of vecResults) {
       const existing = allResults.get(r.filepath);
       if (!existing || r.score > existing.score) {
@@ -4767,6 +5094,7 @@ export async function vectorSearchQuery(
  * Matches the format used in QMD training data.
  */
 export interface StructuredSearchOptions {
+  signal?: AbortSignal;
   collections?: string[];   // Filter to specific collections (OR match)
   limit?: number;           // default 10
   minScore?: number;        // default 0
@@ -4803,6 +5131,15 @@ export async function structuredSearch(
   searches: ExpandedQuery[],
   options?: StructuredSearchOptions
 ): Promise<HybridQueryResult[]> {
+  throwIfAborted(options?.signal);
+  return withQueryInferenceCache(store.db, options?.signal, cache =>
+    withLLMSessionForLlm(getLlm(store), session => structuredSearchInternal(store, searches, options, session, cache),
+      { signal: options?.signal, maxDuration: 0, name: "structured search" }));
+}
+
+async function structuredSearchInternal(store: Store, searches: ExpandedQuery[], options: StructuredSearchOptions | undefined, session: ILLMSession, cache: QueryInferenceCache): Promise<HybridQueryResult[]> {
+  const signal = session.signal;
+  throwIfAborted(signal);
   const limit = options?.limit ?? 10;
   const minScore = options?.minScore ?? 0;
   const candidateLimit = options?.candidateLimit ?? RERANK_CANDIDATE_LIMIT;
@@ -4842,7 +5179,7 @@ export async function structuredSearch(
   ).get();
 
   // Helper to run search across collections (or all if undefined)
-  const collectionList = collections ?? [undefined]; // undefined = all collections
+  const collectionList = collections ? [...new Set(collections)] : [undefined]; // undefined = all collections
 
   // Step 1: Run FTS for all lex searches (sync, instant)
   for (const search of searches) {
@@ -4873,21 +5210,24 @@ export async function structuredSearch(
     );
     if (vecSearches.length > 0) {
       const llm = getLlm(store);
-      const textsToEmbed = vecSearches.map(s => formatQueryForEmbedding(s.query, llm.embedModelName));
-      hooks?.onEmbedStart?.(textsToEmbed.length);
+      hooks?.onEmbedStart?.(vecSearches.length);
+      throwIfAborted(signal);
       const embedStart = Date.now();
-      const embeddings = await llm.embedBatch(textsToEmbed);
+      const embeddings = await embedVectorQueries(store.db, vecSearches.map(s => s.query), llm.embedModelName ?? DEFAULT_EMBED_MODEL, session, llm, true, signal);
+      throwIfAborted(signal);
       hooks?.onEmbedDone?.(Date.now() - embedStart);
+      throwIfAborted(signal);
 
       for (let i = 0; i < vecSearches.length; i++) {
-        const embedding = embeddings[i]?.embedding;
+        const embedding = embeddings[i];
         if (!embedding) continue;
 
         for (const coll of collectionList) {
           const vecResults = await store.searchVec(
             vecSearches[i]!.query, DEFAULT_EMBED_MODEL, 20, coll,
-            undefined, embedding
+            session, embedding, signal,
           );
+          throwIfAborted(signal);
           if (vecResults.length > 0) {
             for (const r of vecResults) docidMap.set(r.filepath, r.docid);
             rankedLists.push(vecResults.map(r => ({
@@ -4916,6 +5256,7 @@ export async function structuredSearch(
   if (candidates.length === 0) return [];
 
   hooks?.onExpand?.("", [], 0); // Signal no expansion (pre-expanded)
+  throwIfAborted(signal);
 
   // Step 4: Chunk documents, pick best chunk per doc for reranking
   // Use first lex query as the "query" for keyword matching, or first vec if no lex
@@ -4928,7 +5269,8 @@ export async function structuredSearch(
   const ssChunkStrategy = options?.chunkStrategy;
 
   for (const cand of candidates) {
-    const chunks = await chunkDocumentAsync(cand.body, undefined, undefined, undefined, cand.file, ssChunkStrategy);
+    const chunks = await chunkDocumentAsync(cand.body, undefined, undefined, undefined, cand.file, ssChunkStrategy, signal);
+    throwIfAborted(signal);
     if (chunks.length === 0) continue;
 
     // Pick chunk with most keyword overlap
@@ -5007,9 +5349,12 @@ export async function structuredSearch(
   }
 
   hooks?.onRerankStart?.(chunksToRerank.length);
+  throwIfAborted(signal);
   const rerankStart2 = Date.now();
-  const reranked = await store.rerank(primaryQuery, chunksToRerank, undefined, intent);
+  const reranked = await store.rerank(primaryQuery, chunksToRerank, undefined, intent, signal, cache);
+  throwIfAborted(signal);
   hooks?.onRerankDone?.(Date.now() - rerankStart2);
+  throwIfAborted(signal);
 
   // Step 6: Blend RRF position score with reranker score
   const candidateMap = new Map(candidates.map(c => [c.file, {

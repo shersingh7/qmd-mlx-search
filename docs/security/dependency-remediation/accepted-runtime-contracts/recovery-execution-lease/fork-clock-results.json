@@ -1,0 +1,44 @@
+[
+  {
+    "parentPid": 13210,
+    "before": 0.040640541,
+    "after": 0.042065583,
+    "child": {
+      "childPid": 13211,
+      "value": 0.04170575
+    },
+    "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+    "version": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]",
+    "clock": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)",
+    "sameInheritedEpoch": true,
+    "iteration": 0
+  },
+  {
+    "parentPid": 13212,
+    "before": 0.044007625,
+    "after": 0.045488916,
+    "child": {
+      "childPid": 13214,
+      "value": 0.045087625
+    },
+    "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+    "version": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]",
+    "clock": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)",
+    "sameInheritedEpoch": true,
+    "iteration": 1
+  },
+  {
+    "parentPid": 13215,
+    "before": 0.043839375,
+    "after": 0.045370375,
+    "child": {
+      "childPid": 13216,
+      "value": 0.044745625
+    },
+    "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+    "version": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]",
+    "clock": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)",
+    "sameInheritedEpoch": true,
+    "iteration": 2
+  }
+]

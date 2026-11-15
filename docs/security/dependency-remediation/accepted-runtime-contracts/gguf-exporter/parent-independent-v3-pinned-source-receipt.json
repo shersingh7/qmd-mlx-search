@@ -1,0 +1,39 @@
+{
+  "mode": "independent-v3-pinned",
+  "status": 0,
+  "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "python_executable": "/Users/shersingh/.hermes/cache/scratch/qmd-frozen-project-install-nszwouqz/environment/bin/python",
+  "pip_present": false,
+  "versions": {
+    "torch": "2.15.0",
+    "transformers": "5.22.2",
+    "accelerate": "1.15.0+qmd.2",
+    "gguf": "0.19.0",
+    "numpy": "2.5.4",
+    "sentencepiece": "0.2.3",
+    "protobuf": "7.36.2"
+  },
+  "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_reader.py",
+  "reader_sha256": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+  "helper_path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/mirror/finetune/gguf_toolchain.py",
+  "helper_sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+  "compiled_sources": {
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/mirror/finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/constants.py": "b070f76b0585b7cd9065ab9d67bfa033b9c3e4af81216695efc56cc5cbd0059c",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/lazy.py": "dbcf8b7376284ab2d920103657cc52c1c62e93fec3856a08a1ae638394e6a7c1",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/quants.py": "f896726209ba8c91afd083dd87031c2d39dc4ef6a78e8a6c12763eeb8ed6ff84",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/tensor_mapping.py": "065375aa115b9a5a6940f2a3e1d23cc5cc6a640a7281f0b677af023ed47f7584",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/vocab.py": "fce519b621f873213973c8186b010d7c41d6bb22134e411c8d47bf3a3e63f807",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/utility.py": "da920e2c62166ec9f30e407e9fb35ec29fda671310ffbf0f8ce856b62f1c70d7",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/gguf-py/gguf/metadata.py": "7cedac3b8457271a3f58e5531a7e6958fdecb9ea072f7895ba5d7f6693c9db29",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/conversion/__init__.py": "0cf965b31162ab3a479a48bfc0dd4f8f0e5dbb5c14d7f2238855a74a8b8d407c",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/conversion/base.py": "648fdc0fadb1a605c642c6de9e90e03ea8eede0622595a975e5e3b934ba26330",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-toolchain-qtll2q_e/upstream/conversion/qwen.py": "2f62b62fb1527c7693a8e178ca39fae6f04578dd089fb609725e1fce99b5c0cf",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/mirror/finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/mirror/finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-replay-l1m14s11/mirror/finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5"
+  }
+}

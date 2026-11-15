@@ -1,0 +1,9 @@
+{"all_closed": true, "cut": 5, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": 7, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": 8, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": 15, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": 16, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": 23, "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": "metadata", "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": "tensor-info", "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}
+{"all_closed": true, "cut": "last-tensor", "fd_after": 12, "fd_before": 12, "gc_disabled": true, "mapping_count": 17, "repeats": 17, "retained": 17}

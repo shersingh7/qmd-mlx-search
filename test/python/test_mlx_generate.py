@@ -93,19 +93,22 @@ def test_generate_cancellation_mid_decode():
         def __init__(self, text):
             self.text = text
 
+    seen_chunks = []
+
     def slow_stream(*args, **kwargs):
         for i in range(10):
             time.sleep(0.05)
             if i == 2:
                 cancel_event.set()
+            seen_chunks.append(i)
             yield StreamResp(f"tok_{i} ")
 
     with patch("scripts.qmd_mlx.generate.mlx_lm.stream_generate", side_effect=slow_stream):
-        t0 = time.monotonic()
         with pytest.raises(RequestCancelledError):
             a._generate_sync("hello", max_tokens=10, temperature=0.0, cancel_event=cancel_event)
-        elapsed = time.monotonic() - t0
-        assert elapsed < 0.35
+        # Assert the cooperative boundary, not a host-load-dependent sleep timer.
+        assert seen_chunks == [0, 1, 2]
+        assert a.total_requests == 0
 
 
 def test_generate_deadline_mid_decode():

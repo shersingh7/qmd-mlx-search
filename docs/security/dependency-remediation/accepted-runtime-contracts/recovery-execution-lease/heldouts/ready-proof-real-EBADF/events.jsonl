@@ -1,0 +1,12 @@
+{"kind": "source", "pid": 12540, "owner": 12540, "at": 0.084882291, "sha256": "52a00fb5b891752f8d53f8d8b08fae3ce467d392461b6524f762376ade344bbf", "executable": "/Library/Developer/CommandLineTools/usr/bin/python3", "python": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]", "monotonic": "namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)"}
+{"kind": "prepared-anchor", "pid": 12540, "owner": 12540, "at": 0.085293083, "preparedAt": 0.085286666, "deadline": 0.285286666}
+{"kind": "control-read", "pid": 12540, "owner": 12540, "at": 0.08577, "dataHex": "533230300a", "preExec": false}
+{"kind": "fork-parent", "pid": 12540, "owner": 12540, "at": 0.086754875, "child": 12541, "inheritedDeadline": 0.285286666}
+{"kind": "setpgid", "pid": 12540, "owner": 12540, "at": 0.087176875, "target": 12541, "group": 12541, "currentGroup": 12540, "currentSession": 12540}
+{"kind": "fork-child", "pid": 12541, "owner": 12540, "at": 0.086823416}
+{"kind": "proof-fd-closed", "pid": 12540, "owner": 12540, "at": 0.087294125}
+{"kind": "setpgid", "pid": 12541, "owner": 12540, "at": 0.087470875, "target": 0, "group": 0, "currentGroup": 12541, "currentSession": 12540}
+{"kind": "refusal-enter", "pid": 12541, "owner": 12540, "at": 0.087587291, "target": 12540, "currentGroup": 12541, "currentSession": 12540}
+{"kind": "setpgid", "pid": 12541, "owner": 12540, "at": 0.087707791, "target": 0, "group": 12540, "currentGroup": 12540, "currentSession": 12540}
+{"kind": "group-signal", "pid": 12541, "owner": 12540, "at": 0.08777775, "group": 12540, "signal": 15, "pinned": true, "currentSession": 12540, "termBlocked": true}
+{"kind": "group-signal", "pid": 12541, "owner": 12540, "at": 0.087888875, "group": 12540, "signal": 19, "pinned": true, "currentSession": 12540, "termBlocked": true}

@@ -1,0 +1,1424 @@
+{
+  "spec": "PASS",
+  "quality": "PASS",
+  "delegation": "deleg_659bea40",
+  "emptyVersionFinding": "CLOSED_ON_EXACT_CANDIDATE",
+  "priorUvFinding": "PRESERVED_CLOSED",
+  "reviewResultSha256": "9288f5a27dc1a8bbbf9bad1d53182ae0944fb80afdee8183de8abf1f8e741c2f",
+  "patchSha256": "3408d9b639ea3b0cadb1d3522fa0b04b304acacdc00f7d05ce0ab5da5bf9113c",
+  "sourceCounts": {
+    "added": 1,
+    "baseline": 42,
+    "candidate": 43,
+    "changed_existing": 1,
+    "unchanged_existing_candidate": 41
+  },
+  "authenticatedManifestEntries": {
+    "regularFiles": 737,
+    "literalSymlinkTargets": 18,
+    "total": 755
+  },
+  "reviewExecution": {
+    "green": {
+      "errors": 0,
+      "failures": 0,
+      "groups": {
+        "test_probe_contract_green": 4,
+        "test_qualify_empty_version": 27,
+        "test_repair_heldouts": 59
+      },
+      "returncode": 0,
+      "seconds": 29.683537625009194,
+      "skipped": 0,
+      "tests": 90
+    },
+    "new_27_case_name_multiset_retained": true,
+    "original_162_suite_freshly_rerun": false,
+    "real_full_exit": 0,
+    "real_full_receipt": {
+      "locked_python_converter_training_gpu_cloud_qualified": false,
+      "native_only": false,
+      "outputs": [
+        "qmd-c-ok",
+        "qmd-cxx-ok"
+      ],
+      "platform": "Darwin/arm64",
+      "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "python": "3.12.13",
+      "scope": "native CPU C/C++ prerequisites only",
+      "status": "pass",
+      "versions": {
+        "c++": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+        "cc": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+        "git": "git version 2.53.0",
+        "make": "GNU Make 3.81",
+        "uv": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)"
+      }
+    },
+    "real_multiline_quiet_build_exit": 0,
+    "real_multiline_quiet_receipt_equal": true,
+    "red": {
+      "errors": 0,
+      "failures": 27,
+      "returncode": 1,
+      "seconds": 8.672635208000429,
+      "skipped": 0,
+      "tests": 27
+    },
+    "retained_85_heldouts_and_7_mutations_freshly_rerun": false,
+    "spec_stage": "PASS"
+  },
+  "pairIntegrated": true,
+  "integration": {
+    "paths": {
+      "finetune/tools/qualify_gguf_image.py": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "finetune/tests/test_qualify_empty_version.py": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8"
+    },
+    "reviewResultSha256": "9288f5a27dc1a8bbbf9bad1d53182ae0944fb80afdee8183de8abf1f8e741c2f",
+    "preimages": "Both live targets were absent, not72ef preimages; installed complete independently reviewed final files only",
+    "otherLauncherHelperOrDependencyFilesModified": false,
+    "nativeImageQualified": false
+  },
+  "parentLivePytest": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "parentHostControls": {
+    "fullHost": {
+      "locked_python_converter_training_gpu_cloud_qualified": false,
+      "native_only": false,
+      "outputs": [
+        "qmd-c-ok",
+        "qmd-cxx-ok"
+      ],
+      "platform": "Darwin/arm64",
+      "probe_sha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "python": "3.12.13",
+      "scope": "native CPU C/C++ prerequisites only",
+      "status": "pass",
+      "versions": {
+        "c++": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+        "cc": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+        "git": "git version 2.53.0",
+        "make": "GNU Make 3.81",
+        "uv": "uv 0.11.18 (e32666915 2026-06-01 aarch64-apple-darwin)"
+      }
+    },
+    "multilineQuietReceiptIdentical": true,
+    "realNativeInvocations": 2,
+    "cleanupVerified": true,
+    "linuxImageExecution": false,
+    "noModelConverterTrainingGpuCloudQualification": true
+  },
+  "linuxImageExecution": false,
+  "fullLauncherHelperDependencyIntegration": false,
+  "wholeWorkspaceAndExactHeadCi": false,
+  "editorDiagnostic": "Pyright reported unresolved pytest import; the explicit test venv actually executed the integrated27cases and2parent checks successfully. No global install or editor configuration was changed.",
+  "remainingGates": [
+    "Compose separately accepted launcher/helper/dependency graph without wholesale mirror restoration",
+    "Accept and integrate premerge image workflow",
+    "Actual native Linuxamd64 image execution and exact source/digest/cleanup readback",
+    "Canonical full workspace build/tests/package/exact-head CI and default-branch alert verification"
+  ],
+  "scope": "Two reviewed final files added to previously absent live paths. Independent90cases exclude preserved-but-unrerun162launcher cases and older85+7controls; parent29livecases include27negativeCLIcases plus2parent tests. Host C/C++ is not Linuximage/converter/model/training/GPU/cloud qualification.",
+  "archivedFiles": {
+    "parent/evidence/integrated-real-full.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/evidence/integrated-real-full.json",
+      "sourceSha256": "7dc5f3458c3adab5c6d08fdceb7aa7d50528a2ed1225881aa804c49f94092295",
+      "archivedSha256": "7dc5f3458c3adab5c6d08fdceb7aa7d50528a2ed1225881aa804c49f94092295",
+      "encoding": "identity"
+    },
+    "parent/evidence/integrated-real-multiline-quiet.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/evidence/integrated-real-multiline-quiet.json",
+      "sourceSha256": "19282e15f451efe8a41d9522e641d7ef130cd733aa1c2de646aabed918f68530",
+      "archivedSha256": "19282e15f451efe8a41d9522e641d7ef130cd733aa1c2de646aabed918f68530",
+      "encoding": "identity"
+    },
+    "parent/evidence/real-decorated-tools.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/evidence/real-decorated-tools.log",
+      "sourceSha256": "d8289eda0b4fd88c674b96847e4ec9ee525902eea8a248205e1b78bae267ad64",
+      "archivedSha256": "d2d0c817790824b3c2c95f51abfbdfac51cd569023c5270230a705ee083c078b",
+      "encoding": "gzip"
+    },
+    "parent/host-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/host-summary.json",
+      "sourceSha256": "3294891773c513a7820549b4d23deed6a6a3187fcd79aa9acd79da44451e782b",
+      "archivedSha256": "3294891773c513a7820549b4d23deed6a6a3187fcd79aa9acd79da44451e782b",
+      "encoding": "identity"
+    },
+    "parent/integrated-tests.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/integrated-tests.xml",
+      "sourceSha256": "86f012202c7a438889789569bf89af2d905a0d7a2670921437ac996568e75906",
+      "archivedSha256": "86f012202c7a438889789569bf89af2d905a0d7a2670921437ac996568e75906",
+      "encoding": "identity"
+    },
+    "parent/source-binding.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/source-binding.json",
+      "sourceSha256": "b9c0dd3c193f54ea1520378e48567274ddb9a816ff9d05972893d22795723b80",
+      "archivedSha256": "b9c0dd3c193f54ea1520378e48567274ddb9a816ff9d05972893d22795723b80",
+      "encoding": "identity"
+    },
+    "parent/test_parent_empty_integration.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-empty-integration-95ey5nij/test_parent_empty_integration.py",
+      "sourceSha256": "db41b0234234efd29faf63d4e906ee5ca13a23cbb5f881f0e339e785722dca1e",
+      "archivedSha256": "db41b0234234efd29faf63d4e906ee5ca13a23cbb5f881f0e339e785722dca1e",
+      "encoding": "identity"
+    },
+    "review/REPORT.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/REPORT.md",
+      "sourceSha256": "b1f778b080b3c07ff1076c382724d12b2077ea3ebdd6605efd5bc2c824109830",
+      "archivedSha256": "b1f778b080b3c07ff1076c382724d12b2077ea3ebdd6605efd5bc2c824109830",
+      "encoding": "identity"
+    },
+    "review/artifact-manifest.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/artifact-manifest.json",
+      "sourceSha256": "2d8d04d19456dcd3b34c2183a7b45c4804f2244dd68cc03c3541fd477a835203",
+      "archivedSha256": "1bb19562892900e756fc93acaa47c8b20088b30d2e9eedb011ba5aa095c649e1",
+      "encoding": "gzip"
+    },
+    "review/baseline/docs/security/dependency-remediation/patched-dependencies.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/docs/security/dependency-remediation/patched-dependencies.json",
+      "sourceSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "archivedSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/LOCKED-JOBS.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/LOCKED-JOBS.md",
+      "sourceSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "archivedSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/convert_gguf.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/convert_gguf.py",
+      "sourceSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "archivedSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/convert_gguf.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/convert_gguf.py.lock",
+      "sourceSha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "archivedSha256": "910c1682de5f01b51d786e030daeca66ce763766befccdaa0621a699bee25ffb",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/convert_onnx.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/convert_onnx.py",
+      "sourceSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "archivedSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/convert_onnx.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/convert_onnx.py.lock",
+      "sourceSha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "archivedSha256": "9a1e6d0db0f5f71562207f189c0235f01bd60c3b8a621308f3e6d713323e5215",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/dataset/analyze_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/analyze_data.py",
+      "sourceSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "archivedSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/analyze_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/analyze_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/prepare_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/prepare_data.py",
+      "sourceSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "archivedSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/prepare_data.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/prepare_data.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/dataset/prepare_data_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/prepare_data_lfm2.py",
+      "sourceSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "archivedSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/prepare_data_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/prepare_data_lfm2.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/dataset/schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/schema.py",
+      "sourceSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "archivedSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/score_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/score_data.py",
+      "sourceSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "archivedSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/score_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/score_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/validate_schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/validate_schema.py",
+      "sourceSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "archivedSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/dataset/validate_schema.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/dataset/validate_schema.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/eval.py",
+      "sourceSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "archivedSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/eval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/eval_retrieval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/eval_retrieval.py",
+      "sourceSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "archivedSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/eval_retrieval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/eval_retrieval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/evals/queries.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/evals/queries.txt",
+      "sourceSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "archivedSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/experiments/grpo/grpo.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/experiments/grpo/grpo.py",
+      "sourceSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "archivedSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/experiments/grpo/grpo.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/experiments/grpo/grpo.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/experiments/lfm2/sft_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/experiments/lfm2/sft_lfm2.py",
+      "sourceSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "archivedSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/experiments/lfm2/sft_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/gguf_toolchain.py",
+      "sourceSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "archivedSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/jobs/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/jobs/eval.py",
+      "sourceSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "archivedSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/jobs/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/jobs/eval.py.lock",
+      "sourceSha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "archivedSha256": "019d02fd42691f70e0861a0fa2926a31c9f41aab84e61835be354d687db6caea",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/jobs/eval_common.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/jobs/eval_common.py",
+      "sourceSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "archivedSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/jobs/sft.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/jobs/sft.py",
+      "sourceSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "archivedSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/jobs/sft.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/jobs/sft.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/pyproject.toml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/pyproject.toml",
+      "sourceSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "archivedSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/reward.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/reward.py",
+      "sourceSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "archivedSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/tests/test_locked_job_submission.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/tests/test_locked_job_submission.py",
+      "sourceSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "archivedSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/tools/qualify_gguf_image.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/tools/qualify_gguf_image.py",
+      "sourceSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "archivedSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/tools/submit_locked_job.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/tools/submit_locked_job.py",
+      "sourceSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "archivedSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/train.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/train.py",
+      "sourceSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "archivedSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/train.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/train.py.lock",
+      "sourceSha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "archivedSha256": "964f2d6da1616eaf300705bf1c3a0e2dc112942748e8d59b5d3656995306d65b",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/train_unsloth.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/train_unsloth.py",
+      "sourceSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "archivedSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "encoding": "identity"
+    },
+    "review/baseline/finetune/train_unsloth.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/train_unsloth.py.lock",
+      "sourceSha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "archivedSha256": "65010e2ad1598f91dea62db06f3bfb9eb47fc4ba74018f48da7b7a7d1712fd46",
+      "encoding": "gzip"
+    },
+    "review/baseline/finetune/uv.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/baseline/finetune/uv.lock",
+      "sourceSha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "archivedSha256": "ef9e92af07bfeb2d9d70675577c3ac8d32f5fb1f26dc2782a01e1ec147c5426d",
+      "encoding": "gzip"
+    },
+    "review/evidence/contract-bare-control.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/contract-bare-control.json",
+      "sourceSha256": "7cc8525ed6787934343ecd175e25d0e82e9769d0a990cdd212ca6c67a3bc87a5",
+      "archivedSha256": "7cc8525ed6787934343ecd175e25d0e82e9769d0a990cdd212ca6c67a3bc87a5",
+      "encoding": "identity"
+    },
+    "review/evidence/contract-upstream-with-commit.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/contract-upstream-with-commit.json",
+      "sourceSha256": "98c0628141118db958abfac62b36c4420a346ee07d91e2abc0d126151739c199",
+      "archivedSha256": "98c0628141118db958abfac62b36c4420a346ee07d91e2abc0d126151739c199",
+      "encoding": "identity"
+    },
+    "review/evidence/contract-upstream-without-commit.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/contract-upstream-without-commit.json",
+      "sourceSha256": "d21294c98e9c97cf38257cf81f8dec8878c1f1def9d67e41674a78aaac49e23d",
+      "archivedSha256": "d21294c98e9c97cf38257cf81f8dec8878c1f1def9d67e41674a78aaac49e23d",
+      "encoding": "identity"
+    },
+    "review/evidence/contract-wrong-release-control.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/contract-wrong-release-control.json",
+      "sourceSha256": "8ba77c1ff1649f81eaddfa88ce1e948f74ad7ff7b1751334d6f9f8e6e4465cda",
+      "archivedSha256": "8ba77c1ff1649f81eaddfa88ce1e948f74ad7ff7b1751334d6f9f8e6e4465cda",
+      "encoding": "identity"
+    },
+    "review/evidence/execution-summary.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/execution-summary.json",
+      "sourceSha256": "9f7c61a7707367d4c7ce633c420370de65bba0de1c21064edb25fa32cfd68292",
+      "archivedSha256": "9f7c61a7707367d4c7ce633c420370de65bba0de1c21064edb25fa32cfd68292",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-arguments-00c525a400.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-arguments-00c525a400.json",
+      "sourceSha256": "3ceb918f7068dfb5804d5fafb8e366d7bed666fff07e93d6f6c075d898bcb534",
+      "archivedSha256": "3ceb918f7068dfb5804d5fafb8e366d7bed666fff07e93d6f6c075d898bcb534",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-arguments-2bb55919b3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-arguments-2bb55919b3.json",
+      "sourceSha256": "3a58a96d2048e1ed693c69e6a2d76f2b7320d59c66dbf2a89c72a00793988fba",
+      "archivedSha256": "3a58a96d2048e1ed693c69e6a2d76f2b7320d59c66dbf2a89c72a00793988fba",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-arguments-39520c22d3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-arguments-39520c22d3.json",
+      "sourceSha256": "770462d893fc52e528e43ef916146ae21192b8aac43a93756c4e0779036c9cac",
+      "archivedSha256": "770462d893fc52e528e43ef916146ae21192b8aac43a93756c4e0779036c9cac",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-arguments-bac5f55e3f.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-arguments-bac5f55e3f.json",
+      "sourceSha256": "a83fb773108f88f1fb3337636fe7d3a529386a5e048bd2c06574bb498e8b7d16",
+      "archivedSha256": "a83fb773108f88f1fb3337636fe7d3a529386a5e048bd2c06574bb498e8b7d16",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-full-missing-uv.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-full-missing-uv.json",
+      "sourceSha256": "115fd940f2dd332b90400d5da129b0545784f301266164db3ec1250335f4bb8b",
+      "archivedSha256": "115fd940f2dd332b90400d5da129b0545784f301266164db3ec1250335f4bb8b",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-0.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-0.json",
+      "sourceSha256": "69f2e4baa41ad75e419333b949431794f3fec55b4ffc66b219db659ab3aaaf39",
+      "archivedSha256": "69f2e4baa41ad75e419333b949431794f3fec55b4ffc66b219db659ab3aaaf39",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-1.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-1.json",
+      "sourceSha256": "6e0355d3e31507edb900240334b732db3e2a4905bd74aaa1f877a248e8e35666",
+      "archivedSha256": "6e0355d3e31507edb900240334b732db3e2a4905bd74aaa1f877a248e8e35666",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-2.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-2.json",
+      "sourceSha256": "92dc663ba8bd13a8f2bdc07e1ce445e8edce0fcbe9c1ac76e8af2e596311a2cc",
+      "archivedSha256": "92dc663ba8bd13a8f2bdc07e1ce445e8edce0fcbe9c1ac76e8af2e596311a2cc",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-3.json",
+      "sourceSha256": "356907d6f61b76bcfd0b982673e74e1600e1285a931ba0852e6fb78e0b5212e6",
+      "archivedSha256": "356907d6f61b76bcfd0b982673e74e1600e1285a931ba0852e6fb78e0b5212e6",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-4.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-4.json",
+      "sourceSha256": "d9ce67ebe2f8269b84fe35260a65d981793ec70141e7ff05db32e1889a0bb5d8",
+      "archivedSha256": "d9ce67ebe2f8269b84fe35260a65d981793ec70141e7ff05db32e1889a0bb5d8",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-5.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-5.json",
+      "sourceSha256": "6aad52c353b1b536723d2be2fa081f1315ed679d3073965c676c667f52f9ce95",
+      "archivedSha256": "6aad52c353b1b536723d2be2fa081f1315ed679d3073965c676c667f52f9ce95",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-6.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-6.json",
+      "sourceSha256": "89b9b40a9466449d317a0fc4ddb757838801e73f6fde8a0f38c2a86e4e83dd22",
+      "archivedSha256": "89b9b40a9466449d317a0fc4ddb757838801e73f6fde8a0f38c2a86e4e83dd22",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-7.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-7.json",
+      "sourceSha256": "b91ea416f7e6795189093d7570c564316d9cf307ee4e5a774c8b4fdd14c23d9c",
+      "archivedSha256": "b91ea416f7e6795189093d7570c564316d9cf307ee4e5a774c8b4fdd14c23d9c",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-8.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-8.json",
+      "sourceSha256": "0f0b7042570622b3ce8b5dc0805b19ab4f80219f81db01d2d44a2e8263f2ccff",
+      "archivedSha256": "0f0b7042570622b3ce8b5dc0805b19ab4f80219f81db01d2d44a2e8263f2ccff",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-grammar-9.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-grammar-9.json",
+      "sourceSha256": "31e18a1075718a13133932d463f52415ba64af41e532c6c8c00030db26e5e986",
+      "archivedSha256": "31e18a1075718a13133932d463f52415ba64af41e532c6c8c00030db26e5e986",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-help.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-help.json",
+      "sourceSha256": "ac0f648b3ab5a7a231c3d6de4ca55cb8a346ac7684ee24c93c330d012b26189e",
+      "archivedSha256": "ac0f648b3ab5a7a231c3d6de4ca55cb8a346ac7684ee24c93c330d012b26189e",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-native-False.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-native-False.json",
+      "sourceSha256": "031b2ed9270cd164b2ecf84ac0037e4baa69b34c400c492f80ceffa2f2f3251e",
+      "archivedSha256": "031b2ed9270cd164b2ecf84ac0037e4baa69b34c400c492f80ceffa2f2f3251e",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-native-True.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-native-True.json",
+      "sourceSha256": "885c9019c375bdb7647545d5b42d6c04e5bbd03e3e0a67616222189cd14e1505",
+      "archivedSha256": "885c9019c375bdb7647545d5b42d6c04e5bbd03e3e0a67616222189cd14e1505",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-native-simulated-python.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-native-simulated-python.json",
+      "sourceSha256": "2597069eea66d855cbb5617beb30bf2aaf82307a3e4012ceaeb4b33a1a30e56a",
+      "archivedSha256": "2597069eea66d855cbb5617beb30bf2aaf82307a3e4012ceaeb4b33a1a30e56a",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-positive-bare.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-positive-bare.json",
+      "sourceSha256": "3fcd73200e9e1f5bc3c79e586d38119eda3b1e6b0484293ceb806d8e6ee7e34d",
+      "archivedSha256": "3fcd73200e9e1f5bc3c79e586d38119eda3b1e6b0484293ceb806d8e6ee7e34d",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-positive-commit-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-positive-commit-target.json",
+      "sourceSha256": "878b44f37d6da693c240d7664013bf7993b0c06588a54df7790ba8fd87d66501",
+      "archivedSha256": "878b44f37d6da693c240d7664013bf7993b0c06588a54df7790ba8fd87d66501",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-positive-darwin-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-positive-darwin-target.json",
+      "sourceSha256": "3fbde28ddaf04dcf79e5226be99f90f1f7993984537ea0a5d53b0926ffd57319",
+      "archivedSha256": "3fbde28ddaf04dcf79e5226be99f90f1f7993984537ea0a5d53b0926ffd57319",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-positive-target.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-positive-target.json",
+      "sourceSha256": "3c22ab584ee913ee9d9891037bd8b12f96503a24a2f012ca63e3ad70bf6e1706",
+      "archivedSha256": "3c22ab584ee913ee9d9891037bd8b12f96503a24a2f012ca63e3ad70bf6e1706",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-0.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-0.json",
+      "sourceSha256": "83f54c400b25c9e040938cac91193f4547bad00fc535f589c7adc1cb76bc6985",
+      "archivedSha256": "83f54c400b25c9e040938cac91193f4547bad00fc535f589c7adc1cb76bc6985",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-1.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-1.json",
+      "sourceSha256": "9193d951ed06b5bc0a8401ba1e0c142ddd0bd4af18c515e0f1ea6cf048afa1a3",
+      "archivedSha256": "9193d951ed06b5bc0a8401ba1e0c142ddd0bd4af18c515e0f1ea6cf048afa1a3",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-2.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-2.json",
+      "sourceSha256": "071b9863342b5026175ddc144fae809ca323daead69148224b95093867ee703d",
+      "archivedSha256": "071b9863342b5026175ddc144fae809ca323daead69148224b95093867ee703d",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-3.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-3.json",
+      "sourceSha256": "49a97a849892e62cd3e25f601c6f685e7b7c410211d8ec797ca1f45e981d39a0",
+      "archivedSha256": "49a97a849892e62cd3e25f601c6f685e7b7c410211d8ec797ca1f45e981d39a0",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-4.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-4.json",
+      "sourceSha256": "5cbce6e1e3bd508b8eee66ea38d1a1dc2dd44aaae10944485a80e634006d647b",
+      "archivedSha256": "5cbce6e1e3bd508b8eee66ea38d1a1dc2dd44aaae10944485a80e634006d647b",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-5.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-5.json",
+      "sourceSha256": "c4a3e24cc83b2622c560e183a2484814bf36acb385db22ca8dbad206a20247a9",
+      "archivedSha256": "c4a3e24cc83b2622c560e183a2484814bf36acb385db22ca8dbad206a20247a9",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-6.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-6.json",
+      "sourceSha256": "c736b9852d0351b4d55b3eb420aae72d34a3cd186f6274ab575eb6853da798df",
+      "archivedSha256": "c736b9852d0351b4d55b3eb420aae72d34a3cd186f6274ab575eb6853da798df",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-7.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-7.json",
+      "sourceSha256": "b9aed4d67548691b886ef061e2cf8fc53383f06d1e6ba3a250a42f75f87948dc",
+      "archivedSha256": "b9aed4d67548691b886ef061e2cf8fc53383f06d1e6ba3a250a42f75f87948dc",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-8.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-8.json",
+      "sourceSha256": "50b57bba5f5b222a7fda750ab66f14f6412bd78b7659241e905f3d2b76fbaac3",
+      "archivedSha256": "50b57bba5f5b222a7fda750ab66f14f6412bd78b7659241e905f3d2b76fbaac3",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-release-9.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-release-9.json",
+      "sourceSha256": "1c1b8341d18b3e5e9b1962d1aa829ba773bb587d70d2b9eeb594b690dd16f4d4",
+      "archivedSha256": "1c1b8341d18b3e5e9b1962d1aa829ba773bb587d70d2b9eeb594b690dd16f4d4",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-wrong-python-11.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-wrong-python-11.json",
+      "sourceSha256": "39490570d376205c14ba8ab4cd42f5c9b1b06105b53c5342ad138ee0bd2e30a4",
+      "archivedSha256": "39490570d376205c14ba8ab4cd42f5c9b1b06105b53c5342ad138ee0bd2e30a4",
+      "encoding": "identity"
+    },
+    "review/evidence/heldout-wrong-python-13.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/heldout-wrong-python-13.json",
+      "sourceSha256": "a853c959d06dc6a305d1c7faac3f238acdd29918531a928f37e2a27e1e36f690",
+      "archivedSha256": "a853c959d06dc6a305d1c7faac3f238acdd29918531a928f37e2a27e1e36f690",
+      "encoding": "identity"
+    },
+    "review/evidence/independent-empty-and-retained-green.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-empty-and-retained-green.json",
+      "sourceSha256": "75d01cdce51b81e9bf5a113987b8f94371c013835eb8858b2db40f7808eca1ea",
+      "archivedSha256": "75d01cdce51b81e9bf5a113987b8f94371c013835eb8858b2db40f7808eca1ea",
+      "encoding": "identity"
+    },
+    "review/evidence/independent-empty-and-retained-green.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-empty-and-retained-green.xml",
+      "sourceSha256": "2e78094309fe4b200c09280a581d707a4b5e7aa51f87f1f206bc1eab3a5cccf7",
+      "archivedSha256": "2e78094309fe4b200c09280a581d707a4b5e7aa51f87f1f206bc1eab3a5cccf7",
+      "encoding": "identity"
+    },
+    "review/evidence/independent-empty-red.json.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-empty-red.json",
+      "sourceSha256": "a832a24788852ae8620cbe11cca83de3fe864fe2e9dd8e9ae5c681261d517c4e",
+      "archivedSha256": "80c876aba419a6da6f8b1c1794fd94fb046b2fa37ff1f5bd4dd49afa359794a2",
+      "encoding": "gzip"
+    },
+    "review/evidence/independent-empty-red.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-empty-red.xml",
+      "sourceSha256": "c4663ef849896007ec8b4ac3bbf8c4829759bce38b8a9b90c8921b8e0c1365ed",
+      "archivedSha256": "c4663ef849896007ec8b4ac3bbf8c4829759bce38b8a9b90c8921b8e0c1365ed",
+      "encoding": "identity"
+    },
+    "review/evidence/independent-real-installed-uv-full.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-real-installed-uv-full.json",
+      "sourceSha256": "a5a73ffe775852d2d93cc3a0435bfde143a4f68b7655338596ca32de5829a4c1",
+      "archivedSha256": "a5a73ffe775852d2d93cc3a0435bfde143a4f68b7655338596ca32de5829a4c1",
+      "encoding": "identity"
+    },
+    "review/evidence/independent-real-multiline-quiet-full.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/independent-real-multiline-quiet-full.json",
+      "sourceSha256": "5db647e8f3f3574a8051ee26bf6fce1fe9b2e507458ee7c3ba8fae3d9c2937e5",
+      "archivedSha256": "5db647e8f3f3574a8051ee26bf6fce1fe9b2e507458ee7c3ba8fae3d9c2937e5",
+      "encoding": "identity"
+    },
+    "review/evidence/multiline-quiet-tool-calls.log.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/multiline-quiet-tool-calls.log",
+      "sourceSha256": "123a82be2fb1307eea1384c06ebe3aabbfaecb6815ab3553eb858cdbd4c53f2a",
+      "archivedSha256": "bd318a0e4f25310efefc9765c009a1c726cb6b3e7def8374e1cbb0c3b63109dd",
+      "encoding": "gzip"
+    },
+    "review/evidence/patch-apply-check.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/patch-apply-check.json",
+      "sourceSha256": "7ddf04d2685df98d181f555b9000096531455343096456caa825e99b4b2f157a",
+      "archivedSha256": "7ddf04d2685df98d181f555b9000096531455343096456caa825e99b4b2f157a",
+      "encoding": "identity"
+    },
+    "review/evidence/patch-replay.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/patch-replay.json",
+      "sourceSha256": "f9a8571f58ef15afcc8a455339285293af0e97e674bc05d438fbfb7e16009ec0",
+      "archivedSha256": "f9a8571f58ef15afcc8a455339285293af0e97e674bc05d438fbfb7e16009ec0",
+      "encoding": "identity"
+    },
+    "review/evidence/preservation-verification.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/preservation-verification.json",
+      "sourceSha256": "51e7eab5822d8f47fbba777e69bb66ee900796837b901e8639a824992dc73f38",
+      "archivedSha256": "51e7eab5822d8f47fbba777e69bb66ee900796837b901e8639a824992dc73f38",
+      "encoding": "identity"
+    },
+    "review/evidence/protected-after.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/protected-after.json",
+      "sourceSha256": "601204c00aa9cacf175ea45ae8af709fd5665a8c025bb43bf5581b4b04d3c574",
+      "archivedSha256": "601204c00aa9cacf175ea45ae8af709fd5665a8c025bb43bf5581b4b04d3c574",
+      "encoding": "identity"
+    },
+    "review/evidence/protected-before.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/protected-before.json",
+      "sourceSha256": "601204c00aa9cacf175ea45ae8af709fd5665a8c025bb43bf5581b4b04d3c574",
+      "archivedSha256": "601204c00aa9cacf175ea45ae8af709fd5665a8c025bb43bf5581b4b04d3c574",
+      "encoding": "identity"
+    },
+    "review/evidence/reviewer-aggregation-issue.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/reviewer-aggregation-issue.json",
+      "sourceSha256": "115ae76719d86cb6ff506fd1a0665787c3c32f79cf1ce1ac1ab0ef4b915a486a",
+      "archivedSha256": "115ae76719d86cb6ff506fd1a0665787c3c32f79cf1ce1ac1ab0ef4b915a486a",
+      "encoding": "identity"
+    },
+    "review/evidence/reviewer-harness-isolation.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/reviewer-harness-isolation.patch",
+      "sourceSha256": "4a0f72ec872afe2f7123d67f1f4734145fc2f2a8c8a63d8c1d564e6e1df9ca47",
+      "archivedSha256": "1de4a40ef3a225057d80c936865966f55d5b04a490887831335cc75263f41902",
+      "encoding": "gzip"
+    },
+    "review/evidence/source-authentication.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/evidence/source-authentication.json",
+      "sourceSha256": "1821880891c503b740c6e4b633c2850deb6019558f1888e67dedf21ad0126db7",
+      "archivedSha256": "1821880891c503b740c6e4b633c2850deb6019558f1888e67dedf21ad0126db7",
+      "encoding": "identity"
+    },
+    "review/finalize_review.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/finalize_review.py",
+      "sourceSha256": "45ef7b1a693fb993b8752b94a84fd5d23b6efc4deb9b03c9878f79cc43940b73",
+      "archivedSha256": "45ef7b1a693fb993b8752b94a84fd5d23b6efc4deb9b03c9878f79cc43940b73",
+      "encoding": "identity"
+    },
+    "review/initialize_review.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/initialize_review.py",
+      "sourceSha256": "290e427a75bb1c97777c44e70a4a3613e5f93ed636df2d5d83682dd9ec59efe2",
+      "archivedSha256": "290e427a75bb1c97777c44e70a4a3613e5f93ed636df2d5d83682dd9ec59efe2",
+      "encoding": "identity"
+    },
+    "review/inputs/base-source-binding.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/base-source-binding.json",
+      "sourceSha256": "9d52764ddc0f0fe8e72414367cc131d619a3e2cae2a8be7eed5a14091d600abe",
+      "archivedSha256": "9d52764ddc0f0fe8e72414367cc131d619a3e2cae2a8be7eed5a14091d600abe",
+      "encoding": "identity"
+    },
+    "review/inputs/empty-version.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/empty-version.patch",
+      "sourceSha256": "3408d9b639ea3b0cadb1d3522fa0b04b304acacdc00f7d05ce0ab5da5bf9113c",
+      "archivedSha256": "15b70364522c4c6b549e10b65eb8bd21b3419f4c7c479926a92457f2878f327d",
+      "encoding": "gzip"
+    },
+    "review/inputs/evidence/complete-green.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/evidence/complete-green.xml",
+      "sourceSha256": "6719c750560204f47a57fe6c267a7fecd33f053d45a96f16fa841d92b08eceeb",
+      "archivedSha256": "6719c750560204f47a57fe6c267a7fecd33f053d45a96f16fa841d92b08eceeb",
+      "encoding": "identity"
+    },
+    "review/inputs/evidence/empty-output-red.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/evidence/empty-output-red.xml",
+      "sourceSha256": "2731ac2d79317659283ad78cc7f26df0a6ca1784e9cac29ef43117932bbbc39a",
+      "archivedSha256": "2731ac2d79317659283ad78cc7f26df0a6ca1784e9cac29ef43117932bbbc39a",
+      "encoding": "identity"
+    },
+    "review/inputs/evidence/real-installed-uv-full.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/evidence/real-installed-uv-full.json",
+      "sourceSha256": "02c8aa8e27894c0104d3539eb7bc86216858f6f72f7d4d71f78ae1675454a710",
+      "archivedSha256": "02c8aa8e27894c0104d3539eb7bc86216858f6f72f7d4d71f78ae1675454a710",
+      "encoding": "identity"
+    },
+    "review/inputs/repair-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/repair-manifest.json",
+      "sourceSha256": "65eb2a3604f4873e1e441eb346aba8eafecf8be335ed45d17f5b556b384471c3",
+      "archivedSha256": "65eb2a3604f4873e1e441eb346aba8eafecf8be335ed45d17f5b556b384471c3",
+      "encoding": "identity"
+    },
+    "review/inputs/review_support.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/review_support.py",
+      "sourceSha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "archivedSha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7",
+      "encoding": "identity"
+    },
+    "review/inputs/run_review-initial.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/run_review-initial.py",
+      "sourceSha256": "b74577ff45db3e9a49113862feac86ab3554a601f82103617448ffcbe2718d57",
+      "archivedSha256": "b74577ff45db3e9a49113862feac86ab3554a601f82103617448ffcbe2718d57",
+      "encoding": "identity"
+    },
+    "review/inputs/test_probe_contract_green.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/test_probe_contract_green.py",
+      "sourceSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "archivedSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "encoding": "identity"
+    },
+    "review/inputs/test_probe_contract_green.py.binding.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/test_probe_contract_green.py.binding.patch",
+      "sourceSha256": "09a124eb3fcda523c967ae5c581f84ad5c7a8fc2874e46669f394f1f44c96c53",
+      "archivedSha256": "17c3f9c7392e9dea0b077a8f743237648de7030ff8d6bda9a073a4dad07dd022",
+      "encoding": "gzip"
+    },
+    "review/inputs/test_repair_heldouts.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/test_repair_heldouts.py",
+      "sourceSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "archivedSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "encoding": "identity"
+    },
+    "review/inputs/test_repair_heldouts.py.binding.patch.txt.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/inputs/test_repair_heldouts.py.binding.patch",
+      "sourceSha256": "3bc5c47aa6b8999934c48bccf5a14143cb3959a53cf31a56b5e49945d600ac04",
+      "archivedSha256": "ae58394603bc53bfef67322811e4853b4a327f296c68e046373454099e27d0db",
+      "encoding": "gzip"
+    },
+    "review/multiline-quiet-tools/c++": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/multiline-quiet-tools/c++",
+      "sourceSha256": "39158dc3d951abd699e225745a628c3a3dfec2691312ea194287f1bdf677f846",
+      "archivedSha256": "39158dc3d951abd699e225745a628c3a3dfec2691312ea194287f1bdf677f846",
+      "encoding": "identity"
+    },
+    "review/multiline-quiet-tools/cc": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/multiline-quiet-tools/cc",
+      "sourceSha256": "3278a33876a14ec2f6e804f758738523f30717008a38d2defff7a5dc90bb06ea",
+      "archivedSha256": "3278a33876a14ec2f6e804f758738523f30717008a38d2defff7a5dc90bb06ea",
+      "encoding": "identity"
+    },
+    "review/multiline-quiet-tools/git": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/multiline-quiet-tools/git",
+      "sourceSha256": "368381d735e05bb87d12514b2089d9a7ea061bd7786a618adcaf94726a91de1b",
+      "archivedSha256": "368381d735e05bb87d12514b2089d9a7ea061bd7786a618adcaf94726a91de1b",
+      "encoding": "identity"
+    },
+    "review/multiline-quiet-tools/make": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/multiline-quiet-tools/make",
+      "sourceSha256": "240a76a30dbf09e4d9f04a578a42d2fcc93ecad73dbf67fb501fd68e4278a588",
+      "archivedSha256": "240a76a30dbf09e4d9f04a578a42d2fcc93ecad73dbf67fb501fd68e4278a588",
+      "encoding": "identity"
+    },
+    "review/multiline-quiet-tools/uv": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/multiline-quiet-tools/uv",
+      "sourceSha256": "a8db2e41a7e2225514c0fef69c16ab8a74b9634cc12fef072db689190a8c8a89",
+      "archivedSha256": "a8db2e41a7e2225514c0fef69c16ab8a74b9634cc12fef072db689190a8c8a89",
+      "encoding": "identity"
+    },
+    "review/old-repo/docs/security/dependency-remediation/patched-dependencies.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/docs/security/dependency-remediation/patched-dependencies.json",
+      "sourceSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "archivedSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/LOCKED-JOBS.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/LOCKED-JOBS.md",
+      "sourceSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "archivedSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/convert_gguf.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/convert_gguf.py",
+      "sourceSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "archivedSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/convert_gguf.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/convert_gguf.py.lock",
+      "sourceSha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "archivedSha256": "910c1682de5f01b51d786e030daeca66ce763766befccdaa0621a699bee25ffb",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/convert_onnx.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/convert_onnx.py",
+      "sourceSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "archivedSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/convert_onnx.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/convert_onnx.py.lock",
+      "sourceSha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "archivedSha256": "9a1e6d0db0f5f71562207f189c0235f01bd60c3b8a621308f3e6d713323e5215",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/dataset/analyze_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/analyze_data.py",
+      "sourceSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "archivedSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/analyze_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/analyze_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/prepare_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/prepare_data.py",
+      "sourceSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "archivedSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/prepare_data.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/prepare_data.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/dataset/prepare_data_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/prepare_data_lfm2.py",
+      "sourceSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "archivedSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/prepare_data_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/prepare_data_lfm2.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/dataset/schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/schema.py",
+      "sourceSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "archivedSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/score_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/score_data.py",
+      "sourceSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "archivedSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/score_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/score_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/validate_schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/validate_schema.py",
+      "sourceSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "archivedSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/dataset/validate_schema.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/dataset/validate_schema.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/eval.py",
+      "sourceSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "archivedSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/eval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/eval_retrieval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/eval_retrieval.py",
+      "sourceSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "archivedSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/eval_retrieval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/eval_retrieval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/evals/queries.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/evals/queries.txt",
+      "sourceSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "archivedSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/experiments/grpo/grpo.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/experiments/grpo/grpo.py",
+      "sourceSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "archivedSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/experiments/grpo/grpo.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/experiments/grpo/grpo.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/experiments/lfm2/sft_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/experiments/lfm2/sft_lfm2.py",
+      "sourceSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "archivedSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/experiments/lfm2/sft_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/gguf_toolchain.py",
+      "sourceSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "archivedSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/jobs/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/jobs/eval.py",
+      "sourceSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "archivedSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/jobs/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/jobs/eval.py.lock",
+      "sourceSha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "archivedSha256": "019d02fd42691f70e0861a0fa2926a31c9f41aab84e61835be354d687db6caea",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/jobs/eval_common.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/jobs/eval_common.py",
+      "sourceSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "archivedSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/jobs/sft.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/jobs/sft.py",
+      "sourceSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "archivedSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/jobs/sft.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/jobs/sft.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/pyproject.toml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/pyproject.toml",
+      "sourceSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "archivedSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/reward.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/reward.py",
+      "sourceSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "archivedSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/tests/test_locked_job_submission.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/tests/test_locked_job_submission.py",
+      "sourceSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "archivedSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/tests/test_qualify_empty_version.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/tests/test_qualify_empty_version.py",
+      "sourceSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "archivedSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/tools/qualify_gguf_image.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/tools/qualify_gguf_image.py",
+      "sourceSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "archivedSha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/tools/submit_locked_job.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/tools/submit_locked_job.py",
+      "sourceSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "archivedSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/train.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/train.py",
+      "sourceSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "archivedSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/train.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/train.py.lock",
+      "sourceSha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "archivedSha256": "964f2d6da1616eaf300705bf1c3a0e2dc112942748e8d59b5d3656995306d65b",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/train_unsloth.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/train_unsloth.py",
+      "sourceSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "archivedSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "encoding": "identity"
+    },
+    "review/old-repo/finetune/train_unsloth.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/train_unsloth.py.lock",
+      "sourceSha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "archivedSha256": "65010e2ad1598f91dea62db06f3bfb9eb47fc4ba74018f48da7b7a7d1712fd46",
+      "encoding": "gzip"
+    },
+    "review/old-repo/finetune/uv.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/old-repo/finetune/uv.lock",
+      "sourceSha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "archivedSha256": "ef9e92af07bfeb2d9d70675577c3ac8d32f5fb1f26dc2782a01e1ec147c5426d",
+      "encoding": "gzip"
+    },
+    "review/repo/docs/security/dependency-remediation/patched-dependencies.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/docs/security/dependency-remediation/patched-dependencies.json",
+      "sourceSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "archivedSha256": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/LOCKED-JOBS.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/LOCKED-JOBS.md",
+      "sourceSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "archivedSha256": "be69f428d973a52ea94c64a9dd196b02a7c978a7e8318f7d85c70b12e4caf8df",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/convert_gguf.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/convert_gguf.py",
+      "sourceSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "archivedSha256": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/convert_gguf.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/convert_gguf.py.lock",
+      "sourceSha256": "f1c3e909f99b6520577d9b1afe201fec42a5ba790296ecec6c91f26e99b1a332",
+      "archivedSha256": "910c1682de5f01b51d786e030daeca66ce763766befccdaa0621a699bee25ffb",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/convert_onnx.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/convert_onnx.py",
+      "sourceSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "archivedSha256": "0e82737b8c397ab8c1bff24a0569fdcf814c8b02a1d54ec650ba45c475e38889",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/convert_onnx.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/convert_onnx.py.lock",
+      "sourceSha256": "43147fe422f1e969f5c3298662d0d7f62d9b705a4c1f08070fd48595bfc21dc0",
+      "archivedSha256": "9a1e6d0db0f5f71562207f189c0235f01bd60c3b8a621308f3e6d713323e5215",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/dataset/analyze_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/analyze_data.py",
+      "sourceSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "archivedSha256": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/analyze_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/analyze_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/prepare_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/prepare_data.py",
+      "sourceSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "archivedSha256": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/prepare_data.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/prepare_data.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/dataset/prepare_data_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/prepare_data_lfm2.py",
+      "sourceSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "archivedSha256": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/prepare_data_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/prepare_data_lfm2.py.lock",
+      "sourceSha256": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "archivedSha256": "d557bcb8b6edc3bda9bb51e78267e516636fbc288e44ecebc562ba6bdbecf47d",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/dataset/schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/schema.py",
+      "sourceSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "archivedSha256": "dff7fe664d1941989ce5614ca0211ff0aadac9ca8a67e927203ca5cec7225d6c",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/score_data.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/score_data.py",
+      "sourceSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "archivedSha256": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/score_data.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/score_data.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/validate_schema.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/validate_schema.py",
+      "sourceSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "archivedSha256": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/dataset/validate_schema.py.lock": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/dataset/validate_schema.py.lock",
+      "sourceSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "archivedSha256": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/eval.py",
+      "sourceSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "archivedSha256": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/eval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/eval_retrieval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/eval_retrieval.py",
+      "sourceSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "archivedSha256": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/eval_retrieval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/eval_retrieval.py.lock",
+      "sourceSha256": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "archivedSha256": "9dc85e926b00bd57b9e44db79bc1035bcb57ab7b557aab8bd70c3931100e30b2",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/evals/queries.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/evals/queries.txt",
+      "sourceSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "archivedSha256": "e6aeefd02afe4d602f328945a66e8d43459da12a29ab7ac0e5ccb25d8594baf6",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/experiments/grpo/grpo.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/experiments/grpo/grpo.py",
+      "sourceSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "archivedSha256": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/experiments/grpo/grpo.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/experiments/grpo/grpo.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/experiments/lfm2/sft_lfm2.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/experiments/lfm2/sft_lfm2.py",
+      "sourceSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "archivedSha256": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/experiments/lfm2/sft_lfm2.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/experiments/lfm2/sft_lfm2.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/gguf_toolchain.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/gguf_toolchain.py",
+      "sourceSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "archivedSha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/jobs/eval.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/jobs/eval.py",
+      "sourceSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "archivedSha256": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/jobs/eval.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/jobs/eval.py.lock",
+      "sourceSha256": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "archivedSha256": "019d02fd42691f70e0861a0fa2926a31c9f41aab84e61835be354d687db6caea",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/jobs/eval_common.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/jobs/eval_common.py",
+      "sourceSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "archivedSha256": "691350f6e666eb8fd7642c0d3aee3fde94f08f28b22808d49193f68f786020c2",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/jobs/sft.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/jobs/sft.py",
+      "sourceSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "archivedSha256": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/jobs/sft.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/jobs/sft.py.lock",
+      "sourceSha256": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "archivedSha256": "5e4e78a18ed4e4162abaa345afc9d79a201c46de61df7e37d1c0574b229ba64c",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/pyproject.toml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/pyproject.toml",
+      "sourceSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "archivedSha256": "d784d5445f2f7641a2c1926b05051dbc39dd0e5b2d693e5555e94fefad2bbb51",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/reward.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/reward.py",
+      "sourceSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "archivedSha256": "e90fa4e2b2933fc85f90819987ac05e265226fed41c35862f43921bae74d15d0",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/tests/test_locked_job_submission.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tests/test_locked_job_submission.py",
+      "sourceSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "archivedSha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/tests/test_qualify_empty_version.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tests/test_qualify_empty_version.py",
+      "sourceSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "archivedSha256": "362ea09d114af4573d58f44f3577b076d3443d93b6183f2e60260701775a0fa8",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/tools/qualify_gguf_image.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tools/qualify_gguf_image.py",
+      "sourceSha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "archivedSha256": "292f01cedb9f2b61f3dce87baba3680749f72ea32566953f937146f09a0114d2",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/tools/submit_locked_job.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/tools/submit_locked_job.py",
+      "sourceSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "archivedSha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/train.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/train.py",
+      "sourceSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "archivedSha256": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/train.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/train.py.lock",
+      "sourceSha256": "a095ef2a81a37a738b25ff80318d30ab2a561212fa52f0721af3b513f7878558",
+      "archivedSha256": "964f2d6da1616eaf300705bf1c3a0e2dc112942748e8d59b5d3656995306d65b",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/train_unsloth.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/train_unsloth.py",
+      "sourceSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "archivedSha256": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+      "encoding": "identity"
+    },
+    "review/repo/finetune/train_unsloth.py.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/train_unsloth.py.lock",
+      "sourceSha256": "553d5f9d175d972b994ed2ea2b9d9a3db35d2497a8f43aad65a79df3c58d89b1",
+      "archivedSha256": "65010e2ad1598f91dea62db06f3bfb9eb47fc4ba74018f48da7b7a7d1712fd46",
+      "encoding": "gzip"
+    },
+    "review/repo/finetune/uv.lock.gz": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/repo/finetune/uv.lock",
+      "sourceSha256": "c390b9302630b2fc829369e513e7bb2c2bc13bf3a33269c7fb9c5240e64309a1",
+      "archivedSha256": "ef9e92af07bfeb2d9d70675577c3ac8d32f5fb1f26dc2782a01e1ec147c5426d",
+      "encoding": "gzip"
+    },
+    "review/review-result.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/review-result.json",
+      "sourceSha256": "9288f5a27dc1a8bbbf9bad1d53182ae0944fb80afdee8183de8abf1f8e741c2f",
+      "archivedSha256": "9288f5a27dc1a8bbbf9bad1d53182ae0944fb80afdee8183de8abf1f8e741c2f",
+      "encoding": "identity"
+    },
+    "review/review_support.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/review_support.py",
+      "sourceSha256": "2a09beb6876393296376e96ccab6af28cd4bd27094469ea70cde0d903352d8b3",
+      "archivedSha256": "2a09beb6876393296376e96ccab6af28cd4bd27094469ea70cde0d903352d8b3",
+      "encoding": "identity"
+    },
+    "review/run_review.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/run_review.py",
+      "sourceSha256": "82c152a9070b07d5453372cd8e6285e3e1194a9f21e78878f36c836daf286ba3",
+      "archivedSha256": "82c152a9070b07d5453372cd8e6285e3e1194a9f21e78878f36c836daf286ba3",
+      "encoding": "identity"
+    },
+    "review/test_probe_contract_green.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/test_probe_contract_green.py",
+      "sourceSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "archivedSha256": "670bf9b5f61d1b17f769cc091403e0da583d4717b8c69983c22864758b2d7eb1",
+      "encoding": "identity"
+    },
+    "review/test_repair_heldouts.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-empty-version-review-v6k8m2/test_repair_heldouts.py",
+      "sourceSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "archivedSha256": "2f4dad4779b9e41d4d9f51925662cc3c3b69b8192cb66ab98f3090a4b313aca2",
+      "encoding": "identity"
+    }
+  }
+}

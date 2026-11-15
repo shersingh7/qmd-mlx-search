@@ -1,0 +1,47 @@
+{
+  "label": "corrected-python-fp16",
+  "repo": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/completed-python-corrected",
+  "source_sha256": "eac3cbdf4580c76de9ec190bc7052e53932aca0399b4e23e459a5cfdc379c289",
+  "model": "/Users/shersingh/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "dtype_requested": "float16",
+  "bulk_microbatch_tokens": 512,
+  "scope": "real MLX runtime; public synthetic workload; not HTTP/retrieval-quality/long-soak qualification",
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "versions": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "numpy": "2.5.4",
+    "transformers": "5.22.2"
+  },
+  "metal_available": true,
+  "passed": false,
+  "samples": {},
+  "limits": {
+    "metal_memory_bytes": 2147483648,
+    "metal_cache_bytes": 536870912
+  },
+  "before_load_memory": {
+    "metal_active_bytes": 0,
+    "metal_cache_bytes": 0,
+    "metal_peak_bytes": 0,
+    "current_rss_bytes": 54231040,
+    "peak_rss_bytes": 54231040
+  },
+  "load_seconds": 4.768553665999207,
+  "error": "MLXRuntimeError: Embedding execution failed: [scaled_dot_product_attention] Mask type must promote to output type float16.",
+  "after_shutdown_memory": {
+    "metal_active_bytes": 0,
+    "metal_cache_bytes": 0,
+    "metal_peak_bytes": 136293128,
+    "current_rss_bytes": 534249472,
+    "peak_rss_bytes": 625180672
+  },
+  "new_live_threads_after_shutdown": [
+    {
+      "name": "tqdm_monitor",
+      "daemon": true
+    }
+  ],
+  "owned_executor_alive_after_shutdown": false
+}

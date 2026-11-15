@@ -1,0 +1,4 @@
+{
+  "engine_raw": "{\"Server\":{\"Os\":\"linux\",\"Arch\":\"arm64\"},\"Server\":{\"Os\":\"linux\",\"Arch\":\"amd64\"}}",
+  "workspace": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-workflow-red-u141gpoe/heldout/cases/engine-duplicate-server/workspace"
+}

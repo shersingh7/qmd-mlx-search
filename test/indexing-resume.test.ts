@@ -100,10 +100,11 @@ describe("Durable Indexing and Resume", () => {
       nativeDimensions: 1024,
       maxTokens: 512,
       normalized: true,
-      pooling: "last",
+      pooling: "last_token",
     };
 
     const mockLlm = {
+      tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
       embedModelName: "mlx-community/Qwen3-Embedding-4B-4bit-DWQ",
       // Actual descriptor API in src/llm.ts is async getDescriptor()
       getDescriptor: async () => realDescriptor,
@@ -164,7 +165,8 @@ describe("Durable Indexing and Resume", () => {
     let embeddedTexts: string[] = [];
     const mockDescriptor: EmbeddingDescriptor = {
       version: 1,
-      backend: "mock",
+      backend: "mlx",
+      pooling: "mean",
       model: "test-embed",
       outputDimensions: 4,
       nativeDimensions: 4,
@@ -172,6 +174,7 @@ describe("Durable Indexing and Resume", () => {
       normalized: true,
     };
     const mockLlm = {
+      tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
       embedModelName: "test-embed",
       getDescriptor: async () => mockDescriptor,
       async embed(text: string): Promise<EmbeddingResult | null> {
@@ -249,6 +252,7 @@ describe("Durable Indexing and Resume", () => {
     controller.abort(); // Abort immediately
 
     const mockLlm = {
+      tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
       embedModelName: "test-model",
       async embed(): Promise<EmbeddingResult | null> {
         return { embedding: [0.1], model: "test-model" };
@@ -326,10 +330,12 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "mismatched-model",
         getDescriptor: async () => ({
           version: 1,
-          backend: "mock",
+          backend: "mlx",
+          pooling: "mean",
           model: "mismatched-model",
           outputDimensions: 4,
           nativeDimensions: 4,
@@ -369,10 +375,12 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "base-model",
         getDescriptor: async () => ({
           version: 1,
-          backend: "mock",
+          backend: "mlx",
+          pooling: "mean",
           model: "base-model",
           outputDimensions: 4,
           nativeDimensions: 4,
@@ -413,10 +421,12 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "base-model",
         getDescriptor: async () => ({
-          version: 2, // Changed version/backend -> changed signature
-          backend: "mlx-v2",
+          version: 1,
+          backend: "gguf", // Different valid backend -> changed signature
+          pooling: "mean",
           model: "base-model",
           outputDimensions: 4,
           nativeDimensions: 4,
@@ -456,10 +466,12 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "base-model",
         getDescriptor: async () => ({
           version: 1,
-          backend: "mock",
+          backend: "mlx",
+          pooling: "mean",
           model: "base-model",
           outputDimensions: 8, // Checkpoint was seeded with 4
           nativeDimensions: 8,
@@ -497,10 +509,12 @@ describe("Durable Indexing and Resume", () => {
       seedDatabaseWithUnrelatedVectorsAndPartialCheckpoint(store.db);
 
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "new-forced-model",
         getDescriptor: async () => ({
           version: 1,
-          backend: "mock",
+          backend: "mlx",
+          pooling: "mean",
           model: "new-forced-model",
           outputDimensions: 4,
           nativeDimensions: 4,
@@ -532,7 +546,8 @@ describe("Durable Indexing and Resume", () => {
 
       const baseDescriptor: EmbeddingDescriptor = {
         version: 1,
-        backend: "mock",
+        backend: "mlx",
+        pooling: "mean",
         model: "base-model",
         revision: "rev-original-v1",
         outputDimensions: 4,
@@ -549,6 +564,7 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "base-model",
         getDescriptor: async () => ({
           ...baseDescriptor,
@@ -586,7 +602,8 @@ describe("Durable Indexing and Resume", () => {
 
       const baseDescriptor: EmbeddingDescriptor = {
         version: 1,
-        backend: "mock",
+        backend: "mlx",
+        pooling: "mean",
         model: "base-model",
         quantization: "4bit",
         outputDimensions: 4,
@@ -603,6 +620,7 @@ describe("Durable Indexing and Resume", () => {
 
       let inferenceCount = 0;
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "base-model",
         getDescriptor: async () => ({
           ...baseDescriptor,
@@ -648,14 +666,17 @@ describe("Durable Indexing and Resume", () => {
         `).run(`${name}.md`, name, hash, now, now);
       }
 
-      const multiChunkText = Array.from({ length: 30 }, (_, i) =>
+      // More than one 32-chunk inference batch, so cancellation follows a
+      // durable commit instead of expecting an aborted inference to publish.
+      const multiChunkText = Array.from({ length: 600 }, (_, i) =>
         `## Paragraph ${i}\n\nThis is paragraph ${i} with substantial length to test multi-chunk splitting during kill and resume cycle.\n\n`
       ).join("\n");
       insertDoc("doc-kill-test", multiChunkText, "hash-kill-test");
 
       const desc: EmbeddingDescriptor = {
         version: 1,
-        backend: "mock",
+        backend: "mlx",
+        pooling: "mean",
         model: "kill-test-model",
         outputDimensions: 4,
         nativeDimensions: 4,
@@ -668,15 +689,12 @@ describe("Durable Indexing and Resume", () => {
       const embeddedItems: string[] = [];
 
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "kill-test-model",
         getDescriptor: async () => desc,
         async embed(t: string): Promise<EmbeddingResult | null> {
           callCount++;
           embeddedItems.push(t);
-          if (callCount === 2) {
-            // Simulate kill mid job via AbortController
-            abortCtrl.abort();
-          }
           return { embedding: [0.1, 0.2, 0.3, 0.4], model: "kill-test-model" };
         },
         async embedBatch(texts: string[]): Promise<(EmbeddingResult | null)[]> {
@@ -691,6 +709,7 @@ describe("Durable Indexing and Resume", () => {
         maxDocsPerBatch: 1,
         maxBatchBytes: 200,
         signal: abortCtrl.signal,
+        onProgress: info => { if (info.chunksEmbedded > 0) abortCtrl.abort(); },
       });
 
       expect(firstRun.status).toBe("cancelled");
@@ -699,6 +718,8 @@ describe("Durable Indexing and Resume", () => {
       expect(midCp?.status).toBe("cancelled");
       const vectorsAfterFirst = (store.db.prepare("SELECT seq FROM content_vectors WHERE hash = 'hash-kill-test'").all() as any[]).length;
       expect(vectorsAfterFirst).toBeGreaterThanOrEqual(1);
+      const expectedChunks = store.db.prepare("SELECT total_chunks FROM content_chunk_expectations WHERE hash='hash-kill-test' AND strategy='regex'").get().total_chunks as number;
+      expect(expectedChunks).toBeGreaterThan(vectorsAfterFirst);
 
       // Second run: fresh non-aborted run resumes and completes remaining chunks
       const secondRun = await runDurableIndexingJob(store, {
@@ -707,7 +728,9 @@ describe("Durable Indexing and Resume", () => {
       });
 
       expect(secondRun.status).toBe("complete");
+      expect(secondRun.chunksAttempted).toBe(expectedChunks - vectorsAfterFirst);
       const finalVectors = store.db.prepare("SELECT seq FROM content_vectors WHERE hash = 'hash-kill-test' ORDER BY seq").all() as { seq: number }[];
+      expect(finalVectors).toHaveLength(expectedChunks);
       const finalSeqs = finalVectors.map(v => v.seq);
       // All chunks present consecutively from 0 to max without duplicates
       expect(finalSeqs).toEqual(Array.from({ length: finalSeqs.length }, (_, i) => i));
@@ -739,13 +762,14 @@ describe("Durable Indexing and Resume", () => {
         nativeDimensions: 1024,
         maxTokens: 512,
         normalized: true,
-        pooling: "last",
+        pooling: "last_token",
       };
 
       const abortCtrl = new AbortController();
       let callCount = 0;
 
       const mockLlm = {
+        tokenize: async (text: string) => text.split(/\s+/).map((_, i) => i),
         embedModelName: "mlx-community/Qwen3-Embedding-4B-4bit-DWQ",
         getDescriptor: async () => realDescriptor,
         async embed(): Promise<EmbeddingResult | null> {

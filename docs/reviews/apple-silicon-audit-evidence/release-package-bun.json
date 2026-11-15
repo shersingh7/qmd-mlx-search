@@ -1,0 +1,14 @@
+{
+  "label": "release-package-bun",
+  "command": [
+    "bash",
+    "test/smoke-install.sh",
+    "--runtime",
+    "bun"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 8.403893541,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-bun.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/release-package-bun-8yi2fhoc"
+}

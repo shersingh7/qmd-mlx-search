@@ -11,6 +11,7 @@ import {
   formatDocForDescriptor,
   isQwenEmbeddingModel,
   isNomicEmbeddingModel,
+  validateEmbeddingDescriptor,
   type EmbeddingDescriptor,
 } from "../src/embedding/contract.js";
 import {
@@ -76,6 +77,35 @@ describe("Embedding Contract Space ID & Fingerprinting", () => {
     };
     expect(computeEmbeddingSpaceId(baseDescriptor)).not.toBe(computeEmbeddingSpaceId(unnormalized));
     expect(areDescriptorsCompatible(baseDescriptor, unnormalized)).toBe(false);
+  });
+
+  test("truncation and exact identity strings are part of the space", () => {
+    expect(computeEmbeddingSpaceId(baseDescriptor)).not.toBe(computeEmbeddingSpaceId({ ...baseDescriptor, maxTokens: 512 }));
+    expect(computeEmbeddingSpaceId(baseDescriptor)).not.toBe(computeEmbeddingSpaceId({ ...baseDescriptor, revision: " revision " }));
+    expect(computeEmbeddingSpaceId({ ...baseDescriptor, revision: "revision" })).not.toBe(
+      computeEmbeddingSpaceId({ ...baseDescriptor, revision: " revision " })
+    );
+    expect(computeEmbeddingSpaceId(baseDescriptor)).not.toBe(computeEmbeddingSpaceId({ ...baseDescriptor, queryPrefix: "" }));
+    expect(formatQueryForDescriptor("query", { ...baseDescriptor, queryPrefix: "" })).toBe("query");
+  });
+
+  test.each([
+    { version: 2 }, { backend: "mlx_synthetic" }, { model: "" }, { pooling: "average" },
+    { nativeDimensions: Infinity }, { outputDimensions: 0 }, { outputDimensions: 1.5 },
+    { outputDimensions: 1024 }, { maxTokens: -1 }, { maxTokens: NaN },
+    { normalized: "true" }, { queryPrefix: false }, { revision: null }, { rerank: { model: 42 } },
+  ])("rejects malformed descriptor fields: %j", (fields) => {
+    expect(() => validateEmbeddingDescriptor({ ...baseDescriptor, ...fields })).toThrow(/Invalid embedding descriptor/);
+    expect(() => computeEmbeddingSpaceId({ ...baseDescriptor, ...fields } as EmbeddingDescriptor)).toThrow();
+  });
+
+  test("returns a detached frozen descriptor including validated auxiliary capabilities", () => {
+    const source = { ...baseDescriptor, rerank: { model: "ranker" } };
+    const parsed = validateEmbeddingDescriptor(source);
+    source.rerank.model = "changed";
+    expect(parsed.rerank?.model).toBe("ranker");
+    expect(Object.isFrozen(parsed)).toBe(true);
+    expect(Object.isFrozen(parsed.rerank)).toBe(true);
   });
 
   test("produces different space ID when tokenizer identity changes", () => {
@@ -176,6 +206,10 @@ describe("Embedding Config Resolution & Precedence", () => {
     delete process.env.QMD_EMBED_DIMS;
     delete process.env.QMD_MLX_EMBED_URL;
     delete process.env.MLX_EMBED_PORT;
+    delete process.env.MLX_EMBED_MODEL;
+    delete process.env.QMD_MLX_TIMEOUT_MS;
+    delete process.env.QMD_MLX_CONCURRENCY;
+    delete process.env.QMD_MLX_BINARY;
   });
 
   afterEach(() => {
@@ -219,5 +253,25 @@ describe("Embedding Config Resolution & Precedence", () => {
     expect(config.model).toBe("caller-model");
     expect(config.dims).toBe(256);
     expect(config.mlxUrl).toBe("http://localhost:8000");
+  });
+
+  test.each(["NaN", "Infinity", "1.5", "2workers", "0", "-2", " 3", "3e1", ""])("rejects invalid numeric environment value %j", (value) => {
+    for (const key of ["QMD_EMBED_DIMS", "QMD_MLX_TIMEOUT_MS", "QMD_MLX_CONCURRENCY"]) {
+      process.env[key] = value;
+      expect(() => resolveEmbeddingConfig()).toThrow();
+      delete process.env[key];
+    }
+  });
+
+  test("explicit valid options override malformed lower-priority environment values", () => {
+    process.env.QMD_MLX_TIMEOUT_MS = "invalid";
+    process.env.QMD_MLX_CONCURRENCY = "invalid";
+    process.env.QMD_EMBED_DIMS = "invalid";
+    process.env.QMD_MLX_BINARY = "invalid";
+    const config = resolveEmbeddingConfig({ dims: 2, mlxTimeoutMs: 10, mlxConcurrency: 1, mlxBinary: false });
+    expect(config.mlxTimeoutMs).toBe(10);
+    expect(config.mlxConcurrency).toBe(1);
+    expect(config.mlxBinary).toBe(false);
+    expect(Object.isFrozen(config)).toBe(true);
   });
 });

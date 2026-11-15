@@ -396,9 +396,6 @@ describe("inline config isolation", () => {
       },
     });
 
-    // Close first store (resets config source)
-    await store1.close();
-
     const store2 = await createStore({
       dbPath: freshDbPath(),
       config: {
@@ -408,10 +405,12 @@ describe("inline config isolation", () => {
       },
     });
 
-    const names = (await store2.listCollections()).map(c => c.name);
-    expect(names).toContain("notes");
-    expect(names).not.toContain("docs");
-
+    await store1.addCollection("first-only", { path: docsDir });
+    expect((await store1.listCollections()).map(c => c.name).sort()).toEqual(["docs", "first-only"]);
+    expect((await store2.listCollections()).map(c => c.name)).toEqual(["notes"]);
+    await store1.close();
+    await store2.addContext("notes", "/", "Surviving store");
+    expect(await store2.listContexts()).toContainEqual({ collection: "notes", path: "/", context: "Surviving store" });
     await store2.close();
   });
 });
@@ -937,6 +936,7 @@ describe("embed", () => {
   function createFakeEmbedLlm() {
     const embedBatchCalls: string[][] = [];
     return {
+      ...createFakeTokenizer(),
       embedBatchCalls,
       async embed(_text: string) {
         return { embedding: [0.1, 0.2, 0.3], model: "fake-embed" };
@@ -962,7 +962,7 @@ describe("embed", () => {
     });
 
     const fakeLlm = createFakeEmbedLlm();
-    setDefaultLlamaCpp(createFakeTokenizer() as any);
+    setDefaultLlamaCpp({ tokenize: async () => { throw new Error("SDK tokenization must use its own LLM"); } } as any);
     store.internal.llm = fakeLlm as any;
 
     try {
@@ -1037,9 +1037,6 @@ describe("lifecycle", () => {
       },
     });
 
-    // Note: since config source is module-level, we close store1 first
-    await store1.close();
-
     const store2 = await createStore({
       dbPath: freshDbPath(),
       config: {
@@ -1049,11 +1046,12 @@ describe("lifecycle", () => {
       },
     });
 
-    const names = (await store2.listCollections()).map(c => c.name);
-    expect(names).toContain("notes");
-    expect(names).not.toContain("docs");
-
+    expect((await store1.listCollections()).map(c => c.name)).toEqual(["docs"]);
+    expect((await store2.listCollections()).map(c => c.name)).toEqual(["notes"]);
     await store2.close();
+    await store1.addContext("docs", "/", "Still open");
+    expect(await store1.listContexts()).toContainEqual({ collection: "docs", path: "/", context: "Still open" });
+    await store1.close();
   });
 });
 

@@ -1,0 +1,122 @@
+{
+  "status": "OriginalSPECFAILpreserved; parentrepairedandverified; independentreacceptancepending",
+  "repair": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair-manifest.json",
+  "source_review": {
+    "delegation": "deleg_85a0cf7f",
+    "owner": "sa-0-e6696476"
+  },
+  "workflow_proposal": {
+    "delegation": "deleg_6bb65ced",
+    "owner": "sa-0-5326dd02",
+    "scope": "Separatepremergeimage-boundworkflow, noimageexecution"
+  },
+  "parent_results": {
+    "original_four_contract_failures": 2,
+    "repaired_four_contract_failures": 0,
+    "full_launcher_passed": 162,
+    "full_launcher_failures": 0,
+    "full_launcher_errors": 0,
+    "full_launcher_skips": 0,
+    "real_installed_uv_full_probe_exit": 0,
+    "real_host_outputs": [
+      "qmd-c-ok",
+      "qmd-cxx-ok"
+    ],
+    "host": "Darwin/arm64",
+    "image_executed": false
+  },
+  "artifact_files": {
+    "failed-review.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/REPORT.md",
+      "sha256": "13e2392db6a56a635f3cbb770016396a3881a3e36ef3d90263a20277aa9dc455"
+    },
+    "failed-review-result.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/review-result.json",
+      "sha256": "8765024c1c5db9da875e87910650f7a1ea4f4c3eecd747f9a60df9084235672d"
+    },
+    "failed-review-preservation.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/final-verification.json",
+      "sha256": "919fa7a35c4bcb973ffc5b0e4bb224e9c7a75515900ecf95f7a7e84447d36923"
+    },
+    "reviewer-positive-red.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/probe-positive-contract.xml",
+      "sha256": "84458a62caddec54cb11dedf1ac66e2ad7ae51f74dbc84133a715ae681e49652"
+    },
+    "upstream-version-source-fetch.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/evidence/public-source-fetch.json",
+      "sha256": "c738d6b929152350da9089fcc407f15bbaee24078416d035565130c886660daa"
+    },
+    "old-qualifier.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-independent-launcher-review-ua_xj6f_/repo/finetune/tools/qualify_gguf_image.py",
+      "sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf"
+    },
+    "parent-repair.md": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/REPAIR-REPORT.md",
+      "sha256": "6c8aa15ff01872c9e17d5c54d903e5217952f663e14e3d64b723f5b62fab2262"
+    },
+    "repair-manifest.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair-manifest.json",
+      "sha256": "d1dcf0b61c96e1aeeecf5d383208f850e0f29e716ab41f0f358e64233702f094"
+    },
+    "repair.patch.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repair.patch",
+      "sha256": "50744121d38fdb998cce014e716302bf0e2010a0eff0a221d0649c94b0a48710"
+    },
+    "original-positive-contract.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract.py",
+      "sha256": "5f37af58a71aaddb1e97ceffaf1f09bb81c45042bd96c6a22585afed4cbdaae5"
+    },
+    "new-source-positive-contract.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/test_probe_contract_green.py",
+      "sha256": "8a7b2ddbe50cf5025d115eadf3d056771b601ab649a1438366c79107c09985ff"
+    },
+    "positive-contract-binding.patch.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/green-test-binding.patch",
+      "sha256": "0057d40f72179f21c73a54773fdcec128c4fffbbaff1cd023c2152a46ec02e4c"
+    },
+    "review-support.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/review_support.py",
+      "sha256": "fbeed6453204ff5887bac03ec274ca2f72efa75fa8465f9714539ff56b1cb2c7"
+    },
+    "repaired-qualifier.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tools/qualify_gguf_image.py",
+      "sha256": "72ef9788f08b2f331de19653302b1e96ec630b7495463d3b19a8264a03101ccc"
+    },
+    "repaired-tests.py.txt": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/repo/finetune/tests/test_locked_job_submission.py",
+      "sha256": "cb512f84519f3e6013a7750c1d699f9a0a0a598afb1afe878357cfaf301502d4"
+    },
+    "parent-red.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/parent-red.json",
+      "sha256": "405653ba5329d96ec8c05393d93de8392d39842899a7fc7b2519850a4a102d9a"
+    },
+    "parent-red.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/parent-red.xml",
+      "sha256": "046c673c9fd934b94c509e4d207aec164ed31bb6f32effe74f5a7fe390ee179d"
+    },
+    "parent-green.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/parent-green.json",
+      "sha256": "c1ad576a76b9a799aea99b9fb6ba2af69f4ae963bd79048a693c27bccd601960"
+    },
+    "parent-green.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/parent-green.xml",
+      "sha256": "badfc3d3a5be9b9d951e98302a7bd73a56d6dc7bb500d9fdc6ca98ea91b40eaa"
+    },
+    "candidate-suite.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/candidate-suite.json",
+      "sha256": "b229721ceb1b605434bb997d0e4adaf23ef1f770ce7c767cd47d5864ae6c4826"
+    },
+    "candidate-suite.xml": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/candidate-suite.xml",
+      "sha256": "19abcb4543b8a38b1f2f21c0c3606cef30c18a9858f0114516239c43edb37202"
+    },
+    "real-uv-red.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/real-uv-red.json",
+      "sha256": "08db8e8e8105eadab3e6393ff6cfe6c29a820ddb2b1eb4eceaace7ac69adf748"
+    },
+    "real-uv-green.json": {
+      "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-uv-qualifier-85630k1p/evidence/real-uv-green.json",
+      "sha256": "59b18af836bee6ae61bf4f6e9ac45ca332203583d372b456524cffe2a25dcd29"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "child-gate-real-EBADF",
+  "child_fd_error": true,
+  "forward_hold": 1.3,
+  "root": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/parent-heldouts/child-gate-real-EBADF",
+  "source": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-lease-review-t1uxv9hk/mirror/scripts/phase5_recovery_process.py"
+}

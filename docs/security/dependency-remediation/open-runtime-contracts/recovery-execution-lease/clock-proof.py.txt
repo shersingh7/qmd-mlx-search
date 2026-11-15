@@ -1,0 +1,18 @@
+"""Local fork clock identity proof; never compare runtime epochs."""
+import json, os, sys, time
+before = time.monotonic()
+read_fd, write_fd = os.pipe()
+pid = os.fork()
+if pid == 0:
+    os.close(read_fd)
+    os.write(write_fd, json.dumps({'childPid': os.getpid(), 'childClock': time.monotonic()}).encode())
+    os._exit(0)
+os.close(write_fd)
+observation = json.loads(os.read(read_fd, 4096))
+after = time.monotonic()
+os.close(read_fd)
+os.waitpid(pid, 0)
+result = {'python': sys.version, 'executable': sys.executable, 'parentPid': os.getpid(), 'parentBefore': before,
+          'parentAfter': after, **observation, 'inheritedEpochVerified': before <= observation['childClock'] <= after}
+print(json.dumps(result))
+assert result['inheritedEpochVerified'], result

@@ -1,0 +1,28 @@
+[
+  {
+    "runtime": "node",
+    "helperMs": 926.673625,
+    "completeCleanupAtReturn": false,
+    "forcedPipeClose": true,
+    "noWork": true,
+    "naturalReapAfterHold": true,
+    "fixtureKills": [],
+    "unexpiredGateRefusal": true,
+    "gateRemainingMs": [
+      8.186250000000006
+    ]
+  },
+  {
+    "runtime": "bun",
+    "helperMs": 921.801167,
+    "completeCleanupAtReturn": false,
+    "forcedPipeClose": true,
+    "noWork": true,
+    "naturalReapAfterHold": true,
+    "fixtureKills": [],
+    "unexpiredGateRefusal": true,
+    "gateRemainingMs": [
+      77.641959
+    ]
+  }
+]

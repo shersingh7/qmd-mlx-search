@@ -1,0 +1,778 @@
+[
+  {
+    "evidence": "raw-bootstrap-before-finally",
+    "case": {
+      "label": "system-supervisor-hold-200",
+      "executable": "/usr/bin/python3",
+      "kind": "supervisor",
+      "kill_ms": 200
+    },
+    "argv": [
+      "/usr/bin/python3",
+      "-S",
+      "-u",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/frozen/scripts/phase5_recovery_process.py",
+      "{\"command\": [\"/usr/bin/true\"], \"timeoutMs\": 200, \"contained\": false}"
+    ],
+    "environment": {
+      "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/home",
+      "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/hermes",
+      "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/hermes",
+      "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/knowledge",
+      "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/cache",
+      "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/config",
+      "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/data",
+      "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/hf",
+      "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/hf/hub",
+      "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/hf/transformers",
+      "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/tmp",
+      "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/tmp",
+      "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/tmp",
+      "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/bun-cache",
+      "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-supervisor-hold-200/npm-cache",
+      "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "LANG": "en_US.UTF-8",
+      "LC_ALL": "en_US.UTF-8",
+      "CI": "1",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "HF_DATASETS_OFFLINE": "1",
+      "REQUIRE_BUN": "1",
+      "QMD_LLAMA_GPU": "false",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONNOUSERSITE": "1",
+      "TOKENIZERS_PARALLELISM": "false",
+      "npm_config_offline": "true",
+      "UV_OFFLINE": "1"
+    },
+    "root_owned_pid": 91266,
+    "monitor": "kernel kqueue NOTE_FORK|NOTE_EXEC|NOTE_EXIT registered before exec; NOTE_TRACK unsupported fallback recorded",
+    "tracking_supported": false,
+    "no_admission_S_was_sent": true,
+    "gate_path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python",
+    "path_history": [
+      {
+        "tMs": 0.09737501386553049,
+        "path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 1.9568749703466892,
+        "path": "/usr/bin/python3"
+      },
+      {
+        "tMs": 11.265457957051694,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9"
+      },
+      {
+        "tMs": 15.84366598399356,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 204.87691595917568,
+        "path": null
+      }
+    ],
+    "elapsedMs": 204.92287498200312,
+    "ownedChildExitedUnreaped": -9,
+    "killedAtBudget": true,
+    "allStreamsNaturallyEOF": true,
+    "streamEOF": {
+      "stdout": true,
+      "stderr": true,
+      "control": true
+    },
+    "data": {
+      "stdout": "",
+      "stderr": "",
+      "control": "{\"type\":\"prepared\",\"supervisorPid\":91266,\"sessionId\":91266}\n"
+    },
+    "events": [
+      {
+        "event": "NOTE_TRACK-registration-unsupported",
+        "errno": 45,
+        "error": "[Errno 45] Operation not supported"
+      },
+      {
+        "tMs": 0.10512495646253228,
+        "ident": 91266,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 1.9667499582283199,
+        "ident": 91266,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 11.273249983787537,
+        "ident": 91266,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 15.850124997086823,
+        "ident": 91266,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 80.77474997844547,
+        "event": "control.data",
+        "text": "{\"type\":\"prepared\",\"supervisorPid\":91266,\"sessionId\":91266}\n"
+      },
+      {
+        "tMs": 200.24345797719434,
+        "event": "owned-child-kill",
+        "eof": {
+          "stdout": false,
+          "stderr": false,
+          "control": false
+        },
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 204.880790959578,
+        "ident": 91266,
+        "filter": -5,
+        "flags": 32821,
+        "fflags": 2147483648,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": false,
+        "NOTE_EXIT": true,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 204.89512500353158,
+        "event": "stdout.EOF"
+      },
+      {
+        "tMs": 204.89883300615475,
+        "event": "stderr.EOF"
+      },
+      {
+        "tMs": 204.90049995714799,
+        "event": "control.EOF"
+      },
+      {
+        "tMs": 204.92020796518773,
+        "event": "owned-child-exit-WNOWAIT",
+        "code": -9,
+        "eof": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        }
+      }
+    ],
+    "fork_events": 0,
+    "child_tracking_events": 0,
+    "track_errors": 0
+  },
+  {
+    "evidence": "raw-bootstrap-before-finally",
+    "case": {
+      "label": "direct-clt-supervisor-hold-200",
+      "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "kind": "supervisor",
+      "kill_ms": 200
+    },
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-S",
+      "-u",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/frozen/scripts/phase5_recovery_process.py",
+      "{\"command\": [\"/usr/bin/true\"], \"timeoutMs\": 200, \"contained\": false}"
+    ],
+    "environment": {
+      "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/home",
+      "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/hermes",
+      "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/hermes",
+      "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/knowledge",
+      "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/cache",
+      "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/config",
+      "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/data",
+      "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/hf",
+      "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/hf/hub",
+      "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/hf/transformers",
+      "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/tmp",
+      "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/tmp",
+      "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/tmp",
+      "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/bun-cache",
+      "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-direct-clt-supervisor-hold-200/npm-cache",
+      "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "LANG": "en_US.UTF-8",
+      "LC_ALL": "en_US.UTF-8",
+      "CI": "1",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "HF_DATASETS_OFFLINE": "1",
+      "REQUIRE_BUN": "1",
+      "QMD_LLAMA_GPU": "false",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONNOUSERSITE": "1",
+      "TOKENIZERS_PARALLELISM": "false",
+      "npm_config_offline": "true",
+      "UV_OFFLINE": "1"
+    },
+    "root_owned_pid": 91270,
+    "monitor": "kernel kqueue NOTE_FORK|NOTE_EXEC|NOTE_EXIT registered before exec; NOTE_TRACK unsupported fallback recorded",
+    "tracking_supported": false,
+    "no_admission_S_was_sent": true,
+    "gate_path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python",
+    "path_history": [
+      {
+        "tMs": 0.06479100557044148,
+        "path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 4.6196249895729125,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9"
+      },
+      {
+        "tMs": 9.1450409963727,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 206.10279100947082,
+        "path": null
+      }
+    ],
+    "elapsedMs": 206.15612500114366,
+    "ownedChildExitedUnreaped": -9,
+    "killedAtBudget": true,
+    "allStreamsNaturallyEOF": true,
+    "streamEOF": {
+      "stdout": true,
+      "stderr": true,
+      "control": true
+    },
+    "data": {
+      "stdout": "",
+      "stderr": "",
+      "control": "{\"type\":\"prepared\",\"supervisorPid\":91270,\"sessionId\":91270}\n"
+    },
+    "events": [
+      {
+        "event": "NOTE_TRACK-registration-unsupported",
+        "errno": 45,
+        "error": "[Errno 45] Operation not supported"
+      },
+      {
+        "tMs": 0.07399998139590025,
+        "ident": 91270,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 4.622165986802429,
+        "ident": 91270,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 9.147082979325205,
+        "ident": 91270,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 65.990665985737,
+        "event": "control.data",
+        "text": "{\"type\":\"prepared\",\"supervisorPid\":91270,\"sessionId\":91270}\n"
+      },
+      {
+        "tMs": 201.52512495405972,
+        "event": "owned-child-kill",
+        "eof": {
+          "stdout": false,
+          "stderr": false,
+          "control": false
+        },
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 206.10650000162423,
+        "ident": 91270,
+        "filter": -5,
+        "flags": 32821,
+        "fflags": 2147483648,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": false,
+        "NOTE_EXIT": true,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 206.12033299403265,
+        "event": "stdout.EOF"
+      },
+      {
+        "tMs": 206.12237497698516,
+        "event": "stderr.EOF"
+      },
+      {
+        "tMs": 206.12370799062774,
+        "event": "control.EOF"
+      },
+      {
+        "tMs": 206.15312497830018,
+        "event": "owned-child-exit-WNOWAIT",
+        "code": -9,
+        "eof": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        }
+      }
+    ],
+    "fork_events": 0,
+    "child_tracking_events": 0,
+    "track_errors": 0
+  },
+  {
+    "evidence": "raw-bootstrap-before-finally",
+    "case": {
+      "label": "kernel-fork-positive",
+      "executable": "/usr/bin/python3",
+      "kind": "fork-positive",
+      "kill_ms": null
+    },
+    "argv": [
+      "/usr/bin/python3",
+      "-S",
+      "-u",
+      "-c",
+      "import subprocess,os,json; p=subprocess.Popen(['/bin/sleep','0.05'],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); code=p.wait(timeout=1); print(json.dumps({'positive_control':'test-owned Popen posix_spawn fork event','pid':os.getpid(),'child_pid':p.pid,'child_returncode':code}),flush=True)"
+    ],
+    "environment": {
+      "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/home",
+      "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/hermes",
+      "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/hermes",
+      "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/knowledge",
+      "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/cache",
+      "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/config",
+      "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/data",
+      "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/hf",
+      "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/hf/hub",
+      "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/hf/transformers",
+      "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/tmp",
+      "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/tmp",
+      "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/tmp",
+      "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/bun-cache",
+      "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-kernel-fork-positive/npm-cache",
+      "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "LANG": "en_US.UTF-8",
+      "LC_ALL": "en_US.UTF-8",
+      "CI": "1",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "HF_DATASETS_OFFLINE": "1",
+      "REQUIRE_BUN": "1",
+      "QMD_LLAMA_GPU": "false",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONNOUSERSITE": "1",
+      "TOKENIZERS_PARALLELISM": "false",
+      "npm_config_offline": "true",
+      "UV_OFFLINE": "1"
+    },
+    "root_owned_pid": 91275,
+    "monitor": "kernel kqueue NOTE_FORK|NOTE_EXEC|NOTE_EXIT registered before exec; NOTE_TRACK unsupported fallback recorded",
+    "tracking_supported": false,
+    "no_admission_S_was_sent": false,
+    "gate_path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python",
+    "path_history": [
+      {
+        "tMs": 0.04058401100337505,
+        "path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 4.58479201188311,
+        "path": "/usr/bin/python3"
+      },
+      {
+        "tMs": 9.12041700212285,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9"
+      },
+      {
+        "tMs": 13.649875007104129,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 425.9464170318097,
+        "path": null
+      }
+    ],
+    "elapsedMs": 428.4760419977829,
+    "ownedChildExitedUnreaped": 0,
+    "killedAtBudget": false,
+    "allStreamsNaturallyEOF": true,
+    "streamEOF": {
+      "stdout": true,
+      "stderr": true,
+      "control": true
+    },
+    "data": {
+      "stdout": "{\"positive_control\": \"test-owned Popen posix_spawn fork event\", \"pid\": 91275, \"child_pid\": 91276, \"child_returncode\": 0}\n",
+      "stderr": "",
+      "control": ""
+    },
+    "events": [
+      {
+        "event": "NOTE_TRACK-registration-unsupported",
+        "errno": 45,
+        "error": "[Errno 45] Operation not supported"
+      },
+      {
+        "tMs": 0.04775001434609294,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 4.587375035043806,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 9.12283401703462,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 13.652042020112276,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 72.55904201883823,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 1073741824,
+        "data": 0,
+        "NOTE_FORK": true,
+        "NOTE_EXEC": false,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 418.15058403881267,
+        "event": "stdout.data",
+        "text": "{\"positive_control\": \"test-owned Popen posix_spawn fork event\", \"pid\": 91275, \"child_pid\": 91276, \"child_returncode\": 0}\n"
+      },
+      {
+        "tMs": 428.3097920124419,
+        "ident": 91275,
+        "filter": -5,
+        "flags": 32821,
+        "fflags": 2147483648,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": false,
+        "NOTE_EXIT": true,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 428.3606249955483,
+        "event": "stdout.EOF"
+      },
+      {
+        "tMs": 428.36666700895876,
+        "event": "stderr.EOF"
+      },
+      {
+        "tMs": 428.36991703370586,
+        "event": "control.EOF"
+      },
+      {
+        "tMs": 428.4652500064112,
+        "event": "owned-child-exit-WNOWAIT",
+        "code": 0,
+        "eof": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        }
+      }
+    ],
+    "fork_events": 1,
+    "child_tracking_events": 0,
+    "track_errors": 0
+  },
+  {
+    "evidence": "raw-bootstrap-before-finally",
+    "case": {
+      "label": "system-clock-complete",
+      "executable": "/usr/bin/python3",
+      "kind": "minimal",
+      "kill_ms": null
+    },
+    "argv": [
+      "/usr/bin/python3",
+      "-S",
+      "-u",
+      "-c",
+      "import os,sys,time,json; print(json.dumps({'pid':os.getpid(),'ppid':os.getppid(),'executable':sys.executable,'version':sys.version,'monotonic_ns':time.monotonic_ns(),'monotonic_info':str(time.get_clock_info('monotonic')),'clock_monotonic_ns':time.clock_gettime_ns(time.CLOCK_MONOTONIC)}),flush=True)"
+    ],
+    "environment": {
+      "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/home",
+      "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/hermes",
+      "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/hermes",
+      "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/knowledge",
+      "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/cache",
+      "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/config",
+      "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/data",
+      "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/hf",
+      "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/hf/hub",
+      "TRANSFORMERS_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/hf/transformers",
+      "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/tmp",
+      "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/tmp",
+      "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/tmp",
+      "BUN_INSTALL_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/bun-cache",
+      "npm_config_cache": "/Users/shersingh/.hermes/cache/scratch/qmd-mac-bootstrap-C4GaOR/environments/raw-system-clock-complete/npm-cache",
+      "PATH": "/Users/shersingh/.hermes/node/bin:/Users/shersingh/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "LANG": "en_US.UTF-8",
+      "LC_ALL": "en_US.UTF-8",
+      "CI": "1",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "HF_DATASETS_OFFLINE": "1",
+      "REQUIRE_BUN": "1",
+      "QMD_LLAMA_GPU": "false",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONNOUSERSITE": "1",
+      "TOKENIZERS_PARALLELISM": "false",
+      "npm_config_offline": "true",
+      "UV_OFFLINE": "1"
+    },
+    "root_owned_pid": 91277,
+    "monitor": "kernel kqueue NOTE_FORK|NOTE_EXEC|NOTE_EXIT registered before exec; NOTE_TRACK unsupported fallback recorded",
+    "tracking_supported": false,
+    "no_admission_S_was_sent": false,
+    "gate_path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python",
+    "path_history": [
+      {
+        "tMs": 0.09124999633058906,
+        "path": "/opt/homebrew/Cellar/python@3.15/3.15.1/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 4.686917003709823,
+        "path": "/usr/bin/python3"
+      },
+      {
+        "tMs": 9.245708002708852,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9"
+      },
+      {
+        "tMs": 13.7866250006482,
+        "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "tMs": 68.2065419969149,
+        "path": null
+      }
+    ],
+    "elapsedMs": 68.22891696356237,
+    "ownedChildExitedUnreaped": 0,
+    "killedAtBudget": false,
+    "allStreamsNaturallyEOF": true,
+    "streamEOF": {
+      "stdout": true,
+      "stderr": true,
+      "control": true
+    },
+    "data": {
+      "stdout": "{\"pid\": 91277, \"ppid\": 91265, \"executable\": \"/Library/Developer/CommandLineTools/usr/bin/python3\", \"version\": \"3.9.6 (default, Oct 19 2026, 19:18:13) \\n[Clang 21.0.0 (clang-2100.4.1.1)]\", \"monotonic_ns\": 43986541, \"monotonic_info\": \"namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)\", \"clock_monotonic_ns\": 347236675519000}\n",
+      "stderr": "",
+      "control": ""
+    },
+    "events": [
+      {
+        "event": "NOTE_TRACK-registration-unsupported",
+        "errno": 45,
+        "error": "[Errno 45] Operation not supported"
+      },
+      {
+        "tMs": 0.09966699872165918,
+        "ident": 91277,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 4.691749985795468,
+        "ident": 91277,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 9.249374968931079,
+        "ident": 91277,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 18.337291956413537,
+        "ident": 91277,
+        "filter": -5,
+        "flags": 37,
+        "fflags": 536870912,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": true,
+        "NOTE_EXIT": false,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 63.68879199726507,
+        "event": "stdout.data",
+        "text": "{\"pid\": 91277, \"ppid\": 91265, \"executable\": \"/Library/Developer/CommandLineTools/usr/bin/python3\", \"version\": \"3.9.6 (default, Oct 19 2026, 19:18:13) \\n[Clang 21.0.0 (clang-2100.4.1.1)]\", \"monotonic_ns\": 43986541, \"monotonic_info\": \"namespace(implementation='mach_absolute_time()', monotonic=True, adjustable=False, resolution=4.166666666666667e-08)\", \"clock_monotonic_ns\": 347236675519000}\n"
+      },
+      {
+        "tMs": 68.20874998811632,
+        "ident": 91277,
+        "filter": -5,
+        "flags": 32821,
+        "fflags": 2147483648,
+        "data": 0,
+        "NOTE_FORK": false,
+        "NOTE_EXEC": false,
+        "NOTE_EXIT": true,
+        "NOTE_CHILD": false,
+        "NOTE_TRACKERR": false
+      },
+      {
+        "tMs": 68.21362499613315,
+        "event": "stdout.EOF"
+      },
+      {
+        "tMs": 68.2147080078721,
+        "event": "stderr.EOF"
+      },
+      {
+        "tMs": 68.21562501136214,
+        "event": "control.EOF"
+      },
+      {
+        "tMs": 68.22654197458178,
+        "event": "owned-child-exit-WNOWAIT",
+        "code": 0,
+        "eof": {
+          "stdout": true,
+          "stderr": true,
+          "control": true
+        }
+      }
+    ],
+    "fork_events": 0,
+    "child_tracking_events": 0,
+    "track_errors": 0
+  }
+]

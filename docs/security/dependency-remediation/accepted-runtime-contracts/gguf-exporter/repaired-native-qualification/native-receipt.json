@@ -1,0 +1,1613 @@
+{
+  "accelerator_calls": [],
+  "actual_checkpoint_materializations": [
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        248077,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        1,
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    }
+  ],
+  "actual_checkpoint_materializations_common": [
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        248077,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        1,
+        4
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        4,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        512,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.bfloat16",
+      "shape": [
+        256
+      ]
+    }
+  ],
+  "actual_composed_imports": {
+    "gguf_toolchain": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/gguf_toolchain.py",
+      "sha256": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028"
+    },
+    "train": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/repo/finetune/train.py",
+      "sha256": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326"
+    }
+  },
+  "actual_maintained_reader_calls": [
+    {
+      "mode": "r",
+      "module": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+      "status": "real reader returned",
+      "tensors": 25
+    },
+    {
+      "mode": "r",
+      "module": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "status": "real reader returned",
+      "tensors": 25
+    },
+    {
+      "mode": "r",
+      "module": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "status": "real reader returned",
+      "tensors": 25
+    },
+    {
+      "mode": "r",
+      "module": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "status": "real reader returned",
+      "tensors": 25
+    }
+  ],
+  "after": {
+    "counts": {
+      "directory": 2537,
+      "file": 30255,
+      "symlink": 3
+    },
+    "regular_file_bytes": 1075927846,
+    "state_sha256": "dcf43d083786a5fcdd5276bbf01818a085bcc58832752b195f1f35ba657a4df8",
+    "versions": {
+      "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "packages": {
+        "accelerate": "1.15.0+qmd.2",
+        "cmake": "4.4.4",
+        "gguf": "0.19.0",
+        "numpy": "2.5.4",
+        "peft": "0.21.3",
+        "protobuf": "7.36.2",
+        "sentencepiece": "0.2.3",
+        "torch": "2.15.0",
+        "transformers": "5.22.2"
+      },
+      "prefix": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv",
+      "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]"
+    }
+  },
+  "artifacts": [
+    {
+      "bytes": 63829280,
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+      "sha256": "32a4f31df10fe1ccbf1bb5df5742ebdd5255f836ab1c2a80dce7b9ab1a5c40f7"
+    },
+    {
+      "bytes": 64125504,
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+      "sha256": "8f485b8f4fce4b82361a1787c96c3dfb0977b991a928d415257c4460b09705ce"
+    },
+    {
+      "bytes": 79824192,
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+      "sha256": "adb5d3e358ba75c6132bd5738351e9c1738eef9cfb5cbcfaf580998c79be7464"
+    }
+  ],
+  "before": {
+    "counts": {
+      "directory": 2537,
+      "file": 30255,
+      "symlink": 3
+    },
+    "regular_file_bytes": 1075927846,
+    "state_sha256": "dcf43d083786a5fcdd5276bbf01818a085bcc58832752b195f1f35ba657a4df8",
+    "versions": {
+      "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "packages": {
+        "accelerate": "1.15.0+qmd.2",
+        "cmake": "4.4.4",
+        "gguf": "0.19.0",
+        "numpy": "2.5.4",
+        "peft": "0.21.3",
+        "protobuf": "7.36.2",
+        "sentencepiece": "0.2.3",
+        "torch": "2.15.0",
+        "transformers": "5.22.2"
+      },
+      "prefix": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv",
+      "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]"
+    }
+  },
+  "checkpoint_reads": [
+    {
+      "framework": "pt",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/RANDOM-NOT-PRETRAINED-Qwen3.5/model.safetensors",
+      "requested_device": "cpu",
+      "tensor_devices": [],
+      "tensor_reads": 0
+    },
+    {
+      "framework": "pt",
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/merged/model.safetensors",
+      "requested_device": "cpu",
+      "tensor_devices": [],
+      "tensor_reads": 0
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "init",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "init",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp"
+      ],
+      "elapsed_seconds": 0.027330791985150427,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/01.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/01.stdout",
+      "timeout": 600
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "fetch",
+        "--depth",
+        "1",
+        "https://github.com/ggml-org/llama.cpp.git",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "fetch",
+        "--depth",
+        "1",
+        "https://github.com/ggml-org/llama.cpp.git",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "elapsed_seconds": 5.317651916993782,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/02.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/02.stdout",
+      "timeout": 600
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "checkout",
+        "--detach",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "checkout",
+        "--detach",
+        "5193ef1d4f7c95b006ab3b9f857ed27be9a63235"
+      ],
+      "elapsed_seconds": 0.5931502080056816,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/03.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/03.stdout",
+      "timeout": 600
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/git",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "credential.helper=",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "rev-parse",
+        "HEAD"
+      ],
+      "elapsed_seconds": 0.01783995795994997,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "source_revision_stdout": "5193ef1d4f7c95b006ab3b9f857ed27be9a63235",
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/04.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/04.stdout",
+      "timeout": 600
+    },
+    {
+      "actual_pinned_gguf_identity": {
+        "files_sha256": {
+          "__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+          "constants.py": "b070f76b0585b7cd9065ab9d67bfa033b9c3e4af81216695efc56cc5cbd0059c",
+          "gguf.py": "f0c0eeedad0911784b52ffed8e162a0eb5ae6d535ce35705bc16196e46597a72",
+          "gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+          "gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542",
+          "lazy.py": "dbcf8b7376284ab2d920103657cc52c1c62e93fec3856a08a1ae638394e6a7c1",
+          "metadata.py": "7cedac3b8457271a3f58e5531a7e6958fdecb9ea072f7895ba5d7f6693c9db29",
+          "py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "quants.py": "f896726209ba8c91afd083dd87031c2d39dc4ef6a78e8a6c12763eeb8ed6ff84",
+          "scripts/gguf_convert_endian.py": "6ecc8d50c30fa0f3056c666795bcb23ed1de82aad45f86433b9855ce9b546c31",
+          "scripts/gguf_dump.py": "d8b8fc28e96d15d8a4d6f05cdff4a747f5a06f31172efee9dfc971998ed0203f",
+          "scripts/gguf_editor_gui.py": "6e9d70e850268fff5d4108d9ecbc2b4d90e70b61f08e71f7d37ac20916d854bb",
+          "scripts/gguf_hash.py": "9f277c9338d12a73857a4e54683d7da4d5de01531751f14401267c9289e4197f",
+          "scripts/gguf_new_metadata.py": "972499d35957b4721b9243828d5547d1c84def8d4e6fc641887c6578bf765255",
+          "scripts/gguf_set_metadata.py": "c8612a7109428a677ea55976dd5eeed6088934ddef7ef01246a5bc7a6e585b3b",
+          "tensor_mapping.py": "065375aa115b9a5a6940f2a3e1d23cc5cc6a640a7281f0b677af023ed47f7584",
+          "utility.py": "da920e2c62166ec9f30e407e9fb35ec29fda671310ffbf0f8ce856b62f1c70d7",
+          "vocab.py": "fce519b621f873213973c8186b010d7c41d6bb22134e411c8d47bf3a3e63f807"
+        },
+        "retained": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-pinned-reader/native/gguf",
+        "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/gguf-py/gguf"
+      },
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/convert_hf_to_gguf.py",
+        "--help"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/convert_hf_to_gguf.py",
+        "--help"
+      ],
+      "elapsed_seconds": 2.8749979169806466,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "source_module_sha256": {
+        "conversion/base.py": "648fdc0fadb1a605c642c6de9e90e03ea8eede0622595a975e5e3b934ba26330",
+        "conversion/qwen.py": "2f62b62fb1527c7693a8e178ca39fae6f04578dd089fb609725e1fce99b5c0cf",
+        "convert_hf_to_gguf.py": "297502d115010e97b996e20dc9cdcfc90ee293df9b616259e5a646b64f410630",
+        "gguf-py/gguf/__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+        "gguf-py/gguf/gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+        "gguf-py/gguf/gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542"
+      },
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/05.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/05.stdout",
+      "timeout": 180
+    },
+    {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/cmake",
+        "-B",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_C_COMPILER=/usr/bin/cc",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/c++",
+        "-DCMAKE_MAKE_PROGRAM=/usr/bin/make",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DGGML_CUDA=OFF",
+        "-DGGML_METAL=OFF",
+        "-DGGML_OPENMP=OFF",
+        "-DLLAMA_OPENSSL=OFF",
+        "-DLLAMA_BUILD_TESTS=OFF",
+        "-DLLAMA_BUILD_EXAMPLES=OFF",
+        "-DLLAMA_BUILD_SERVER=OFF",
+        "-DLLAMA_BUILD_APP=OFF",
+        "-DLLAMA_BUILD_UI=OFF",
+        "-DLLAMA_CONNECT=OFF"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/cmake",
+        "-B",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build",
+        "-S",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_C_COMPILER=/usr/bin/cc",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/c++",
+        "-DCMAKE_MAKE_PROGRAM=/usr/bin/make",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DGGML_CUDA=OFF",
+        "-DGGML_METAL=OFF",
+        "-DGGML_OPENMP=OFF",
+        "-DLLAMA_OPENSSL=OFF",
+        "-DLLAMA_BUILD_TESTS=OFF",
+        "-DLLAMA_BUILD_EXAMPLES=OFF",
+        "-DLLAMA_BUILD_SERVER=OFF",
+        "-DLLAMA_BUILD_APP=OFF",
+        "-DLLAMA_BUILD_UI=OFF",
+        "-DLLAMA_CONNECT=OFF"
+      ],
+      "elapsed_seconds": 3.2853386669885367,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/06.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/06.stdout",
+      "timeout": 300
+    },
+    {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/cmake",
+        "--build",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build",
+        "--target",
+        "llama-quantize",
+        "-j",
+        "2"
+      ],
+      "cmake_cache_sha256": "abcb2ff6164929286f414c379033fca30503b2bc6ac5e9e2257556b2b3727891",
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/cmake",
+        "--build",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build",
+        "--target",
+        "llama-quantize",
+        "-j",
+        "2"
+      ],
+      "elapsed_seconds": 77.91244312503841,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "quantizer_sha256": "8606f05fca21522e81978d576be8caec9357ab8a6ede2f7f11c58456ed907cd9",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/07.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/07.stdout",
+      "timeout": 1800
+    },
+    {
+      "actual_pinned_gguf_identity": {
+        "files_sha256": {
+          "__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+          "constants.py": "b070f76b0585b7cd9065ab9d67bfa033b9c3e4af81216695efc56cc5cbd0059c",
+          "gguf.py": "f0c0eeedad0911784b52ffed8e162a0eb5ae6d535ce35705bc16196e46597a72",
+          "gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+          "gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542",
+          "lazy.py": "dbcf8b7376284ab2d920103657cc52c1c62e93fec3856a08a1ae638394e6a7c1",
+          "metadata.py": "7cedac3b8457271a3f58e5531a7e6958fdecb9ea072f7895ba5d7f6693c9db29",
+          "py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "quants.py": "f896726209ba8c91afd083dd87031c2d39dc4ef6a78e8a6c12763eeb8ed6ff84",
+          "scripts/gguf_convert_endian.py": "6ecc8d50c30fa0f3056c666795bcb23ed1de82aad45f86433b9855ce9b546c31",
+          "scripts/gguf_dump.py": "d8b8fc28e96d15d8a4d6f05cdff4a747f5a06f31172efee9dfc971998ed0203f",
+          "scripts/gguf_editor_gui.py": "6e9d70e850268fff5d4108d9ecbc2b4d90e70b61f08e71f7d37ac20916d854bb",
+          "scripts/gguf_hash.py": "9f277c9338d12a73857a4e54683d7da4d5de01531751f14401267c9289e4197f",
+          "scripts/gguf_new_metadata.py": "972499d35957b4721b9243828d5547d1c84def8d4e6fc641887c6578bf765255",
+          "scripts/gguf_set_metadata.py": "c8612a7109428a677ea55976dd5eeed6088934ddef7ef01246a5bc7a6e585b3b",
+          "tensor_mapping.py": "065375aa115b9a5a6940f2a3e1d23cc5cc6a640a7281f0b677af023ed47f7584",
+          "utility.py": "da920e2c62166ec9f30e407e9fb35ec29fda671310ffbf0f8ce856b62f1c70d7",
+          "vocab.py": "fce519b621f873213973c8186b010d7c41d6bb22134e411c8d47bf3a3e63f807"
+        },
+        "retained": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-pinned-reader/native/gguf",
+        "source": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/gguf-py/gguf"
+      },
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/convert_hf_to_gguf.py",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/merged",
+        "--outfile",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "--outtype",
+        "f16",
+        "--no-mtp"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+        "-s",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/llama.cpp/convert_hf_to_gguf.py",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/merged",
+        "--outfile",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "--outtype",
+        "f16",
+        "--no-mtp"
+      ],
+      "elapsed_seconds": 7.625964750011917,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "source_module_sha256": {
+        "conversion/base.py": "648fdc0fadb1a605c642c6de9e90e03ea8eede0622595a975e5e3b934ba26330",
+        "conversion/qwen.py": "2f62b62fb1527c7693a8e178ca39fae6f04578dd089fb609725e1fce99b5c0cf",
+        "convert_hf_to_gguf.py": "297502d115010e97b996e20dc9cdcfc90ee293df9b616259e5a646b64f410630",
+        "gguf-py/gguf/__init__.py": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+        "gguf-py/gguf/gguf_reader.py": "d0ea743200e19d7ef0a4c969edcc4a6dba8e3656a790b217e3bdc7b31170718e",
+        "gguf-py/gguf/gguf_writer.py": "1b2ada9355750eb9dc8f1eda619850278a5f3823aab957672436fd8b50324542"
+      },
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/08.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/08.stdout",
+      "timeout": null
+    },
+    {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+        "Q4_K_M"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q4_k_m.gguf",
+        "Q4_K_M"
+      ],
+      "elapsed_seconds": 1.3760232499917038,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/09.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/09.stdout",
+      "timeout": null
+    },
+    {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+        "Q6_K"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q6_k.gguf",
+        "Q6_K"
+      ],
+      "elapsed_seconds": 0.5265349589753896,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/10.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/10.stdout",
+      "timeout": null
+    },
+    {
+      "argv": [
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+        "Q8_0"
+      ],
+      "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh",
+      "effective_argv": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network*)",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/build/bin/llama-quantize",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-f16.gguf",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer/.gguf-convert-h865bnp2/tools/gguf/RANDOM-Qwen3.5-native-q8_0.gguf",
+        "Q8_0"
+      ],
+      "elapsed_seconds": 0.3805699169752188,
+      "environment": {
+        "ACCELERATE_USE_CPU": "true",
+        "CUDA_VISIBLE_DEVICES": "",
+        "DO_NOT_TRACK": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+        "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+        "HF_DATASETS_OFFLINE": "1",
+        "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+        "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_OFFLINE": "1",
+        "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+        "LC_ALL": "en_US.UTF-8",
+        "MKL_NUM_THREADS": "1",
+        "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+        "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+        "QMD_LLAMA_GPU": "false",
+        "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+        "TOKENIZERS_PARALLELISM": "false",
+        "TORCHINDUCTOR_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp/torchinductor_shersingh",
+        "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+        "TRANSFORMERS_OFFLINE": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "WANDB_MODE": "disabled",
+        "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+        "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+        "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+        "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+        "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+      },
+      "returncode": 0,
+      "status": "completed",
+      "stderr_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/11.stderr",
+      "stdout_log": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/logs/native/11.stdout",
+      "timeout": null
+    }
+  ],
+  "cpu_routing": {
+    "method": "test-process-only lru_cache availability=False preserving __wrapped__/cache APIs",
+    "torch_cuda_is_available": false,
+    "torch_mps_is_available": false
+  },
+  "dispatch_operations": 168,
+  "dispatch_tensor_devices": {
+    "cpu": 50,
+    "meta": 118
+  },
+  "elapsed_seconds": 139.4006440830417,
+  "entrypoint": {
+    "function": "train.export_gguf",
+    "model_name": "RANDOM-Qwen3.5-native",
+    "output_dir": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/actual-native-stock-tokenizer"
+  },
+  "environment": {
+    "ACCELERATE_USE_CPU": "true",
+    "CUDA_VISIBLE_DEVICES": "",
+    "DO_NOT_TRACK": "1",
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_TERMINAL_PROMPT": "0",
+    "HERMES_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+    "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes",
+    "HERMES_KNOWLEDGE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/hermes/knowledge",
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf",
+    "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/hf/hub",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "HF_HUB_OFFLINE": "1",
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/home",
+    "LC_ALL": "en_US.UTF-8",
+    "MKL_NUM_THREADS": "1",
+    "MPLCONFIGDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/matplotlib",
+    "NUMBA_CACHE_DIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/numba",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin:/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTORCH_ENABLE_MPS_FALLBACK": "0",
+    "QMD_LLAMA_GPU": "false",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/tmp",
+    "TOKENIZERS_PARALLELISM": "false",
+    "TORCH_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/torch",
+    "TRANSFORMERS_OFFLINE": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "WANDB_MODE": "disabled",
+    "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/cache/xdg",
+    "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/config",
+    "XDG_DATA_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/data",
+    "XDG_STATE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-repaired-native-v7cvw6rh/isolation/native/state",
+    "__CF_USER_TEXT_ENCODING": "0x1F5:0x0:0x52"
+  },
+  "environment_unchanged": true,
+  "installed_gguf_identity": {
+    "init_sha256": "3ccfc0104cd7ea88c6028743b7bf3f2c89b5f474425de03a217a6072320d7c2f",
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/__init__.py",
+    "reader_path": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/lib/python3.12/site-packages/gguf/gguf_reader.py",
+    "reader_sha256": "91cb9e81f1a67f5856f012cf3f526ad9ffdb6b887d2aa66e2593ee6f63764aad",
+    "version": "0.19.0"
+  },
+  "max_rss_bytes_child": 971423744,
+  "max_rss_bytes_self": 1515503616,
+  "model_devices": [
+    {
+      "buffer_devices": [
+        "cpu"
+      ],
+      "hf_device_map": null,
+      "label": "actual_native_model_load",
+      "parameter_bytes": 129648016,
+      "parameter_count": 64824008,
+      "parameter_devices": [
+        "cpu"
+      ]
+    }
+  ],
+  "name": "native",
+  "network_attempts": [],
+  "packages": {
+    "accelerate": "1.15.0+qmd.2",
+    "cmake": "4.4.4",
+    "gguf": "0.19.0",
+    "numpy": "2.5.4",
+    "peft": "0.21.3",
+    "protobuf": "7.36.2",
+    "sentencepiece": "0.2.3",
+    "torch": "2.15.0",
+    "transformers": "5.22.2"
+  },
+  "pip_after": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "--version"
+    ],
+    "status": 1,
+    "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python: No module named pip\n"
+  },
+  "pip_before": {
+    "argv": [
+      "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "--version"
+    ],
+    "status": 1,
+    "stderr": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-lock-preview-f_xuxmo_/repo/finetune/.venv/bin/python: No module named pip\n"
+  },
+  "source_after": {
+    "binding_manifest_sha256": "83872d1719834153c8e1b97fa26d741fca7505bbf9cfa59aa95279100a3a17a0",
+    "composed_files": {
+      "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "finetune/convert_gguf.py": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+      "finetune/convert_gguf.py.lock": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+      "finetune/convert_onnx.py": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+      "finetune/convert_onnx.py.lock": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+      "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/pyproject.toml": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+      "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+      "finetune/train.py": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+      "finetune/train.py.lock": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+      "finetune/train_unsloth.py": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+      "finetune/train_unsloth.py.lock": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+      "finetune/uv.lock": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+      "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+      "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596"
+    }
+  },
+  "source_before": {
+    "binding_manifest_sha256": "83872d1719834153c8e1b97fa26d741fca7505bbf9cfa59aa95279100a3a17a0",
+    "composed_files": {
+      "docs/security/dependency-remediation/patched-dependencies.json": "109c61e982160bb5c7c6fe40923e4c399bee7907de02f86126f669fd343f8c82",
+      "finetune/convert_gguf.py": "1cb47afa28d802c6a7ad0ed1bcd3ef1732558dc42c89877898569868aaf01f5b",
+      "finetune/convert_gguf.py.lock": "d76dc77fc81d8d7671ea4ceab8dab27f366d7005097069e463249482ee9c47ba",
+      "finetune/convert_onnx.py": "dc396c529da322f4a79dce5fad5176b5930c5aedd8efd4b4e526765e986a3091",
+      "finetune/convert_onnx.py.lock": "0fc7a64e995544ab8cbaee0a7b8516fa5c28565a518ea578a400a5d21466671a",
+      "finetune/dataset/analyze_data.py": "b46b04a7988e80b5cabef51141e9f748af2f728326c94b9e78ea5bd4e514479a",
+      "finetune/dataset/analyze_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/prepare_data.py": "682a22df0a402ae05c6c00552ffb0363353a0b346aba7e68aff819583f3280af",
+      "finetune/dataset/prepare_data.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/prepare_data_lfm2.py": "effb4e37c084bac22e43426a7cfeb9645c441ca59d5be608ac8ab904f4e4ab3f",
+      "finetune/dataset/prepare_data_lfm2.py.lock": "5b9982babe48be942398f7d1509eab60374bf415e92cbbed0d8b984305cc241e",
+      "finetune/dataset/score_data.py": "8d31c8f83d097ac871d16eb5abc32a1bd65d677711ff154e528ed24fe213c242",
+      "finetune/dataset/score_data.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/dataset/validate_schema.py": "4e263e0a7e822dc98ac603c346dd8fb0871353bf63ee7fd62ab9f2c6e92b2d0b",
+      "finetune/dataset/validate_schema.py.lock": "a279deb995655cea7269e87c867ccf3141e591e16657b32784da9fbd92287605",
+      "finetune/eval.py": "5a023745a539a2dc20dd81064d1cee4f0d8213df6d4a11af418c7fba1a9bae7c",
+      "finetune/eval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/eval_retrieval.py": "4bfec80512858caadb2c10a22b76f269b3d29d1af1571b48fef656e65d30dd06",
+      "finetune/eval_retrieval.py.lock": "153f3d0c71b890dfee70a8331b7883d206e58aef3f914965a0770f39656b76a4",
+      "finetune/experiments/grpo/grpo.py": "1770dc786afeae8bdd4e72ed24b9f231b946717b5f3d51f6db318dc581c56dd2",
+      "finetune/experiments/grpo/grpo.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/experiments/lfm2/sft_lfm2.py": "28a0838fb802ce71eef0c5a0b69175a388cbeffc7602878e13db1435e1a8fb2e",
+      "finetune/experiments/lfm2/sft_lfm2.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+      "finetune/jobs/eval.py": "3ac0c1cc1c4005009eeee232eb6d45d96083ff7b534d9eced47eef10e8686a8b",
+      "finetune/jobs/eval.py.lock": "964399b0c1363cc814178912f5761a08fb414ce935b4035c30b6567dab81337d",
+      "finetune/jobs/sft.py": "d322982cf2c7ff9158f5ff0e0400058836d6dd3f1f819a1ff2f9962d7f2d8293",
+      "finetune/jobs/sft.py.lock": "e86f06d11b0412dc0eae0be01b4720c177c140c7f028bdace504bc9b055deefa",
+      "finetune/pyproject.toml": "c02e48857b94ff2434319026b161824fd563a89e7550ad4c9d68899844600b35",
+      "finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+      "finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+      "finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+      "finetune/tools/sync_script_dependencies.py": "1f383a3ceb16f1249756b31a8dca38e20dec5cc30a37b55bd018938cf0a69f2f",
+      "finetune/train.py": "4f39cd5d1f69425fa779403b5aa2474968196ee3299a8c8632e51ca959150326",
+      "finetune/train.py.lock": "42ab587ac7fdd7a13fb71c94d51f064c99155ef361175118bc1309c844d4baba",
+      "finetune/train_unsloth.py": "5567b52a8aac997f5a40f78e6b6ca5600c28bdb432ee9526525d7f7e05f5ef1b",
+      "finetune/train_unsloth.py.lock": "5386a0eaec5e84e3dfd04e2efbdb60c4891aa608b2d49862b2e3498ff597e453",
+      "finetune/uv.lock": "25ce9759372b14ba41afa0b3cd36cfe5ad7734f445e216e60d0d241e16903af2",
+      "finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+      "scripts/uv_lock_graph.py": "e1d133c16346ed0138eaae115d1ab3c98a9b200a1adcb2fdb3cd69acc9f7c596"
+    }
+  },
+  "source_unchanged": true,
+  "success": true,
+  "tokenizer": {
+    "class": "transformers.models.qwen2.tokenization_qwen2.Qwen2Tokenizer",
+    "length": 248077,
+    "stock_save_pretrained_unmodified": true,
+    "trust_remote_code": false
+  }
+}

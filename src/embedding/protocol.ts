@@ -1,15 +1,21 @@
-/**
- * protocol.ts — Binary & JSON Wire Protocol Serialization and Validation
- *
- * Implements strict binary framing and JSON response validation for high-speed,
- * safe embedding transport over local loopback HTTP.
- */
+/** Strict little-endian framing and serving-identity validation. */
+import {
+  MAX_EMBEDDING_DIMENSIONS, assertEmbeddingCompatibility, validateEmbeddingDescriptor,
+  type EmbeddingDescriptor,
+} from "./contract.js";
 
 export class EmbeddingProtocolError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "EmbeddingProtocolError";
-  }
+  constructor(message: string) { super(message); this.name = "EmbeddingProtocolError"; }
+}
+
+export const MAX_EMBEDDING_VALUES = 4_194_304;
+const MAX_VECTOR_COUNT = 65_536;
+const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+
+export interface EmbeddingResponseExpectations {
+  count?: number;
+  dims?: number;
+  descriptor?: EmbeddingDescriptor;
 }
 
 export interface DecodedBinaryPayload {
@@ -19,137 +25,125 @@ export interface DecodedBinaryPayload {
   rawFloats: Float32Array;
 }
 
-/**
- * Decodes little-endian binary embedding payload.
- * Binary format: [int32 count (4B)][int32 dims (4B)][float32 data (count * dims * 4B)]
- */
-export function decodeBinaryEmbeddings(buffer: ArrayBuffer): DecodedBinaryPayload {
-  if (buffer.byteLength < 8) {
-    throw new EmbeddingProtocolError(
-      `Binary response truncated: buffer length ${buffer.byteLength} < 8-byte header`
-    );
+function validateShape(count: number, dims: number, expected?: EmbeddingResponseExpectations): number {
+  if (!Number.isSafeInteger(count) || count < 0 || count > MAX_VECTOR_COUNT) {
+    throw new EmbeddingProtocolError("Invalid embedding count");
   }
+  if (!Number.isSafeInteger(dims) || dims < 0 || dims > MAX_EMBEDDING_DIMENSIONS || (count > 0 && dims === 0)) {
+    throw new EmbeddingProtocolError("Invalid embedding dimensions");
+  }
+  const values = count * dims;
+  if (!Number.isSafeInteger(values) || values > MAX_EMBEDDING_VALUES) {
+    throw new EmbeddingProtocolError("Embedding response exceeds value limit");
+  }
+  if (expected?.count !== undefined && count !== expected.count) {
+    throw new EmbeddingProtocolError(`Embedding count ${count} does not match expected ${expected.count}`);
+  }
+  const expectedDims = expected?.dims ?? expected?.descriptor?.outputDimensions;
+  if (expectedDims !== undefined && dims !== expectedDims) {
+    throw new EmbeddingProtocolError(`Embedding dims ${dims} do not match expected ${expectedDims}`);
+  }
+  return values;
+}
 
-  // Use DataView to ensure strictly little-endian parsing
+/** Binary body is unchanged: int32 count, int32 dims, then count*dims float32. */
+export function decodeBinaryEmbeddings(buffer: ArrayBuffer, expected?: EmbeddingResponseExpectations): DecodedBinaryPayload {
+  if (buffer.byteLength < 8) throw new EmbeddingProtocolError("Binary response truncated: less than 8-byte header");
   const view = new DataView(buffer);
   const count = view.getInt32(0, true);
   const dims = view.getInt32(4, true);
-
-  if (count < 0 || dims < 0) {
-    throw new EmbeddingProtocolError(`Invalid negative count (${count}) or dims (${dims}) in header`);
+  const values = validateShape(count, dims, expected);
+  const expectedBytes = 8 + values * 4;
+  // Validate even empty frames: no early return that can hide trailing bytes.
+  if (buffer.byteLength !== expectedBytes) {
+    throw new EmbeddingProtocolError(`Binary payload byte length mismatch: expected ${expectedBytes}, received ${buffer.byteLength}`);
   }
-
-  if (count === 0 || dims === 0) {
-    return { count: 0, dims: 0, vectors: [], rawFloats: new Float32Array(0) };
+  const floats = LITTLE_ENDIAN ? new Float32Array(buffer, 8, values) : new Float32Array(values);
+  for (let i = 0; i < values; i++) {
+    if (!LITTLE_ENDIAN) floats[i] = view.getFloat32(8 + i * 4, true);
+    if (!Number.isFinite(floats[i])) throw new EmbeddingProtocolError(`Non-finite float at offset ${i}`);
   }
-
-  const expectedDataBytes = count * dims * 4;
-  const totalExpectedBytes = 8 + expectedDataBytes;
-
-  if (buffer.byteLength !== totalExpectedBytes) {
-    throw new EmbeddingProtocolError(
-      `Binary payload byte length mismatch: expected ${totalExpectedBytes} bytes for ${count}x${dims} floats, received ${buffer.byteLength} bytes`
-    );
-  }
-
-  // Float32Array view directly into buffer offset 8
-  const floats = new Float32Array(buffer, 8, count * dims);
-
-  // Validate finite values (no NaN or Infinity)
-  for (let i = 0; i < floats.length; i++) {
-    const val = floats[i]!;
-    if (!Number.isFinite(val)) {
-      throw new EmbeddingProtocolError(`Non-finite float value detected in embedding at offset ${i}: ${val}`);
-    }
-  }
-
-  const vectors: number[][] = new Array(count);
-  for (let i = 0; i < count; i++) {
-    const start = i * dims;
-    const end = start + dims;
-    vectors[i] = Array.from(floats.subarray(start, end));
-  }
-
-  return {
-    count,
-    dims,
-    vectors,
-    rawFloats: floats,
-  };
+  const vectors = Array.from({ length: count }, (_, i) => Array.from(floats.subarray(i * dims, (i + 1) * dims)));
+  return { count, dims, vectors, rawFloats: floats };
 }
 
-/**
- * Encodes count x dims float32 vectors into standard little-endian binary buffer.
- */
-export function encodeBinaryEmbeddings(vectors: number[][] | Float32Array[], dims: number): Uint8Array {
+export function encodeBinaryEmbeddings(vectors: number[][] | Float32Array[], dims: number): Uint8Array<ArrayBuffer> {
   const count = vectors.length;
-  const totalBytes = 8 + count * dims * 4;
-  const buffer = new ArrayBuffer(totalBytes);
-  const view = new DataView(buffer);
-
-  view.setInt32(0, count, true);
-  view.setInt32(4, dims, true);
-
-  const floatView = new Float32Array(buffer, 8, count * dims);
+  const values = validateShape(count, dims);
+  // Validate before allocation or conversion, including float32 overflow.
   for (let i = 0; i < count; i++) {
-    const vec = vectors[i]!;
-    if (vec.length !== dims) {
-      throw new EmbeddingProtocolError(`Vector at index ${i} has length ${vec.length}, expected ${dims}`);
+    const vector = vectors[i];
+    if ((!Array.isArray(vector) && !(vector instanceof Float32Array)) || vector.length !== dims) {
+      throw new EmbeddingProtocolError(`Vector at index ${i} does not have ${dims} dimensions`);
     }
-    for (let j = 0; j < dims; j++) {
-      const v = vec[j]!;
-      if (!Number.isFinite(v)) {
-        throw new EmbeddingProtocolError(`Non-finite float value at vector ${i}, dim ${j}: ${v}`);
+    for (const value of vector) {
+      if (typeof value !== "number" || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) {
+        throw new EmbeddingProtocolError(`Non-finite float32 value in vector ${i}`);
       }
-      floatView[i * dims + j] = v;
     }
   }
-
+  const buffer = new ArrayBuffer(8 + values * 4);
+  const view = new DataView(buffer);
+  view.setInt32(0, count, true);
+  view.setInt32(4, dims, true);
+  for (let i = 0; i < count; i++) {
+    for (let j = 0; j < dims; j++) view.setFloat32(8 + (i * dims + j) * 4, vectors[i]![j]!, true);
+  }
   return new Uint8Array(buffer);
 }
 
-/**
- * Validates a JSON response payload from the embedding server.
- */
-export function validateJsonEmbedResponse(data: unknown): {
+function responseDescriptor(data: unknown, expected?: EmbeddingDescriptor): EmbeddingDescriptor | undefined {
+  if (data === undefined) {
+    if (expected) throw new EmbeddingProtocolError("Missing serving embedding descriptor");
+    return undefined; // Legacy standalone helper compatibility, never used by the production client.
+  }
+  try {
+    const actual = validateEmbeddingDescriptor(data);
+    if (actual.backend !== "mlx") throw new Error("Serving embedding backend must be mlx");
+    if (expected) assertEmbeddingCompatibility(expected, actual, "MLX response");
+    return actual;
+  } catch (error) {
+    throw new EmbeddingProtocolError(error instanceof Error ? error.message : "Invalid serving embedding descriptor");
+  }
+}
+
+/** Header value is urllib.parse.quote(JSON, safe=''), not base64 or raw JSON. */
+export function decodeEmbeddingDescriptorHeader(value: string | null, expected?: EmbeddingDescriptor): EmbeddingDescriptor | undefined {
+  if (value === null) return responseDescriptor(undefined, expected);
+  try {
+    if (value.length > 262_144) throw new Error("Embedding descriptor header exceeds byte limit");
+    return responseDescriptor(JSON.parse(decodeURIComponent(value)), expected);
+  } catch (error) {
+    if (error instanceof EmbeddingProtocolError) throw error;
+    throw new EmbeddingProtocolError("Invalid percent-encoded embedding descriptor header");
+  }
+}
+
+export function validateJsonEmbedResponse(data: unknown, expected?: EmbeddingResponseExpectations): {
   embeddings: number[][];
   model: string;
   dims: number;
+  descriptor?: EmbeddingDescriptor;
 } {
-  if (!data || typeof data !== "object") {
-    throw new EmbeddingProtocolError("Invalid JSON response: expected an object");
-  }
-
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new EmbeddingProtocolError("Expected a JSON object");
   const obj = data as Record<string, unknown>;
-  if (!Array.isArray(obj.embeddings)) {
-    throw new EmbeddingProtocolError("Invalid JSON response: 'embeddings' must be an array");
+  if (!Array.isArray(obj.embeddings)) throw new EmbeddingProtocolError("'embeddings' must be an array");
+  if (typeof obj.dims !== "number") throw new EmbeddingProtocolError("'dims' must be an integer");
+  validateShape(obj.embeddings.length, obj.dims, expected);
+  const descriptor = responseDescriptor(obj.descriptor, expected?.descriptor);
+  if (typeof obj.model !== "string" || !obj.model.trim() || obj.model.length > 8192) throw new EmbeddingProtocolError("'model' must be a nonempty string");
+  if (descriptor && (obj.model !== descriptor.model || obj.dims !== descriptor.outputDimensions)) {
+    throw new EmbeddingProtocolError("Response model/dimensions disagree with serving descriptor");
   }
-
   const embeddings = obj.embeddings as number[][];
-  const model = typeof obj.model === "string" ? obj.model : "unknown";
-  const reportedDims = typeof obj.dims === "number" ? obj.dims : (embeddings[0]?.length ?? 0);
-
   for (let i = 0; i < embeddings.length; i++) {
-    const vec = embeddings[i];
-    if (!Array.isArray(vec)) {
-      throw new EmbeddingProtocolError(`Embedding at index ${i} is not an array`);
-    }
-    if (reportedDims > 0 && vec.length !== reportedDims) {
-      throw new EmbeddingProtocolError(
-        `Embedding at index ${i} length ${vec.length} does not match expected dims ${reportedDims}`
-      );
-    }
-    for (let j = 0; j < vec.length; j++) {
-      const val = vec[j];
-      if (typeof val !== "number" || !Number.isFinite(val)) {
-        throw new EmbeddingProtocolError(`Non-finite number at embedding ${i}, dim ${j}: ${val}`);
+    const vector = embeddings[i];
+    if (!Array.isArray(vector) || vector.length !== obj.dims) throw new EmbeddingProtocolError(`Invalid dimensions at embedding ${i}`);
+    for (let j = 0; j < vector.length; j++) {
+      if (typeof vector[j] !== "number" || !Number.isFinite(vector[j]) || !Number.isFinite(Math.fround(vector[j]!))) {
+        throw new EmbeddingProtocolError(`Non-finite float32 value at embedding ${i}, dim ${j}`);
       }
     }
   }
-
-  return {
-    embeddings,
-    model,
-    dims: reportedDims,
-  };
+  return { embeddings, model: obj.model, dims: obj.dims, descriptor };
 }

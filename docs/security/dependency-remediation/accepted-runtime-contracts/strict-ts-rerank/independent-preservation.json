@@ -1,0 +1,40 @@
+{
+  "originalSnapshotMismatches": [],
+  "originalMirrorMismatches": [],
+  "followupMirrorMismatches": [],
+  "ownCandidateMismatches": [],
+  "artifactMismatches": [],
+  "liveEntryToExitChanges": [],
+  "liveRecoveryFreezeMismatches": [],
+  "sharedDependencyCache": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-ts-nj8i129w/mirror/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+    "sha256": "aa0b2e06cb12d8ca1a44b5a04b5ea60d3d2b87d27d1a8c6cc849a0dc77fc2d2c",
+    "mtimeNs": 1794608031759430836,
+    "bytesAndMtimeUnchanged": true
+  },
+  "counts": {
+    "frozenSnapshotEntries": 242,
+    "originalDeliveryFiles": 20,
+    "supplementFiles": 4,
+    "combinedIntegrationPaths": 16,
+    "liveRecoveryFreezeFiles": 9
+  },
+  "originalRedRunnerSha256": "055073c2b89162b97bdae97f66217fc5b3e911acebf37d59761be80381865bbe",
+  "historicalOriginals": [
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/mcp-positive-contract-and-admission-review.mjs",
+      "sha256": "7d303207ec3cd253b95688702dec2499e0b9a74e7fa82151e3cd5ffe8668343d",
+      "archivedManifestMatches": true
+    },
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/mcp-postrepair-http-admission-proof.mjs",
+      "sha256": "60ce7419d0de829721028ecb3f57709722944aaa8dccfd3cd48c0b237b47c742",
+      "archivedManifestMatches": true
+    },
+    {
+      "file": "docs/reviews/apple-silicon-audit-evidence/quality-mcp-heldout-cancel.mjs",
+      "sha256": "707ca38db0dcbd5c22767e5169bedd35ef9a97eb11849884023cf675cbe06997",
+      "archivedManifestMatches": true
+    }
+  ]
+}

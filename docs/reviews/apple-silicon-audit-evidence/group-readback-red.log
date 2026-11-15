@@ -1,0 +1,146 @@
+{"command": ["/Users/shersingh/github/qmd-mlx-search/.venv/bin/python", "-m", "pytest", "test/python/test_watchdog_cli_cleanup.py", "test/python/test_process_ownership_quality.py", "-q", "-k", "group_readback_failure or empty_no_match_readback"], "cwd": "/Users/shersingh/github/qmd-mlx-search", "environment": {"CI": "true", "HERMES_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/hermes", "HF_DATASETS_OFFLINE": "1", "HF_HUB_OFFLINE": "1", "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/home", "PATH": "/Users/shersingh/.local/bin:/Users/shersingh/.browser-use-env/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/Users/shersingh/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/usr/local/co.palokaj.battery:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/shersingh/.hermes/hermes-agent/.hermes/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/b3f691ccae4e4120a54cf5ef7554f276/venv/bin:/Users/shersingh/.hermes/hermes-agent/node_modules/.bin:/Users/shersingh/.hermes/node/bin:/Users/shersingh/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/shersingh/.hermes/installs/24e229a8a5fcc398/environments/ce5ceaa1d33f425cba05f169f248ba85/venv/bin:/Users/shersingh/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin:/Users/shersingh/.hermes/tools/agent-browser-0.26.0-darwin-arm64/bin:/Users/shersingh/.antigravity-ide/antigravity-ide/bin:/Users/shersingh/.local/bin:/Users/shersingh/.grok/bin:/Users/shersingh/.bun/bin:/Users/shersingh/bin:/Users/shersingh/.antigravity/antigravity/bin:/Users/shersingh/miniconda3/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shersingh/Downloads/apache-maven-3.9.0/bin:/Users/shersingh/.lmstudio/bin:/usr/local/sbin:/Users/shersingh/.hermes/bin:/Users/shersingh/.hermes/tools/python-3.14.9+20261021-darwin-arm64/bin:/Users/shersingh/.hermes/tools/cua-driver-0.21.0-darwin-arm64/CuaDriver.app/Contents/MacOS:/Users/shersingh/.hermes/tools/ffmpeg-9.0.1-darwin-arm64:/Users/shersingh/.hermes/tools/npm-12.0.2-darwin-arm64/bin:/Users/shersingh/.hermes/tools/pnpm-12.15.0-darwin-arm64:/Users/shersingh/.hermes/tools/node-26.12.1-darwin-arm64/bin:/Users/shersingh/.hermes/tools/ripgrep-15.2.0-darwin-arm64:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin:/Users/shersingh/.lmstudio/bin", "PYTHONPATH": "/Users/shersingh/github/qmd-mlx-search", "SHELL": "/bin/zsh", "TEMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp", "TMP": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp", "TMPDIR": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp", "TOKENIZERS_PARALLELISM": "false", "TRANSFORMERS_OFFLINE": "1", "XDG_CACHE_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/cache", "XDG_CONFIG_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/config"}, "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw"}
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_cli_group_readback_failure_retains_anchor_and_fails_closed[1--ps: sysctl: Operation not permitted-leader_exit] _
+
+cli_tree = namespace(root=PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp/pytest-of-s...al-s', '0.02', '--startup-grace-period-s', '0', '--health-timeout-s', '0.15', '--consecutive-failures', '1', '--json'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106d0bd10>
+capsys = <_pytest.capture.CaptureFixture object at 0x106d08e00>, returncode = 1
+stdout_template = '', stderr = 'ps: sysctl: Operation not permitted'
+
+    @pytest.mark.parametrize("mode", ["leader_exit"])
+    @pytest.mark.parametrize("returncode,stdout_template,stderr", [
+        (1, "", "ps: sysctl: Operation not permitted"),
+        (0, "{pid} Z\n", "ps: incomplete process snapshot"),
+        (1, "{pid} Z\n", ""),
+    ])
+    def test_cli_group_readback_failure_retains_anchor_and_fails_closed(
+        cli_tree, monkeypatch, capsys, returncode, stdout_template, stderr,
+    ):
+        from scripts.qmd_mlx.process_anchor import wait_child_without_reaping
+    
+        tree = cli_tree
+        real_run = subprocess.run
+        observations = []
+    
+        def failed_group_readback(command, *args, **kwargs):
+            if command[:2] == ["ps", "-g"]:
+                assert tree.children and int(command[2]) == tree.children[0].pid
+                observations.append(command)
+                return SimpleNamespace(
+                    returncode=returncode,
+                    stdout=stdout_template.format(pid=tree.children[0].pid), stderr=stderr,
+                )
+            return real_run(command, *args, **kwargs)
+    
+        # Only completion telemetry is injected: process identity, exited leader,
+        # TERM-ignoring grandchild, sentinel and final fixture cleanup are real.
+        with monkeypatch.context() as patch:
+            patch.setattr(subprocess, "run", failed_group_readback)
+            code = tree.cli.main(tree.options + ["--launch"] + tree.command)
+        captured = capsys.readouterr()
+        report = json.loads(captured.out)
+        child = tree.children[0]
+        descendant = read_json_when_ready(tree.root / "grandchild.json")["pid"]
+        assert observations
+>       assert code == report["exit_code"] == 2
+E       assert 0 == 2
+
+test/python/test_watchdog_cli_cleanup.py:437: AssertionError
+_ test_cli_group_readback_failure_retains_anchor_and_fails_closed[0-{pid} Z\n-ps: incomplete process snapshot-leader_exit] _
+
+cli_tree = namespace(root=PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp/pytest-of-s...al-s', '0.02', '--startup-grace-period-s', '0', '--health-timeout-s', '0.15', '--consecutive-failures', '1', '--json'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106d08fe0>
+capsys = <_pytest.capture.CaptureFixture object at 0x106cb27e0>, returncode = 0
+stdout_template = '{pid} Z\n', stderr = 'ps: incomplete process snapshot'
+
+    @pytest.mark.parametrize("mode", ["leader_exit"])
+    @pytest.mark.parametrize("returncode,stdout_template,stderr", [
+        (1, "", "ps: sysctl: Operation not permitted"),
+        (0, "{pid} Z\n", "ps: incomplete process snapshot"),
+        (1, "{pid} Z\n", ""),
+    ])
+    def test_cli_group_readback_failure_retains_anchor_and_fails_closed(
+        cli_tree, monkeypatch, capsys, returncode, stdout_template, stderr,
+    ):
+        from scripts.qmd_mlx.process_anchor import wait_child_without_reaping
+    
+        tree = cli_tree
+        real_run = subprocess.run
+        observations = []
+    
+        def failed_group_readback(command, *args, **kwargs):
+            if command[:2] == ["ps", "-g"]:
+                assert tree.children and int(command[2]) == tree.children[0].pid
+                observations.append(command)
+                return SimpleNamespace(
+                    returncode=returncode,
+                    stdout=stdout_template.format(pid=tree.children[0].pid), stderr=stderr,
+                )
+            return real_run(command, *args, **kwargs)
+    
+        # Only completion telemetry is injected: process identity, exited leader,
+        # TERM-ignoring grandchild, sentinel and final fixture cleanup are real.
+        with monkeypatch.context() as patch:
+            patch.setattr(subprocess, "run", failed_group_readback)
+            code = tree.cli.main(tree.options + ["--launch"] + tree.command)
+        captured = capsys.readouterr()
+        report = json.loads(captured.out)
+        child = tree.children[0]
+        descendant = read_json_when_ready(tree.root / "grandchild.json")["pid"]
+        assert observations
+>       assert code == report["exit_code"] == 2
+E       assert 0 == 2
+
+test/python/test_watchdog_cli_cleanup.py:437: AssertionError
+_ test_cli_group_readback_failure_retains_anchor_and_fails_closed[1-{pid} Z\n--leader_exit] _
+
+cli_tree = namespace(root=PosixPath('/Users/shersingh/.hermes/cache/scratch/qmd-audit/group-readback-red-n2iftejw/tmp/pytest-of-s...al-s', '0.02', '--startup-grace-period-s', '0', '--health-timeout-s', '0.15', '--consecutive-failures', '1', '--json'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106d2f260>
+capsys = <_pytest.capture.CaptureFixture object at 0x106d2deb0>, returncode = 1
+stdout_template = '{pid} Z\n', stderr = ''
+
+    @pytest.mark.parametrize("mode", ["leader_exit"])
+    @pytest.mark.parametrize("returncode,stdout_template,stderr", [
+        (1, "", "ps: sysctl: Operation not permitted"),
+        (0, "{pid} Z\n", "ps: incomplete process snapshot"),
+        (1, "{pid} Z\n", ""),
+    ])
+    def test_cli_group_readback_failure_retains_anchor_and_fails_closed(
+        cli_tree, monkeypatch, capsys, returncode, stdout_template, stderr,
+    ):
+        from scripts.qmd_mlx.process_anchor import wait_child_without_reaping
+    
+        tree = cli_tree
+        real_run = subprocess.run
+        observations = []
+    
+        def failed_group_readback(command, *args, **kwargs):
+            if command[:2] == ["ps", "-g"]:
+                assert tree.children and int(command[2]) == tree.children[0].pid
+                observations.append(command)
+                return SimpleNamespace(
+                    returncode=returncode,
+                    stdout=stdout_template.format(pid=tree.children[0].pid), stderr=stderr,
+                )
+            return real_run(command, *args, **kwargs)
+    
+        # Only completion telemetry is injected: process identity, exited leader,
+        # TERM-ignoring grandchild, sentinel and final fixture cleanup are real.
+        with monkeypatch.context() as patch:
+            patch.setattr(subprocess, "run", failed_group_readback)
+            code = tree.cli.main(tree.options + ["--launch"] + tree.command)
+        captured = capsys.readouterr()
+        report = json.loads(captured.out)
+        child = tree.children[0]
+        descendant = read_json_when_ready(tree.root / "grandchild.json")["pid"]
+        assert observations
+>       assert code == report["exit_code"] == 2
+E       assert 0 == 2
+
+test/python/test_watchdog_cli_cleanup.py:437: AssertionError
+=========================== short test summary info ============================
+FAILED test/python/test_watchdog_cli_cleanup.py::test_cli_group_readback_failure_retains_anchor_and_fails_closed[1--ps: sysctl: Operation not permitted-leader_exit] - assert 0 == 2
+FAILED test/python/test_watchdog_cli_cleanup.py::test_cli_group_readback_failure_retains_anchor_and_fails_closed[0-{pid} Z\n-ps: incomplete process snapshot-leader_exit] - assert 0 == 2
+FAILED test/python/test_watchdog_cli_cleanup.py::test_cli_group_readback_failure_retains_anchor_and_fails_closed[1-{pid} Z\n--leader_exit] - assert 0 == 2
+3 failed, 1 passed, 31 deselected in 0.98s

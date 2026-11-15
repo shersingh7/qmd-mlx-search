@@ -1,0 +1,35 @@
+"""TEST-ONLY adapter. Inline production controller is read unchanged from stdin.
+
+The generated Bash's one Python executable is replaced with this owned adapter.
+Host platform answers and Docker/git executable destinations are synthetic; all
+other control flow, subprocess argv, timeout handling, logging and cleanup code
+comes verbatim from the proposed workflow. Probe/launcher are NEVER executed.
+"""
+from pathlib import Path
+import json
+import platform
+import subprocess
+import sys
+
+cfg_path = Path(sys.argv[1])
+cfg = json.loads(cfg_path.read_text())
+owned = sys.argv[2]
+code = sys.stdin.read()
+platform.system = lambda: cfg.get('host_os', 'Linux')
+platform.machine = lambda: cfg.get('host_arch', 'x86_64')
+original_popen = subprocess.Popen
+
+def fixture_popen(argv, **kwargs):
+    assert argv[0] in ('docker', 'git'), f'Unexpected subprocess denied: {argv!r}'
+    child = original_popen([sys.executable, '-I', '-B', '-S', str(cfg_path.parent.parent.parent / 'fake_cli.py'),
+                            str(cfg_path), *argv], **kwargs)
+    if argv[0] == 'docker' and 'run' in argv and cfg.get('probe_timeout'):
+        original_wait = child.wait
+        def accelerated_wait(timeout=None):
+            return original_wait(timeout=0.3 if timeout == 180 else timeout)
+        child.wait = accelerated_wait
+    return child
+
+subprocess.Popen = fixture_popen
+sys.argv = ['-', owned]
+exec(compile(code, '<verbatim-workflow-controller>', 'exec'), {'__name__': '__main__'})

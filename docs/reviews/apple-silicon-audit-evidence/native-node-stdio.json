@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "runtime": "node v22.22.3",
+  "pid": 31075,
+  "checks": [
+    "installed native MCP stdio initialize, tools/list and status"
+  ],
+  "tools": [
+    "query",
+    "get",
+    "multi_get",
+    "status"
+  ],
+  "childExited": true
+}

@@ -1,0 +1,36 @@
+{
+  "status": "SPEC_PASS_QUALITY_PASS_LIVE_INTEGRATED_LOCAL_ACCEPTANCE_PASSED_CI_RELEASE_PENDING",
+  "baselineHead": "9ca0fee12a398a6196ec0d3a8e3270a4ff21e705",
+  "patchSha256": "1539352e30bb2ecd2f8b52a3195dd86867e71c2d27d065127569e511d6335116",
+  "payloadSha256": {
+    "src/ast.ts": "ce7e7609538ea35c972abd7b0a04af72bf744108ea630c26542257baceb5f79a",
+    "test/ast-lifecycle.test.ts": "98dbec000a3e83c575f83f7030bbd7a584043db8acd4ead38d0124df03b5e4cb"
+  },
+  "reviewIndexSha256": "b20fbe86156b5853d09d0ae5d3eeb79948a7e682d393e8ab59c90ccd2c117c60",
+  "reviewArtifactsVerified": 166,
+  "actualCheckoutFullNode": {
+    "passed": 1519,
+    "failed": 0,
+    "skipped": 66,
+    "files": 54
+  },
+  "localQualificationRoot": "/Users/shersingh/.hermes/cache/scratch/qmd-ast-live-integration-94dc6wza",
+  "firstQualificationProcess": "proc_7ab9e172d8af: failed harness guard-observation assertion; retained, not relabeled",
+  "qualificationCorrection": "Bun compiler required its explicit --preload flag; fresh qualified Node/Bun executions have real guard receipts and zero refusals",
+  "localQualificationSummary": "local-qualification-summary.json",
+  "localQualificationBundle": "local-qualification-evidence.tar.gz",
+  "localQualificationBundleSha256": "f3f280ffda62ef9e1d3b33ccf0ee511fbd067c2fb4a00b9a1fb855f1ce72cb94",
+  "localQualificationEntriesVerified": 60,
+  "wholeRootCompilerRootsPerHost": 154,
+  "wholeRootDiagnosticsAndRefusals": 0,
+  "actualNativeBunFocusedPassed": 62,
+  "installedPackageSmokes": "Node and Bun passed; Bun HTTP refused as documented, not qualified",
+  "qualifiedTarballSha256": "ce36bcaca2037d7ae1c6e0a63e71260554e6c9e0a837158f24821b4fe69ad3be",
+  "bundleSha256": "5923b16c3996f9f3797067132d9a5ef917f648f1bba5bbaa34456e68f1e0f3f5",
+  "indexedEntries": 171,
+  "limitations": [
+    "Exact release attempts do not guarantee native deallocation when delete throws",
+    "No claim that full native-Bun Vitest allocator crash is fixed",
+    "Actual recovery CI failures and independent fixture/startup-probe work remain open"
+  ]
+}

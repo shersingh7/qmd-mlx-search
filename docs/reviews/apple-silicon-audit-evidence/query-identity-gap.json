@@ -1,0 +1,14 @@
+{
+  "label": "query-identity-gap",
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-gap.mts"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 1,
+  "elapsed_seconds": 0.5082957499999999,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-gap.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/query-identity-gap-ynjb2sin"
+}

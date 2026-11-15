@@ -1,0 +1,15 @@
+{
+  "label": "dev-cli-ipc-green",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "test/audit-cli-ipc.test.ts",
+    "--maxWorkers=1"
+  ],
+  "cwd": "/Users/shersingh/github/qmd-mlx-search",
+  "exit_code": 0,
+  "elapsed_seconds": 0.885686083,
+  "log": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/dev-cli-ipc-green.log",
+  "fixture": "/Users/shersingh/.hermes/cache/scratch/qmd-audit/dev-cli-ipc-green-fegyc7kq"
+}

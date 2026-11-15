@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Current Apple Silicon audit (local candidate)
+- Added a detailed parallel implementation plan, independent regression suites and real-Metal/source-fingerprinted benchmark tooling.
+- Corrected BERT/MiniLM forward semantics by supplying learned segment-zero embeddings; verified against the same local Hugging Face model rather than relying only on self-consistency.
+- Added per-response embedding descriptors, strict bounded/cancellable transport, per-instance lifecycle ownership, isolated SDK configuration and safer indexing/search/cache behavior.
+- Added bounded HTTP/SSE handling, source-level loopback origin protection, reproducible packaging/CI and fresh-process recovery fixtures.
+- **AST cleanup:** parser and tree disposal is attempted on every acquired-resource path, including parse/query/capture failures; a tree-disposal error no longer skips parser cleanup. Cleanup failures retain the regex fallback rather than masquerading as successful AST output.
+- Made bulk scheduling targets explicit and separate from the memory budget. Removed unconditional speedup/zero-copy claims; old wrong-vector benchmarks are not performance evidence.
+- **Migration:** context-aware space fingerprints and corrected BERT numerics require an explicit validated index rebuild. Storage quantization uses `auto`/`none`/`4bit`/`8bit`, independently of floating compute dtype. Unqualified Nomic/Gemma adapters fail closed.
+- **Runtime compatibility:** MCP/REST HTTP hosting requires Node.js 22+; native Bun HTTP startup is explicitly refused because disconnect cancellation is unreliable. Bun CLI, SDK and MCP stdio remain supported. The Vitest suite uses `bun run test`, with independent installed-native-runtime checks rather than Bun's partial Vitest shim.
+- **Daemon migration:** persistent MLX startup requires an explicit locally cached model selection. MCP daemon startup verifies health ownership before success, and shutdown refuses legacy or mismatched PID-only records.
+- **Developer CLI:** source launchers use Node's `tsx` import hook directly, avoiding wrapper processes and Unix IPC path collisions under long temporary directories. Subprocess fixtures exercise concurrent long-path launches.
+- Historical entries below describe earlier experimental work, not proof that the current candidate has passed every release gate. Final acceptance and remaining limitations are recorded separately; no production cutover is implied.
+
 ### Added
 - **Apple Silicon Search and Inference Overhaul**: High-performance, model-aware MLX embedding runtime on Apple Silicon.
 - **Model-Aware MLX Server & Runtime**: Dedicated GPU worker thread running MLX embedding models (`mlx-community/nomic-embed-text-v1.5`, `BAAI/bge-small-en-v1.5`, `Qwen/Qwen3-Embedding-0.6B`) with architectural hidden state extraction, mean/CLS/last-token pooling, and float32 L2 normalization.

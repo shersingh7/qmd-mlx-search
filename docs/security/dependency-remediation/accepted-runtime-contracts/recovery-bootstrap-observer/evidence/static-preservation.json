@@ -1,0 +1,167 @@
+{
+  "status": "PASS",
+  "originalFiles": 244,
+  "candidateFiles": 246,
+  "changes": [
+    ".github/workflows/ci.yml",
+    "test/audit-recovery-tree.test.ts",
+    "test/helpers/recovery-bootstrap-diagnostics.mjs",
+    "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs"
+  ],
+  "originalRecoveredByteForByte": true,
+  "itCalls": 8,
+  "launchCalls": 7,
+  "callOrderUnchanged": true,
+  "workflowSemanticsPreserved": true,
+  "limits": {
+    "executionMs": 200,
+    "teardownMs": 800,
+    "guardMs": 1800,
+    "exclusiveElapsedMs": 1500,
+    "eventLimit": 32
+  },
+  "shell": [
+    {
+      "name": "Install SQLite (Ubuntu)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "dc5c828e07f89d1ab0fce87ef92a038bfd0a1c3699767eb7fd1abaef545ab0c7",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Install SQLite (macOS)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "9ed45ebf97c7ad95b0b8699ca843d380f636dbedd9977977542468b63f9d2430",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Frozen dependencies (no implicit lifecycle scripts)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "2bfc1364b429016df7ef482ad40d37e06d4c729581e3e6275c2377801a3b7eaf",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Build Node SQLite addon for the Vitest runner",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "db6c8c61660477175b25f2c98cb27afdb948807dba6f468b99650da521e37030",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Static macOS bootstrap metadata (no added interpreter launch)",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "f31c4d4e16adb01a8757d632a48668557fece30c4b3062c31ffc338a867f39ab",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Full source build",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "6b2042ecf1413e3d06577176ce50f0b96391e2de20d38cf99bac2f111ba95ae3",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Real launcher argv/runtime tests",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "d0c34dc7189da27b68063d95e6d1fd2e248a4c95faf0dd01c22b3d44226c7d1b",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Node tests",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "2f4a95284f2678d8f7f5db458c41a25c0dfdce792c61423e96eb9fd5ab44915a",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Vitest suite through Bun's package-script launcher",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "08e17c239da1401735059775a2d9b557065ac88ff1e414a0930a21f98a48be5a",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "Real isolated tarball install and CLI/SQLite smoke",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "c7fa786c195d27665745acd064ff062fa729e31472e2c9229416fa1ffe302968",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    },
+    {
+      "name": "After-canonical Node diagnostic controls",
+      "argv": [
+        "/bin/bash",
+        "-n"
+      ],
+      "sha256": "9320f16811ad5af0057464fda244470d9d693568538bfec7e3f1ab9f44e699be",
+      "exitCode": 0,
+      "stderr": "",
+      "signal": null
+    }
+  ],
+  "patch": {
+    "executable": "/usr/bin/patch",
+    "argv": [
+      "-p1",
+      "--batch",
+      "--forward",
+      "-i",
+      "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/evidence/provided-diagnostics-proposal.patch"
+    ],
+    "cwd": "/Users/shersingh/.hermes/cache/scratch/qmd-observer-independent-g4hwpj_2/patch-replay",
+    "exitCode": 0,
+    "stdout": "patching file '.github/workflows/ci.yml'\npatching file 'test/audit-recovery-tree.test.ts'\npatching file 'test/helpers/recovery-bootstrap-diagnostics.mjs'\npatching file 'test/helpers/recovery-bootstrap-diagnostics.selftest.mjs'\n",
+    "stderr": "",
+    "replayHashes": {
+      ".github/workflows/ci.yml": "f4a8f301be216c80a07668b8ddbbb8d9e3e44f12acfc3fb48fd51670dfbdf67f",
+      "test/audit-recovery-tree.test.ts": "8f4d31a4348f9c041eead28c8379d9a6053793054fab8fc6f71a246d635dd515",
+      "test/helpers/recovery-bootstrap-diagnostics.mjs": "3c762b713596d47c3e0622195418a6182fb150c290c38aa16146c7017fba41de",
+      "test/helpers/recovery-bootstrap-diagnostics.selftest.mjs": "b25346753f581711188206b525cac5f972d1d71e2301611fe55b9daa6287046e"
+    }
+  },
+  "caveat": "Static syntax and preservation are not real CI/clock/causality qualification"
+}

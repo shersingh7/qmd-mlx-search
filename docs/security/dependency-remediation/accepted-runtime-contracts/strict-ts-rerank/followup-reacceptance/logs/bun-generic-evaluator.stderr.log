@@ -1,0 +1,22 @@
+2 | import { VitestModuleEvaluator } from '../node_modules/vitest/dist/module-evaluator.js';
+3 | const url=new URL('./namespace-entry.js',import.meta.url).href;
+4 | const native=await import(url);
+5 | const interop=await new VitestModuleEvaluator(undefined,{}).runExternalModule(url);
+6 | console.log(JSON.stringify({execPath:process.execPath,bun:process.versions.bun,node:process.versions.node,url,nativeKeys:Object.keys(native),defaultKeys:Object.keys(native.default),defaultHasEsModule:'__esModule' in native.default,defaultOwnEsModule:Object.hasOwn(native.default,'__esModule'),defaultEsModule:native.default.__esModule,nativeNamed:typeof native.z,interopNamed:typeof interop.z,interopKeys:Object.keys(interop)},null,2));
+7 | assert.equal(typeof interop.z,'object','Vitest must preserve real named namespace export');
+           ^
+AssertionError: Vitest must preserve real named namespace export
++ actual - expected
+
++ 'undefined'
+- 'object'
+
+ generatedMessage: false,
+     actual: "undefined",
+   expected: "object",
+   operator: "strictEqual",
+       code: "ERR_ASSERTION"
+
+      at /Users/shersingh/.hermes/cache/scratch/qmd-independent-final-deltas-ho4piwdo/probes/pure-namespace-evaluator.mjs:7:8
+
+Bun v1.3.8 (macOS arm64)

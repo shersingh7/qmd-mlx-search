@@ -84,15 +84,18 @@ export {
   type IndexingJobCheckpoint,
   type IndexingFingerprint,
 } from "./indexing/checkpoint.js";
+import { basename, dirname, join, resolve } from "node:path";
+import { randomUUID } from "node:crypto";
+import { accessSync, closeSync, constants, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import YAML from "yaml";
+import { assertDatabaseAccess, createSavepoint, withExclusiveDatabaseOperation, withoutDatabaseOperation } from "./db.js";
+export { DatabaseBusyError } from "./db.js";
+import { LlamaCpp } from "./llm.js";
+import { throwIfAborted } from "./llm/lifecycle.js";
 import {
-  LlamaCpp,
-  getEmbedBackend,
-} from "./llm.js";
-import {
-  setConfigSource,
+  withConfigSource,
   loadConfig,
   addCollection as collectionsAddCollection,
-  removeCollection as collectionsRemoveCollection,
   renameCollection as collectionsRenameCollection,
   addContext as collectionsAddContext,
   removeContext as collectionsRemoveContext,
@@ -101,6 +104,7 @@ import {
   type CollectionConfig,
   type NamedCollection,
   type ContextMap,
+  type ConfigSource,
 } from "./collections.js";
 
 // Re-export types for SDK consumers
@@ -184,6 +188,8 @@ export type UpdateResult = {
  * Options for the unified search() method.
  */
 export interface SearchOptions {
+  /** Cancel pending inference/transport work without releasing active native work early. */
+  signal?: AbortSignal;
   /** Simple query string — will be auto-expanded via LLM */
   query?: string;
   /** Pre-expanded queries (from expandQuery) — skips auto-expansion */
@@ -220,6 +226,7 @@ export interface LexSearchOptions {
 export interface VectorSearchOptions {
   limit?: number;
   collection?: string;
+  signal?: AbortSignal;
 }
 
 /**
@@ -227,6 +234,7 @@ export interface VectorSearchOptions {
  */
 export interface ExpandQueryOptions {
   intent?: string;
+  signal?: AbortSignal;
 }
 
 /**
@@ -333,6 +341,7 @@ export interface QMDStore {
     maxBatchBytes?: number;
     chunkStrategy?: ChunkStrategy;
     onProgress?: (info: EmbedProgress) => void;
+    signal?: AbortSignal;
   }): Promise<EmbedResult>;
 
   // ── Index Health ────────────────────────────────────────────────────
@@ -347,6 +356,52 @@ export interface QMDStore {
 
   /** Close the store and release all resources (LLM models, DB connection) */
   close(): Promise<void>;
+}
+
+/** Release both resources even if one cleanup fails. Preserve every failure. */
+async function closeStoreResources(internal: InternalStore, llm?: LlamaCpp): Promise<void> {
+  const errors: unknown[] = [];
+  try {
+    await withoutDatabaseOperation(internal.db, () => llm?.dispose());
+  } catch (error) {
+    errors.push(error);
+  }
+  try {
+    internal.close();
+  } catch (error) {
+    errors.push(error);
+  }
+  if (errors.length === 1) throw errors[0];
+  if (errors.length > 1) throw new AggregateError(errors, "Failed to close QMD store");
+}
+
+/** Never truncate the source on a failed config write; own the temp exclusively. */
+function writeRemovalConfig(path: string, contents: string, mode: number): void {
+  const temporary = join(dirname(path), `.${basename(path)}.${randomUUID()}.tmp`);
+  let descriptor: number | undefined;
+  let ownsTemporary = false;
+  let published = false;
+  const errors: unknown[] = [];
+  try {
+    descriptor = openSync(temporary, "wx", mode);
+    ownsTemporary = true;
+    writeFileSync(descriptor, contents, "utf8");
+    closeSync(descriptor);
+    descriptor = undefined;
+    renameSync(temporary, path);
+    published = true;
+  } catch (error) {
+    errors.push(error);
+  } finally {
+    if (descriptor !== undefined) {
+      try { closeSync(descriptor); } catch (error) { errors.push(error); }
+    }
+    if (ownsTemporary && !published) {
+      try { unlinkSync(temporary); } catch (error) { errors.push(error); }
+    }
+  }
+  if (errors.length === 1) throw errors[0];
+  if (errors.length > 1) throw new AggregateError(errors, "Failed to persist collection removal config", { cause: errors[0] });
 }
 
 /**
@@ -382,44 +437,67 @@ export async function createStore(options: StoreOptions): Promise<QMDStore> {
     throw new Error("Provide either configPath or config, not both");
   }
 
-  // Create the internal store (opens DB, creates tables)
+  // Capture this store's target once. No SDK operation replaces/reset the CLI's
+  // process-wide config source. Resolve file paths now so a later chdir is safe.
+  const source: ConfigSource | undefined = options.configPath
+    ? { configPath: resolve(options.configPath) }
+    : options.config ? { config: options.config } : undefined;
+  const writeConfig = (action: () => unknown): void => {
+    if (source) withConfigSource(source, action);
+  };
+
+  // Create the internal store (opens DB, creates tables).
   const internal = createStoreInternal(options.dbPath);
   const db = internal.db;
 
-  // Track whether we have a YAML config path for write-through
-  const hasYamlConfig = !!options.configPath;
+  let llm: LlamaCpp | undefined;
+  let transactionOpen = false;
+  try {
+    const config = source ? withConfigSource(source, loadConfig) : undefined;
+    if (config) {
+      // Failed sync/model setup must not leave a half-configured existing DB.
+      db.exec("BEGIN IMMEDIATE");
+      transactionOpen = true;
+      syncConfigToDb(db, config);
+    }
 
-  // Sync config into SQLite store_collections
-  let config: CollectionConfig | undefined;
-  if (options.configPath) {
-    // YAML mode: inject config source for write-through, sync to DB
-    setConfigSource({ configPath: options.configPath });
-    config = loadConfig();
-    syncConfigToDb(db, config);
-  } else if (options.config) {
-    // Inline config mode: inject config source for mutations, sync to DB
-    setConfigSource({ config: options.config });
-    config = options.config;
-    syncConfigToDb(db, config);
+    // Models stay lazy and belong to this store. Let LlamaCpp resolve omitted
+    // settings from the environment/defaults; never opt into an implicit fallback.
+    llm = new LlamaCpp({
+      embedModel: config?.models?.embed,
+      generateModel: config?.models?.generate,
+      rerankModel: config?.models?.rerank,
+      embedBackend: config?.models?.embedBackend,
+      mlxUrl: config?.models?.mlxUrl,
+      mlxDtype: config?.models?.mlxDtype,
+      mlxFallback: config?.models?.mlxFallback ?? false,
+      mlxConcurrency: config?.models?.mlxConcurrency,
+      inactivityTimeoutMs: 5 * 60 * 1000,
+      disposeModelsOnInactivity: true,
+    });
+    internal.llm = llm;
+    if (transactionOpen) {
+      db.exec("COMMIT");
+      transactionOpen = false;
+    }
+  } catch (error) {
+    const errors: unknown[] = [error];
+    if (transactionOpen) {
+      try { db.exec("ROLLBACK"); } catch (rollbackError) { errors.push(rollbackError); }
+    }
+    try { await closeStoreResources(internal, llm); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length > 1) {
+      throw new AggregateError(errors, "Failed to create QMD store and release resources", { cause: error });
+    }
+    throw error;
   }
-  // else: DB-only mode — no external config, use existing store_collections
 
-  // Create a per-store LlamaCpp instance — lazy-loads models on first use,
-  // auto-unloads after 5 min inactivity to free VRAM.
-  // Supports MLX backend for GPU-accelerated embeddings via external Python server.
-  const llm = new LlamaCpp({
-    embedModel: config?.models?.embed,
-    generateModel: config?.models?.generate,
-    rerankModel: config?.models?.rerank,
-    embedBackend: config?.models?.embedBackend ?? getEmbedBackend(),
-    mlxUrl: config?.models?.mlxUrl,
-    mlxDtype: config?.models?.mlxDtype ?? 'float32',
-    mlxFallback: config?.models?.mlxFallback ?? true,
-    mlxConcurrency: config?.models?.mlxConcurrency ?? 2,
-    inactivityTimeoutMs: 5 * 60 * 1000,
-    disposeModelsOnInactivity: true,
-  });
-  internal.llm = llm;
+  let closePromise: Promise<void> | undefined;
+  let closing = false;
+  const assertOpen = () => {
+    if (closing) throw new Error("QMD store is closing or closed");
+    assertDatabaseAccess(db);
+  };
 
   const store: QMDStore = {
     internal,
@@ -427,14 +505,16 @@ export async function createStore(options: StoreOptions): Promise<QMDStore> {
 
     // Search
     search: async (opts) => {
+      assertOpen();
+      throwIfAborted(opts.signal);
       if (!opts.query && !opts.queries) {
         throw new Error("search() requires either 'query' or 'queries'");
       }
       // Normalize collection/collections
-      const collections = [
+      const collections = [...new Set([
         ...(opts.collection ? [opts.collection] : []),
         ...(opts.collections ?? []),
-      ];
+      ])];
       const skipRerank = opts.rerank === false;
 
       if (opts.queries) {
@@ -447,138 +527,191 @@ export async function createStore(options: StoreOptions): Promise<QMDStore> {
           intent: opts.intent,
           skipRerank,
           chunkStrategy: opts.chunkStrategy,
+          signal: opts.signal,
         });
       }
 
       // Simple query string — use hybridQuery (expand + search + rerank)
       return hybridQuery(internal, opts.query!, {
-        collection: collections[0],
+        collections: collections.length > 0 ? collections : undefined,
         limit: opts.limit,
         minScore: opts.minScore,
         explain: opts.explain,
         intent: opts.intent,
         skipRerank,
         chunkStrategy: opts.chunkStrategy,
+        signal: opts.signal,
       });
     },
-    searchLex: async (q, opts) => internal.searchFTS(q, opts?.limit, opts?.collection),
-    searchVector: async (q, opts) => internal.searchVec(q, DEFAULT_EMBED_MODEL, opts?.limit, opts?.collection),
-    expandQuery: async (q, opts) => internal.expandQuery(q, undefined, opts?.intent),
-    get: async (pathOrDocid, opts) => internal.findDocument(pathOrDocid, opts),
+    searchLex: async (q, opts) => { assertOpen(); return internal.searchFTS(q, opts?.limit, opts?.collection); },
+    searchVector: async (q, opts) => { assertOpen(); return internal.searchVec(q, internal.llm?.embedModelName ?? DEFAULT_EMBED_MODEL, opts?.limit, opts?.collection, undefined, undefined, opts?.signal); },
+    expandQuery: async (q, opts) => { assertOpen(); return internal.expandQuery(q, undefined, opts?.intent, opts?.signal); },
+    get: async (pathOrDocid, opts) => { assertOpen(); return internal.findDocument(pathOrDocid, opts); },
     getDocumentBody: async (pathOrDocid, opts) => {
+      assertOpen();
       const result = internal.findDocument(pathOrDocid, { includeBody: false });
       if ("error" in result) return null;
       return internal.getDocumentBody(result, opts?.fromLine, opts?.maxLines);
     },
-    multiGet: async (pattern, opts) => internal.findDocuments(pattern, opts),
+    multiGet: async (pattern, opts) => { assertOpen(); return internal.findDocuments(pattern, opts); },
 
     // Collection Management — write to SQLite + write-through to YAML/inline if configured
     addCollection: async (name, opts) => {
-      upsertStoreCollection(db, name, { path: opts.path, pattern: opts.pattern, ignore: opts.ignore });
-      if (hasYamlConfig || options.config) {
-        collectionsAddCollection(name, opts.path, opts.pattern);
-      }
+      assertOpen();
+      const existing = getStoreCollection(db, name);
+      upsertStoreCollection(db, name, {
+        ...existing,
+        path: opts.path,
+        pattern: opts.pattern,
+        ignore: opts.ignore ?? existing?.ignore,
+      });
+      writeConfig(() => collectionsAddCollection(name, opts.path, opts.pattern, opts.ignore));
     },
     removeCollection: async (name) => {
-      const result = deleteStoreCollection(db, name);
-      if (hasYamlConfig || options.config) {
-        collectionsRemoveCollection(name);
+      assertOpen();
+      if (!source) return deleteStoreCollection(db, name);
+      if (!getStoreCollection(db, name) && !db.prepare("SELECT 1 FROM documents WHERE collection = ? LIMIT 1").get(name)) return false;
+
+      // Load/serialize without mutating caller-owned inline state. Any DB/FTS
+      // deletion remains rollbackable until persistence and outer commit pass.
+      const config = withConfigSource(source, loadConfig);
+      const originalEntry = Object.getOwnPropertyDescriptor(config.collections, name);
+      let publishConfig = () => {};
+      let restoreConfig = () => {};
+      if (originalEntry) {
+        if (source.config) {
+          publishConfig = () => { delete config.collections[name]; };
+          restoreConfig = () => { Object.defineProperty(config.collections, name, originalEntry); };
+        } else {
+          const path = source.configPath!;
+          const original = readFileSync(path, "utf8");
+          const mode = statSync(path).mode & 0o777;
+          // Atomic replacement must not silently bypass a read-only source.
+          accessSync(path, constants.W_OK);
+          const next = { ...config, collections: { ...config.collections } };
+          delete next.collections[name];
+          const contents = YAML.stringify(next, { indent: 2, lineWidth: 0 });
+          publishConfig = () => writeRemovalConfig(path, contents, mode);
+          restoreConfig = () => writeRemovalConfig(path, original, mode);
+        }
       }
-      return result;
+      const transaction = createSavepoint(db);
+      let configPublished = false;
+      try {
+        const result = deleteStoreCollection(db, name);
+        if (result) { publishConfig(); configPublished = true; }
+        transaction.commit();
+        return result;
+      } catch (error) {
+        const errors: unknown[] = [error];
+        try { transaction.rollback(); } catch (rollbackError) { errors.push(rollbackError); }
+        // No cross-resource crash atomicity is claimed. A failed DB commit
+        // compensates config synchronously, retaining every cleanup failure.
+        if (configPublished) {
+          try { restoreConfig(); } catch (restoreError) { errors.push(restoreError); }
+        }
+        if (errors.length > 1) throw new AggregateError(errors, "Failed to remove collection and restore prior state", { cause: error });
+        throw error;
+      }
     },
     renameCollection: async (oldName, newName) => {
+      assertOpen();
       const result = renameStoreCollection(db, oldName, newName);
-      if (hasYamlConfig || options.config) {
-        collectionsRenameCollection(oldName, newName);
-      }
+      if (result) writeConfig(() => collectionsRenameCollection(oldName, newName));
       return result;
     },
-    listCollections: async () => storeListCollections(db),
+    listCollections: async () => { assertOpen(); return storeListCollections(db); },
     getDefaultCollectionNames: async () => {
+      assertOpen();
       const collections = storeListCollections(db);
       return collections.filter(c => c.includeByDefault).map(c => c.name);
     },
 
     // Context Management — write to SQLite + write-through to YAML/inline if configured
     addContext: async (collectionName, pathPrefix, contextText) => {
+      assertOpen();
       const result = updateStoreContext(db, collectionName, pathPrefix, contextText);
-      if (hasYamlConfig || options.config) {
-        collectionsAddContext(collectionName, pathPrefix, contextText);
-      }
+      if (result) writeConfig(() => collectionsAddContext(collectionName, pathPrefix, contextText));
       return result;
     },
     removeContext: async (collectionName, pathPrefix) => {
+      assertOpen();
       const result = removeStoreContext(db, collectionName, pathPrefix);
-      if (hasYamlConfig || options.config) {
-        collectionsRemoveContext(collectionName, pathPrefix);
-      }
+      if (result) writeConfig(() => collectionsRemoveContext(collectionName, pathPrefix));
       return result;
     },
     setGlobalContext: async (context) => {
+      assertOpen();
       setStoreGlobalContext(db, context);
-      if (hasYamlConfig || options.config) {
-        collectionsSetGlobalContext(context);
-      }
+      writeConfig(() => collectionsSetGlobalContext(context));
     },
-    getGlobalContext: async () => getStoreGlobalContext(db),
-    listContexts: async () => getStoreContexts(db),
+    getGlobalContext: async () => { assertOpen(); return getStoreGlobalContext(db); },
+    listContexts: async () => { assertOpen(); return getStoreContexts(db); },
 
     // Indexing — reads collections from SQLite
     update: async (updateOpts) => {
-      const collections = getStoreCollections(db);
-      const filtered = updateOpts?.collections
-        ? collections.filter(c => updateOpts.collections!.includes(c.name))
-        : collections;
+      assertOpen();
+      return withExclusiveDatabaseOperation(db, "collection update", async () => {
+        const collections = getStoreCollections(db);
+        const filtered = updateOpts?.collections
+          ? collections.filter(c => updateOpts.collections!.includes(c.name))
+          : collections;
 
-      internal.clearCache();
+        internal.clearCache();
 
-      let totalIndexed = 0, totalUpdated = 0, totalUnchanged = 0, totalRemoved = 0;
+        let totalIndexed = 0, totalUpdated = 0, totalUnchanged = 0, totalRemoved = 0;
 
-      for (const col of filtered) {
-        const result = await reindexCollection(internal, col.path, col.pattern || "**/*.md", col.name, {
-          ignorePatterns: col.ignore,
-          onProgress: updateOpts?.onProgress
-            ? (info) => updateOpts.onProgress!({ collection: col.name, ...info })
-            : undefined,
-        });
-        totalIndexed += result.indexed;
-        totalUpdated += result.updated;
-        totalUnchanged += result.unchanged;
-        totalRemoved += result.removed;
-      }
+        for (const col of filtered) {
+          const result = await reindexCollection(internal, col.path, col.pattern || "**/*.md", col.name, {
+            ignorePatterns: col.ignore,
+            onProgress: updateOpts?.onProgress
+              ? (info) => updateOpts.onProgress!({ collection: col.name, ...info })
+              : undefined,
+          });
+          totalIndexed += result.indexed;
+          totalUpdated += result.updated;
+          totalUnchanged += result.unchanged;
+          totalRemoved += result.removed;
+        }
 
-      return {
-        collections: filtered.length,
-        indexed: totalIndexed,
-        updated: totalUpdated,
-        unchanged: totalUnchanged,
-        removed: totalRemoved,
-        needsEmbedding: internal.getHashesNeedingEmbedding(),
-      };
+        return {
+          collections: filtered.length,
+          indexed: totalIndexed,
+          updated: totalUpdated,
+          unchanged: totalUnchanged,
+          removed: totalRemoved,
+          needsEmbedding: internal.getHashesNeedingEmbedding(),
+        };
+      });
     },
 
     embed: async (embedOpts) => {
+      assertOpen();
       return runDurableIndexingJob(internal, {
         force: embedOpts?.force,
         model: embedOpts?.model,
         maxDocsPerBatch: embedOpts?.maxDocsPerBatch,
         maxBatchBytes: embedOpts?.maxBatchBytes,
         chunkStrategy: embedOpts?.chunkStrategy,
+        signal: embedOpts?.signal,
         onProgress: embedOpts?.onProgress ? (info) => embedOpts.onProgress!(info) : undefined,
       });
     },
 
     // Index Health
-    getStatus: async () => internal.getStatus(),
-    getIndexHealth: async () => internal.getIndexHealth(),
+    getStatus: async () => { assertOpen(); return internal.getStatus(); },
+    getIndexHealth: async () => { assertOpen(); return internal.getIndexHealth(); },
 
     // Lifecycle
-    close: async () => {
-      await llm.dispose();
-      internal.close();
-      if (hasYamlConfig || options.config) {
-        setConfigSource(undefined); // Reset config source
-      }
+    close: () => {
+      if (closePromise) return closePromise;
+      try { assertDatabaseAccess(db); }
+      catch (error) { return Promise.reject(error); }
+      // Acquire ownership synchronously, before disposal can yield or call back.
+      // A refused acquisition above leaves the store open and retryable.
+      closing = true;
+      return closePromise = withExclusiveDatabaseOperation(db, "store closing", () =>
+        Promise.resolve().then(() => closeStoreResources(internal, llm)));
     },
   };
 

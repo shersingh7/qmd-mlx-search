@@ -1,0 +1,188 @@
+{
+  "verdict": "PASS - narrow qmd.2 descriptor-lifetime repair acceptance",
+  "revision": "f452290f116934a4f126fe8e513c565e97a8c94f",
+  "wheel_sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+  "checkpoint_source_sha256": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
+  "fresh_executions": {
+    "maintained": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/maintained-qmd2-macos.xml",
+      "sha256": "ffd27ff49a93839219d68580d45b22a51e69c71a2e50d1b012f98cb1494ddf66",
+      "testcases": 1197,
+      "passed": 1149,
+      "skipped": 48,
+      "failed": 0,
+      "errors": 0,
+      "failures": []
+    },
+    "independent_positive": {
+      "path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/independent-positive-qmd2-macos.xml",
+      "sha256": "569129baca01e6fbba0ba9f489e63f701ad73cd938d4691f3ada94f58536b52d",
+      "testcases": 24,
+      "passed": 24,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "failures": []
+    }
+  },
+  "fresh_maintained_lifetime_cases": [
+    {
+      "name": "test_retired_capability_is_revoked_before_recycled_fd_access[public-load]",
+      "status": "passed"
+    },
+    {
+      "name": "test_retired_capability_is_revoked_before_recycled_fd_access[preflight]",
+      "status": "passed"
+    },
+    {
+      "name": "test_retired_capability_is_revoked_before_recycled_fd_access[validate]",
+      "status": "passed"
+    },
+    {
+      "name": "test_retired_capability_is_revoked_before_recycled_fd_access[locate]",
+      "status": "passed"
+    },
+    {
+      "name": "test_retired_capability_is_revoked_before_recycled_fd_access[open]",
+      "status": "passed"
+    },
+    {
+      "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[unlink]",
+      "status": "passed"
+    },
+    {
+      "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[temporary-directory-exit]",
+      "status": "passed"
+    },
+    {
+      "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[wrapper-construction]",
+      "status": "passed"
+    },
+    {
+      "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[directory-context-exit]",
+      "status": "passed"
+    }
+  ],
+  "independent_positive_contract_counts": {
+    "R1-expired-root": 10,
+    "R1-revoke-before-OS-close": 1,
+    "R2-staging-ownership": 6,
+    "open-setup-owner": 2,
+    "wrapper-teardown-owner": 1,
+    "caller-error-owner": 2,
+    "root-construction-owner": 2
+  },
+  "initial_probe_harness_failure_preserved_not_a_product_pass": {
+    "path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/independent-positive-qmd2-macos-initial.xml",
+    "sha256": "eb2952b3873f0b094a6dc50f5e14c5da73adbdbd5b12b44e2018069e6b90173d",
+    "testcases": 24,
+    "passed": 23,
+    "skipped": 0,
+    "failed": 1,
+    "errors": 0,
+    "failures": [
+      {
+        "name": "test_root_revokes_before_real_close_and_reentrant_recycle",
+        "message": "assert 11 == 12"
+      }
+    ]
+  },
+  "harness_correction": "One natural open used a lower free descriptor (11) instead of the retired root descriptor (12); fill lower free slots with ordinary owned directory opens before asserting recycling. No product changes or contract relaxations.",
+  "changed_functions_ast": [
+    "_Root.__init__",
+    "_Root._require_open",
+    "_Root.close",
+    "_Root.locate",
+    "_Root.open",
+    "_Root.preflight",
+    "_pin_regular"
+  ],
+  "native_ci_lifetime_cases_read_only_corroboration_not_executed_here": {
+    "ubuntu-24.04": [
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[public-load]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[preflight]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[validate]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[locate]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[open]",
+        "status": "passed"
+      },
+      {
+        "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[unlink]",
+        "status": "skipped"
+      },
+      {
+        "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[temporary-directory-exit]",
+        "status": "skipped"
+      },
+      {
+        "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[wrapper-construction]",
+        "status": "passed"
+      },
+      {
+        "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[directory-context-exit]",
+        "status": "passed"
+      }
+    ],
+    "macos-15": [
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[public-load]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[preflight]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[validate]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[locate]",
+        "status": "passed"
+      },
+      {
+        "name": "test_retired_capability_is_revoked_before_recycled_fd_access[open]",
+        "status": "passed"
+      },
+      {
+        "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[unlink]",
+        "status": "passed"
+      },
+      {
+        "name": "test_staging_cleanup_failure_retains_fd_ownership_until_transfer[temporary-directory-exit]",
+        "status": "passed"
+      },
+      {
+        "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[wrapper-construction]",
+        "status": "passed"
+      },
+      {
+        "name": "test_open_context_keeps_descriptor_ownership_on_setup_failure[directory-context-exit]",
+        "status": "passed"
+      }
+    ]
+  },
+  "prior_negative_evidence_unchanged": true,
+  "reviewed_artifact_sources_installed_module_unchanged": true,
+  "repo_writes_by_this_review": [],
+  "report_path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/independent-qmd2-lifetime-acceptance.md",
+  "final_probe_sha256": "cf7787048eb581760d74b08645db90262f1335751ba9e0550596fdc231ae6ef4",
+  "limitations": [
+    "Local executions are macOS CPU only; native Linux CI receipts are separate read-only corroboration, not Linux work performed here.",
+    "No GPU, real distributed run, training, network, installation, source-policy approval, or package/deployment integration was performed.",
+    "The trusted initial root/cache and same-filesystem macOS staging requirements remain. No same-UID sandbox, in-place-inode integrity or external content authentication claim."
+  ]
+}

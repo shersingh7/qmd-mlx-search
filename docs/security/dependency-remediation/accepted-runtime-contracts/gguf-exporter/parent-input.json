@@ -1,0 +1,16 @@
+{
+  "review_root": "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-reaccept-ku9v_mpa",
+  "source_sha256": {
+    "mirror/finetune/convert_gguf.py": "40b19f2e7be09993bb0f9f22e2ef069b5eeb89f2a6dca7cbf415e57555bf87ab",
+    "mirror/finetune/gguf_toolchain.py": "5c36cc3f73ec03cd7c89f7f8f7083987824f4b8bae19ee720a02177fa03ea028",
+    "mirror/finetune/tests/test_finetune_correctness.py": "2e023eb88997dc63a54b4c6e7eb40bb1a19023415dc900e306dbff0d735b88f3",
+    "mirror/finetune/tests/test_gguf_structure.py": "a39e8d9e442ff9426731e61c7cc8b3ba4f939eb0461fc1598e6f16b6ee992617",
+    "mirror/finetune/tests/test_gguf_toolchain.py": "9d68ac180502a2b6b54b78606e7640333e6b30c6a9f4d32518aa88d626513941",
+    "mirror/finetune/train.py": "3e8d06816928626f733992df2f650aea493180f935f8daa63601c9ade302387e",
+    "mirror/finetune/train_unsloth.py": "257f517da20d4f6a745e51dc3d1026f821ef369db136ef4beedb9444a104a1f5",
+    "mirror/finetune/tests/conftest.py": "039fe2c7452d861a11fc4b5833e4cb456300fe1e768ec5c8439e11ad072df097",
+    "run_checks.py": "ab5a428604444a2cfab5b3082eec7e8a96349ae2f85bf5272fc9c45db0194eea",
+    "test_independent_contracts.py": "1d13ccb0318465518ea393d954e673dfc1af7247f236fbcf1d5dd281bc59f45c"
+  },
+  "initial_setup_failure": "/Users/shersingh/.hermes/cache/scratch/qmd-parent-gguf-reaccepted-dfq3wjhf/setup-failure.json"
+}

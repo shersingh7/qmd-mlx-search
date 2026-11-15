@@ -1,0 +1,246 @@
+{
+  "arm64_converter_training_gpu_cloud_qualified": false,
+  "checkout_sha": "1111111111111111111111111111111111111111",
+  "cleanup": {
+    "absence_verified": false,
+    "cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "error": "Refused: cleanup-before failed",
+    "status": "unproven-or-failed"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/public work space",
+        "rev-parse",
+        "--verify",
+        "HEAD"
+      ],
+      "exit": 0,
+      "name": "checkout",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "1111111111111111111111111111111111111111\n",
+      "timeout_seconds": 15
+    },
+    {
+      "argv": [
+        "docker",
+        "--config",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "exit": 0,
+      "name": "engine",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "{\"Client\": {\"Version\": \"SYNTHETIC-client\", \"Os\": \"linux\", \"Arch\": \"amd64\"}, \"Server\": {\"Version\": \"SYNTHETIC-engine\", \"Os\": \"linux\", \"Arch\": \"amd64\"}}\n",
+      "timeout_seconds": 20
+    },
+    {
+      "argv": [
+        "docker",
+        "--config",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "pull",
+        "--platform",
+        "linux/amd64",
+        "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e"
+      ],
+      "exit": 0,
+      "name": "pull",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "SYNTHETIC public pull, no image pulled\n",
+      "timeout_seconds": 180
+    },
+    {
+      "argv": [
+        "docker",
+        "--config",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "image",
+        "inspect",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Os\":{{json .Os}},\"Architecture\":{{json .Architecture}},\"RepoDigests\":{{json .RepoDigests}}}",
+        "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e"
+      ],
+      "exit": 0,
+      "name": "image",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "{\"Id\": \"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\", \"Os\": \"linux\", \"Architecture\": \"amd64\", \"RepoDigests\": [\"ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e\"]}\n",
+      "timeout_seconds": 20
+    },
+    {
+      "argv": [
+        "docker",
+        "--config",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--pull",
+        "never",
+        "--cidfile",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/container.cid",
+        "--label",
+        "qmd.native-qualification.owner=2c19a96cb8e791bbf6245be04a728654",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--read-only",
+        "--cpus",
+        "2",
+        "--memory",
+        "1g",
+        "--pids-limit",
+        "64",
+        "--user",
+        "65534:65534",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--tmpfs",
+        "/tmp:rw,exec,nosuid,nodev,size=128m,uid=65534,gid=65534,mode=0700",
+        "--mount",
+        "type=bind,src=/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/probe.py,dst=/probe.py,readonly",
+        "--env",
+        "HOME=/tmp",
+        "--env",
+        "TMPDIR=/tmp",
+        "--env",
+        "XDG_CACHE_HOME=/tmp/cache",
+        "--env",
+        "HF_HOME=/tmp/hf",
+        "--env",
+        "HERMES_HOME=/tmp/hermes",
+        "--env",
+        "KNOWLEDGE_DIR=/tmp/knowledge",
+        "--env",
+        "HF_HUB_OFFLINE=1",
+        "--env",
+        "TRANSFORMERS_OFFLINE=1",
+        "--env",
+        "HF_DATASETS_OFFLINE=1",
+        "--env",
+        "QMD_LLAMA_GPU=false",
+        "--env",
+        "CUDA_VISIBLE_DEVICES=",
+        "--env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "--entrypoint",
+        "python",
+        "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+        "-I",
+        "-B",
+        "-S",
+        "/probe.py"
+      ],
+      "exit": 0,
+      "name": "probe",
+      "process_exit": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"pass\", \"native_only\": false, \"platform\": \"Linux/x86_64\", \"python\": \"3.12.13\", \"versions\": {\"git\": \"SYNTHETIC git\", \"cc\": \"SYNTHETIC cc\", \"c++\": \"SYNTHETIC c++\", \"make\": \"SYNTHETIC make\", \"uv\": \"SYNTHETIC uv\"}, \"outputs\": [\"qmd-c-ok\", \"qmd-cxx-ok\"], \"probe_sha256\": \"6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf\", \"fixture_notice\": \"SYNTHETIC receipt only; probe/C/C++/image NOT EXECUTED\"}\n",
+      "timeout_seconds": 180
+    },
+    {
+      "argv": [
+        "docker",
+        "--config",
+        "/Users/shersingh/.hermes/cache/scratch/qmd-gguf-workflow-ffsshvav/evidence/synthetic-final-v2/cleanup-daemon-unreachable/runner temp/qmd-native-image.tMrjTQAg/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "container",
+        "ls",
+        "--all",
+        "--no-trunc",
+        "--format",
+        "{{json .ID}}"
+      ],
+      "exit": 29,
+      "name": "cleanup-before",
+      "process_exit": 29,
+      "stderr": "SYNTHETIC unreachable daemon\n",
+      "stdout": "",
+      "timeout_seconds": 15
+    }
+  ],
+  "context_sha": "3333333333333333333333333333333333333333",
+  "docker_version": {
+    "Client": {
+      "Arch": "amd64",
+      "Os": "linux",
+      "Version": "SYNTHETIC-client"
+    },
+    "Server": {
+      "Arch": "amd64",
+      "Os": "linux",
+      "Version": "SYNTHETIC-engine"
+    }
+  },
+  "event": "pull_request",
+  "event_head_sha": "2222222222222222222222222222222222222222",
+  "expected_repo_digest": "ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+  "final_exit": 1,
+  "hard_termination_limit": "SIGKILL, runner loss or job hard timeout can prevent cleanup/readback; no absence proof then.",
+  "host": {
+    "architecture": "x86_64",
+    "os": "Linux",
+    "python": "3.12.13"
+  },
+  "image_input": "ghcr.io/astral-sh/uv:0.11.18-python3.12-trixie@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e",
+  "image_readback": {
+    "Architecture": "amd64",
+    "Id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "Os": "linux",
+    "RepoDigests": [
+      "ghcr.io/astral-sh/uv@sha256:c8fe61165767c52118d7d3e67db5d0be5454c2e0da1f9fe15c697ebdd72f304e"
+    ]
+  },
+  "primary_exit": 0,
+  "probe_exit": 0,
+  "probe_receipt": {
+    "fixture_notice": "SYNTHETIC receipt only; probe/C/C++/image NOT EXECUTED",
+    "native_only": false,
+    "outputs": [
+      "qmd-c-ok",
+      "qmd-cxx-ok"
+    ],
+    "platform": "Linux/x86_64",
+    "probe_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf",
+    "python": "3.12.13",
+    "status": "pass",
+    "versions": {
+      "c++": "SYNTHETIC c++",
+      "cc": "SYNTHETIC cc",
+      "git": "SYNTHETIC git",
+      "make": "SYNTHETIC make",
+      "uv": "SYNTHETIC uv"
+    }
+  },
+  "runner": {
+    "arch": "X64",
+    "name": "SYNTHETIC fixture runner",
+    "os": "Linux"
+  },
+  "schema": 1,
+  "scope": "native Linux amd64 CPU C/C++ prerequisites only",
+  "sources": {
+    "launcher_sha256": "f61076c5a71e5b251db42aadb1bbe15fb1689a2d3293f1085edcdefc1958a83b",
+    "probe_sha256": "6717b3770708789be996da14ef3ce614f81f15c1ce0713ed03aa457201729ecf"
+  },
+  "status": "not-qualified"
+}

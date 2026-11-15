@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "valid-id-zero-notification-cancel",
+    "cancellationStatus": 202,
+    "signalAbortedBeforeStop": false,
+    "operationSettledBeforeStop": false,
+    "backendRequests": 1,
+    "backendClosedBeforeStop": 0
+  },
+  {
+    "kind": "duplicate-active-ids-stop",
+    "signalsAbortedAfterStop": [
+      false,
+      true
+    ],
+    "operationsSettledAfterStop": [
+      false,
+      true
+    ],
+    "backendRequests": 2,
+    "backendClosedAfterStop": 1
+  }
+]

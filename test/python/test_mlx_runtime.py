@@ -11,6 +11,7 @@ from scripts.qmd_mlx.protocol import (
     DeadlineExceededError,
     InvalidInputError,
     MLXRuntimeError,
+    ModelUnavailableError,
     OutOfMemoryError,
     OverloadedError,
     RequestCancelledError,
@@ -22,55 +23,52 @@ from scripts.qmd_mlx.executor import GPUExecutor
 from scripts.qmd_mlx.model_manager import ModelResidencyManager, ModelState
 
 
-class MockEmbeddingAdapter:
+from scripts.qmd_mlx.adapters.embedding import BaseEmbeddingAdapter
+from test_audit_embedding_adapters import dependencies  # noqa: F401 -- CPU loader spies
+
+
+class MockTokenizer:
+    pad_token_id = 0
+
+    def encode(self, text, **kwargs):
+        return [101, 202, 103]
+
+
+class MockEmbeddingAdapter(BaseEmbeddingAdapter):
+    synthetic = True
+
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        self.model_name = model_name
-        self.native_dims = 384
-        self.max_length = 512
+        super().__init__(model_name, max_length=512)
         self.model_params_b = 0.5
-        self.model_memory_mb = 500.0
-        self._loaded = True
-        self.raw_hf_tokenizer = MagicMock()
-        self.raw_hf_tokenizer.encode.side_effect = lambda text, **kwargs: [1, 2, 3]
-        self.model = MagicMock()
+        self.estimated_memory_mb = self.model_memory_mb = 500.0
+        self._loaded = False
 
     def is_loaded(self):
-        return self._loaded
+        return self._loaded and super().is_loaded()
 
     def load(self):
-        self._loaded = True
-        self.model = MagicMock()
+        with self._init_lock:
+            if self.is_loaded():
+                return
+            memory_mb = self.model_memory_mb
+            tokenizer = MockTokenizer()
+            self._publish_loaded(
+                object(), tokenizer, tokenizer, {"hidden_size": 384, "num_parameters": 500_000_000},
+                "fixture-mock-revision", "float32", "none", 0, supports_mrl=True,
+            )
+            self.model_memory_mb = memory_mb
+            self._loaded = True
 
     def unload(self):
         self._loaded = False
-        self.model = None
+        super().unload()
 
-    def tokenize_texts(self, texts, max_length=None):
-        from scripts.qmd_mlx.adapters.tokenization import TokenizedBatch
-        token_ids = [[101, 202, 103] for _ in texts]
-        lengths = [len(t) for t in token_ids]
-        indices = list(range(len(texts)))
-        return TokenizedBatch(token_ids, lengths, indices, pad_token_id=0, texts=list(texts))
-
-    def forward_batch(self, batch, requested_dims=None):
+    def forward_batch(self, tokenized_batch, requested_dims=None):
         dims = requested_dims or self.native_dims
-        count = len(batch)
+        count = len(tokenized_batch)
         arr = np.ones((count, dims), dtype=np.float32)
         arr = arr / np.linalg.norm(arr, axis=-1, keepdims=True)
         return arr
-
-    def get_descriptor(self, requested_dims=None):
-        out_dims = requested_dims if requested_dims and requested_dims < self.native_dims else self.native_dims
-        return {
-            "version": 1,
-            "backend": "mlx",
-            "model": self.model_name,
-            "nativeDimensions": self.native_dims,
-            "outputDimensions": out_dims,
-            "normalized": True,
-            "maxSequenceLength": self.max_length,
-            "pooling": "mean",
-        }
 
 
 @pytest.fixture(scope="module")
@@ -214,10 +212,10 @@ def test_runtime_bulk_micro_batch_ordering(mlx_runtime):
     assert res.shape == (12, 384)
 
 
-def test_runtime_mixed_stage_eviction_and_micro_batch_reload():
+def test_runtime_mixed_stage_eviction_refuses_partial_request_and_reloads_whole_retry():
     """
-    Deterministically test runtime mixed-stage eviction
-    and next embedding micro-batch reload on executor thread.
+    Eviction between owner jobs refuses the partial generation, then a complete
+    new request reloads transparently without combining two load generations.
     """
     executor = GPUExecutor(max_queue_size=20)
     # Residency budget of 1500MB (can fit either embed at 1000MB or rerank at 1000MB, but not both)
@@ -273,23 +271,36 @@ def test_runtime_mixed_stage_eviction_and_micro_batch_reload():
 
     def hooking_forward_batch(batch, requested_dims=None):
         forward_call_count[0] += 1
-        res = orig_forward_batch(batch, requested_dims=requested_dims)
-        if forward_call_count[0] == 1:
-            manager.ensure_loaded("rerank")
-        return res
+        return orig_forward_batch(batch, requested_dims=requested_dims)
 
     runtime.adapter.forward_batch = hooking_forward_batch
 
-    res = runtime.submit_embed(texts, is_query=False)
+    original_submit = executor.submit
+    evicted = False
 
-    assert res.shape == (3, 384)
-    assert np.all(np.isfinite(res))
-    assert forward_call_count[0] == 3
-    assert manager.get_state("embed") == ModelState.READY
-    assert runtime.adapter.is_loaded()
+    def evict_at_boundary(*args, **kwargs):
+        nonlocal evicted
+        result = original_submit(*args, **kwargs)
+        if kwargs.get("description") == "Embed batch 1/3 (doc)" and not evicted:
+            evicted = True
+            manager.ensure_loaded("rerank")
+        return result
 
-    runtime.shutdown()
-    executor.shutdown()
+    executor.submit = evict_at_boundary
+    try:
+        with pytest.raises(ModelUnavailableError, match="generation"):
+            runtime.submit_embed(texts, is_query=False)
+        assert forward_call_count[0] == 1
+        assert manager.get_state("embed") == ModelState.UNLOADED
+        res = runtime.submit_embed(texts, is_query=False)
+        assert res.shape == (3, 384)
+        assert np.all(np.isfinite(res))
+        assert forward_call_count[0] == 4
+        assert manager.get_state("embed") == ModelState.READY
+        assert runtime.adapter.is_loaded()
+    finally:
+        runtime.shutdown()
+        executor.shutdown()
 
 
 def test_runtime_shutdown_under_owner_thread():
@@ -313,7 +324,7 @@ def test_runtime_shutdown_under_owner_thread():
         executor.shutdown()
 
 
-def test_descriptor_reports_measured_quantization_and_revision():
+def test_descriptor_reports_measured_quantization_and_revision(dependencies):
     from scripts.qmd_mlx.adapters.embedding import QwenEmbeddingAdapter
     from unittest.mock import patch, MagicMock
 
@@ -324,14 +335,22 @@ def test_descriptor_reports_measured_quantization_and_revision():
 
     # Mock loaded model with config exposing 4bit quantization and commit hash
     fake_model = MagicMock()
-    fake_tok = MagicMock()
+    fake_tok = MagicMock(spec=["encode", "pad_token_id", "padding_side"])
+    fake_tok.pad_token_id = 0
+    fake_tok.encode.return_value = [1, 2, 3]
     fake_config = {
+        "model_type": "qwen2",
         "quantization": {"bits": 4, "group_size": 64},
         "_commit_hash": "abc1234def",
         "hidden_size": 1024,
     }
 
-    with patch("scripts.qmd_mlx.adapters.embedding._MLX_AVAILABLE", True), \
+    # Immutable resolution and dtype/storage validation have their own adapter
+    # tests. Keep this descriptor-publication test wholly CPU/offline.
+    with patch.object(adapter, "_compute_dtype", return_value=np.float32), \
+         patch.object(adapter, "_get_active_memory_mb", return_value=0.0), \
+         patch.object(adapter, "_resolve_source", return_value=("/synthetic/snapshot", "abc1234def", fake_config, [])), \
+         patch.object(adapter, "_apply_and_measure_dtype", return_value="float32"), \
          patch("mlx_lm.load", return_value=(fake_model, fake_tok, fake_config)):
         adapter.load()
 
@@ -340,7 +359,7 @@ def test_descriptor_reports_measured_quantization_and_revision():
     assert desc["revision"] == "abc1234def"
 
 
-def test_concurrent_tokenize_and_submit_embed_serialized_init():
+def test_concurrent_tokenize_and_submit_embed_serialized_init(dependencies):
     import threading
     import time
     from unittest.mock import patch, MagicMock
@@ -380,14 +399,18 @@ def test_concurrent_tokenize_and_submit_embed_serialized_init():
 
     fake_tok = MockTokenizer()
     fake_model = MagicMock()
-    fake_config = {"hidden_size": 384}
+    fake_config = {"model_type": "qwen2", "hidden_size": 384}
 
     def slow_load(*args, **kwargs):
         time.sleep(0.08)
         load_count[0] += 1
         return fake_model, fake_tok, fake_config
 
-    with patch("scripts.qmd_mlx.adapters.embedding._MLX_AVAILABLE", True), \
+    with patch("scripts.qmd_mlx.runtime._MLX_AVAILABLE", True), \
+         patch.object(QwenEmbeddingAdapter, "_compute_dtype", return_value=np.float32), \
+         patch.object(QwenEmbeddingAdapter, "_get_active_memory_mb", return_value=0.0), \
+         patch.object(QwenEmbeddingAdapter, "_resolve_source", return_value=("/synthetic/snapshot", "fixture-revision", fake_config, [])), \
+         patch.object(QwenEmbeddingAdapter, "_apply_and_measure_dtype", return_value="float32"), \
          patch("mlx_lm.load", side_effect=slow_load):
         runtime = MLXEmbeddingRuntime(
             model_name="mlx-community/Qwen2.5-Coder-0.5B-Instruct-4bit",
@@ -435,26 +458,25 @@ def test_concurrent_tokenize_and_submit_embed_serialized_init():
 
 
 def test_runtime_tokenization_survives_model_weight_eviction_regression(mlx_runtime):
-    """Finding 3 Regression: Tokenization on CPU succeeds even if model weights were evicted."""
+    """A fresh request after eviction initializes only on the owner, never CPU."""
     rt = mlx_runtime
     # Ensure model is initialized
     _ = rt.tokenize(["initial tokenization check"])
     assert rt.adapter.raw_hf_tokenizer is not None
 
-    # Simulate model weight eviction while keeping tokenizer
+    # Eviction releases both weights and the adapter-owned tokenizer.
     rt.model_manager.unload("embed")
     assert not rt.adapter.is_loaded()
     assert rt.adapter.model is None
-    assert rt.adapter.raw_hf_tokenizer is not None
+    assert rt.adapter.raw_hf_tokenizer is None
 
-    # Calling tokenize must succeed on CPU without loading GPU model weights
+    # A new request acquires a new owner-prepared tokenizer/model generation.
     tokens = rt.tokenize(["test tokenization without weights", "second query text"])
     assert len(tokens) == 2
     assert all(len(t) > 0 for t in tokens)
-    # Model weights must NOT have been loaded on caller thread
-    assert rt.adapter.model is None
+    assert rt.adapter.is_loaded()
 
-    # submit_embed must reload weights safely on the owner thread before forward pass
+    # The following embedding request uses the already verified generation.
     res = rt.submit_embed(["test tokenization without weights"])
     assert res.shape == (1, 384)
     assert rt.adapter.is_loaded()
@@ -490,59 +512,39 @@ def test_runtime_bounded_admission_rejection_regression(mlx_runtime):
     dead_mgr = ModelResidencyManager(dead_exec)
 
     # Instantiate runtime with dead executor
-    runtime_dead = MLXEmbeddingRuntime(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        executor=dead_exec,
-        model_manager=dead_mgr,
-        lazy_load=True,
-    )
+    with patch("scripts.qmd_mlx.runtime.resolve_embedding_adapter", return_value=MockEmbeddingAdapter()):
+        runtime_dead = MLXEmbeddingRuntime(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            executor=dead_exec,
+            model_manager=dead_mgr,
+            lazy_load=True,
+        )
     with pytest.raises(WorkerUnavailableError):
         runtime_dead.submit_embed(["test query"])
 
 
-def test_unloaded_tokenize_self_deadlock_regression():
-    """Verify tokenize_texts on an unloaded adapter does not self-deadlock when calling self.load()."""
-    from scripts.qmd_mlx.adapters.embedding import BertEmbeddingAdapter, QwenEmbeddingAdapter
-    from unittest.mock import MagicMock, patch
+@pytest.mark.parametrize("adapter_name", ["BertEmbeddingAdapter", "QwenEmbeddingAdapter"])
+def test_unloaded_tokenize_requires_explicit_load_without_self_deadlock(adapter_name):
+    """CPU preparation cannot implicitly load; explicit publication stays usable."""
+    from scripts.qmd_mlx.adapters import embedding
 
-    # 1. BertEmbeddingAdapter test
-    bert_adapter = BertEmbeddingAdapter(model_name="fake-bert")
-    assert not bert_adapter.is_loaded()
-    fake_tokenizer = MagicMock()
-    fake_tokenizer.encode.side_effect = lambda t, **kwargs: [1, 2, 3]
+    adapter = getattr(embedding, adapter_name)(model_name="fake-bert-qwen")
+    tokenizer = MockTokenizer()
 
-    with patch.object(bert_adapter, "load") as mock_load:
-        def do_load():
-            # When load is called while tokenize_texts holds _init_lock,
-            # this must succeed immediately because _init_lock is an RLock!
-            with bert_adapter._init_lock:
-                bert_adapter.raw_hf_tokenizer = fake_tokenizer
-                bert_adapter.tokenizer = fake_tokenizer
-                bert_adapter.model = MagicMock()
-        mock_load.side_effect = do_load
+    def explicit_load():
+        with adapter._init_lock:
+            adapter._publish_loaded(
+                object(), tokenizer, tokenizer, {"hidden_size": 4},
+                "fixture-explicit-load", "float32", "none", 0,
+            )
 
-        tokens = bert_adapter.tokenize_texts(["hello world", "testing deadlock"])
-        assert len(tokens) == 2
-        assert mock_load.called
-
-    # 2. QwenEmbeddingAdapter test
-    qwen_adapter = QwenEmbeddingAdapter(model_name="fake-qwen")
-    assert not qwen_adapter.is_loaded()
-
-    fake_qwen_tok = MagicMock()
-    fake_qwen_tok.encode.side_effect = lambda t, **kwargs: [1, 2, 3]
-
-    with patch.object(qwen_adapter, "load") as mock_load:
-        def do_load_qwen():
-            with qwen_adapter._init_lock:
-                qwen_adapter.raw_hf_tokenizer = fake_qwen_tok
-                qwen_adapter.tokenizer = fake_qwen_tok
-                qwen_adapter.model = MagicMock()
-        mock_load.side_effect = do_load_qwen
-
-        tokens = qwen_adapter.tokenize_texts(["hello world"])
-        assert len(tokens) == 1
-        assert mock_load.called
+    with patch.object(adapter, "load", side_effect=explicit_load) as load:
+        with pytest.raises(ModelUnavailableError):
+            adapter.tokenize_texts(["must not implicitly load"])
+        load.assert_not_called()
+        adapter.load()
+        assert len(adapter.tokenize_texts(["hello world", "explicit initialization"])) == 2
+        assert load.call_count == 1
 
 
 def test_infer_model_params_b_and_memory_estimation_distinguishes_quantization():
@@ -615,9 +617,9 @@ def test_admission_lease_concurrency_and_guaranteed_release():
     assert runtime.in_flight_requests == 0
 
     # Guaranteed release on failed tokenize / submit_embed
-    runtime.adapter.tokenize_texts = MagicMock(side_effect=RuntimeError("Tokenization error"))
-    with pytest.raises(RuntimeError, match="Tokenization error"):
-        runtime.tokenize(["sample text"])
+    with patch("scripts.qmd_mlx.adapters.embedding.EmbeddingPreparation.tokenize_texts", side_effect=RuntimeError("Tokenization error")):
+        with pytest.raises(RuntimeError, match="Tokenization error"):
+            runtime.tokenize(["sample text"])
 
     # In-flight stats must be 0 even after exception!
     assert runtime.in_flight_requests == 0
@@ -748,9 +750,8 @@ def test_lazy_load_planner_retuning_and_oom_preservation():
             self.raw_hf_tokenizer = None
 
         def load(self):
-            self._loaded = True
+            super().load()
             self.model_params_b = 4.0  # measured as 4.0B after real load
-            self.raw_hf_tokenizer = MagicMock()
 
         def is_loaded(self):
             return self._loaded
@@ -816,6 +817,16 @@ def test_bulk_microbatch_yield_to_interactive_query():
     """
     executor = GPUExecutor(max_queue_size=20)
     manager = ModelResidencyManager(executor, residency_budget_mb=6000.0)
+    interactive_forward_queued = threading.Event()
+    original_submit_async = executor.submit_async
+
+    def record_query_submission(*args, **kwargs):
+        result = original_submit_async(*args, **kwargs)
+        if kwargs.get("description", "").endswith("(query)"):
+            interactive_forward_queued.set()
+        return result
+
+    executor.submit_async = record_query_submission
 
     class InterleavingMockAdapter(MockEmbeddingAdapter):
         def __init__(self):
@@ -824,14 +835,13 @@ def test_bulk_microbatch_yield_to_interactive_query():
             self.first_bulk_batch_started = threading.Event()
             self.interactive_query_finished = threading.Event()
 
-        def tokenize_texts(self, texts, max_length=None):
-            # Create distinct token lengths so planner splits them into micro-batches
-            token_ids = [[i + 1] * (100 if i % 2 == 0 else 120) for i, _ in enumerate(texts)]
-            lengths = [len(t) for t in token_ids]
-            indices = list(range(len(texts)))
-            return TokenizedBatch(token_ids, lengths, indices, pad_token_id=0, texts=list(texts))
+        def load(self):
+            super().load()
+            # Tokenize through the captured CPU object, not mutable adapter state.
+            self.raw_hf_tokenizer.encode = lambda text, **kw: [1] * (120 if "document 1" in text or "document 3" in text else 100)
 
-        def forward_batch(self, batch, requested_dims=None):
+        def forward_batch(self, tokenized_batch, requested_dims=None):
+            batch = tokenized_batch
             dims = requested_dims or self.native_dims
             count = len(batch)
             is_query = "urgent query" in str(getattr(batch, "texts", []))
@@ -841,8 +851,9 @@ def test_bulk_microbatch_yield_to_interactive_query():
             if not is_query and len(self.call_log) == 1:
                 # First bulk micro-batch
                 self.first_bulk_batch_started.set()
-                # Yield CPU briefly so interactive query thread can enqueue into GPUExecutor priority queue
-                time.sleep(0.05)
+                # Ready CPU preparation must overlap this owner forward and
+                # enqueue the interactive forward before bulk is released.
+                assert interactive_forward_queued.wait(2.0)
 
             # Return identifiable unique array rows
             arr = np.zeros((count, dims), dtype=np.float32)

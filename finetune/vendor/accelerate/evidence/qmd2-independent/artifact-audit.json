@@ -1,0 +1,89 @@
+{
+  "verdict": "PASS artifact/source/install binding",
+  "scope": "Narrow qmd.1 to qmd.2 descriptor-lifetime repair; not broader security or source-policy approval",
+  "revision": "f452290f116934a4f126fe8e513c565e97a8c94f",
+  "repository_head_at_audit": "50995803ae2564650353d464902a7e78ac3a8f9d",
+  "wheel": {
+    "path": "/Users/shersingh/github/qmd-mlx-search/finetune/vendor/accelerate/accelerate-1.15.0+qmd.2-py3-none-any.whl",
+    "sha256": "abfd4ac2b7c632dd0c005e8c928c44112ed67fb3c43d5b320414d7d44b684ad6",
+    "size": 1586279,
+    "matches_exact_commit": true
+  },
+  "provenance_sha256": "d4f451e3a1a24db26dddb4baf0a156d1a8d871579682936b240fff35cbb452f4",
+  "input_sha256": {
+    "build_patched_accelerate.py": "a22cbf0e3e880d0ede3dfd6147247bd4b330478466247a6ada138426ef09abdf",
+    "checkpoint_security.py": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
+    "source.patch": "488057287e5b8c7eac6a1ff4ade291a061fbdeed6007b8c34ba503e9f7d150ce"
+  },
+  "maintained_test_sha256": "a191b16f371a5330a46ea03b2457992696390acfda088faaa783cd7e7056ab48",
+  "verified_wheel_record_entries": 92,
+  "verified_wheel_member_hashes": 92,
+  "verified_installed_package_members": 85,
+  "installed_package_root": "/Users/shersingh/.hermes/cache/scratch/qmd-finetune-venv/lib/python3.12/site-packages/accelerate",
+  "installed_module_path": "/Users/shersingh/.hermes/cache/scratch/qmd-finetune-venv/lib/python3.12/site-packages/accelerate/utils/checkpoint_security.py",
+  "installed_checkpoint_module_sha256": "2cb2afdff6e5506ae33ccf5a4bdb51b79d020bb8037e634e0ac098378b409f95",
+  "package_member_delta_qmd1_to_qmd2": [
+    "accelerate/__init__.py",
+    "accelerate/utils/checkpoint_security.py"
+  ],
+  "upstream_license_preserved": true,
+  "prior_negative_evidence_sha256": {
+    "/Users/shersingh/github/qmd-mlx-search/finetune/vendor/accelerate/evidence/independent-qmd1-review.md": "82cf65ff5fe8ebcc40bfa55c4aac4aebefcde60a920f003d4e180b191f27c52c",
+    "/Users/shersingh/github/qmd-mlx-search/finetune/vendor/accelerate/evidence/independent-qmd1-lifecycle.json": "fe7860f04cc158384b071b083cbc3042c4db3167fa318c502df9afff8836f238",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-security-review-6f4e3e2d/lifecycle_probes.py": "95d74d8c3f5e43da22c69b14632984c9282d4bac9042b79d3efae4b760ce4e0b",
+    "/Users/shersingh/.hermes/cache/scratch/qmd-independent-security-review-6f4e3e2d/lifecycle-reproductions.json": "fe7860f04cc158384b071b083cbc3042c4db3167fa318c502df9afff8836f238"
+  },
+  "native_ci_receipts_read_only_corroboration_not_executed_here": {
+    "run_id": "43469021580",
+    "revision_per_parent": "f452290f116934a4f126fe8e513c565e97a8c94f",
+    "receipts": {
+      "ubuntu-24.04": {
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-native-ci-ai9r6ux_/ubuntu-24.04/accelerate-checkpoint.xml",
+        "sha256": "59228e45f9eb91b443f381fa9c5ce97763487bc0a20fb8783b7810540d0a3898",
+        "testcases": 1258,
+        "passed": 1203,
+        "skipped": 55,
+        "failed": 0,
+        "errors": 0
+      },
+      "macos-15": {
+        "path": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-native-ci-ai9r6ux_/macos-15/accelerate-checkpoint.xml",
+        "sha256": "cf6a47373952ccc7c29313166d36f4b222d12ae2fdba604dc1e0e25c266743ec",
+        "testcases": 1258,
+        "passed": 1210,
+        "skipped": 48,
+        "failed": 0,
+        "errors": 0
+      }
+    }
+  },
+  "runtime": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]",
+    "executable": "/Users/shersingh/.hermes/cache/scratch/qmd-finetune-venv/bin/python",
+    "versions": {
+      "accelerate": "1.15.0+qmd.2",
+      "torch": "2.15.0",
+      "safetensors": "0.8.0",
+      "pytest": "9.2.0",
+      "transformers": "5.22.2",
+      "peft": "0.21.3",
+      "trl": "1.17.1"
+    }
+  },
+  "environment": {
+    "HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/home",
+    "TMPDIR": "/Users/shersingh/.hermes/cache/scratch",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "HF_HOME": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/home/hf",
+    "HF_HUB_CACHE": "/Users/shersingh/.hermes/cache/scratch/qmd-qmd2-independent-mbXc5o8b/home/hf/hub",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "CUDA_VISIBLE_DEVICES": "",
+    "ACCELERATE_USE_CPU": "true",
+    "PYTHONPATH": "",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"
+  },
+  "repository_status_at_audit": " M .github/workflows/dependency-security.yml\n M finetune/DEPENDENCIES.md\n M finetune/convert_onnx.py\n M finetune/eval.py\n M finetune/eval_retrieval.py\n M finetune/tests/test_onnx_api.py\n M finetune/train_unsloth.py\n M scripts/check_dependency_security.py\n M test/audit-recovery-tree.test.ts\n?? finetune/tests/test_review_compatibility.py\n?? finetune/tests/test_script_source_policy.py\n?? scripts/verify_patched_dependencies.py\n?? test/security/test_patched_dependencies.py\n"
+}
