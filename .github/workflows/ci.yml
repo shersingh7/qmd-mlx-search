@@ -75,7 +75,9 @@ jobs:
           bun run test --maxWorkers=2 --testTimeout 60000
         env:
           QMD_BOOTSTRAP_ENABLED: ${{ runner.os == 'macOS' && '1' || '0' }}
-          DYLD_LIBRARY_PATH: /opt/homebrew/opt/sqlite/lib
+          # src/db.ts selects Homebrew SQLite by absolute path. A global DYLD
+          # override also affects Python supervisors and slows their startup.
+          # Keep their real short execution budgets free of this unrelated override.
           LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu
       - name: Real isolated tarball install and CLI/SQLite smoke
         # runtime is a fixed matrix enum, never interpolated PR/event content.

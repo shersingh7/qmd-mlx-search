@@ -107,3 +107,11 @@ The follow-up changes only test infrastructure:
 - Separate real-kernel recovery files from concurrent application files. The application pool retains two workers; real execution/teardown budgets are unchanged, and coverage checks assign every test file exactly once. This resource-contention mitigation is not a causal explanation of every historical startup miss or the original macOS `EPERM` spawn refusal.
 
 The new regression controls were observed failing before repair (six failures), then all seven passed. The first full local rerun passed 1,965 tests and exposed one synthetic fixture still selecting an open channel while expecting an EOF interval; that case was corrected rather than weakening its two-release assertion. The final focused rerun passed 272 TypeScript tests and 35 Python tests plus 11 subtests; canonical build and strict TypeScript checks passed. Complete final-suite and remote results remain separate exact-head publication gates.
+
+### Loader-environment follow-up
+
+A complete, unchanged-source rerun still failed the macOS/Bun gated-child readiness precondition; the failed attempt and its original source-bound observations are retained. Comparing the job environments exposed an unnecessary `DYLD_LIBRARY_PATH=/opt/homebrew/opt/sqlite/lib` override unique to the Bun suite. The offline wrapper preserves that variable, so it affected Python supervisor startup as well as Bun.
+
+Eight alternating local diagnostics used fresh homes and closed stdin, with no launch admission, worker creation or workload execution. Median startup was 48.6 ms without that override and 116.2 ms with it (observed maximum 198.9 ms with the override). These are local bootstrap measurements, not cold-OS proof, GPU benchmarks or a complete causal account of every earlier CI failure.
+
+The workflow now omits the global macOS loader override. `src/db.ts` already selects Homebrew SQLite by absolute path, and the complete local suites plus the Node/macOS CI job exercised native Bun without the override. No test or execution deadline was removed or relaxed. The modified workflow passed the checksum-verified official actionlint v1.7.12 validator; a new exact-head CI run remains required before merge.
