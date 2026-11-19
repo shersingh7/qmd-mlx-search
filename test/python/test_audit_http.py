@@ -115,7 +115,10 @@ def listener(control=False, max_threads=1, runtime=None):
 
 @pytest.mark.parametrize("control", [False, True], ids=["inference", "control"])
 def test_loopback_browser_headers(control):
-    with listener(control=control) as (server, _):
+    # A received response does not mean its server worker released its socket
+    # permit. Budget one permit per connection so this tests headers, not overload.
+    case_count = 9
+    with listener(control=control, max_threads=case_count) as (server, _):
         port = server.server_port
         origin = f"http://localhost:{port}"
         cases = [
@@ -129,6 +132,7 @@ def test_loopback_browser_headers(control):
             ({"Origin": f"{origin}/page"}, 403),
             ({"Referer": "http://localhost:1/page"}, 403),
         ]
+        assert len(cases) == case_count
         for headers, expected in cases:
             with contextlib.closing(http.client.HTTPConnection("127.0.0.1", port, timeout=2)) as client:
                 client.request("GET", "/health", headers=headers)
