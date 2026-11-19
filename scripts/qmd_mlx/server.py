@@ -8,6 +8,7 @@ import http.server
 import json
 import math
 import os
+import re
 import select
 import socket
 import socketserver
@@ -17,7 +18,7 @@ import time
 import uuid
 from contextlib import contextmanager
 from typing import Any, Optional, cast
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 import numpy as np
 
 from .executor import GPUExecutor
@@ -44,6 +45,46 @@ from .protocol import (
     validate_rerank_request,
 )
 from .runtime import EmbeddingResult, MLXEmbeddingRuntime
+
+
+_HTTP_AUTHORITY = re.compile(r"(\[[0-9a-fA-F:.]+\]|[a-zA-Z0-9.-]+)(?::([0-9]{1,5}))?")
+
+
+def _loopback_authority(value: str, allowed_hosts: set[str]) -> Optional[int]:
+    """Return the HTTP port for an allowed authority, or None if invalid."""
+    match = _HTTP_AUTHORITY.fullmatch(value)
+    if not match or match[1].strip("[]").lower() not in allowed_hosts:
+        return None
+    port = int(match[2]) if match[2] else 80
+    return port if 0 < port <= 65535 else None
+
+
+def _validate_loopback_request_headers(headers: Any, bind_host: str, server_port: int) -> bool:
+    """Allow local clients and browser headers from the same HTTP listener."""
+    allowed_hosts = {"127.0.0.1", "localhost", "::1", bind_host.strip("[]").lower()}
+    for name in ("Host", "Origin", "Referer"):
+        values = headers.get_all(name, [])
+        if not values:
+            continue  # Native clients need not send Origin or Referer.
+        if len(values) != 1:
+            return False
+        value = values[0].strip(" \t")
+        if name == "Host":
+            if _loopback_authority(value, allowed_hosts) is None:
+                return False
+            continue
+        if not value or any(ch.isspace() or ord(ch) < 32 or ord(ch) == 127 for ch in value):
+            return False
+        try:
+            parsed = urlsplit(value)
+        except ValueError:
+            return False
+        # Both listeners speak plain HTTP; a different scheme or port is not local to them.
+        if parsed.scheme != "http" or _loopback_authority(parsed.netloc, allowed_hosts) != server_port:
+            return False
+        if name == "Origin" and (parsed.path or "?" in value or "#" in value):
+            return False
+    return True
 
 
 class _SocketAdmissionMixin:
@@ -534,29 +575,8 @@ class MLXControlRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _validate_origin_and_referer(self) -> bool:
-        """Validates Host, Origin, and Referer headers to protect against DNS rebinding & CSRF."""
-        allowed_hosts = {"127.0.0.1", "localhost", self.control_server.bind_host, ""}
-        host = self.headers.get("Host", "").split(":")[0]
-        if host not in allowed_hosts:
-            return False
-
-        origin = self.headers.get("Origin")
-        if origin:
-            from urllib.parse import urlparse
-            parsed = urlparse(origin)
-            orig_host = (parsed.hostname or "").lower()
-            if orig_host not in allowed_hosts:
-                return False
-
-        referer = self.headers.get("Referer")
-        if referer:
-            from urllib.parse import urlparse
-            parsed = urlparse(referer)
-            ref_host = (parsed.hostname or "").lower()
-            if ref_host not in allowed_hosts:
-                return False
-
-        return True
+        srv = self.control_server
+        return _validate_loopback_request_headers(self.headers, srv.bind_host, srv.server_port)
 
     def do_GET(self):
         if not self._validate_origin_and_referer():
@@ -722,29 +742,8 @@ class MLXHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def _validate_origin_and_referer(self) -> bool:
-        """Validates Host, Origin, and Referer headers to protect against DNS rebinding & CSRF."""
-        allowed_hosts = {"127.0.0.1", "localhost", self.mlx_server.bind_host, ""}
-        host = self.headers.get("Host", "").split(":")[0]
-        if host not in allowed_hosts:
-            return False
-
-        origin = self.headers.get("Origin")
-        if origin:
-            from urllib.parse import urlparse
-            parsed = urlparse(origin)
-            orig_host = (parsed.hostname or "").lower()
-            if orig_host not in allowed_hosts:
-                return False
-
-        referer = self.headers.get("Referer")
-        if referer:
-            from urllib.parse import urlparse
-            parsed = urlparse(referer)
-            ref_host = (parsed.hostname or "").lower()
-            if ref_host not in allowed_hosts:
-                return False
-
-        return True
+        srv = self.mlx_server
+        return _validate_loopback_request_headers(self.headers, srv.bind_host, srv.server_port)
 
     @contextmanager
     def _request_cancellation(self, deadline: float):

@@ -113,6 +113,40 @@ def listener(control=False, max_threads=1, runtime=None):
         assert not thread.is_alive()
 
 
+@pytest.mark.parametrize("control", [False, True], ids=["inference", "control"])
+def test_loopback_browser_headers(control):
+    with listener(control=control) as (server, _):
+        port = server.server_port
+        origin = f"http://localhost:{port}"
+        cases = [
+            ({}, 200),
+            ({"Host": f"LOCALHOST:{port}", "Origin": origin}, 200),
+            ({"Referer": f"{origin}/page?from=qmd"}, 200),
+            ({"Origin": "null"}, 403),
+            ({"Origin": ""}, 403),
+            ({"Origin": "https://example.invalid"}, 403),
+            ({"Origin": f"https://localhost:{port}"}, 403),
+            ({"Origin": f"{origin}/page"}, 403),
+            ({"Referer": "http://localhost:1/page"}, 403),
+        ]
+        for headers, expected in cases:
+            with contextlib.closing(http.client.HTTPConnection("127.0.0.1", port, timeout=2)) as client:
+                client.request("GET", "/health", headers=headers)
+                response = client.getresponse()
+                response.read()
+                assert response.status == expected, headers
+
+
+def test_loopback_headers_fail_closed_on_url_parser_error():
+    from http.client import HTTPMessage
+    from scripts.qmd_mlx.server import _validate_loopback_request_headers
+
+    headers = HTTPMessage()
+    headers["Origin"] = "http://localhost:8787"
+    with patch("scripts.qmd_mlx.server.urlsplit", side_effect=ValueError("invalid URL")):
+        assert not _validate_loopback_request_headers(headers, "127.0.0.1", 8787)
+
+
 def receive_all(client):
     chunks = []
     while True:

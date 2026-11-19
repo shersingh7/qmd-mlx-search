@@ -51,8 +51,12 @@ try {
   }
   assert(existsSync(tarball), `Tarball missing: ${tarball}`);
   const inventory = run("tar", ["-tzf", tarball], workspace, true).trim().split("\n");
-  for (const path of ["bin/qmd", "dist/index.js", "dist/index.d.ts", "dist/cli/qmd.js", "dist/mcp/server.js", "scripts/mlx_embed_server.py", "scripts/mlx_server_requirements.txt", "scripts/mlx_server_constraints.txt", "scripts/qmd_mlx/server.py", "scripts/qmd_mlx/adapters/embedding.py", "scripts/qmd_mlx/adapters/tokenization.py", "scripts/qmd_gguf/benchmark.py", "scripts/launchd/qmd_mlx_daemon.py"]) {
+  for (const path of ["bin/qmd", "dist/index.js", "dist/index.d.ts", "dist/cli/qmd.js", "dist/mcp/server.js", "scripts/mlx_embed_server.py", "scripts/mlx_server_requirements.txt", "scripts/mlx_server_constraints.txt", "scripts/qmd_mlx/server.py", "scripts/qmd_mlx/adapters/embedding.py", "scripts/qmd_mlx/adapters/tokenization.py", "scripts/qmd_gguf/benchmark.py", "scripts/qmd-gguf-benchmark.py", "scripts/gguf_embed_server.mjs", "scripts/launchd/qmd_mlx_daemon.py"]) {
     assert(inventory.includes(`package/${path}`), `Package omitted ${path}`);
+  }
+  // The generation qualification harness imports the checkout's TypeScript source.
+  for (const path of ["scripts/qmd-mlx-generate-smoke.py", "scripts/qmd_mlx/generate_smoke.py", "scripts/expansion_bridge.ts"]) {
+    assert(!inventory.includes(`package/${path}`), `Package included checkout-only ${path}`);
   }
   assert(!inventory.some(path => /(^|\/)(__pycache__|\.venv|node_modules)(\/|$)|\.py[co]$/.test(path)), "Package contains local cache/dependency artifacts");
   const target = join(workspace, "installed");
