@@ -3,12 +3,14 @@
 // Run: bun scripts/timing-embed-4b-gguf.ts
 // NOTE: bun 1.3.8 segfaults at hard process.exit() after native (llama.cpp)
 // teardown — data prints first; we exit by draining the loop instead.
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { LlamaCpp } from "../dist/llm.js";
 
 const llm = new LlamaCpp({
   embedBackend: "gguf",
   mlxFallback: false,
-  embedModel: "/Users/shersingh/.cache/qmd/models/hf_Qwen_Qwen3-Embedding-4B-Q4_K_M.gguf",
+  embedModel: process.env.QMD_EMBED_MODEL ?? join(homedir(), ".cache/qmd/models/hf_Qwen_Qwen3-Embedding-4B-Q4_K_M.gguf"),
 });
 
 const texts = Array.from({ length: 32 }, (_, i) =>

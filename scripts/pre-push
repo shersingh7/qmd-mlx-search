@@ -74,7 +74,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
     if [[ "$FAILED" -gt 0 ]] 2>/dev/null; then
       echo >&2 "ABORT: CI failed for $COMMIT"
-      echo >&2 "https://github.com/tobi/qmd/commit/$COMMIT"
+      echo >&2 "https://github.com/shersingh7/qmd-mlx-search/commit/$COMMIT"
       exit 1
     fi
 

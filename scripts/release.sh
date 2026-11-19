@@ -91,18 +91,21 @@ read -p "Release v$NEW? [y/N] " -n 1 -r
 echo ""
 [[ $REPLY =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
 
-# --- Rename [Unreleased] -> [X.Y.Z] - date, add fresh [Unreleased] ---
-
-sed -i '' "s/^## \[Unreleased\].*/## [$NEW] - $DATE/" CHANGELOG.md
-
-# Insert a new empty [Unreleased] section after the header
-awk '
-  /^## \['"$NEW"'\]/ && !done {
-    print "## [Unreleased]\n"
+# Rename [Unreleased] and insert its replacement in one portable rewrite.
+changelog_tmp=$(mktemp ./CHANGELOG.md.XXXXXX)
+trap 'rm -f "$changelog_tmp"' EXIT
+awk -v ver="$NEW" -v date="$DATE" '
+  /^## \[Unreleased\]/ && !done {
+    printf "## [Unreleased]\n\n## [%s] - %s\n", ver, date
     done = 1
+    next
   }
   { print }
-' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+  END { if (!done) exit 1 }
+' CHANGELOG.md > "$changelog_tmp"
+chmod 644 "$changelog_tmp"
+mv "$changelog_tmp" CHANGELOG.md
+trap - EXIT
 
 # --- Bump version and commit ---
 

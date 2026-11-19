@@ -74,8 +74,8 @@ def main() -> int:
         print(f"{path}: 0 scored, {errors} errors")
 
     if ratings:
-        rating_parts = [f\"{k}:{v}\" for k, v in sorted(ratings.items())]
-        print(f\"  ratings: {', '.join(rating_parts)}\")
+        rating_parts = [f"{k}:{v}" for k, v in sorted(ratings.items())]
+        print(f"  ratings: {', '.join(rating_parts)}")
 
     return 0
 

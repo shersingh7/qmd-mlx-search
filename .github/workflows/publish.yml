@@ -54,7 +54,10 @@ jobs:
           printf 'QMD_RELEASE_TARBALL=%s/%s\n' "$RUNNER_TEMP" "$FILENAME" >> "$GITHUB_ENV"
       - name: Verify the exact tarball before publishing
         run: python scripts/run-offline.py bash test/smoke-install.sh --package "$QMD_RELEASE_TARBALL" --runtime node
-      - run: npm publish "$QMD_RELEASE_TARBALL" --provenance --access public
+      # Fork keeps @tobilu/qmd for SDK compatibility; opt in via repo variable ENABLE_NPM_PUBLISH=true to publish.
+      - name: Publish to npm (opt-in)
+        if: vars.ENABLE_NPM_PUBLISH == 'true'
+        run: npm publish "$QMD_RELEASE_TARBALL" --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -11,6 +11,7 @@ Gate: top1_agreement >= 0.90 AND mean spearman >= 0.80 -> PASS.
 Usage: PYTHONPATH=. .venv/bin/python scripts/parity_eval_mlx_rerank.py
 """
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -46,7 +47,8 @@ def main() -> int:
     doc_texts = {p.stem: p.read_text() for p in docs_dir.glob("*.md")}
 
     t0 = time.time()
-    adapter = MLXRerankAdapter(model_name="/Users/shersingh/.cache/qmd/models/qwen3-reranker-4b-mlx-8bit")
+    model_path = os.environ.get("QMD_RERANK_MODEL", str(Path.home() / ".cache/qmd/models/qwen3-reranker-4b-mlx-8bit"))
+    adapter = MLXRerankAdapter(model_name=model_path)
     load_s = time.time() - t0
     adapter.warmup()
 

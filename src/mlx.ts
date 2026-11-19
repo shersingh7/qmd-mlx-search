@@ -49,7 +49,7 @@ const METADATA_BYTES = 131_072;
 const ERROR_BYTES = 4096;
 const LOG_CHARS = 1024;
 const MAX_JSON_BYTES = 64 * 1024 * 1024;
-const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
+const MAX_REQUEST_BYTES = 10 * 1024 * 1024;
 const BINARY_THRESHOLD = 16;
 
 function validateSignal(signal?: AbortSignal): void {
@@ -229,9 +229,9 @@ async function requestBytes(path: string, payload: Record<string, unknown> | und
   checkScope(scope);
   let body: string | undefined;
   if (payload !== undefined) {
-    if (requestByteLength(payload) > MAX_REQUEST_BYTES) throw new RangeError("MLX request exceeds 16 MiB byte limit; use smaller batches");
+    if (requestByteLength(payload) > MAX_REQUEST_BYTES) throw new RangeError("MLX request exceeds 10 MiB byte limit; use smaller batches");
     body = JSON.stringify(payload);
-    if (Buffer.byteLength(body, "utf8") > MAX_REQUEST_BYTES) throw new RangeError("MLX request exceeds 16 MiB byte limit; use smaller batches");
+    if (Buffer.byteLength(body, "utf8") > MAX_REQUEST_BYTES) throw new RangeError("MLX request exceeds 10 MiB byte limit; use smaller batches");
   }
   const response = await abortable(fetch(`${config.url}${path}`, {
     method: payload === undefined ? "GET" : "POST",
